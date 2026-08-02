@@ -29,11 +29,12 @@ Conventional Commits format: `type: description`
 - Commit messages are included in release notes; write for users.
 
 **Type Selection**:
-| Type | Release Note | Purpose |
-|------|--------------|---------|
-| `feat` | Features | User-facing new feature |
-| `fix` | Bug Fixes | User-impacting bug fix |
-| `chore`, `ci`, `build`, `refactor` | Excluded | Internal changes |
+
+| Type                               | Release Note | Purpose                 |
+| ---------------------------------- | ------------ | ----------------------- |
+| `feat`                             | Features     | User-facing new feature |
+| `fix`                              | Bug Fixes    | User-impacting bug fix  |
+| `chore`, `ci`, `build`, `refactor` | Excluded     | Internal changes        |
 
 **Critical**: Use `fix` only for user-facing bugs. Internal fixes (linter errors, type errors, build scripts) must use `chore`.
 
