@@ -99,7 +99,7 @@
     "@xterm/xterm": "6.0.0",
     "changelogithub": "14.0.0",
     "class-variance-authority": "0.7.1",
-    "clean-pkg-json": "^1.4.2",
+    "clean-pkg-json": "^2.0.0",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
     "commander": "14.0.3",
