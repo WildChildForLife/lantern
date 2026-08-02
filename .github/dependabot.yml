@@ -1,0 +1,37 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # One pull request per ecosystem rather than twenty; these move together.
+      dev-tooling:
+        patterns:
+          - "@biomejs/*"
+          - "oxlint"
+          - "oxfmt"
+          - "vitest"
+          - "@vitest/*"
+          - "typescript"
+          - "@tsconfig/*"
+      effect:
+        patterns:
+          - "effect"
+          - "@effect/*"
+      tanstack:
+        patterns:
+          - "@tanstack/*"
+    commit-message:
+      prefix: chore
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: ci
