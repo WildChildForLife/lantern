@@ -108,7 +108,7 @@
     "drizzle-kit": "1.0.0-beta.20",
     "drizzle-orm": "1.0.0-beta.20",
     "effect": "3.22.1",
-    "es-toolkit": "1.46.1",
+    "es-toolkit": "1.50.0",
     "esbuild": "0.28.0",
     "gatecheck": "0.0.1-beta.5",
     "hono": "4.12.18",
