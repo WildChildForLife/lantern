@@ -95,7 +95,9 @@ export const ResizableSidebar: FC<ResizableSidebarProps> = ({ children, classNam
       {/* Resize handle - only show when content is visible */}
       {isLeftPanelOpen && (
         <div
+          // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- a focusable splitter, which <hr> cannot be
           role="separator"
+          aria-label="Resize sidebar"
           aria-orientation="vertical"
           aria-valuemin={0}
           aria-valuemax={50}
