@@ -56,10 +56,10 @@ importers:
         version: 0.19.0(@effect/experimental@0.61.1(@effect/platform@0.97.1(effect@3.22.1))(effect@3.22.1))(@effect/platform@0.97.1(effect@3.22.1))(@effect/rpc@0.76.1(@effect/platform@0.97.1(effect@3.22.1))(effect@3.22.1))(effect@3.22.1)
       '@hono/node-server':
         specifier: 2.0.12
-        version: 2.0.12(hono@4.12.18)
+        version: 2.0.12(hono@4.12.27)
       '@hono/zod-validator':
         specifier: 0.7.6
-        version: 0.7.6(hono@4.12.18)(zod@4.4.3)
+        version: 0.7.6(hono@4.12.27)(zod@4.4.3)
       '@hookform/resolvers':
         specifier: 5.5.7
         version: 5.5.7(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(effect@3.22.1)(react-hook-form@7.83.0(react@19.2.6))(valibot@1.2.0)(zod@4.4.3)
@@ -217,8 +217,8 @@ importers:
         specifier: 0.0.1-beta.5
         version: 0.0.1-beta.5(@types/node@25.6.2)
       hono:
-        specifier: 4.12.18
-        version: 4.12.18
+        specifier: 4.12.27
+        version: 4.12.27
       inquirer:
         specifier: 13.4.2
         version: 13.4.2(@types/node@25.6.2)
@@ -5701,8 +5701,8 @@ packages:
   highlightjs-vue@1.0.0:
     resolution: {integrity: sha512-PDEfEF102G23vHmPhLyPboFCD+BkMGu+GuJe2d9/eH4FsCwvgBpnc9n0pGE+ffKdph38s6foEZiEjdgHdzp+IA==}
 
-  hono@4.12.18:
-    resolution: {integrity: sha512-RWzP96k/yv0PQfyXnWjs6zot20TqfpfsNXhOnev8d1InAxubW93L11/oNUc3tQqn2G0bSdAOBpX+2uDFHV7kdQ==}
+  hono@4.12.27:
+    resolution: {integrity: sha512-1yrb/+w6HWQJrUCLkJ2IF5jNIPvvFkblV5RNOYl6bV+OA6p9GLcMpHFFGTosSvHvcAUibuUukRqhlYI4z32C7Q==}
     engines: {node: '>=16.9.0'}
 
   hookable@6.1.1:
@@ -9213,17 +9213,17 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@hono/node-server@1.19.17(hono@4.12.18)':
+  '@hono/node-server@1.19.17(hono@4.12.27)':
     dependencies:
-      hono: 4.12.18
+      hono: 4.12.27
 
-  '@hono/node-server@2.0.12(hono@4.12.18)':
+  '@hono/node-server@2.0.12(hono@4.12.27)':
     dependencies:
-      hono: 4.12.18
+      hono: 4.12.27
 
-  '@hono/zod-validator@0.7.6(hono@4.12.18)(zod@4.4.3)':
+  '@hono/zod-validator@0.7.6(hono@4.12.27)(zod@4.4.3)':
     dependencies:
-      hono: 4.12.18
+      hono: 4.12.27
       zod: 4.4.3
 
   '@hookform/resolvers@5.5.7(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(effect@3.22.1)(react-hook-form@7.83.0(react@19.2.6))(valibot@1.2.0)(zod@4.4.3)':
@@ -9649,7 +9649,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.29.0(zod@4.4.3)':
     dependencies:
-      '@hono/node-server': 1.19.17(hono@4.12.18)
+      '@hono/node-server': 1.19.17(hono@4.12.27)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
@@ -9659,7 +9659,7 @@ snapshots:
       eventsource-parser: 3.0.8
       express: 5.2.1
       express-rate-limit: 8.5.1(express@5.2.1)
-      hono: 4.12.18
+      hono: 4.12.27
       jose: 6.2.3
       json-schema-typed: 8.0.2
       pkce-challenge: 5.0.1
@@ -13053,7 +13053,7 @@ snapshots:
 
   highlightjs-vue@1.0.0: {}
 
-  hono@4.12.18: {}
+  hono@4.12.27: {}
 
   hookable@6.1.1: {}
 
