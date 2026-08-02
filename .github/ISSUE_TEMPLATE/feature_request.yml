@@ -1,0 +1,31 @@
+name: Feature request
+description: Suggest something Lantern should do
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is the problem
+      description: What are you trying to do that Lantern makes hard today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help
+      description: Your idea, if you have one. Rough is fine.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Topic grouping
+        - Conversation list
+        - Board / table view
+        - Session viewer
+        - Setup and configuration
+        - Something else
+    validations:
+      required: true

@@ -1,0 +1,46 @@
+name: Bug report
+description: Something in Lantern does not work the way it should
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not paste conversation contents. Titles and paths are usually enough, and
+        session logs often contain things you would rather not publish.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you got instead.
+      placeholder: |
+        1. Opened the topics page in table view
+        2. Clicked ...
+        3. Expected ..., but ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Lantern version
+      description: From `package.json`, or the commit you are running.
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Node.js version, browser.
+      placeholder: Ubuntu 24.04 under WSL2, Node 24.18.1, Chrome 141
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Server output
+      description: Anything the server printed around the failure. Redact as needed.
+      render: shell

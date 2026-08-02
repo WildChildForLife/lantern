@@ -1,0 +1,39 @@
+pre-commit:
+  parallel: true
+  commands:
+    gitleaks:
+      run: gitleaks protect --staged --no-banner
+      skip:
+        - merge
+
+    oxlint:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: pnpm fix:oxlint {staged_files}
+      stage_fixed: true
+
+    oxfmt:
+      glob: "*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}"
+      run: pnpm fix:oxfmt {staged_files}
+      stage_fixed: true
+
+pre-push:
+  parallel: true
+  commands:
+    lint:
+      run: pnpm lint
+
+    typecheck:
+      run: pnpm typecheck
+
+    test:
+      run: pnpm test
+
+    lingui-check:
+      run: |
+        ./scripts/lingui-check.sh
+        pnpm lingui:compile
+        ./scripts/i18n-check-key-equals-translation.sh
+        if ! git --no-pager diff --exit-code -- src/lib/i18n/locales/; then
+          echo "Error: Lingui extraction/compilation produced unexpected changes. Please commit the updated locale files."
+          exit 1
+        fi

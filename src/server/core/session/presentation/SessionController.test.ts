@@ -1,0 +1,205 @@
+import { SystemError } from "@effect/platform/Error";
+import { it } from "@effect/vitest";
+import { Effect, Layer } from "effect";
+import { expect } from "vitest";
+import { testFileSystemLayer } from "../../../../testing/layers/testFileSystemLayer.ts";
+import { testPlatformLayer } from "../../../../testing/layers/testPlatformLayer.ts";
+import { AgentSessionRepository } from "../../agent-session/infrastructure/AgentSessionRepository.ts";
+import { EventBus, type IEventBus } from "../../events/services/EventBus.ts";
+import type { InternalEventDeclaration } from "../../events/types/InternalEventDeclaration.ts";
+import { SessionRepository } from "../infrastructure/SessionRepository.ts";
+import { SessionMetaService } from "../services/SessionMetaService.ts";
+import { SessionController } from "./SessionController.ts";
+
+describe("SessionController", () => {
+  describe("deleteSession", () => {
+    const createTestLayers = (options: {
+      fileExists?: boolean;
+      removeSuccess?: boolean;
+      onRemove?: (path: string) => void;
+      onEmit?: <EventName extends keyof InternalEventDeclaration>(
+        event: EventName,
+        data: InternalEventDeclaration[EventName],
+      ) => void;
+    }) => {
+      const { fileExists = true, removeSuccess = true, onRemove, onEmit } = options;
+
+      const projectPath = "/test/project";
+      const projectId = Buffer.from(projectPath).toString("base64url");
+      const sessionId = "test-session";
+      const sessionPath = `${projectPath}/${sessionId}.jsonl`;
+
+      const fileSystemLayer = testFileSystemLayer({
+        exists: (path: string) => Effect.succeed(path === sessionPath && fileExists),
+        remove: (path: string) => {
+          onRemove?.(path);
+          if (removeSuccess) {
+            return Effect.void;
+          }
+          return Effect.fail(
+            new SystemError({
+              method: "remove",
+              reason: "Unknown",
+              module: "FileSystem",
+              cause: new Error("Permission denied"),
+            }),
+          );
+        },
+      });
+
+      const sessionRepositoryLayer = Layer.succeed(SessionRepository, {
+        getSession: () => Effect.succeed({ session: null }),
+        getSessions: () => Effect.succeed({ sessions: [] }),
+        getAllConversations: () =>
+          Effect.succeed({ conversations: [], total: 0, nextOffset: undefined }),
+        getConversationTopics: () => Effect.succeed({ topics: [] }),
+      });
+
+      const agentSessionRepositoryLayer = Layer.succeed(AgentSessionRepository, {
+        getAgentSessionByAgentId: () => Effect.succeed(null),
+        listAgentSessionsForSession: () => Effect.succeed([]),
+      });
+
+      const sessionMetaServiceLayer = Layer.succeed(SessionMetaService, {
+        getSessionMeta: () =>
+          Effect.succeed({
+            messageCount: 0,
+            firstUserMessage: null,
+            customTitle: null,
+            cost: {
+              totalUsd: 0,
+              breakdown: {
+                inputTokensUsd: 0,
+                outputTokensUsd: 0,
+                cacheCreationUsd: 0,
+                cacheReadUsd: 0,
+              },
+              tokenUsage: {
+                inputTokens: 0,
+                outputTokens: 0,
+                cacheCreationTokens: 0,
+                cacheReadTokens: 0,
+              },
+            },
+            modelName: null,
+            prLinks: [],
+          }),
+        invalidateSession: () => Effect.void,
+      });
+
+      const eventBusLayer = Layer.succeed(EventBus, {
+        emit: <EventName extends keyof InternalEventDeclaration>(
+          event: EventName,
+          data: InternalEventDeclaration[EventName],
+        ) => {
+          onEmit?.(event, data);
+          return Effect.void;
+        },
+        on: () => Effect.void,
+        off: () => Effect.void,
+      } satisfies IEventBus);
+
+      return {
+        projectId,
+        sessionId,
+        sessionPath,
+        layers: Layer.mergeAll(
+          fileSystemLayer,
+          sessionRepositoryLayer,
+          sessionMetaServiceLayer,
+          eventBusLayer,
+          agentSessionRepositoryLayer,
+        ),
+      };
+    };
+
+    it.live("successfully deletes a session file and returns 200", () => {
+      let removedPath: string | undefined;
+      const { projectId, sessionId, sessionPath, layers } = createTestLayers({
+        fileExists: true,
+        removeSuccess: true,
+        onRemove: (path) => {
+          removedPath = path;
+        },
+      });
+
+      return Effect.gen(function* () {
+        const controller = yield* SessionController;
+        const result = yield* controller.deleteSession({ projectId, sessionId });
+
+        expect(result.status).toBe(200);
+        expect(result.response).toEqual({ success: true });
+        expect(removedPath).toBe(sessionPath);
+      }).pipe(
+        Effect.provide(SessionController.Live),
+        Effect.provide(layers),
+        Effect.provide(testPlatformLayer()),
+      );
+    });
+
+    it.live("emits sessionListChanged event after successful deletion", () => {
+      const emittedEvents: Array<{
+        event: keyof InternalEventDeclaration;
+        data: InternalEventDeclaration[keyof InternalEventDeclaration];
+      }> = [];
+      const { projectId, sessionId, layers } = createTestLayers({
+        fileExists: true,
+        removeSuccess: true,
+        onEmit: (event, data) => {
+          emittedEvents.push({ event, data });
+        },
+      });
+
+      return Effect.gen(function* () {
+        const controller = yield* SessionController;
+        yield* controller.deleteSession({ projectId, sessionId });
+
+        expect(emittedEvents).toContainEqual({
+          event: "sessionListChanged",
+          data: { projectId },
+        });
+      }).pipe(
+        Effect.provide(SessionController.Live),
+        Effect.provide(layers),
+        Effect.provide(testPlatformLayer()),
+      );
+    });
+
+    it.live("returns 404 when session file does not exist", () => {
+      const { projectId, sessionId, layers } = createTestLayers({
+        fileExists: false,
+      });
+
+      return Effect.gen(function* () {
+        const controller = yield* SessionController;
+        const result = yield* controller.deleteSession({ projectId, sessionId });
+
+        expect(result.status).toBe(404);
+        expect(result.response).toEqual({ error: "Session not found" });
+      }).pipe(
+        Effect.provide(SessionController.Live),
+        Effect.provide(layers),
+        Effect.provide(testPlatformLayer()),
+      );
+    });
+
+    it.live("returns 500 when file system error occurs during deletion", () => {
+      const { projectId, sessionId, layers } = createTestLayers({
+        fileExists: true,
+        removeSuccess: false,
+      });
+
+      return Effect.gen(function* () {
+        const controller = yield* SessionController;
+        const result = yield* controller.deleteSession({ projectId, sessionId });
+
+        expect(result.status).toBe(500);
+        expect(result.response).toHaveProperty("error");
+      }).pipe(
+        Effect.provide(SessionController.Live),
+        Effect.provide(layers),
+        Effect.provide(testPlatformLayer()),
+      );
+    });
+  });
+});

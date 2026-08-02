@@ -1,0 +1,12 @@
+import { Hono } from "hono";
+import type { UserConfig } from "../lib/config/config.ts";
+
+export type HonoContext = {
+  Variables: {
+    userConfig: UserConfig;
+  };
+};
+
+export const honoApp = new Hono<HonoContext>();
+
+export type HonoAppType = typeof honoApp;

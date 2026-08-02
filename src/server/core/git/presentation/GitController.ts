@@ -1,0 +1,458 @@
+import { Context, Effect, Either, Layer } from "effect";
+import type { ControllerResponse } from "../../../lib/effect/toEffectResponse.ts";
+import type { InferEffect } from "../../../lib/effect/types.ts";
+import { ProjectRepository } from "../../project/infrastructure/ProjectRepository.ts";
+import type { PushErrorCode } from "../schema.ts";
+import { GitService } from "../services/GitService.ts";
+
+const LayerImpl = Effect.gen(function* () {
+  const gitService = yield* GitService;
+  const projectRepository = yield* ProjectRepository;
+
+  const getGitDiff = (options: { projectId: string; fromRef: string; toRef: string }) =>
+    Effect.gen(function* () {
+      const { projectId, fromRef, toRef } = options;
+
+      const { project } = yield* projectRepository.getProject(projectId);
+
+      if (project.meta.projectPath === null) {
+        return {
+          response: { error: "Project path not found" },
+          status: 400,
+        } as const satisfies ControllerResponse;
+      }
+
+      const projectPath = project.meta.projectPath;
+
+      const diffResult = yield* Effect.either(gitService.getDiff(projectPath, fromRef, toRef));
+
+      if (Either.isLeft(diffResult)) {
+        return {
+          response: {
+            success: false,
+            error: parseDiffError(diffResult.left),
+          },
+          status: 200,
+        } as const satisfies ControllerResponse;
+      }
+
+      return {
+        response: {
+          success: true,
+          data: diffResult.right,
+        },
+        status: 200,
+      } as const satisfies ControllerResponse;
+    });
+
+  const commitFiles = (options: { projectId: string; files: string[]; message: string }) =>
+    Effect.gen(function* () {
+      const { projectId, files, message } = options;
+
+      const { project } = yield* projectRepository.getProject(projectId);
+      if (project.meta.projectPath === null) {
+        return {
+          response: { error: "Project path not found" },
+          status: 400,
+        } as const satisfies ControllerResponse;
+      }
+
+      const projectPath = project.meta.projectPath;
+      const stageResult = yield* Effect.either(gitService.stageFiles(projectPath, files));
+      if (Either.isLeft(stageResult)) {
+        return {
+          response: {
+            success: false,
+            error: "Failed to stage files",
+            errorCode: "GIT_COMMAND_ERROR",
+            details: stageResult.left.message,
+          },
+          status: 200,
+        } as const satisfies ControllerResponse;
+      }
+
+      const commitResult = yield* Effect.either(gitService.commit(projectPath, message));
+      if (Either.isLeft(commitResult)) {
+        const error = commitResult.left;
+        const errorMessage =
+          "_tag" in error && error._tag === "GitCommandError"
+            ? error.command
+            : "message" in error
+              ? String(error.message)
+              : "Unknown error";
+        const isHookFailure = errorMessage.includes("hook");
+        return {
+          response: {
+            success: false,
+            error: isHookFailure ? "Pre-commit hook failed" : "Commit failed",
+            errorCode: isHookFailure ? "HOOK_FAILED" : "GIT_COMMAND_ERROR",
+            details: errorMessage,
+          },
+          status: 200,
+        } as const satisfies ControllerResponse;
+      }
+
+      return {
+        response: {
+          success: true,
+          commitSha: commitResult.right,
+          filesCommitted: files.length,
+          message,
+        },
+        status: 200,
+      } as const satisfies ControllerResponse;
+    });
+
+  const pushCommits = (options: { projectId: string }) =>
+    Effect.gen(function* () {
+      const { projectId } = options;
+
+      const { project } = yield* projectRepository.getProject(projectId);
+      if (project.meta.projectPath === null) {
+        return {
+          response: { error: "Project path not found" },
+          status: 400,
+        } as const satisfies ControllerResponse;
+      }
+
+      const projectPath = project.meta.projectPath;
+      const pushResult = yield* Effect.either(gitService.push(projectPath));
+
+      if (Either.isLeft(pushResult)) {
+        const error = pushResult.left;
+        const errorMessage =
+          "_tag" in error && error._tag === "GitCommandError"
+            ? error.command
+            : "message" in error
+              ? String(error.message)
+              : "Unknown error";
+
+        const errorCode = parsePushError(errorMessage);
+        return {
+          response: {
+            success: false,
+            error: getPushErrorMessage(errorCode),
+            errorCode,
+            details: errorMessage,
+          },
+          status: 200,
+        } as const satisfies ControllerResponse;
+      }
+
+      return {
+        response: {
+          success: true,
+          remote: "origin",
+          branch: pushResult.right.branch,
+        },
+        status: 200,
+      } as const satisfies ControllerResponse;
+    });
+
+  const commitAndPush = (options: { projectId: string; files: string[]; message: string }) =>
+    Effect.gen(function* () {
+      const { projectId, files, message } = options;
+
+      // First, commit
+      const commitResult = yield* commitFiles({ projectId, files, message });
+
+      if (commitResult.status !== 200 || !commitResult.response.success) {
+        return commitResult; // Return commit error
+      }
+
+      const commitSha = commitResult.response.commitSha;
+
+      // Then, push
+      const pushResult = yield* pushCommits({ projectId });
+
+      if (pushResult.status !== 200 || !pushResult.response.success) {
+        // Partial failure: commit succeeded, push failed
+        return {
+          response: {
+            success: false,
+            commitSucceeded: true,
+            commitSha,
+            error: pushResult.response.error,
+            errorCode: pushResult.response.errorCode,
+            details: pushResult.response.details,
+          },
+          status: 200,
+        } as const satisfies ControllerResponse;
+      }
+
+      // Full success
+      return {
+        response: {
+          success: true,
+          commitSha,
+          filesCommitted: files.length,
+          message,
+          remote: pushResult.response.remote,
+          branch: pushResult.response.branch,
+        },
+        status: 200,
+      } as const satisfies ControllerResponse;
+    });
+
+  const getCurrentRevisions = (options: { projectId: string }) =>
+    Effect.gen(function* () {
+      const { projectId } = options;
+
+      const { project } = yield* projectRepository.getProject(projectId);
+
+      if (project.meta.projectPath === null) {
+        return {
+          response: { error: "Project path not found" },
+          status: 400,
+        } as const satisfies ControllerResponse;
+      }
+
+      const projectPath = project.meta.projectPath;
+
+      // Get current branch
+      const currentBranchResult = yield* Effect.either(gitService.getCurrentBranch(projectPath));
+
+      if (Either.isLeft(currentBranchResult)) {
+        return {
+          response: {
+            success: false,
+          },
+          status: 200,
+        } as const satisfies ControllerResponse;
+      }
+
+      const currentBranch = currentBranchResult.right;
+
+      // Find base branch
+      const baseBranchResult = yield* Effect.either(
+        gitService.findBaseBranch(projectPath, currentBranch),
+      );
+
+      // Get all branches to extract branch details
+      const allBranchesResult = yield* Effect.either(gitService.getBranches(projectPath));
+
+      if (Either.isLeft(allBranchesResult)) {
+        return {
+          response: {
+            success: false,
+          },
+          status: 200,
+        } as const satisfies ControllerResponse;
+      }
+
+      const allBranches = allBranchesResult.right.data;
+
+      // Find current branch details
+      const currentBranchDetails = allBranches.find((branch) => branch.name === currentBranch);
+
+      // Find base branch details if exists
+      let baseBranchDetails: (typeof allBranches)[number] | undefined;
+      if (Either.isRight(baseBranchResult) && baseBranchResult.right !== null) {
+        const baseBranchName = baseBranchResult.right.branch;
+        baseBranchDetails = allBranches.find((branch) => branch.name === baseBranchName);
+      }
+
+      // Get commits if base branch exists
+      let commits: Array<{
+        sha: string;
+        message: string;
+        author: string;
+        date: string;
+      }> = [];
+
+      if (Either.isRight(baseBranchResult) && baseBranchResult.right !== null) {
+        const baseBranchHash = baseBranchResult.right.hash;
+        const commitsResult = yield* Effect.either(
+          gitService.getCommitsBetweenBranches(projectPath, baseBranchHash, "HEAD"),
+        );
+
+        if (Either.isRight(commitsResult)) {
+          commits = commitsResult.right.data;
+        }
+      }
+
+      return {
+        response: {
+          success: true,
+          data: {
+            baseBranch: baseBranchDetails ?? null,
+            currentBranch: currentBranchDetails ?? null,
+            head: currentBranchDetails?.commit ?? null,
+            commits,
+          },
+        },
+        status: 200,
+      } as const satisfies ControllerResponse;
+    });
+
+  const getBranches = (options: { projectId: string }) =>
+    Effect.gen(function* () {
+      const { projectId } = options;
+
+      const { project } = yield* projectRepository.getProject(projectId);
+
+      if (project.meta.projectPath === null) {
+        return {
+          response: { success: false, error: "Project path not found" },
+          status: 400,
+        } as const satisfies ControllerResponse;
+      }
+
+      const projectPath = project.meta.projectPath;
+
+      const branchesResult = yield* Effect.either(gitService.getBranches(projectPath));
+
+      if (Either.isLeft(branchesResult)) {
+        return {
+          response: { success: false, error: "Failed to get branches" },
+          status: 500,
+        } as const satisfies ControllerResponse;
+      }
+
+      const currentBranchResult = yield* Effect.either(gitService.getCurrentBranch(projectPath));
+
+      const currentBranch = Either.isRight(currentBranchResult) ? currentBranchResult.right : null;
+
+      return {
+        response: {
+          success: true,
+          data: {
+            branches: branchesResult.right.data,
+            currentBranch,
+          },
+        },
+        status: 200,
+      } as const satisfies ControllerResponse;
+    });
+
+  const checkoutBranch = (options: { projectId: string; branchName: string }) =>
+    Effect.gen(function* () {
+      const { projectId, branchName } = options;
+
+      const { project } = yield* projectRepository.getProject(projectId);
+
+      if (project.meta.projectPath === null) {
+        return {
+          response: { success: false, error: "Project path not found" },
+          status: 400,
+        } as const satisfies ControllerResponse;
+      }
+
+      const projectPath = project.meta.projectPath;
+
+      const checkoutResult = yield* Effect.either(gitService.checkout(projectPath, branchName));
+
+      if (Either.isLeft(checkoutResult)) {
+        return {
+          response: { success: false, error: "Failed to checkout branch" },
+          status: 500,
+        } as const satisfies ControllerResponse;
+      }
+
+      return {
+        response: {
+          success: true,
+          branch: checkoutResult.right.branch,
+        },
+        status: 200,
+      } as const satisfies ControllerResponse;
+    });
+
+  return {
+    getGitDiff,
+    commitFiles,
+    pushCommits,
+    commitAndPush,
+    getCurrentRevisions,
+    getBranches,
+    checkoutBranch,
+  };
+});
+
+// Helper functions for push error handling
+const parsePushError = (stderr: string): PushErrorCode => {
+  if (stderr.includes("no upstream") || stderr.includes("has no upstream")) {
+    return "NO_UPSTREAM";
+  }
+  if (stderr.includes("non-fast-forward") || stderr.includes("failed to push some refs")) {
+    return "NON_FAST_FORWARD";
+  }
+  if (stderr.includes("Authentication failed") || stderr.includes("Permission denied")) {
+    return "AUTH_FAILED";
+  }
+  if (stderr.includes("Could not resolve host")) {
+    return "NETWORK_ERROR";
+  }
+  if (stderr.includes("timeout") || stderr.includes("timed out")) {
+    return "TIMEOUT";
+  }
+  return "GIT_COMMAND_ERROR";
+};
+
+const getPushErrorMessage = (code: PushErrorCode): string => {
+  const messages: Record<PushErrorCode, string> = {
+    NO_UPSTREAM: "Branch has no upstream. Run: git push --set-upstream origin <branch>",
+    NON_FAST_FORWARD: "Remote has diverged. Pull changes first before pushing.",
+    AUTH_FAILED: "Authentication failed. Check your SSH keys or HTTPS credentials.",
+    NETWORK_ERROR: "Network error. Check your internet connection.",
+    TIMEOUT: "Push operation timed out after 60 seconds. Retry or check network.",
+    GIT_COMMAND_ERROR: "Git command failed. Check details.",
+    PROJECT_NOT_FOUND: "Project not found.",
+    NOT_A_REPOSITORY: "Not a git repository.",
+  };
+  return messages[code];
+};
+
+const parseDiffError = (error: unknown) => {
+  if (typeof error === "object" && error !== null && "_tag" in error) {
+    const tag = String(error._tag);
+
+    if (tag === "NotARepositoryError") {
+      const message =
+        "cwd" in error && typeof error.cwd === "string"
+          ? `Not a git repository: ${error.cwd}`
+          : "Not a git repository";
+      return {
+        code: "NOT_A_REPOSITORY" as const,
+        message,
+      };
+    }
+
+    if (tag === "GitInvalidRefError" || tag === "GitInvalidDiffRefError") {
+      return {
+        code: "BRANCH_NOT_FOUND" as const,
+        message: "Branch or commit not found",
+      };
+    }
+
+    if (tag === "GitDiffParseError") {
+      const message =
+        "reason" in error && typeof error.reason === "string"
+          ? `Failed to parse diff: ${error.reason}`
+          : "Failed to parse diff";
+      return {
+        code: "PARSE_ERROR" as const,
+        message,
+      };
+    }
+
+    if (tag === "GitCommandError") {
+      return {
+        code: "COMMAND_FAILED" as const,
+        message: "Git command failed",
+        command:
+          "command" in error && typeof error.command === "string" ? error.command : undefined,
+      };
+    }
+  }
+
+  return {
+    code: "COMMAND_FAILED" as const,
+    message: "Git command failed",
+  };
+};
+
+export type IGitController = InferEffect<typeof LayerImpl>;
+export class GitController extends Context.Tag("GitController")<GitController, IGitController>() {
+  static Live = Layer.effect(this, LayerImpl);
+}

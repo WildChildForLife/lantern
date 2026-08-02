@@ -1,0 +1,41 @@
+name: Schema Parse Error
+description: Report a schema validation error when viewing a session
+labels: ["bug", "schema"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a schema parse error!
+        Please paste the **raw JSON line** that failed to parse, not a screenshot.
+        You can copy it from the "Raw Data" section shown in the error display.
+  - type: textarea
+    id: raw-json
+    attributes:
+      label: Raw JSON line
+      description: Paste the raw JSON line from the error display. Do NOT paste a screenshot.
+      render: json
+    validations:
+      required: true
+  - type: input
+    id: claude-code-version
+    attributes:
+      label: Claude Code version
+      description: "Run `claude --version` to check."
+      placeholder: "e.g., 1.0.20"
+    validations:
+      required: true
+  - type: input
+    id: viewer-version
+    attributes:
+      label: Lantern version
+      description: "Shown in Settings > System Information."
+      placeholder: "e.g., 0.7.3"
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Any other relevant information.
+    validations:
+      required: false

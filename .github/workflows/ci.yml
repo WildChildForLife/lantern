@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-ci
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Setup Node & pnpm
+        uses: ./.github/actions/setup-node
+
+      - name: Run linting
+        run: pnpm lint
+
+      - name: Run type checking
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Check lingui translations
+        run: ./scripts/lingui-check.sh
+
+      - name: Check key-equals-translation entries
+        run: ./scripts/i18n-check-key-equals-translation.sh
+
+      - name: Compile lingui and check for changes
+        run: |
+          pnpm lingui:compile
+          git diff --exit-code || (echo "Error: lingui compilation produced unexpected changes" && exit 1)
+
+      - name: Run pack check
+        run: ./scripts/pack/check.sh

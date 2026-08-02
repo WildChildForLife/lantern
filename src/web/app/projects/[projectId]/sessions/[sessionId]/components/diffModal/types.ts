@@ -1,0 +1,80 @@
+export type DiffLine = {
+  type: "added" | "deleted" | "unchanged" | "hunk" | "context";
+  oldLineNumber?: number;
+  newLineNumber?: number;
+  content: string;
+};
+
+export type DiffHunk = {
+  oldStart: number;
+  // oldLines: number;
+  newStart: number;
+  // newLines: number;
+  lines: DiffLine[];
+};
+
+export type FileDiff = {
+  filename: string;
+  oldFilename?: string;
+  isNew: boolean;
+  isDeleted: boolean;
+  isRenamed: boolean;
+  isBinary: boolean;
+  hunks: DiffHunk[];
+  linesAdded: number;
+  linesDeleted: number;
+};
+
+export type GitRef = {
+  name: `branch:${string}` | `commit:${string}` | `HEAD` | "working";
+  type: "branch" | "commit" | "head" | "working";
+  sha?: string;
+  displayName: string;
+};
+
+export type DiffSummary = {
+  filesChanged: number;
+  insertions: number;
+  deletions: number;
+  files: FileDiff[];
+};
+
+export type DiffModalProps = {
+  projectId: string;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  defaultCompareFrom?: string;
+  defaultCompareTo?: string;
+  revisionsData?:
+    | {
+        success: true;
+        data: {
+          baseBranch: {
+            name: string;
+            current: boolean;
+            remote?: string;
+            commit: string;
+            ahead?: number;
+            behind?: number;
+          } | null;
+          currentBranch: {
+            name: string;
+            current: boolean;
+            remote?: string;
+            commit: string;
+            ahead?: number;
+            behind?: number;
+          } | null;
+          head: string | null;
+          commits: Array<{
+            sha: string;
+            message: string;
+            author: string;
+            date: string;
+          }>;
+        };
+      }
+    | {
+        success: false;
+      };
+};

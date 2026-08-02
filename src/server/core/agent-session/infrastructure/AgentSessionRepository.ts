@@ -1,0 +1,180 @@
+import { FileSystem, Path } from "@effect/platform";
+import { Context, Effect, Layer } from "effect";
+import { z } from "zod";
+import { parseJsonl } from "../../claude-code/functions/parseJsonl.ts";
+import { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
+import { decodeProjectId, validateProjectPath } from "../../project/functions/id.ts";
+import { extractFirstUserText } from "../../session/functions/extractFirstUserText.ts";
+import type { ExtendedConversation } from "../../types.ts";
+
+const SAFE_AGENT_ID_PATTERN = /^[a-zA-Z0-9_-]+$/;
+
+const LayerImpl = Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem;
+  const path = yield* Path.Path;
+  const appContext = yield* ApplicationContext;
+
+  /**
+   * Get agent session conversations by agentId.
+   * Checks new path: {project}/{sessionId}/subagents/agent-{agentId}.jsonl
+   * Fallback to old path: {project}/agent-{agentId}.jsonl
+   */
+  const getAgentSessionByAgentId = (
+    projectId: string,
+    agentId: string,
+    sessionId?: string,
+  ): Effect.Effect<ExtendedConversation[] | null, Error> =>
+    Effect.gen(function* () {
+      // Validate agentId to prevent path traversal
+      if (!SAFE_AGENT_ID_PATTERN.test(agentId)) {
+        return yield* Effect.fail(new Error("Invalid agent ID: contains disallowed characters"));
+      }
+
+      const projectPath = decodeProjectId(projectId);
+
+      // Validate that the project path is within the Claude projects directory
+      const { claudeProjectsDirPath } = yield* appContext.claudeCodePaths;
+      if (!validateProjectPath(projectPath, claudeProjectsDirPath)) {
+        return yield* Effect.fail(new Error("Invalid project path: outside allowed directory"));
+      }
+
+      // Try new path if sessionId is provided
+      if (sessionId !== undefined && sessionId !== "") {
+        const newPath = path.resolve(projectPath, sessionId, "subagents", `agent-${agentId}.jsonl`);
+
+        if (yield* fs.exists(newPath)) {
+          const content = yield* fs.readFileString(newPath);
+          return parseJsonl(content);
+        }
+      }
+
+      // Fallback to old path
+      const agentFilePath = path.resolve(projectPath, `agent-${agentId}.jsonl`);
+
+      // Check if file exists
+      const exists = yield* fs.exists(agentFilePath);
+      if (!exists) {
+        return null;
+      }
+
+      const content = yield* fs.readFileString(agentFilePath);
+      const conversations = parseJsonl(content);
+      return conversations;
+    });
+
+  /**
+   * List all agent sessions for a given session.
+   * Scans both legacy root directory and new subagents directory.
+   */
+  const listAgentSessionsForSession = (
+    projectId: string,
+    sessionId: string,
+  ): Effect.Effect<{ agentId: string; firstMessage: string | null }[], Error> =>
+    Effect.gen(function* () {
+      const projectPath = decodeProjectId(projectId);
+
+      // Validate that the project path is within the Claude projects directory
+      const { claudeProjectsDirPath } = yield* appContext.claudeCodePaths;
+      if (!validateProjectPath(projectPath, claudeProjectsDirPath)) {
+        return yield* Effect.fail(new Error("Invalid project path: outside allowed directory"));
+      }
+      const results: { agentId: string; firstMessage: string | null }[] = [];
+
+      const extractAgentId = (filename: string): string | null => {
+        const match = /^agent-(.+)\.jsonl$/.exec(filename);
+        return match ? (match[1] ?? null) : null;
+      };
+
+      const processFile = (filePath: string, filename: string): Effect.Effect<void, Error> =>
+        Effect.gen(function* () {
+          const agentId = extractAgentId(filename);
+          if (agentId === null) return;
+
+          const content = yield* fs.readFileString(filePath);
+          const firstLine = content.split("\n")[0];
+          if (firstLine === undefined || firstLine.trim() === "") return;
+
+          try {
+            const conversations = parseJsonl(firstLine);
+            const firstConv = conversations[0];
+            const firstMessage = firstConv ? extractFirstUserText(firstConv) : null;
+            results.push({ agentId, firstMessage });
+          } catch {
+            results.push({ agentId, firstMessage: null });
+          }
+        });
+
+      // Check subagents directory: {project}/{sessionId}/subagents/
+      const subagentsDir = path.join(projectPath, sessionId, "subagents");
+      const subagentsDirExists = yield* fs.exists(subagentsDir);
+
+      if (subagentsDirExists) {
+        const entries = yield* fs
+          .readDirectory(subagentsDir)
+          .pipe(Effect.catchAll(() => Effect.succeed([] as string[])));
+
+        const agentFiles = entries.filter((f) => f.startsWith("agent-") && f.endsWith(".jsonl"));
+
+        for (const filename of agentFiles) {
+          yield* processFile(path.join(subagentsDir, filename), filename).pipe(
+            Effect.catchAll(() => Effect.void),
+          );
+        }
+      }
+
+      // Check legacy root directory
+      const rootEntries = yield* fs
+        .readDirectory(projectPath)
+        .pipe(Effect.catchAll(() => Effect.succeed([] as string[])));
+
+      const rootAgentFiles = rootEntries.filter(
+        (f) => f.startsWith("agent-") && f.endsWith(".jsonl"),
+      );
+
+      for (const filename of rootAgentFiles) {
+        const filePath = path.join(projectPath, filename);
+        // Only include if the first line's sessionId matches
+        const content = yield* fs
+          .readFileString(filePath)
+          .pipe(Effect.catchAll(() => Effect.succeed("")));
+        const firstLine = content.split("\n")[0];
+        if (firstLine === undefined || firstLine.trim() === "") continue;
+
+        try {
+          const parsed: unknown = JSON.parse(firstLine);
+          const sessionIdResult = z.object({ sessionId: z.string() }).safeParse(parsed);
+          if (sessionIdResult.success && sessionIdResult.data.sessionId === sessionId) {
+            yield* processFile(filePath, filename).pipe(Effect.catchAll(() => Effect.void));
+          }
+        } catch {
+          // skip invalid files
+        }
+      }
+
+      return results;
+    });
+
+  return {
+    getAgentSessionByAgentId,
+    listAgentSessionsForSession,
+  };
+});
+
+export class AgentSessionRepository extends Context.Tag("AgentSessionRepository")<
+  AgentSessionRepository,
+  {
+    readonly getAgentSessionByAgentId: (
+      projectId: string,
+      agentId: string,
+      sessionId?: string,
+    ) => Effect.Effect<ExtendedConversation[] | null, Error>;
+    readonly listAgentSessionsForSession: (
+      projectId: string,
+      sessionId: string,
+    ) => Effect.Effect<{ agentId: string; firstMessage: string | null }[], Error>;
+  }
+>() {
+  static Live = Layer.effect(this, LayerImpl);
+}
+
+export type IAgentSessionRepository = Context.Tag.Service<typeof AgentSessionRepository>;

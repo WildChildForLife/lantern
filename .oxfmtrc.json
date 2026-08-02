@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "experimentalSortImports": {
+    "order": "asc",
+    "newlinesBetween": false
+  },
+  "experimentalSortPackageJson": true,
+  "ignorePatterns": ["src/web/routeTree.gen.ts", "src/lib/i18n/locales/**"]
+}

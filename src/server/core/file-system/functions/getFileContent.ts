@@ -1,0 +1,343 @@
+import { FileSystem, Path } from "@effect/platform";
+import type { PlatformError } from "@effect/platform/Error";
+import { Effect } from "effect";
+
+/** Default maximum file size in bytes (1MB) */
+export const DEFAULT_MAX_FILE_SIZE = 1024 * 1024;
+
+/** Binary file extensions that should be rejected */
+const BINARY_EXTENSIONS = new Set([
+  // Images
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "bmp",
+  "ico",
+  "webp",
+  "svg",
+  "tiff",
+  "tif",
+  // Archives
+  "zip",
+  "tar",
+  "gz",
+  "bz2",
+  "7z",
+  "rar",
+  "xz",
+  // Executables
+  "exe",
+  "dll",
+  "so",
+  "dylib",
+  "bin",
+  // Documents
+  "pdf",
+  "doc",
+  "docx",
+  "xls",
+  "xlsx",
+  "ppt",
+  "pptx",
+  // Media
+  "mp3",
+  "mp4",
+  "avi",
+  "mov",
+  "mkv",
+  "wav",
+  "flac",
+  // Database
+  "db",
+  "sqlite",
+  "sqlite3",
+  // Other
+  "wasm",
+  "ttf",
+  "otf",
+  "woff",
+  "woff2",
+  "eot",
+]);
+
+/** Language detection mapping from file extension */
+const EXTENSION_TO_LANGUAGE: Record<string, string> = {
+  ts: "typescript",
+  tsx: "tsx",
+  js: "javascript",
+  jsx: "jsx",
+  mjs: "javascript",
+  cjs: "javascript",
+  json: "json",
+  jsonc: "json",
+  md: "markdown",
+  mdx: "markdown",
+  py: "python",
+  rs: "rust",
+  go: "go",
+  html: "html",
+  htm: "html",
+  css: "css",
+  scss: "scss",
+  sass: "sass",
+  less: "less",
+  yml: "yaml",
+  yaml: "yaml",
+  toml: "toml",
+  xml: "xml",
+  sh: "bash",
+  bash: "bash",
+  zsh: "bash",
+  fish: "fish",
+  ps1: "powershell",
+  sql: "sql",
+  graphql: "graphql",
+  gql: "graphql",
+  java: "java",
+  kt: "kotlin",
+  kts: "kotlin",
+  scala: "scala",
+  rb: "ruby",
+  php: "php",
+  c: "c",
+  h: "c",
+  cpp: "cpp",
+  cc: "cpp",
+  cxx: "cpp",
+  hpp: "cpp",
+  cs: "csharp",
+  swift: "swift",
+  m: "objectivec",
+  mm: "objectivec",
+  r: "r",
+  lua: "lua",
+  vim: "vim",
+  dockerfile: "dockerfile",
+  makefile: "makefile",
+  cmake: "cmake",
+  tf: "hcl",
+  hcl: "hcl",
+  proto: "protobuf",
+  prisma: "prisma",
+  vue: "vue",
+  svelte: "svelte",
+  astro: "astro",
+  zig: "zig",
+  elm: "elm",
+  ex: "elixir",
+  exs: "elixir",
+  erl: "erlang",
+  hrl: "erlang",
+  clj: "clojure",
+  cljs: "clojure",
+  cljc: "clojure",
+  hs: "haskell",
+  lhs: "haskell",
+  ml: "ocaml",
+  mli: "ocaml",
+  fs: "fsharp",
+  fsx: "fsharp",
+  fsi: "fsharp",
+  pl: "perl",
+  pm: "perl",
+  nim: "nim",
+  d: "d",
+  dart: "dart",
+  v: "v",
+  sol: "solidity",
+  ini: "ini",
+  cfg: "ini",
+  conf: "ini",
+  env: "shell",
+  gitignore: "gitignore",
+  editorconfig: "editorconfig",
+  txt: "text",
+};
+
+export type FileContentSuccess = {
+  success: true;
+  content: string;
+  filePath: string;
+  truncated: boolean;
+  language: string;
+};
+
+export type FileContentError = {
+  success: false;
+  error: "INVALID_PATH" | "NOT_FOUND" | "BINARY_FILE" | "READ_ERROR";
+  message: string;
+  filePath: string;
+};
+
+export type FileContentResult = FileContentSuccess | FileContentError;
+
+export type GetFileContentOptions = {
+  maxFileSize?: number;
+};
+
+/**
+ * Detects the programming language from a file path
+ */
+export const detectLanguage = (filePath: string): string => {
+  const extensionIndex = filePath.lastIndexOf(".");
+  const ext = extensionIndex === -1 ? "" : filePath.slice(extensionIndex + 1).toLowerCase();
+
+  // Handle special filenames without extension
+  const basename = filePath.split("/").pop() ?? "";
+  const lowerBasename = basename.toLowerCase();
+
+  if (lowerBasename === "dockerfile") return "dockerfile";
+  if (lowerBasename === "makefile") return "makefile";
+  if (lowerBasename.startsWith(".env")) return "shell";
+
+  return EXTENSION_TO_LANGUAGE[ext] ?? "text";
+};
+
+/**
+ * Checks if a file extension indicates a binary file
+ */
+export const isBinaryExtension = (filePath: string): boolean => {
+  const extensionIndex = filePath.lastIndexOf(".");
+  const ext = extensionIndex === -1 ? "" : filePath.slice(extensionIndex + 1).toLowerCase();
+  return BINARY_EXTENSIONS.has(ext);
+};
+
+/**
+ * Checks if file content appears to be binary
+ * Detects null bytes which are common in binary files
+ */
+export const isBinaryContent = (buffer: Uint8Array): boolean => {
+  // Check first 8KB for null bytes
+  const checkLength = Math.min(buffer.length, 8192);
+  for (let i = 0; i < checkLength; i++) {
+    if (buffer[i] === 0) {
+      return true;
+    }
+  }
+  return false;
+};
+
+/**
+ * Validates that the file path is safe and within the project root
+ * Accepts both absolute paths (must be within project root) and relative paths
+ */
+export const validateFilePath = (
+  path: Path.Path,
+  projectRoot: string,
+  filePath: string,
+): { valid: true; resolvedPath: string } | { valid: false; message: string } => {
+  // Check for empty path
+  if (!filePath || filePath.trim() === "") {
+    return { valid: false, message: "File path cannot be empty" };
+  }
+
+  // Check for null bytes
+  if (filePath.includes("\x00")) {
+    return { valid: false, message: "File path contains invalid characters" };
+  }
+
+  // Check for path traversal attempts
+  if (filePath.includes("..")) {
+    return { valid: false, message: "Path traversal (..) is not allowed" };
+  }
+
+  const resolvedRoot = path.resolve(projectRoot);
+  // path.isAbsolute correctly handles both POSIX (/foo) and Windows (C:\foo) absolute paths.
+  const resolvedPath = path.isAbsolute(filePath)
+    ? path.normalize(filePath)
+    : path.resolve(projectRoot, path.normalize(filePath));
+
+  // Containment check via path.relative — robust across separators and drive letters.
+  // Anything outside the root yields a result that either starts with ".." or is absolute
+  // (the latter happens on Windows when the two paths live on different drives).
+  const relativePath = path.relative(resolvedRoot, resolvedPath);
+  const escapesRoot =
+    relativePath === ".." ||
+    relativePath.startsWith(`..${path.sep}`) ||
+    relativePath.startsWith("../") || // tolerate POSIX-style separator just in case
+    path.isAbsolute(relativePath);
+  if (escapesRoot) {
+    return { valid: false, message: "Path is outside the project root" };
+  }
+
+  return { valid: true, resolvedPath };
+};
+
+export const getFileContentEffect = (
+  projectRoot: string,
+  filePath: string,
+  options: GetFileContentOptions = {},
+): Effect.Effect<FileContentResult, PlatformError, FileSystem.FileSystem | Path.Path> =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+
+    const { maxFileSize = DEFAULT_MAX_FILE_SIZE } = options;
+
+    const validation = validateFilePath(path, projectRoot, filePath);
+    if (!validation.valid) {
+      return {
+        success: false,
+        error: "INVALID_PATH",
+        message: validation.message,
+        filePath,
+      };
+    }
+
+    const { resolvedPath } = validation;
+
+    if (isBinaryExtension(filePath)) {
+      return {
+        success: false,
+        error: "BINARY_FILE",
+        message: "Binary file cannot be displayed",
+        filePath,
+      };
+    }
+
+    const readFileResult = yield* Effect.either(fs.readFile(resolvedPath));
+    if (readFileResult._tag === "Left") {
+      const error = readFileResult.left;
+      if (error._tag === "SystemError") {
+        if (error.reason === "NotFound" || error.reason === "BadResource") {
+          return {
+            success: false,
+            error: "NOT_FOUND",
+            message: "File not found",
+            filePath,
+          };
+        }
+      }
+
+      return {
+        success: false,
+        error: "READ_ERROR",
+        message: error.message,
+        filePath,
+      };
+    }
+
+    const buffer = readFileResult.right;
+    if (isBinaryContent(buffer)) {
+      return {
+        success: false,
+        error: "BINARY_FILE",
+        message: "Binary file cannot be displayed",
+        filePath,
+      };
+    }
+
+    const truncated = buffer.length > maxFileSize;
+    const contentBuffer = truncated ? buffer.subarray(0, maxFileSize) : buffer;
+    const content = new TextDecoder("utf-8").decode(contentBuffer);
+    const language = detectLanguage(filePath);
+
+    return {
+      success: true,
+      content,
+      filePath,
+      truncated,
+      language,
+    };
+  });

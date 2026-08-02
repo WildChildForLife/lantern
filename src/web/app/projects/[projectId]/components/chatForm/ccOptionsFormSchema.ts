@@ -1,0 +1,323 @@
+import { z } from "zod";
+import type { CCOptionsSchema } from "@/server/core/claude-code/schema";
+
+/**
+ * Frontend form schema for CC Options
+ * This is a user-friendly representation that will be transformed to CCOptionsSchema
+ */
+
+// System Prompt ADT (Algebraic Data Type)
+export const systemPromptFormSchema = z.object({
+  mode: z.enum(["preset", "none"]),
+  append: z.string().optional(),
+});
+
+export type SystemPromptForm = z.infer<typeof systemPromptFormSchema>;
+
+// Sandbox Network Config
+export const sandboxNetworkFormSchema = z.object({
+  allowedDomains: z.string().optional(), // comma-separated string in form
+  allowLocalBinding: z.boolean().optional(),
+});
+
+export type SandboxNetworkForm = z.infer<typeof sandboxNetworkFormSchema>;
+
+// Sandbox Settings
+export const sandboxFormSchema = z.object({
+  enabled: z.boolean().optional(),
+  autoAllowBashIfSandboxed: z.boolean().optional(),
+  allowUnsandboxedCommands: z.boolean().optional(),
+  network: sandboxNetworkFormSchema.optional(),
+});
+
+export type SandboxForm = z.infer<typeof sandboxFormSchema>;
+
+// Main CC Options Form Schema
+export const ccOptionsFormSchema = z.object({
+  model: z.string().optional(),
+  disallowedTools: z.array(z.string()).optional(),
+  systemPrompt: systemPromptFormSchema.optional(),
+  env: z.record(z.string(), z.string().optional()).optional(),
+  sandbox: sandboxFormSchema.optional(),
+  settingSources: z.array(z.enum(["user", "project", "local"])).optional(),
+  maxTurns: z.number().int().positive().optional(),
+  maxThinkingTokens: z.number().int().positive().optional(),
+  maxBudgetUsd: z.number().nonnegative().optional(),
+  effort: z.enum(["low", "medium", "high", "max"]).optional(),
+  permissionMode: z.enum(["acceptEdits", "bypassPermissions", "default", "plan"]).optional(),
+});
+
+export type CCOptionsForm = z.infer<typeof ccOptionsFormSchema>;
+
+const defaultSettingSources: Array<"user" | "project" | "local"> = ["user", "project", "local"];
+
+/**
+ * Get default CC options for initial state
+ * This ensures that settingSources has proper defaults even when Popover is not opened
+ */
+export const getDefaultCCOptions = (): CCOptionsSchema => {
+  return {
+    settingSources: [...defaultSettingSources],
+    permissionMode: "default",
+    systemPrompt: {
+      type: "preset",
+      preset: "claude_code",
+    },
+  };
+};
+
+/**
+ * Check if the given CC options differ from the default values
+ * Used to determine whether to show the settings indicator
+ */
+export const hasNonDefaultCCOptions = (options: CCOptionsSchema | undefined): boolean => {
+  if (options === undefined) return false;
+
+  const defaultOptions = getDefaultCCOptions();
+
+  // Check if settingSources differs from default
+  const settingSourcesChanged =
+    options.settingSources !== undefined &&
+    (options.settingSources.length !== defaultOptions.settingSources?.length ||
+      !options.settingSources.every((s, i) => defaultOptions.settingSources?.[i] === s));
+
+  // Check if any other field is set (non-default)
+  const hasOtherSettings =
+    options.model !== undefined ||
+    (options.disallowedTools !== undefined && options.disallowedTools.length > 0) ||
+    (options.systemPrompt !== undefined &&
+      // Treat preset without append as default
+      !(
+        typeof options.systemPrompt === "object" &&
+        options.systemPrompt.type === "preset" &&
+        (options.systemPrompt.append === undefined || options.systemPrompt.append === "")
+      )) ||
+    (options.env !== undefined && Object.keys(options.env).length > 0) ||
+    options.sandbox !== undefined ||
+    options.maxTurns !== undefined ||
+    options.maxThinkingTokens !== undefined ||
+    options.maxBudgetUsd !== undefined ||
+    options.effort !== undefined ||
+    (options.permissionMode !== undefined && options.permissionMode !== "default");
+
+  return settingSourcesChanged || hasOtherSettings;
+};
+
+/**
+ * Transform frontend form data to backend schema
+ */
+export const transformFormToSchema = (form: CCOptionsForm): CCOptionsSchema | undefined => {
+  const hasValue = (value: unknown): boolean => {
+    if (value === undefined) return false;
+    if (Array.isArray(value)) return value.length > 0;
+    if (typeof value === "object" && value !== null) return Object.keys(value).length > 0;
+    return true;
+  };
+
+  const parseAllowedDomains = (value: string | undefined) => {
+    if (value === undefined || value === "") return undefined;
+    const domains = value
+      .split(",")
+      .map((domain) => domain.trim())
+      .filter(Boolean);
+    return domains.length > 0 ? domains : undefined;
+  };
+
+  const buildNetwork = (network: SandboxNetworkForm | undefined) => {
+    if (network === undefined) return undefined;
+
+    const allowedDomains = parseAllowedDomains(network.allowedDomains);
+    const allowLocalBinding = network.allowLocalBinding;
+
+    const result = {
+      ...(allowedDomains !== undefined ? { allowedDomains } : {}),
+      ...(allowLocalBinding !== undefined ? { allowLocalBinding } : {}),
+    };
+
+    return hasValue(result) ? result : undefined;
+  };
+
+  const buildSandbox = (sandbox: SandboxForm | undefined) => {
+    if (sandbox === undefined) return undefined;
+
+    const network = buildNetwork(sandbox.network);
+    const result = {
+      ...(sandbox.enabled !== undefined ? { enabled: sandbox.enabled } : {}),
+      ...(sandbox.autoAllowBashIfSandboxed !== undefined
+        ? { autoAllowBashIfSandboxed: sandbox.autoAllowBashIfSandboxed }
+        : {}),
+      ...(sandbox.allowUnsandboxedCommands !== undefined
+        ? { allowUnsandboxedCommands: sandbox.allowUnsandboxedCommands }
+        : {}),
+      ...(network !== undefined ? { network } : {}),
+    };
+
+    return hasValue(result) ? result : undefined;
+  };
+
+  const buildSystemPrompt = (
+    systemPrompt: SystemPromptForm | undefined,
+  ): CCOptionsSchema["systemPrompt"] | undefined => {
+    if (systemPrompt === undefined) {
+      return undefined;
+    }
+
+    // "none" mode: opt out of default system prompt
+    if (systemPrompt.mode === "none") {
+      return "";
+    }
+
+    // "preset" mode without append: use default (no flag needed)
+    if (systemPrompt.append === undefined || systemPrompt.append === "") {
+      return undefined;
+    }
+
+    return {
+      type: "preset",
+      preset: "claude_code",
+      append: systemPrompt.append,
+    };
+  };
+
+  // If all fields are empty/undefined, return undefined
+  const hasAnyValue = Object.values(form).some((value) => hasValue(value));
+
+  if (!hasAnyValue) {
+    return undefined;
+  }
+
+  const systemPrompt = buildSystemPrompt(form.systemPrompt);
+  const sandbox = buildSandbox(form.sandbox);
+  const env = form.env !== undefined && hasValue(form.env) ? form.env : undefined;
+
+  const result: CCOptionsSchema = {
+    ...(form.model !== undefined && form.model !== "" ? { model: form.model } : {}),
+    ...(form.disallowedTools !== undefined && form.disallowedTools.length > 0
+      ? { disallowedTools: form.disallowedTools }
+      : {}),
+    ...(systemPrompt !== undefined ? { systemPrompt } : {}),
+    ...(env !== undefined ? { env } : {}),
+    ...(sandbox !== undefined ? { sandbox } : {}),
+    // Always include settingSources if defined (even empty array means explicit user choice)
+    ...(form.settingSources !== undefined ? { settingSources: form.settingSources } : {}),
+    ...(form.maxTurns !== undefined ? { maxTurns: form.maxTurns } : {}),
+    ...(form.maxThinkingTokens !== undefined ? { maxThinkingTokens: form.maxThinkingTokens } : {}),
+    ...(form.maxBudgetUsd !== undefined ? { maxBudgetUsd: form.maxBudgetUsd } : {}),
+    ...(form.effort !== undefined ? { effort: form.effort } : {}),
+    ...(form.permissionMode !== undefined ? { permissionMode: form.permissionMode } : {}),
+  };
+
+  return hasValue(result) ? result : undefined;
+};
+
+/**
+ * Transform backend schema to frontend form data
+ */
+export const transformSchemaToForm = (schema: CCOptionsSchema | undefined): CCOptionsForm => {
+  if (!schema) {
+    return {
+      systemPrompt: { mode: "preset" },
+      settingSources: [...defaultSettingSources],
+    };
+  }
+
+  const form: CCOptionsForm = {
+    settingSources: [...defaultSettingSources],
+  };
+
+  // Model
+  if (schema.model !== undefined && schema.model !== "") {
+    form.model = schema.model;
+  }
+
+  // Disallowed Tools
+  if (schema.disallowedTools !== undefined) {
+    form.disallowedTools = schema.disallowedTools;
+  }
+
+  // System Prompt (ADT transformation)
+  if (schema.systemPrompt === undefined) {
+    form.systemPrompt = { mode: "preset" };
+  } else if (typeof schema.systemPrompt === "string") {
+    // Empty string means "no system prompt" (--system-prompt '')
+    form.systemPrompt = { mode: "none" };
+  } else {
+    form.systemPrompt = {
+      mode: "preset",
+      append: schema.systemPrompt.append,
+    };
+  }
+
+  // Environment Variables
+  if (schema.env !== undefined) {
+    form.env = schema.env;
+  }
+
+  // Sandbox
+  if (schema.sandbox !== undefined) {
+    const sandbox: SandboxForm = {};
+
+    if (schema.sandbox.enabled !== undefined) {
+      sandbox.enabled = schema.sandbox.enabled;
+    }
+
+    if (schema.sandbox.autoAllowBashIfSandboxed !== undefined) {
+      sandbox.autoAllowBashIfSandboxed = schema.sandbox.autoAllowBashIfSandboxed;
+    }
+
+    if (schema.sandbox.allowUnsandboxedCommands !== undefined) {
+      sandbox.allowUnsandboxedCommands = schema.sandbox.allowUnsandboxedCommands;
+    }
+
+    if (schema.sandbox.network !== undefined) {
+      const network: SandboxNetworkForm = {};
+
+      if (
+        schema.sandbox.network.allowedDomains !== undefined &&
+        schema.sandbox.network.allowedDomains.length > 0
+      ) {
+        network.allowedDomains = schema.sandbox.network.allowedDomains.join(", ");
+      }
+
+      if (schema.sandbox.network.allowLocalBinding !== undefined) {
+        network.allowLocalBinding = schema.sandbox.network.allowLocalBinding;
+      }
+
+      sandbox.network = network;
+    }
+
+    form.sandbox = sandbox;
+  }
+
+  // Setting Sources
+  if (schema.settingSources !== undefined) {
+    form.settingSources = schema.settingSources;
+  }
+
+  // Max Turns
+  if (schema.maxTurns !== undefined) {
+    form.maxTurns = schema.maxTurns;
+  }
+
+  // Max Thinking Tokens
+  if (schema.maxThinkingTokens !== undefined) {
+    form.maxThinkingTokens = schema.maxThinkingTokens;
+  }
+
+  // Max Budget USD
+  if (schema.maxBudgetUsd !== undefined) {
+    form.maxBudgetUsd = schema.maxBudgetUsd;
+  }
+
+  // Effort
+  if (schema.effort !== undefined) {
+    form.effort = schema.effort;
+  }
+
+  // Permission Mode
+  if (schema.permissionMode !== undefined) {
+    form.permissionMode = schema.permissionMode;
+  }
+
+  return form;
+};
