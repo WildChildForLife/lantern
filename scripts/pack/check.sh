@@ -5,7 +5,7 @@ set -ueo pipefail
 ./scripts/pack/pack.sh
 
 npx_timeout_sec=10
-if ! timeout "$npx_timeout_sec" ./temp-pack/claude-code-viewer; then
+if ! timeout "$npx_timeout_sec" ./temp-pack/lantern; then
   status=$?
   # timeout(124) は起動確認完了として許容する
   if [ "$status" -ne 124 ]; then

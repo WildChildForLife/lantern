@@ -1,5 +1,5 @@
 {
-  description = "claude-code-viewer dev shell with security tools";
+  description = "Lantern dev shell with security tools";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";

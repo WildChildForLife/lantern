@@ -26,8 +26,8 @@ searchable list of everything, and a board view of the lot.
 - **Three layouts.** Rows, cards, or a full-width board with one column per topic, newest first.
 - **Pick up where you left off.** Copy a conversation id to resume it from a terminal, or tick
   conversations off as done once you have dealt with them.
-- **Everything the viewer it forked from does** — live session log viewing, search, cost and token
-  breakdowns, git integration, an in-app terminal, and PWA support for phones.
+- **A full session viewer.** Live conversation log viewing, search, cost and token breakdowns, git
+  integration, an in-app terminal, and PWA support for phones.
 
 <p align="center">
   <img src="docs/screenshots/topic-table.jpg" alt="Board view with one column per topic" width="100%">
@@ -110,15 +110,6 @@ pnpm build
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and house rules, and [AGENTS.md](AGENTS.md) for
 the architecture (Hono + Effect-TS backend, Vite + TanStack Router frontend, SQLite cache).
 
-## Credits
-
-Lantern is a fork of [**d-kimuson/claude-code-viewer**](https://github.com/d-kimuson/claude-code-viewer)
-by [@d-kimuson](https://github.com/d-kimuson), which provides the session log reader, the viewer UI and
-the client that the topic features are built on. All of that work is theirs; Lantern adds the topic
-grouping, the cross-project conversation list and the board view on top.
-
-If you want the original, unopinionated viewer, use theirs — it is excellent.
-
 ## Privacy
 
 Lantern reads your session logs locally and sends them nowhere. The only outbound traffic is the
@@ -127,4 +118,4 @@ See [PRIVACY.md](PRIVACY.md).
 
 ## Licence
 
-[MIT](LICENSE) — original work © 2025 Claude Code Viewer, modifications © 2026 Lantern contributors.
+[MIT](LICENSE) — © 2026 Lantern contributors.

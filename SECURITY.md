@@ -9,9 +9,6 @@ rather than opening a public issue.
 Include what you did, what happened, and what you expected. A proof of concept helps. You should get a
 first response within a week.
 
-Please do not report issues in the upstream project here — send those to
-[d-kimuson/claude-code-viewer](https://github.com/d-kimuson/claude-code-viewer/security).
-
 ## What Lantern exposes
 
 Lantern is a local-first tool, and the threat model follows from that.

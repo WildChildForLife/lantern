@@ -118,7 +118,7 @@ const LayerImpl = Effect.gen(function* () {
 
     const ccvAskUserQuestionTool = tool(
       "CCVAskUserQuestion",
-      "Ask the user questions through the Claude Code Viewer web interface. This tool replaces AskUserQuestion for web-based sessions. Use this to:\n1. Gather user preferences or requirements\n2. Clarify ambiguous instructions\n3. Get decisions on implementation choices\n4. Offer choices about what direction to take.\n\nUsers can select from provided options or type custom input. Use multiSelect: true to allow multiple answers.",
+      "Ask the user questions through the Lantern web interface. This tool replaces AskUserQuestion for web-based sessions. Use this to:\n1. Gather user preferences or requirements\n2. Clarify ambiguous instructions\n3. Get decisions on implementation choices\n4. Offer choices about what direction to take.\n\nUsers can select from provided options or type custom input. Use multiSelect: true to allow multiple answers.",
       questionInputSchema,
       async (args) => {
         const questionRequest: QuestionRequest = {

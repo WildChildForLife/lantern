@@ -56,7 +56,7 @@ const LoginPage = () => {
             <KeyRound className="w-8 h-8 text-primary" />
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-2xl font-bold tracking-tight">Claude Code Viewer</CardTitle>
+            <CardTitle className="text-2xl font-bold tracking-tight">Lantern</CardTitle>
             <CardDescription className="text-muted-foreground">
               Enter your password to continue
             </CardDescription>

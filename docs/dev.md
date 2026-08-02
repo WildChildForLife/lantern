@@ -1,6 +1,6 @@
 # Developer Documentation
 
-This document provides technical details for developers contributing to Claude Code Viewer.
+This document provides technical details for developers contributing to Lantern.
 
 ## Architecture Overview
 
@@ -42,7 +42,7 @@ This document provides technical details for developers contributing to Claude C
 
 ### Session Process Management
 
-Claude Code Viewer provides advanced control over Claude Code session processes:
+Lantern provides advanced control over Claude Code session processes:
 
 - After starting a session, the process remains in the background unless explicitly aborted
 - Paused sessions can continue without changing the session-id (no resume needed)

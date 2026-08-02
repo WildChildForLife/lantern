@@ -75,7 +75,7 @@ const SessionPageInner: FC<{
   const projectPath = project?.meta.projectPath ?? project?.claudeProjectPath;
   const projectName = project?.meta.projectName ?? "Untitled Project";
 
-  const title = projectName ? `${projectName} - Claude Code Viewer` : "Claude Code Viewer";
+  const title = projectName ? `${projectName} - Lantern` : "Lantern";
 
   // Right panel margin (when open, reserve space for fixed right panel)
   const rightPanelMargin = isRightPanelOpen && !isMobile ? `${rightPanelWidth}%` : "0";

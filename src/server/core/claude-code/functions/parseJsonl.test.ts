@@ -489,8 +489,8 @@ describe("parseJsonl", () => {
         type: "pr-link",
         sessionId: "28fc793f-fbe6-4062-8b4a-3d6e28f65b8b",
         prNumber: 167,
-        prUrl: "https://github.com/d-kimuson/claude-code-viewer/pull/167",
-        prRepository: "d-kimuson/claude-code-viewer",
+        prUrl: "https://github.com/acme/example-app/pull/167",
+        prRepository: "acme/example-app",
         timestamp: "2026-03-30T19:16:39.642Z",
       });
 
@@ -500,8 +500,8 @@ describe("parseJsonl", () => {
       expect(result[0]).toHaveProperty("type", "pr-link");
       const entry = expectPrLinkEntry(result[0]);
       expect(entry.prNumber).toBe(167);
-      expect(entry.prUrl).toBe("https://github.com/d-kimuson/claude-code-viewer/pull/167");
-      expect(entry.prRepository).toBe("d-kimuson/claude-code-viewer");
+      expect(entry.prUrl).toBe("https://github.com/acme/example-app/pull/167");
+      expect(entry.prRepository).toBe("acme/example-app");
     });
 
     it("last-prompt entry parses correctly", () => {
@@ -537,8 +537,8 @@ describe("parseJsonl", () => {
           type: "pr-link",
           sessionId: "session-1",
           prNumber: 167,
-          prUrl: "https://github.com/d-kimuson/claude-code-viewer/pull/167",
-          prRepository: "d-kimuson/claude-code-viewer",
+          prUrl: "https://github.com/acme/example-app/pull/167",
+          prRepository: "acme/example-app",
           timestamp: "2026-03-30T19:16:39.642Z",
         }),
         JSON.stringify({

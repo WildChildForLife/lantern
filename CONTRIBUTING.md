@@ -54,9 +54,8 @@ Use `fix` only for things a user would notice. A linter or type error is a `chor
 
 ## Scope
 
-Lantern is a fork of [claude-code-viewer](https://github.com/d-kimuson/claude-code-viewer) focused on
-finding conversations again: topics, cross-project listing, board view. Fixes that belong to the viewer
-itself are usually better sent upstream, where everyone benefits — including us.
+Lantern is focused on finding conversations again: topic grouping, cross-project listing and the
+board view. Changes that make those better are the easiest to get merged.
 
 ## Code of conduct
 

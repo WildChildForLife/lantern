@@ -73,7 +73,7 @@ export const SystemInfoCard: FC = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Claude Code Viewer Version */}
+        {/* Lantern Version */}
         <div className="space-y-3">
           <h3 className="font-medium text-sm text-sidebar-foreground">
             <Trans id="system_info.viewer_version" />

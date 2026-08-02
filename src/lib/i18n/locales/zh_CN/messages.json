@@ -4503,7 +4503,7 @@
         79
       ]
     ],
-    "translation": "Claude Code Viewer"
+    "translation": "Lantern"
   },
   "usage_mode.api.description": {
     "message": "You use Claude Code with API keys. All features are available.",

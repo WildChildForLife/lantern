@@ -139,7 +139,7 @@ describe("DeprecatedEnvDetector", () => {
       expect(output).toContain("CLAUDE_CODE_VIEWER_CC_EXECUTABLE_PATH");
 
       // Check the migration guide link
-      expect(output).toContain("https://github.com/d-kimuson/claude-code-viewer#configuration");
+      expect(output).toContain("https://github.com/WildChildForLife/lantern#configuration");
 
       // biome-ignore lint/style/noProcessEnv: Testing environment variable detection
       delete process.env.CLAUDE_CODE_VIEWER_AUTH_PASSWORD;
@@ -162,7 +162,7 @@ describe("DeprecatedEnvDetector", () => {
       yield* Effect.either(checkDeprecatedEnvs);
 
       const output = consoleSpy.mock.calls.flat().join("\n");
-      expect(output).toContain("https://github.com/d-kimuson/claude-code-viewer#configuration");
+      expect(output).toContain("https://github.com/WildChildForLife/lantern#configuration");
 
       // biome-ignore lint/style/noProcessEnv: Testing environment variable detection
       delete process.env.CLAUDE_CODE_VIEWER_AUTH_PASSWORD;
