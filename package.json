@@ -114,7 +114,7 @@
     "hono": "4.12.18",
     "inquirer": "13.4.2",
     "jotai": "2.20.0",
-    "jsdom": "^29.1.1",
+    "jsdom": "^30.0.1",
     "lefthook": "2.1.6",
     "lucide-react": "1.14.0",
     "npm-run-all2": "8.0.4",
