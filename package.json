@@ -125,7 +125,7 @@
     "picomatch": "^4.0.4",
     "playwright": "1.59.1",
     "prexit": "2.3.0",
-    "radix-ui": "1.4.3",
+    "radix-ui": "1.6.7",
     "react": "19.2.6",
     "react-dom": "19.2.6",
     "react-error-boundary": "6.1.1",
