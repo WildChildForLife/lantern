@@ -65,7 +65,7 @@
     "@lingui/core": "6.0.1",
     "@lingui/format-json": "6.0.1",
     "@lingui/loader": "6.0.1",
-    "@lingui/react": "6.0.1",
+    "@lingui/react": "6.6.0",
     "@lingui/vite-plugin": "6.0.1",
     "@radix-ui/react-avatar": "1.1.11",
     "@radix-ui/react-checkbox": "1.3.3",
