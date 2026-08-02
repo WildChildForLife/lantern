@@ -3,7 +3,7 @@
 set -ueo pipefail
 
 temp_dir="temp-pack"
-temp_cache_dir="${temp_dir}/npm-cache" # 空のキャッシュディレクトリを使うことでクリーンインストール時の動作を再現
+temp_cache_dir="${temp_dir}/npm-cache" # An empty cache directory reproduces what a clean install does
 temp_bin_file="${temp_dir}/lantern"
 
 if [ -d "$temp_dir" ]; then

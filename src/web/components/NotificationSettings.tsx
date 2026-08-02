@@ -136,7 +136,7 @@ export const NotificationSettings: FC<NotificationSettingsProps> = ({
         <div className="flex items-center gap-2">
           <Select value={settings.soundType} onValueChange={handleSoundTypeChange}>
             <SelectTrigger id={selectId} className="w-[180px]">
-              <SelectValue placeholder="音を選択" />
+              <SelectValue placeholder="Choose a sound" />
             </SelectTrigger>
             <SelectContent>
               {availableSoundTypes.map((soundType) => (

@@ -41,14 +41,14 @@ export const CommandCompletion = forwardRef<CommandCompletionRef, CommandComplet
     const containerRef = useRef<HTMLDivElement>(null);
     const listRef = useRef<HTMLDivElement>(null);
 
-    // コマンドリストを取得
+    // Fetch the command list
     const { data: commandData } = useQuery({
       queryKey: claudeCommandsQuery(projectId).queryKey,
       queryFn: claudeCommandsQuery(projectId).queryFn,
-      staleTime: 1000 * 60 * 5, // 5分間キャッシュ
+      staleTime: 1000 * 60 * 5, // cache for five minutes
     });
 
-    // メモ化されたコマンドフィルタリング
+    // Memoised command filtering
     const { shouldShowCompletion, filteredCommands } = useMemo(() => {
       const allCommands: CommandInfo[] = [
         ...(commandData?.defaultCommands ?? []),
@@ -75,16 +75,16 @@ export const CommandCompletion = forwardRef<CommandCompletionRef, CommandComplet
       return { shouldShowCompletion: shouldShow, filteredCommands: filtered };
     }, [commandData, inputValue]);
 
-    // 表示状態の導出（useEffectを削除）
+    // Visibility derived from props rather than an effect
     const shouldBeOpen = shouldShowCompletion && filteredCommands.length > 0;
 
-    // 状態が変更された時のリセット処理
+    // Reset the selection when the state changes
     if (isOpen !== shouldBeOpen) {
       setIsOpen(shouldBeOpen);
       setSelectedIndex(-1);
     }
 
-    // メモ化されたコマンド選択処理
+    // Memoised selection handler
     const handleCommandSelect = useCallback(
       (command: CommandInfo) => {
         // Append argumentHint as placeholder if exists
@@ -99,10 +99,10 @@ export const CommandCompletion = forwardRef<CommandCompletionRef, CommandComplet
       [onCommandSelect],
     );
 
-    // スクロール処理
+    // Keep the highlighted item in view
     const scrollToSelected = useCallback((index: number) => {
       if (index >= 0 && listRef.current) {
-        // ボタン要素を直接検索
+        // Look the button element up directly
         const buttons = listRef.current.querySelectorAll('button[role="option"]');
         const selectedButton = buttons[index];
         if (selectedButton instanceof HTMLElement) {
@@ -114,7 +114,7 @@ export const CommandCompletion = forwardRef<CommandCompletionRef, CommandComplet
       }
     }, []);
 
-    // メモ化されたキーボードナビゲーション処理
+    // Memoised keyboard navigation
     const handleKeyboardNavigation = useCallback(
       (e: KeyboardEvent): boolean => {
         if (!isOpen || filteredCommands.length === 0) return false;
@@ -124,7 +124,7 @@ export const CommandCompletion = forwardRef<CommandCompletionRef, CommandComplet
             e.preventDefault();
             setSelectedIndex((prev) => {
               const newIndex = prev < filteredCommands.length - 1 ? prev + 1 : 0;
-              // スクロールを次のフレームで実行
+              // Scroll on the next frame, once the list has rendered
               requestAnimationFrame(() => scrollToSelected(newIndex));
               return newIndex;
             });
@@ -133,7 +133,7 @@ export const CommandCompletion = forwardRef<CommandCompletionRef, CommandComplet
             e.preventDefault();
             setSelectedIndex((prev) => {
               const newIndex = prev > 0 ? prev - 1 : filteredCommands.length - 1;
-              // スクロールを次のフレームで実行
+              // Scroll on the next frame, once the list has rendered
               requestAnimationFrame(() => scrollToSelected(newIndex));
               return newIndex;
             });
@@ -161,7 +161,7 @@ export const CommandCompletion = forwardRef<CommandCompletionRef, CommandComplet
       [isOpen, selectedIndex, handleCommandSelect, scrollToSelected, filteredCommands],
     );
 
-    // 外部クリック処理をuseEffectで設定
+    // Close on a click outside
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
         if (
@@ -178,7 +178,7 @@ export const CommandCompletion = forwardRef<CommandCompletionRef, CommandComplet
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // useImperativeHandleでキーボードハンドラーを公開
+    // Expose the keyboard handler to the parent
     useImperativeHandle(
       ref,
       () => ({

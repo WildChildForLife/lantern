@@ -206,7 +206,7 @@ const ConversationItemComponent: FC<ConversationItemProps> = ({
       ) : null;
 
     return conversation.isMeta === true ? (
-      // 展開可能にしてデフォで非展開
+      // Expandable, collapsed by default
       <MetaConversationContent>
         <div className="flex flex-col w-full">
           {timestamp}

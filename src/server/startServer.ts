@@ -105,7 +105,7 @@ export const startServer = async (options: CliOptions) => {
       yield* setupTerminalWebSocket(server);
     }
   })
-    // 依存の浅い順にコンテナに pipe する必要がある
+    // Layers must be piped into the container from the shallowest dependency up
     .pipe(Effect.provide(MainLayer), Effect.scoped);
 
   await Effect.runPromise(program);

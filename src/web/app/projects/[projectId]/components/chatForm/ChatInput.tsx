@@ -355,7 +355,7 @@ export const ChatInput: FC<ChatInputProps> = ({
       return;
     }
 
-    // IMEで変換中の場合は送信しない
+    // Do not submit while an IME composition is in progress
     if (e.key === "Enter" && !e.nativeEvent.isComposing) {
       const enterKeyBehavior = config?.enterKeyBehavior;
 

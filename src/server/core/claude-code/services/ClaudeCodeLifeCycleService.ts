@@ -235,7 +235,7 @@ const LayerImpl = Effect.gen(function* () {
           for await (const message of messageIter) {
             const result = await Runtime.runPromise(runtime)(handleMessage(message)).catch(
               (error: unknown) => {
-                // iter 自体が落ちてなければ継続したいので握りつぶす
+                // Swallowed on purpose: as long as the iterator itself is alive, keep going
                 Effect.runFork(
                   sessionProcessService.changeTurnState({
                     sessionProcessId: sessionProcess.def.sessionProcessId,

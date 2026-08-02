@@ -46,7 +46,7 @@ export class InitializeService extends Context.Tag("InitializeService")<
         Layer.succeed(ProjectRepository, projectRepository),
       );
 
-      // 状態管理用の Ref
+      // Refs holding the listeners so they can be detached on shutdown
       const listenersRef = yield* Ref.make<{
         sessionChanged?: ((event: InternalEventDeclaration["sessionChanged"]) => void) | null;
         sessionListChanged?:
@@ -66,7 +66,7 @@ export class InitializeService extends Context.Tag("InitializeService")<
           );
           yield* Effect.logInfo("fullSync completed");
 
-          // ファイルウォッチャーを開始
+          // Start the file watcher
           yield* fileWatcher.startWatching();
 
           // Start all enabled scheduled jobs
@@ -80,10 +80,10 @@ export class InitializeService extends Context.Tag("InitializeService")<
             }),
           );
 
-          // Rate limit auto-schedule service を開始
+          // Start the rate limit auto-schedule service
           yield* rateLimitAutoScheduleService.start();
 
-          // ハートビートを定期的に送信
+          // Send a heartbeat on an interval
           const daemon = Effect.repeat(
             eventBus.emit("heartbeat", {}),
             Schedule.fixed("10 seconds"),
@@ -93,14 +93,14 @@ export class InitializeService extends Context.Tag("InitializeService")<
           yield* Effect.forkDaemon(daemon);
           yield* Effect.logInfo("after starting heartbeat fork");
 
-          // sessionChanged イベントのリスナーを登録
+          // Subscribe to sessionChanged
           const onSessionChanged = (event: InternalEventDeclaration["sessionChanged"]) => {
             Effect.runFork(projectMetaService.invalidateProject(event.projectId));
 
             Effect.runFork(sessionMetaService.invalidateSession(event.projectId, event.sessionId));
           };
 
-          // sessionListChanged イベントのリスナーを登録
+          // Subscribe to sessionListChanged
           const onSessionListChanged = (event: InternalEventDeclaration["sessionListChanged"]) => {
             Effect.runFork(
               syncService.syncProjectList(event.projectId).pipe(

@@ -143,7 +143,7 @@ export const FileCompletion = forwardRef<FileCompletionRef, FileCompletionProps>
     // Scroll to selected entry
     const scrollToSelected = useCallback((index: number) => {
       if (index >= 0 && listRef.current) {
-        // ボタン要素を直接検索
+        // Look the button element up directly
         const buttons = listRef.current.querySelectorAll('button[role="option"]');
         const selectedButton = buttons[index];
         if (selectedButton instanceof HTMLElement) {
