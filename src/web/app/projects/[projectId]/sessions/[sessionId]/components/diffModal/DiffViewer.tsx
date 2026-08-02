@@ -374,10 +374,10 @@ const FileHeader: FC<FileHeaderProps> = ({ fileDiff, isCollapsed, onToggleCollap
     e.stopPropagation();
     try {
       await navigator.clipboard.writeText(fileDiff.filename);
-      toast.success("ファイル名をコピーしました");
+      toast.success("File name copied");
     } catch (err) {
       console.error("Failed to copy filename:", err);
-      toast.error("ファイル名のコピーに失敗しました");
+      toast.error("Could not copy the file name");
     }
   };
 

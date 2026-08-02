@@ -178,7 +178,7 @@ export const MarkdownContent: FC<MarkdownContentProps> = ({ content, className =
           </MarkdownLink>
         );
       },
-      // テーブルの改善
+      // Table styling
       table({ children, ...props }) {
         return (
           <div className="overflow-x-auto my-6 rounded-lg border border-border max-w-full">

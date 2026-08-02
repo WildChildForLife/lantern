@@ -20,38 +20,38 @@ const basename = (filePath: string): string => filePath.split("/").at(-1) ?? fil
 const describeGitSubcommand = (args: readonly string[]): string => {
   switch (args[0]?.toLowerCase() ?? "") {
     case "commit":
-      return "コミットしようとしています";
+      return "wants to commit";
     case "push":
-      return "プッシュしようとしています";
+      return "wants to push";
     case "pull":
-      return "プルしようとしています";
+      return "wants to pull";
     case "clone":
-      return "リポジトリをクローンしようとしています";
+      return "wants to clone a repository";
     case "checkout":
     case "switch":
-      return "ブランチを切り替えようとしています";
+      return "wants to switch branch";
     case "branch":
-      return "ブランチを操作しようとしています";
+      return "wants to work with branches";
     case "merge":
-      return "マージしようとしています";
+      return "wants to merge";
     case "rebase":
-      return "リベースしようとしています";
+      return "wants to rebase";
     case "add":
-      return "変更をステージしようとしています";
+      return "wants to stage changes";
     case "status":
-      return "git の状態を確認しようとしています";
+      return "wants to check the git status";
     case "log":
-      return "git ログを確認しようとしています";
+      return "wants to read the git log";
     case "diff":
-      return "差分を確認しようとしています";
+      return "wants to view a diff";
     case "reset":
-      return "変更をリセットしようとしています";
+      return "wants to reset changes";
     case "stash":
-      return "変更を一時保存しようとしています";
+      return "wants to stash changes";
     case "fetch":
-      return "リモートの情報を取得しようとしています";
+      return "wants to fetch from the remote";
     default:
-      return "git を操作しようとしています";
+      return "wants to run a git command";
   }
 };
 
@@ -60,26 +60,24 @@ const describePackageManagerSubcommand = (args: readonly string[]): string => {
     case "install":
     case "add":
     case "i":
-      return "パッケージをインストールしようとしています";
+      return "wants to install packages";
     case "uninstall":
     case "remove":
     case "rm":
-      return "パッケージを削除しようとしています";
+      return "wants to remove packages";
     case "update":
     case "upgrade":
-      return "パッケージを更新しようとしています";
+      return "wants to update packages";
     case "run":
-      return args[1] !== undefined
-        ? `${args[1]} スクリプトを実行しようとしています`
-        : "スクリプトを実行しようとしています";
+      return args[1] !== undefined ? `wants to run the ${args[1]} script` : "wants to run a script";
     case "build":
-      return "ビルドしようとしています";
+      return "wants to run a build";
     case "test":
-      return "テストを実行しようとしています";
+      return "wants to run the tests";
     case "lint":
-      return "Lint を実行しようとしています";
+      return "wants to run the linter";
     default:
-      return "パッケージを管理しようとしています";
+      return "wants to manage packages";
   }
 };
 
@@ -105,34 +103,28 @@ const describeBashCommand = (command: string): string => {
   switch (baseCmd) {
     case "rm":
     case "rmdir":
-      return firstArg !== undefined
-        ? `${firstArg} を削除しようとしています`
-        : "ファイルを削除しようとしています";
+      return firstArg !== undefined ? `wants to delete ${firstArg}` : "wants to delete a file";
     case "ls":
       return firstArg !== undefined
-        ? `${firstArg} フォルダを確認しようとしています`
-        : "フォルダを確認しようとしています";
+        ? `wants to inspect the folder ${firstArg}`
+        : "wants to inspect a folder";
     case "mkdir":
       return firstArg !== undefined
-        ? `${firstArg} フォルダを作成しようとしています`
-        : "フォルダを作成しようとしています";
+        ? `wants to create the folder ${firstArg}`
+        : "wants to create a folder";
     case "cp":
-      return "ファイルをコピーしようとしています";
+      return "wants to copy a file";
     case "mv":
-      return "ファイルを移動しようとしています";
+      return "wants to move a file";
     case "cat":
-      return firstArg !== undefined
-        ? `${firstArg} を確認しようとしています`
-        : "ファイルを確認しようとしています";
+      return firstArg !== undefined ? `wants to inspect ${firstArg}` : "wants to inspect a file";
     case "touch":
-      return firstArg !== undefined
-        ? `${firstArg} を作成しようとしています`
-        : "ファイルを作成しようとしています";
+      return firstArg !== undefined ? `wants to create ${firstArg}` : "wants to create a file";
     case "find":
-      return "ファイルを検索しようとしています";
+      return "wants to search for files";
     case "grep":
     case "rg":
-      return "ファイル内を検索しようとしています";
+      return "wants to search inside files";
     case "git":
       return describeGitSubcommand(args);
     case "npm":
@@ -142,47 +134,45 @@ const describeBashCommand = (command: string): string => {
       return describePackageManagerSubcommand(args);
     case "curl":
     case "wget":
-      return "ファイルをダウンロードしようとしています";
+      return "wants to download a file";
     case "chmod":
     case "chown":
-      return "ファイルの権限を変更しようとしています";
+      return "wants to change file permissions";
     case "kill":
     case "killall":
     case "pkill":
-      return "プロセスを終了しようとしています";
+      return "wants to kill a process";
     case "ps":
-      return "プロセスを確認しようとしています";
+      return "wants to inspect processes";
     case "docker":
-      return "Docker を操作しようとしています";
+      return "wants to run a Docker command";
     case "ssh":
-      return "リモートサーバーに接続しようとしています";
+      return "wants to connect to a remote server";
     case "make":
-      return "ビルドしようとしています";
+      return "wants to run a build";
     case "python":
     case "python3":
-      return "Python スクリプトを実行しようとしています";
+      return "wants to run a Python script";
     case "node":
     case "npx":
     case "tsx":
     case "ts-node":
-      return "スクリプトを実行しようとしています";
+      return "wants to run a script";
     case "echo":
-      return "テキストを出力しようとしています";
+      return "wants to print text";
     case "cd":
       return firstArg !== undefined
-        ? `${firstArg} に移動しようとしています`
-        : "ディレクトリを移動しようとしています";
+        ? `wants to change into ${firstArg}`
+        : "wants to change directory";
     case "tar":
     case "zip":
     case "unzip":
     case "gzip":
-      return "アーカイブを操作しようとしています";
+      return "wants to work with an archive";
     case "open":
-      return firstArg !== undefined
-        ? `${firstArg} を開こうとしています`
-        : "ファイルを開こうとしています";
+      return firstArg !== undefined ? `wants to open ${firstArg}` : "wants to open a file";
     default:
-      return "コマンドを実行しようとしています";
+      return "wants to run a command";
   }
 };
 
@@ -193,76 +183,76 @@ const describePermissionRequest = (
   switch (toolName.toLowerCase()) {
     case "read": {
       if (typeof toolInput["file_path"] === "string") {
-        return `${basename(toolInput["file_path"])} を読もうとしています`;
+        return `wants to read ${basename(toolInput["file_path"])}`;
       }
-      return "ファイルを読もうとしています";
+      return "wants to read a file";
     }
     case "write": {
       if (typeof toolInput["file_path"] === "string") {
-        return `${basename(toolInput["file_path"])} を書き込もうとしています`;
+        return `wants to write ${basename(toolInput["file_path"])}`;
       }
-      return "ファイルを書き込もうとしています";
+      return "wants to write a file";
     }
     case "edit":
     case "multiedit": {
       if (typeof toolInput["file_path"] === "string") {
-        return `${basename(toolInput["file_path"])} を編集しようとしています`;
+        return `wants to edit ${basename(toolInput["file_path"])}`;
       }
-      return "ファイルを編集しようとしています";
+      return "wants to edit a file";
     }
     case "bash": {
       if (typeof toolInput["command"] === "string") {
         return describeBashCommand(toolInput["command"]);
       }
-      return "コマンドを実行しようとしています";
+      return "wants to run a command";
     }
     case "glob": {
       if (typeof toolInput["pattern"] === "string") {
-        return `${toolInput["pattern"]} に一致するファイルを検索しようとしています`;
+        return `wants to find files matching ${toolInput["pattern"]}`;
       }
-      return "ファイルを検索しようとしています";
+      return "wants to search for files";
     }
     case "grep": {
       if (typeof toolInput["pattern"] === "string") {
-        return `「${toolInput["pattern"]}」をファイル内で検索しようとしています`;
+        return `wants to search files for "${toolInput["pattern"]}"`;
       }
-      return "ファイル内を検索しようとしています";
+      return "wants to search inside files";
     }
     case "ls": {
       if (typeof toolInput["path"] === "string") {
-        return `${toolInput["path"]} フォルダを確認しようとしています`;
+        return `wants to inspect the folder ${toolInput["path"]}`;
       }
-      return "フォルダを確認しようとしています";
+      return "wants to inspect a folder";
     }
     case "webfetch": {
-      return "Web ページを取得しようとしています";
+      return "wants to fetch a web page";
     }
     case "websearch": {
       if (typeof toolInput["query"] === "string") {
-        return `「${toolInput["query"]}」を検索しようとしています`;
+        return `wants to search for "${toolInput["query"]}"`;
       }
-      return "Web を検索しようとしています";
+      return "wants to search the web";
     }
     case "notebookread": {
       if (typeof toolInput["notebook_path"] === "string") {
-        return `${basename(toolInput["notebook_path"])} を読もうとしています`;
+        return `wants to read ${basename(toolInput["notebook_path"])}`;
       }
-      return "ノートブックを読もうとしています";
+      return "wants to read a notebook";
     }
     case "notebookedit": {
       if (typeof toolInput["notebook_path"] === "string") {
-        return `${basename(toolInput["notebook_path"])} を編集しようとしています`;
+        return `wants to edit ${basename(toolInput["notebook_path"])}`;
       }
-      return "ノートブックを編集しようとしています";
+      return "wants to edit a notebook";
     }
     case "todowrite": {
-      return "タスクリストを更新しようとしています";
+      return "wants to update the task list";
     }
     case "agent": {
       if (typeof toolInput["description"] === "string") {
-        return `サブエージェント（${toolInput["description"]}）を起動しようとしています`;
+        return `wants to start a subagent (${toolInput["description"]})`;
       }
-      return "サブエージェントを起動しようとしています";
+      return "wants to start a subagent";
     }
     default: {
       // MCP tools: mcp__serverName__toolName
@@ -270,9 +260,9 @@ const describePermissionRequest = (
         const parts = toolName.split("__");
         const serverName = parts[1] ?? "";
         const toolPart = parts.slice(2).join("__");
-        return `${serverName} の ${toolPart} を実行しようとしています`;
+        return `wants to run ${toolPart} on ${serverName}`;
       }
-      return `${toolName} を実行しようとしています`;
+      return `wants to run ${toolName}`;
     }
   }
 };

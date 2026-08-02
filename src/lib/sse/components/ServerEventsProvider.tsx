@@ -16,8 +16,8 @@ export const ServerEventsProvider: FC<PropsWithChildren> = ({ children }) => {
   useEffect(() => {
     const sse = callSSE({
       onOpen: () => {
-        // reconnect 中のイベントは購読できないので
-        // open 時にまとめて invalidate する
+        // Events that arrive while reconnecting cannot be observed,
+        // so everything is invalidated once the stream opens again.
         void queryClient.invalidateQueries({
           queryKey: projectListQuery.queryKey,
         });

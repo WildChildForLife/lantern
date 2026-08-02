@@ -18,16 +18,16 @@ for (const locale of locales) {
     const content = readFileSync(filePath, "utf-8");
     const data = JSON.parse(content);
 
-    // キーをアルファベット順にソート
+    // Sort the keys alphabetically
     const sortedKeys = Object.keys(data).sort();
     const sortedData = {};
 
     for (const key of sortedKeys) {
       const message = data[key];
-      // originの配列もソートする (ファイルパスと行番号で比較)
+      // Sort the origin array too, by file path then line number
       if (message.origin && Array.isArray(message.origin)) {
         message.origin.sort((a, b) => {
-          // 要素がタプルの場合 [file, line]
+          // Entries are [file, line] tuples
           if (Array.isArray(a) && Array.isArray(b)) {
             const fileCheck = String(a[0]).localeCompare(String(b[0]));
             if (fileCheck !== 0) return fileCheck;

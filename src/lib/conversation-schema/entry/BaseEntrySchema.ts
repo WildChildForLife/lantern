@@ -15,7 +15,7 @@ export const BaseEntrySchema = z.object({
 
   // optional
   isMeta: z.boolean().optional(),
-  toolUseResult: z.unknown().optional(), // スキーマがツールごとに異なりすぎるし利用もしなそうなので unknown
+  toolUseResult: z.unknown().optional(), // Left as unknown: the shape differs per tool and nothing reads it
   gitBranch: z.string().optional(),
   isCompactSummary: z.boolean().optional(),
   agentId: z.string().optional(),

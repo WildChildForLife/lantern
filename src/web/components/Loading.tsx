@@ -4,19 +4,19 @@ import { cn } from "@/web/utils";
 
 export type LoadingProps = {
   /**
-   * ローディングメッセージ（省略可能）
+   * Message shown under the spinner. Optional.
    */
   message?: string;
   /**
-   * サイズ（デフォルト: "default"）
+   * Spinner size. Defaults to "default".
    */
   size?: "sm" | "default" | "lg";
   /**
-   * フルスクリーンで表示するか（デフォルト: true）
+   * Whether to fill the screen. Defaults to true.
    */
   fullScreen?: boolean;
   /**
-   * 追加のクラス名
+   * Extra class names.
    */
   className?: string;
 };
