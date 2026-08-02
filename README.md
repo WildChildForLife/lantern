@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/WildChildForLife/lantern/actions/workflows/ci.yml/badge.svg)](https://github.com/WildChildForLife/lantern/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/WildChildForLife/lantern/actions/workflows/codeql.yml/badge.svg)](https://github.com/WildChildForLife/lantern/actions/workflows/codeql.yml)
+[![npm](https://img.shields.io/npm/v/lantern-ccv.svg)](https://www.npmjs.com/package/lantern-ccv)
+[![Container](https://img.shields.io/badge/ghcr.io-lantern-blue.svg)](https://github.com/WildChildForLife/lantern/pkgs/container/lantern)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)](https://nodejs.org)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
@@ -41,7 +43,41 @@ searchable list of everything, and a board view of the lot.
 
 ## Install
 
-Lantern is not on npm yet. Run it from source:
+### Docker
+
+```bash
+docker run -d --name lantern \
+  -p 127.0.0.1:3400:3400 \
+  -v "$HOME/.claude:/root/.claude:ro" \
+  -v lantern_cache:/root/.claude-code-viewer \
+  ghcr.io/wildchildforlife/lantern:latest
+```
+
+Or with Compose, which is the same thing plus a password:
+
+```bash
+curl -O https://raw.githubusercontent.com/WildChildForLife/lantern/main/docker-compose.yml
+echo "CCV_PASSWORD=pick-something" > .env
+docker compose up -d
+```
+
+Images are published for `linux/amd64` and `linux/arm64`, so a Raspberry Pi or an Apple Silicon
+machine works the same way.
+
+### npm
+
+```bash
+npx lantern-ccv --port 3400
+```
+
+Or install it properly:
+
+```bash
+npm install -g lantern-ccv
+lantern --port 3400
+```
+
+### From source
 
 ```bash
 git clone https://github.com/WildChildForLife/lantern.git
@@ -53,7 +89,8 @@ node dist/main.js --port 3400
 
 Then open <http://localhost:3400>.
 
-> **Requirements:** Node.js 24 or newer, pnpm, and Claude Code installed and signed in.
+> **Requirements:** Node.js 24 or newer for the npm and source installs. Claude Code itself must be
+> installed and signed in for the optional AI topic naming; everything else works without it.
 
 ## Usage
 

@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 
-FROM node:22-slim AS base
+FROM node:24-slim AS base
 ENV PNPM_HOME=/usr/local/share/pnpm
 ENV PATH=${PNPM_HOME}:${PATH}
 RUN corepack enable pnpm && apt-get update && apt-get install -y git openssh-client && rm -rf /var/lib/apt/lists/*
