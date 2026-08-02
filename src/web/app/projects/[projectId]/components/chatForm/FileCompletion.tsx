@@ -281,6 +281,7 @@ export const FileCompletion = forwardRef<FileCompletionRef, FileCompletionProps>
                         )}
                         onClick={() => handleEntrySelect(entry, entry.type === "file")}
                         onMouseEnter={() => setSelectedIndex(index)}
+                        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role -- <option> is only valid inside <select>; this is a custom listbox
                         role="option"
                         tabIndex={-1}
                         aria-selected={index === selectedIndex}

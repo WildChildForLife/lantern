@@ -72,10 +72,8 @@ export const MarkdownLink: FC<MarkdownLinkProps> = ({ href, children }) => {
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
-            role="img"
-            aria-labelledby="preview-icon-title"
+            aria-hidden="true"
           >
-            <title id="preview-icon-title">Preview</title>
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
