@@ -7,6 +7,7 @@ import { testPlatformLayer } from "../../../../testing/layers/testPlatformLayer.
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessions } from "../../../lib/db/schema.ts";
 import { decodeProjectId } from "../../project/functions/id.ts";
+import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import { SyncService } from "./SyncService.ts";
 
 /**
@@ -30,6 +31,7 @@ const testLayer = Layer.mergeAll(
   makeDrizzleTestServiceLayer(),
   testPlatformLayer(),
   NodeFileSystem.layer,
+  SourceRegistry.Live,
 );
 
 describe("SyncService.fullSync", () => {
