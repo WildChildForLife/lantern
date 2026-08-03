@@ -27,7 +27,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        227
+        235
       ]
     ],
     "translation": "Close Sidebar"
@@ -146,7 +146,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        216
+        224
       ]
     ],
     "translation": "New Chat"
@@ -183,7 +183,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        300
+        290
       ]
     ],
     "translation": "Select Enter key behavior"
@@ -194,7 +194,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        358
+        348
       ]
     ],
     "translation": "Select Find Hotkey"
@@ -205,7 +205,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        444
+        434
       ]
     ],
     "translation": "Select Language"
@@ -216,7 +216,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        332
+        322
       ]
     ],
     "translation": "Select Search Hotkey"
@@ -227,7 +227,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        473
+        463
       ]
     ],
     "translation": "Select Theme"
@@ -3409,7 +3409,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        73
+        74
       ]
     ],
     "translation": "Display and behavior settings"
@@ -3454,7 +3454,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        292
+        282
       ]
     ],
     "translation": "Enter Key Behavior"
@@ -3465,7 +3465,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        310
+        300
       ]
     ],
     "translation": "Send with Command+Enter"
@@ -3476,7 +3476,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        316
+        306
       ]
     ],
     "translation": "Select Enter key behavior for message input"
@@ -3487,7 +3487,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        307
+        297
       ]
     ],
     "translation": "Send with Enter"
@@ -3498,7 +3498,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        304
+        294
       ]
     ],
     "translation": "Send with Shift+Enter (Default)"
@@ -3509,7 +3509,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        353
+        343
       ]
     ],
     "translation": "Find Hotkey"
@@ -3520,7 +3520,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        365
+        355
       ]
     ],
     "translation": "Command+F"
@@ -3531,7 +3531,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        362
+        352
       ]
     ],
     "translation": "Ctrl+F"
@@ -3542,7 +3542,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        371
+        361
       ]
     ],
     "translation": "Select the hotkey to open in-page find"
@@ -3553,7 +3553,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        324
+        314
       ]
     ],
     "translation": "Search Hotkey"
@@ -3564,7 +3564,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        339
+        329
       ]
     ],
     "translation": "Command+K"
@@ -3575,7 +3575,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        336
+        326
       ]
     ],
     "translation": "Ctrl+K"
@@ -3586,7 +3586,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        345
+        335
       ]
     ],
     "translation": "Select the hotkey to open search dialog"
@@ -3597,11 +3597,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        138
+        139
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
-        81
+        82
       ]
     ],
     "translation": "Loading settings..."
@@ -3612,7 +3612,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        439
+        429
       ]
     ],
     "translation": "Language"
@@ -3623,7 +3623,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        460
+        450
       ]
     ],
     "translation": "Select your preferred language"
@@ -3634,7 +3634,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        451
+        441
       ]
     ],
     "translation": "English"
@@ -3645,7 +3645,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        448
+        438
       ]
     ],
     "translation": "Japanese"
@@ -3656,7 +3656,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        454
+        444
       ]
     ],
     "translation": "Chinese (Simplified)"
@@ -3704,7 +3704,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        428
+        418
       ]
     ],
     "translation": "Configure the model options available in the session toolbar"
@@ -3716,7 +3716,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        379
+        369
       ]
     ],
     "translation": "Model Choices"
@@ -3728,7 +3728,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        409
+        399
       ]
     ],
     "translation": "Add model choice..."
@@ -3739,7 +3739,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        153
+        161
       ]
     ],
     "translation": "Notifications"
@@ -3822,7 +3822,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        96
+        104
       ]
     ],
     "translation": "Notifications"
@@ -3833,10 +3833,26 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        89
+        97
       ]
     ],
     "translation": "Session Display"
+  },
+  "settings.section.sources": {
+    "message": "Agent CLIs",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
+        147
+      ],
+      [
+        "src/web/components/GlobalSidebar.tsx",
+        90
+      ]
+    ],
+    "translation": "Agent CLIs"
   },
   "settings.section.system_info": {
     "placeholders": {},
@@ -3844,7 +3860,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        109
+        117
       ]
     ],
     "translation": "System Information"
@@ -3855,7 +3871,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        277
+        267
       ]
     ],
     "translation": "Auto-schedule Continue on Rate Limit"
@@ -3866,7 +3882,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        283
+        273
       ]
     ],
     "translation": "Automatically schedule a continue message when Claude hits rate limits"
@@ -3877,7 +3893,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        146
+        154
       ]
     ],
     "translation": "Session Display"
@@ -3888,7 +3904,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        233
+        223
       ]
     ],
     "translation": "Hide Sessions Without User Messages"
@@ -3899,7 +3915,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        239
+        229
       ]
     ],
     "translation": "Show only sessions that contain user commands or messages"
@@ -3910,7 +3926,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        254
+        244
       ]
     ],
     "translation": "Unify Sessions with Same Title"
@@ -3921,7 +3937,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        260
+        250
       ]
     ],
     "translation": "When multiple sessions have the same title, show only the latest session"
@@ -3937,18 +3953,6 @@
       ]
     ],
     "translation": "Setting Sources"
-  },
-  "settings.sources": {
-    "message": "Agent CLIs",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/components/SettingsControls.tsx",
-        179
-      ]
-    ],
-    "translation": "Agent CLIs"
   },
   "settings.systemPrompt.includeDefault": {
     "message": "Include Claude Code system prompt",
@@ -3968,7 +3972,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        65
+        66
       ]
     ],
     "translation": "Display and Notification Settings"
@@ -3979,7 +3983,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        468
+        458
       ]
     ],
     "translation": "Theme"
@@ -3990,7 +3994,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        480
+        470
       ]
     ],
     "translation": "Dark"
@@ -4001,7 +4005,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        489
+        479
       ]
     ],
     "translation": "Select your preferred color theme"
@@ -4012,7 +4016,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        477
+        467
       ]
     ],
     "translation": "Light"
@@ -4023,7 +4027,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        483
+        473
       ]
     ],
     "translation": "System"
@@ -4039,7 +4043,7 @@
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
-        70
+        71
       ]
     ],
     "translation": "Settings"
@@ -4051,7 +4055,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        188
+        178
       ]
     ],
     "translation": "Usage Mode"
@@ -4063,7 +4067,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        208
+        198
       ]
     ],
     "translation": "API"
@@ -4075,7 +4079,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        214
+        204
       ]
     ],
     "translation": "Select how you use Claude Code. Subscription mode restricts features that require the Agent SDK."
@@ -4087,7 +4091,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        194
+        184
       ]
     ],
     "translation": "Select usage mode"
@@ -4099,7 +4103,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        202
+        192
       ]
     ],
     "translation": "Subscription (Max, Pro, etc.)"
@@ -4228,7 +4232,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        62
+        63
       ]
     ],
     "translation": "MCP"
@@ -4240,7 +4244,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        195
+        203
       ]
     ],
     "translation": "Projects"
@@ -4251,7 +4255,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        64
+        65
       ]
     ],
     "translation": "Scheduler"
@@ -4262,7 +4266,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        61
+        62
       ]
     ],
     "translation": "Sessions"
@@ -4273,7 +4277,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        65
+        66
       ]
     ],
     "translation": "Settings"
@@ -4284,7 +4288,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        66
+        67
       ]
     ],
     "translation": "System Info"
@@ -4295,7 +4299,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        63
+        64
       ]
     ],
     "translation": "Tasks"
@@ -4307,10 +4311,34 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        78
+        103
       ]
     ],
     "translation": "Which agent CLIs Lantern reads sessions from. Turning one off forgets its conversations; it never touches the files."
+  },
+  "sources.error": {
+    "message": "Could not read the list of agent CLIs.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        94
+      ]
+    ],
+    "translation": "Could not read the list of agent CLIs."
+  },
+  "sources.loading": {
+    "message": "Looking for agent CLIs…",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        86
+      ]
+    ],
+    "translation": "Looking for agent CLIs…"
   },
   "sources.read_only": {
     "message": "read-only",
@@ -4319,7 +4347,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        129
+        158
       ]
     ],
     "translation": "read-only"
@@ -4398,7 +4426,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        115
+        144
       ]
     ],
     "translation": "{sessionCount} conversations across {projectCount} projects"

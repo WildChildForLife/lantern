@@ -16,7 +16,7 @@ import type {
   SourceSession,
   SourceSessionRef,
 } from "../../source/models/SourceEntities.ts";
-import type { SourceId } from "../../source/models/SourceId.ts";
+import { type SourceId, sourceIdSchema } from "../../source/models/SourceId.ts";
 import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 
 /**
@@ -44,6 +44,12 @@ const LayerImpl = Effect.gen(function* () {
   const applicationContext = yield* ApplicationContext;
 
   const { db, rawDb } = drizzleService;
+
+  // fullSync and purgeSource both rewrite whole swathes of the cache. Run
+  // concurrently they interleave: a purge deletes rows a sync is still writing,
+  // or a sync started before a source was disabled re-inserts everything the
+  // purge removed. One at a time is enough, and cheap.
+  const engineLock = yield* Effect.makeSemaphore(1);
 
   // Adapters declare what they need; the engine hands them the one runtime it
   // was built with, so the service itself stays free of those requirements.
@@ -292,7 +298,7 @@ const LayerImpl = Effect.gen(function* () {
   // Entry points
   // -------------------------------------------------------------------------
 
-  const fullSync = (sourceIds?: readonly SourceId[]): Effect.Effect<void, Error> =>
+  const runFullSync = (sourceIds?: readonly SourceId[]): Effect.Effect<void, Error> =>
     Effect.gen(function* () {
       const enabledAdapters = yield* registry.enabled();
       const adapters =
@@ -301,6 +307,8 @@ const LayerImpl = Effect.gen(function* () {
           : enabledAdapters.filter((adapter) => sourceIds.includes(adapter.id));
 
       const syncedSourceIds = new Set<string>(adapters.map((adapter) => adapter.id));
+      const knownProjectSources = new Map<string, string>();
+      const sourceOf = (projectId: string) => knownProjectSources.get(projectId) ?? "";
       const knownProjectIds = new Set(
         db
           .select({ id: projects.id, source: projects.source })
@@ -309,22 +317,40 @@ const LayerImpl = Effect.gen(function* () {
           // Only rows belonging to a source in this pass can be judged missing;
           // a scoped sync knows nothing about the others.
           .filter((project) => syncedSourceIds.has(project.source))
-          .map((project) => project.id),
+          .map((project) => {
+            knownProjectSources.set(project.id, project.source);
+            return project.id;
+          }),
       );
       const seenProjectIds = new Set<string>();
 
+      // A source that could not be listed says nothing about what it holds, so
+      // its rows must not be judged missing. Without this, an unreadable or
+      // not-yet-mounted history directory silently wipes that source's cache.
+      const listedSourceIds = new Set<string>();
+
       for (const adapter of adapters) {
         const sourceProjects = yield* withEnv(adapter.listProjects()).pipe(
-          Effect.catchAll(() => Effect.succeed<readonly SourceProject[]>([])),
+          Effect.map((listed) => ({ listed, ok: true })),
+          Effect.catchAll((error) =>
+            Effect.logWarning(`Could not list ${adapter.id} projects: ${String(error)}`).pipe(
+              Effect.as({ listed: [] as readonly SourceProject[], ok: false }),
+            ),
+          ),
         );
 
-        for (const project of sourceProjects) {
+        if (!sourceProjects.ok) {
+          continue;
+        }
+        listedSourceIds.add(adapter.id);
+
+        for (const project of sourceProjects.listed) {
           seenProjectIds.add(yield* syncProject(adapter, project));
         }
       }
 
       for (const knownProjectId of knownProjectIds) {
-        if (!seenProjectIds.has(knownProjectId)) {
+        if (!seenProjectIds.has(knownProjectId) && listedSourceIds.has(sourceOf(knownProjectId))) {
           db.delete(sessions).where(eq(sessions.projectId, knownProjectId)).run();
           rawDb
             .prepare("DELETE FROM session_messages_fts WHERE project_id = ?")
@@ -334,7 +360,7 @@ const LayerImpl = Effect.gen(function* () {
       }
     });
 
-  const purgeSource = (sourceId: SourceId): Effect.Effect<void, Error> =>
+  const runPurgeSource = (sourceId: SourceId): Effect.Effect<void, Error> =>
     Effect.gen(function* () {
       const projectIds = db
         .select({ id: projects.id })
@@ -355,22 +381,36 @@ const LayerImpl = Effect.gen(function* () {
       yield* Effect.logInfo(`Forgot ${projectIds.length} ${sourceId} projects`);
     });
 
-  /** Resolves the adapter owning a project, falling back to the first enabled one. */
-  const adapterForProject = (projectId: string) =>
-    Effect.gen(function* () {
-      const adapters = yield* registry.enabled();
-      for (const adapter of adapters) {
-        const roots = yield* withEnv(adapter.watchRoots());
-        if (roots.some((root) => projectId !== "" && decodeProjectId(projectId).startsWith(root))) {
-          return adapter;
-        }
-      }
-      return adapters.at(0);
-    });
+  const fullSync = (sourceIds?: readonly SourceId[]): Effect.Effect<void, Error> =>
+    engineLock.withPermits(1)(runFullSync(sourceIds));
+
+  const purgeSource = (sourceId: SourceId): Effect.Effect<void, Error> =>
+    engineLock.withPermits(1)(runPurgeSource(sourceId));
+
+  /**
+   * The adapter that recorded a project, from the row itself.
+   *
+   * Guessing here is destructive: syncSession deletes a session it cannot
+   * locate, so handing it the wrong adapter deletes another source's row.
+   */
+  const adapterForProject = (projectId: string): SourceAdapter | undefined => {
+    const row = db
+      .select({ source: projects.source })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .get();
+
+    if (row === undefined) {
+      return undefined;
+    }
+
+    const parsed = sourceIdSchema.safeParse(row.source);
+    return parsed.success ? registry.get(parsed.data) : undefined;
+  };
 
   const syncSession = (projectId: string, sessionId: string): Effect.Effect<void, Error> =>
     Effect.gen(function* () {
-      const adapter = yield* adapterForProject(projectId);
+      const adapter = adapterForProject(projectId);
       if (adapter === undefined) {
         return;
       }
@@ -403,7 +443,7 @@ const LayerImpl = Effect.gen(function* () {
 
   const syncProjectList = (projectId: string): Effect.Effect<void, Error> =>
     Effect.gen(function* () {
-      const adapter = yield* adapterForProject(projectId);
+      const adapter = adapterForProject(projectId);
       if (adapter === undefined) {
         return;
       }

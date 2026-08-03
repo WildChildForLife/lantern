@@ -5,7 +5,6 @@ import { type FC, useId, useMemo, useState } from "react";
 import { DEFAULT_LOCALE, detectLocaleFromNavigator } from "@/lib/i18n/localeDetection";
 import type { SupportedLocale } from "@/lib/i18n/schema";
 import { useConfig } from "@/web/app/hooks/useConfig";
-import { SourcesSettings } from "@/web/components/SourcesSettings";
 import { Button } from "@/web/components/ui/button";
 import { Checkbox } from "@/web/components/ui/checkbox";
 import { Input } from "@/web/components/ui/input";
@@ -173,15 +172,6 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <div className="space-y-2">
-        {showLabels && (
-          <span className="text-sm font-medium leading-none">
-            <Trans id="settings.sources" message="Agent CLIs" />
-          </span>
-        )}
-        <SourcesSettings showDescriptions={showDescriptions} />
-      </div>
-
       <div className="space-y-2">
         {showLabels && (
           <label htmlFor={usageModeId} className="text-sm font-medium leading-none">

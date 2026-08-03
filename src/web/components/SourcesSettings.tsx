@@ -1,6 +1,6 @@
 import { Trans, useLingui } from "@lingui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { FC } from "react";
+import { type FC, useState } from "react";
 import { honoClient } from "@/web/lib/api/client";
 import { sourcesQuery } from "@/web/lib/api/queries";
 import { Checkbox } from "./ui/checkbox";
@@ -52,9 +52,13 @@ export const SourcesSettings: FC<{ showDescriptions?: boolean }> = ({
 }) => {
   const queryClient = useQueryClient();
   const unsupportedLabel = useUnsupportedLabel();
-  const { data } = useQuery(sourcesQuery);
+  const { data, isPending, isError, isFetching } = useQuery(sourcesQuery);
+  // The response to a change is computed before the purge and re-read finish,
+  // so the server's answer is briefly out of date. Until the refetch lands,
+  // the checkboxes follow what was submitted.
+  const [submitted, setSubmitted] = useState<readonly string[] | null>(null);
 
-  const { mutate: setEnabled, isPending } = useMutation({
+  const { mutate: setEnabled, isPending: isMutating } = useMutation({
     mutationFn: async (enabled: SourceId[]) => {
       const response = await honoClient.api.sources.$put({ json: { enabled } });
 
@@ -67,9 +71,30 @@ export const SourcesSettings: FC<{ showDescriptions?: boolean }> = ({
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: sourcesQuery.queryKey });
     },
+    onSettled: () => {
+      setSubmitted(null);
+    },
   });
 
   const sources = data?.sources ?? [];
+  const isEnabled = (sourceId: string, serverValue: boolean) =>
+    submitted === null ? serverValue : submitted.includes(sourceId);
+
+  if (isPending) {
+    return (
+      <p className="text-xs text-muted-foreground">
+        <Trans id="sources.loading" message="Looking for agent CLIs…" />
+      </p>
+    );
+  }
+
+  if (isError) {
+    return (
+      <p className="text-xs text-destructive">
+        <Trans id="sources.error" message="Could not read the list of agent CLIs." />
+      </p>
+    );
+  }
 
   return (
     <div className="space-y-3">
@@ -84,23 +109,27 @@ export const SourcesSettings: FC<{ showDescriptions?: boolean }> = ({
 
       <div className="space-y-2">
         {sources.map((source) => {
-          const selectable = source.supported || source.enabled;
+          const enabled = isEnabled(source.id, source.enabled);
+          const selectable = source.supported || enabled;
           const checkboxId = `source-${source.id}`;
 
           return (
             <div key={source.id} className="flex items-start gap-2">
               <Checkbox
                 id={checkboxId}
-                checked={source.enabled}
-                disabled={!selectable || isPending}
+                checked={enabled}
+                disabled={!selectable || isFetching || isMutating}
                 onCheckedChange={(checked) => {
-                  const enabled = sources
+                  const next = sources
                     .filter((candidate) =>
-                      candidate.id === source.id ? checked === true : candidate.enabled,
+                      candidate.id === source.id
+                        ? checked === true
+                        : isEnabled(candidate.id, candidate.enabled),
                     )
                     .map((candidate) => candidate.id);
 
-                  setEnabled(enabled);
+                  setSubmitted(next);
+                  setEnabled(next);
                 }}
               />
               <div className="min-w-0">

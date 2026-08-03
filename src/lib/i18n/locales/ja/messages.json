@@ -27,7 +27,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        227
+        235
       ]
     ],
     "translation": "サイドバーを閉じる"
@@ -146,7 +146,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        216
+        224
       ]
     ],
     "translation": "新規チャット"
@@ -183,7 +183,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        300
+        290
       ]
     ],
     "translation": "Enterキーの動作を選択"
@@ -194,7 +194,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        358
+        348
       ]
     ],
     "translation": "ページ内検索ホットキーを選択"
@@ -205,7 +205,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        444
+        434
       ]
     ],
     "translation": "言語を選択"
@@ -216,7 +216,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        332
+        322
       ]
     ],
     "translation": "検索ホットキーを選択"
@@ -227,7 +227,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        473
+        463
       ]
     ],
     "translation": "テーマを選択"
@@ -3409,7 +3409,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        73
+        74
       ]
     ],
     "translation": "表示と動作の設定"
@@ -3454,7 +3454,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        292
+        282
       ]
     ],
     "translation": "Enterキーの動作"
@@ -3465,7 +3465,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        310
+        300
       ]
     ],
     "translation": "Command+Enterで送信"
@@ -3476,7 +3476,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        316
+        306
       ]
     ],
     "translation": "メッセージ入力でのEnterキーの動作を選択"
@@ -3487,7 +3487,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        307
+        297
       ]
     ],
     "translation": "Enterで送信"
@@ -3498,7 +3498,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        304
+        294
       ]
     ],
     "translation": "Shift+Enterで送信（デフォルト）"
@@ -3509,7 +3509,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        353
+        343
       ]
     ],
     "translation": "ページ内検索ホットキー"
@@ -3520,7 +3520,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        365
+        355
       ]
     ],
     "translation": "Command+F"
@@ -3531,7 +3531,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        362
+        352
       ]
     ],
     "translation": "Ctrl+F"
@@ -3542,7 +3542,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        371
+        361
       ]
     ],
     "translation": "ページ内検索を開くホットキーを選択します"
@@ -3553,7 +3553,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        324
+        314
       ]
     ],
     "translation": "検索ホットキー"
@@ -3564,7 +3564,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        339
+        329
       ]
     ],
     "translation": "Command+K"
@@ -3575,7 +3575,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        336
+        326
       ]
     ],
     "translation": "Ctrl+K"
@@ -3586,7 +3586,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        345
+        335
       ]
     ],
     "translation": "検索ダイアログを開くホットキーを選択します"
@@ -3597,11 +3597,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        138
+        139
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
-        81
+        82
       ]
     ],
     "translation": "設定を読み込み中..."
@@ -3612,7 +3612,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        439
+        429
       ]
     ],
     "translation": "言語"
@@ -3623,7 +3623,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        460
+        450
       ]
     ],
     "translation": "お好みの言語を選択"
@@ -3634,7 +3634,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        451
+        441
       ]
     ],
     "translation": "English"
@@ -3645,7 +3645,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        448
+        438
       ]
     ],
     "translation": "日本語"
@@ -3656,7 +3656,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        454
+        444
       ]
     ],
     "translation": "中国語（簡体字）"
@@ -3704,7 +3704,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        428
+        418
       ]
     ],
     "translation": "セッションツールバーで利用可能なモデル選択肢を設定します"
@@ -3716,7 +3716,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        379
+        369
       ]
     ],
     "translation": "モデル選択肢"
@@ -3728,7 +3728,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        409
+        399
       ]
     ],
     "translation": "モデル選択肢を追加..."
@@ -3739,7 +3739,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        153
+        161
       ]
     ],
     "translation": "通知"
@@ -3822,7 +3822,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        96
+        104
       ]
     ],
     "translation": "通知"
@@ -3833,10 +3833,26 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        89
+        97
       ]
     ],
     "translation": "セッション表示"
+  },
+  "settings.section.sources": {
+    "message": "Agent CLIs",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
+        147
+      ],
+      [
+        "src/web/components/GlobalSidebar.tsx",
+        90
+      ]
+    ],
+    "translation": "エージェント CLI"
   },
   "settings.section.system_info": {
     "placeholders": {},
@@ -3844,7 +3860,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        109
+        117
       ]
     ],
     "translation": "システム情報"
@@ -3855,7 +3871,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        277
+        267
       ]
     ],
     "translation": "レート制限時に自動的に継続をスケジュール"
@@ -3866,7 +3882,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        283
+        273
       ]
     ],
     "translation": "Claude がレート制限に達した際に、自動的に継続メッセージをスケジュール実行します"
@@ -3877,7 +3893,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        146
+        154
       ]
     ],
     "translation": "セッション表示"
@@ -3888,7 +3904,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        233
+        223
       ]
     ],
     "translation": "ユーザーメッセージのないセッションを非表示"
@@ -3899,7 +3915,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        239
+        229
       ]
     ],
     "translation": "ユーザーコマンドまたはメッセージを含むセッションのみを表示"
@@ -3910,7 +3926,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        254
+        244
       ]
     ],
     "translation": "同じタイトルのセッションを統合"
@@ -3921,7 +3937,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        260
+        250
       ]
     ],
     "translation": "同じタイトルの複数のセッションがある場合、最新のセッションのみを表示"
@@ -3937,18 +3953,6 @@
       ]
     ],
     "translation": "設定ソース"
-  },
-  "settings.sources": {
-    "message": "Agent CLIs",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/components/SettingsControls.tsx",
-        179
-      ]
-    ],
-    "translation": "エージェント CLI"
   },
   "settings.systemPrompt.includeDefault": {
     "message": "Include Claude Code system prompt",
@@ -3968,7 +3972,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        65
+        66
       ]
     ],
     "translation": "表示と通知の設定"
@@ -3979,7 +3983,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        468
+        458
       ]
     ],
     "translation": "テーマ"
@@ -3990,7 +3994,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        480
+        470
       ]
     ],
     "translation": "ダーク"
@@ -4001,7 +4005,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        489
+        479
       ]
     ],
     "translation": "お好みのカラーテーマを選択"
@@ -4012,7 +4016,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        477
+        467
       ]
     ],
     "translation": "ライト"
@@ -4023,7 +4027,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        483
+        473
       ]
     ],
     "translation": "システム"
@@ -4039,7 +4043,7 @@
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
-        70
+        71
       ]
     ],
     "translation": "設定"
@@ -4051,7 +4055,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        188
+        178
       ]
     ],
     "translation": "利用モード"
@@ -4063,7 +4067,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        208
+        198
       ]
     ],
     "translation": "API"
@@ -4075,7 +4079,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        214
+        204
       ]
     ],
     "translation": "Claude Codeの利用方法を選択してください。サブスクリプションモードではAgent SDKが必要な機能が制限されます。"
@@ -4087,7 +4091,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        194
+        184
       ]
     ],
     "translation": "利用モードを選択"
@@ -4099,7 +4103,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        202
+        192
       ]
     ],
     "translation": "サブスクリプション (Max, Proなど)"
@@ -4228,7 +4232,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        62
+        63
       ]
     ],
     "translation": "MCP"
@@ -4240,7 +4244,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        195
+        203
       ]
     ],
     "translation": "プロジェクト一覧"
@@ -4251,7 +4255,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        64
+        65
       ]
     ],
     "translation": "スケジューラー"
@@ -4262,7 +4266,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        61
+        62
       ]
     ],
     "translation": "セッション一覧"
@@ -4273,7 +4277,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        65
+        66
       ]
     ],
     "translation": "設定"
@@ -4284,7 +4288,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        66
+        67
       ]
     ],
     "translation": "システム情報"
@@ -4295,7 +4299,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        63
+        64
       ]
     ],
     "translation": "タスク一覧"
@@ -4307,10 +4311,34 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        78
+        103
       ]
     ],
     "translation": "Lantern がセッションを読み取るエージェント CLI です。オフにするとその会話は表示されなくなりますが、ファイルには一切触れません。"
+  },
+  "sources.error": {
+    "message": "Could not read the list of agent CLIs.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        94
+      ]
+    ],
+    "translation": "エージェント CLI の一覧を読み込めませんでした。"
+  },
+  "sources.loading": {
+    "message": "Looking for agent CLIs…",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        86
+      ]
+    ],
+    "translation": "エージェント CLI を検出しています…"
   },
   "sources.read_only": {
     "message": "read-only",
@@ -4319,7 +4347,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        129
+        158
       ]
     ],
     "translation": "読み取り専用"
@@ -4398,7 +4426,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        115
+        144
       ]
     ],
     "translation": "{projectCount} 個のプロジェクトにまたがる {sessionCount} 件の会話"

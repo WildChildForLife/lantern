@@ -19,9 +19,22 @@ const withTempBaseDir = <A, E>(
 const serviceLayer = (baseDir: string) =>
   SourceConfigService.Live.pipe(
     Layer.provide(Layer.succeed(SourceConfigBaseDir, baseDir)),
-    Layer.provide(LanternOptionsService.Live),
+    // Merged, not just provided: the tests drive loadCliOptions through the
+    // same service instance the config service reads.
+    Layer.provideMerge(LanternOptionsService.Live),
     Layer.provide(NodeContext.layer),
   );
+
+/**
+ * The server loads CLI options after the layers are built, so a test that wants
+ * them visible has to do the same — reading them at construction time is the
+ * bug these cover.
+ */
+const withCliSources = (sources: string[]) =>
+  Effect.gen(function* () {
+    const optionsService = yield* LanternOptionsService;
+    yield* optionsService.loadCliOptions({ port: "3000", hostname: "localhost", source: sources });
+  });
 
 describe("SourceConfigService", () => {
   it.live("reads Claude Code only when nothing has been chosen", () =>
@@ -90,6 +103,55 @@ describe("SourceConfigService", () => {
         const service = yield* Effect.provide(SourceConfigService, serviceLayer(baseDir));
 
         expect((yield* service.get()).enabled).toStrictEqual(["claude-code"]);
+      }),
+    ),
+  );
+
+  it.live("applies --source even though options load after the layers are built", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        yield* withCliSources(["claude-code"]);
+
+        const service = yield* SourceConfigService;
+
+        expect((yield* service.get()).enabled).toStrictEqual(["claude-code"]);
+      }).pipe(Effect.provide(serviceLayer(baseDir))),
+    ),
+  );
+
+  /** A one-off scope must not become the stored selection. */
+  it.live("refuses to change the selection during a --source run", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        yield* withCliSources(["claude-code"]);
+
+        const service = yield* SourceConfigService;
+        const result = yield* Effect.either(service.setEnabled([]));
+
+        expect(result._tag).toBe("Left");
+        if (result._tag === "Left") {
+          expect(result.left._tag).toBe("SourceSelectionLockedError");
+        }
+      }).pipe(Effect.provide(serviceLayer(baseDir))),
+    ),
+  );
+
+  /**
+   * The caller purges and re-reads from the returned diff, so a selection that
+   * could not be written must not be reported as applied.
+   */
+  it.live("fails when the selection cannot be written", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        // A file where the config directory belongs: the write cannot succeed.
+        yield* fs.writeFileString(path.join(baseDir, "sources"), "not a directory");
+
+        const service = yield* Effect.provide(SourceConfigService, serviceLayer(baseDir));
+        const result = yield* Effect.either(service.setEnabled(["claude-code"]));
+
+        expect(result._tag).toBe("Left");
       }),
     ),
   );

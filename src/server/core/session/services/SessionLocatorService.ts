@@ -93,7 +93,7 @@ const LayerImpl = Effect.gen(function* () {
       const adapter = parsedSource.success ? registry.get(parsedSource.data) : undefined;
       const roots = adapter === undefined ? undefined : rootsBySource.get(adapter.id);
 
-      // A row whose source has no enabled adapter names no directory Lantern
+      // A row whose source has no registered adapter names no directory Lantern
       // reads, so there is nothing to validate its path against and no way to
       // serve the file. Refusing beats handing back an unchecked path.
       if (adapter === undefined || roots === undefined) {

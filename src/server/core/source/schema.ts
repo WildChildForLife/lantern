@@ -10,8 +10,6 @@ import { CLAUDE_CODE_SOURCE_ID, sourceIdSchema } from "./models/SourceId.ts";
  */
 export const sourceConfigSchema = z.object({
   enabled: z.array(sourceIdSchema).default([CLAUDE_CODE_SOURCE_ID]),
-  /** Overrides for where a source keeps its history, by source id. */
-  roots: z.partialRecord(sourceIdSchema, z.string()).default(() => ({})),
 });
 
 export type SourceConfig = z.infer<typeof sourceConfigSchema>;

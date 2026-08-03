@@ -27,7 +27,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        227
+        235
       ]
     ],
     "translation": "关闭侧边栏"
@@ -146,7 +146,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        216
+        224
       ]
     ],
     "translation": "新建聊天"
@@ -183,7 +183,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        300
+        290
       ]
     ],
     "translation": "选择回车键行为"
@@ -194,7 +194,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        358
+        348
       ]
     ],
     "translation": "选择页内搜索快捷键"
@@ -205,7 +205,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        444
+        434
       ]
     ],
     "translation": "选择语言"
@@ -216,7 +216,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        332
+        322
       ]
     ],
     "translation": "选择搜索快捷键"
@@ -227,7 +227,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        473
+        463
       ]
     ],
     "translation": "选择主题"
@@ -3409,7 +3409,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        73
+        74
       ]
     ],
     "translation": "显示和行为设置"
@@ -3454,7 +3454,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        292
+        282
       ]
     ],
     "translation": "回车键行为"
@@ -3465,7 +3465,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        310
+        300
       ]
     ],
     "translation": "使用 Command+Enter 发送"
@@ -3476,7 +3476,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        316
+        306
       ]
     ],
     "translation": "选择消息输入的回车键行为"
@@ -3487,7 +3487,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        307
+        297
       ]
     ],
     "translation": "使用 Enter 发送"
@@ -3498,7 +3498,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        304
+        294
       ]
     ],
     "translation": "使用 Shift+Enter 发送(默认)"
@@ -3509,7 +3509,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        353
+        343
       ]
     ],
     "translation": "页内搜索快捷键"
@@ -3520,7 +3520,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        365
+        355
       ]
     ],
     "translation": "Command+F"
@@ -3531,7 +3531,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        362
+        352
       ]
     ],
     "translation": "Ctrl+F"
@@ -3542,7 +3542,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        371
+        361
       ]
     ],
     "translation": "选择打开页内搜索的快捷键"
@@ -3553,7 +3553,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        324
+        314
       ]
     ],
     "translation": "搜索快捷键"
@@ -3564,7 +3564,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        339
+        329
       ]
     ],
     "translation": "Command+K"
@@ -3575,7 +3575,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        336
+        326
       ]
     ],
     "translation": "Ctrl+K"
@@ -3586,7 +3586,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        345
+        335
       ]
     ],
     "translation": "选择打开搜索对话框的快捷键"
@@ -3597,11 +3597,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        138
+        139
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
-        81
+        82
       ]
     ],
     "translation": "正在加载设置..."
@@ -3612,7 +3612,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        439
+        429
       ]
     ],
     "translation": "语言"
@@ -3623,7 +3623,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        460
+        450
       ]
     ],
     "translation": "选择您偏好的语言"
@@ -3634,7 +3634,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        451
+        441
       ]
     ],
     "translation": "英语"
@@ -3645,7 +3645,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        448
+        438
       ]
     ],
     "translation": "日语"
@@ -3656,7 +3656,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        454
+        444
       ]
     ],
     "translation": "简体中文"
@@ -3704,7 +3704,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        428
+        418
       ]
     ],
     "translation": "配置会话工具栏中可用的模型选项"
@@ -3716,7 +3716,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        379
+        369
       ]
     ],
     "translation": "模型选项"
@@ -3728,7 +3728,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        409
+        399
       ]
     ],
     "translation": "添加模型选项..."
@@ -3739,7 +3739,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        153
+        161
       ]
     ],
     "translation": "通知"
@@ -3822,7 +3822,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        96
+        104
       ]
     ],
     "translation": "通知"
@@ -3833,10 +3833,26 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        89
+        97
       ]
     ],
     "translation": "会话显示"
+  },
+  "settings.section.sources": {
+    "message": "Agent CLIs",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
+        147
+      ],
+      [
+        "src/web/components/GlobalSidebar.tsx",
+        90
+      ]
+    ],
+    "translation": "代理 CLI"
   },
   "settings.section.system_info": {
     "placeholders": {},
@@ -3844,7 +3860,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        109
+        117
       ]
     ],
     "translation": "系统信息"
@@ -3855,7 +3871,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        277
+        267
       ]
     ],
     "translation": "达到速率限制时自动调度继续"
@@ -3866,7 +3882,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        283
+        273
       ]
     ],
     "translation": "当 Claude 达到速率限制时,自动调度继续消息"
@@ -3877,7 +3893,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        146
+        154
       ]
     ],
     "translation": "会话显示"
@@ -3888,7 +3904,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        233
+        223
       ]
     ],
     "translation": "隐藏无用户消息的会话"
@@ -3899,7 +3915,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        239
+        229
       ]
     ],
     "translation": "仅显示包含用户命令或消息的会话"
@@ -3910,7 +3926,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        254
+        244
       ]
     ],
     "translation": "合并同名会话"
@@ -3921,7 +3937,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        260
+        250
       ]
     ],
     "translation": "当多个会话标题相同时,仅显示最新的会话"
@@ -3937,18 +3953,6 @@
       ]
     ],
     "translation": "设置来源"
-  },
-  "settings.sources": {
-    "message": "Agent CLIs",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/components/SettingsControls.tsx",
-        179
-      ]
-    ],
-    "translation": "代理 CLI"
   },
   "settings.systemPrompt.includeDefault": {
     "message": "Include Claude Code system prompt",
@@ -3968,7 +3972,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        65
+        66
       ]
     ],
     "translation": "显示和通知设置"
@@ -3979,7 +3983,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        468
+        458
       ]
     ],
     "translation": "主题"
@@ -3990,7 +3994,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        480
+        470
       ]
     ],
     "translation": "深色"
@@ -4001,7 +4005,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        489
+        479
       ]
     ],
     "translation": "选择您偏好的颜色主题"
@@ -4012,7 +4016,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        477
+        467
       ]
     ],
     "translation": "浅色"
@@ -4023,7 +4027,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        483
+        473
       ]
     ],
     "translation": "跟随系统"
@@ -4039,7 +4043,7 @@
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
-        70
+        71
       ]
     ],
     "translation": "设置"
@@ -4051,7 +4055,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        188
+        178
       ]
     ],
     "translation": "使用模式"
@@ -4063,7 +4067,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        208
+        198
       ]
     ],
     "translation": "API"
@@ -4075,7 +4079,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        214
+        204
       ]
     ],
     "translation": "选择您使用Claude Code的方式。订阅模式会限制需要Agent SDK的功能。"
@@ -4087,7 +4091,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        194
+        184
       ]
     ],
     "translation": "选择使用模式"
@@ -4099,7 +4103,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        202
+        192
       ]
     ],
     "translation": "订阅 (Max, Pro等)"
@@ -4228,7 +4232,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        62
+        63
       ]
     ],
     "translation": "MCP"
@@ -4240,7 +4244,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        195
+        203
       ]
     ],
     "translation": "项目列表"
@@ -4251,7 +4255,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        64
+        65
       ]
     ],
     "translation": "调度器"
@@ -4262,7 +4266,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        61
+        62
       ]
     ],
     "translation": "会话列表"
@@ -4273,7 +4277,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        65
+        66
       ]
     ],
     "translation": "设置"
@@ -4284,7 +4288,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        66
+        67
       ]
     ],
     "translation": "系统信息"
@@ -4295,7 +4299,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        63
+        64
       ]
     ],
     "translation": "任务列表"
@@ -4307,10 +4311,34 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        78
+        103
       ]
     ],
     "translation": "Lantern 从这些代理 CLI 读取会话。关闭后其会话将不再显示，但不会改动任何文件。"
+  },
+  "sources.error": {
+    "message": "Could not read the list of agent CLIs.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        94
+      ]
+    ],
+    "translation": "无法读取代理 CLI 列表。"
+  },
+  "sources.loading": {
+    "message": "Looking for agent CLIs…",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        86
+      ]
+    ],
+    "translation": "正在查找代理 CLI…"
   },
   "sources.read_only": {
     "message": "read-only",
@@ -4319,7 +4347,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        129
+        158
       ]
     ],
     "translation": "只读"
@@ -4398,7 +4426,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        115
+        144
       ]
     ],
     "translation": "{projectCount} 个项目中的 {sessionCount} 个会话"

@@ -34,9 +34,15 @@ export class FileWatcherService extends Context.Tag("FileWatcherService")<
 
       // One fiber per watched root, keyed by the root itself, so enabling or
       // disabling a source starts or interrupts only its own watcher.
-      const watcherFibersRef = yield* Ref.make<Map<string, Fiber.RuntimeFiber<void, unknown>>>(
-        new Map(),
-      );
+      const watcherFibersRef = yield* Ref.make<
+        ReadonlyMap<string, Fiber.RuntimeFiber<void, unknown>>
+      >(new Map());
+
+      // Reconciling yields on every interrupt and every fs.watch, so two
+      // concurrent runs would interleave: both start a watcher for the same
+      // root and one fiber leaks unstoppable, or one deletes a root the other
+      // just decided to keep and it ends up unwatched.
+      const reconcileLock = yield* Effect.makeSemaphore(1);
       const debounceTimersRef = yield* Ref.make<Map<string, ReturnType<typeof setTimeout>>>(
         new Map(),
       );
@@ -146,45 +152,49 @@ export class FileWatcherService extends Context.Tag("FileWatcherService")<
         });
 
       const reconcileWatchers = (): Effect.Effect<void> =>
-        Effect.gen(function* () {
-          const wanted = yield* enabledRoots();
-          const running = yield* Ref.get(watcherFibersRef);
+        reconcileLock
+          .withPermits(1)(
+            Effect.gen(function* () {
+              const wanted = yield* enabledRoots();
+              const running = yield* Ref.get(watcherFibersRef);
+              const next = new Map(running);
 
-          for (const [root, fiber] of running) {
-            if (!wanted.has(root)) {
-              yield* Effect.logInfo(`No longer watching: ${root}`);
-              yield* Fiber.interrupt(fiber);
-              running.delete(root);
-            }
-          }
+              for (const [root, fiber] of running) {
+                if (!wanted.has(root)) {
+                  yield* Effect.logInfo(`No longer watching: ${root}`);
+                  yield* Fiber.interrupt(fiber);
+                  next.delete(root);
+                }
+              }
 
-          for (const [root, { adapter, roots }] of wanted) {
-            if (running.has(root)) {
-              continue;
-            }
+              for (const [root, { adapter, roots }] of wanted) {
+                if (next.has(root)) {
+                  continue;
+                }
 
-            yield* Effect.logInfo(`Starting file watcher on: ${root}`);
+                yield* Effect.logInfo(`Starting file watcher on: ${root}`);
 
-            // One root failing — a directory that does not exist, or an inotify
-            // limit — must not take the other sources' watchers down with it.
-            const fiber = yield* fs.watch(root, { recursive: true }).pipe(
-              Stream.runForEach((event) => handleWatchEvent(adapter, roots, root, event.path)),
-              Effect.catchAll((error) =>
-                Effect.logError(`Stopped watching ${root}: ${String(error)}`),
-              ),
-              Effect.forkDaemon,
-            );
+                // One root failing — a directory that is not there, an inotify
+                // limit — must not take the other sources' watchers with it.
+                const fiber = yield* fs.watch(root, { recursive: true }).pipe(
+                  Stream.runForEach((event) => handleWatchEvent(adapter, roots, root, event.path)),
+                  Effect.catchAll((error) =>
+                    Effect.logError(`Stopped watching ${root}: ${String(error)}`),
+                  ),
+                  Effect.forkDaemon,
+                );
 
-            running.set(root, fiber);
-          }
+                next.set(root, fiber);
+              }
 
-          yield* Ref.set(watcherFibersRef, running);
-        }).pipe(
-          Effect.catchAll((error) => {
-            Effect.runFork(Effect.logError(`Failed to reconcile file watchers: ${String(error)}`));
-            return Effect.void;
-          }),
-        );
+              yield* Ref.set(watcherFibersRef, next);
+            }),
+          )
+          .pipe(
+            Effect.catchAll((error) =>
+              Effect.logError(`Failed to reconcile file watchers: ${String(error)}`),
+            ),
+          );
 
       const startWatching = (): Effect.Effect<void> => reconcileWatchers();
 

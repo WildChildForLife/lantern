@@ -1,13 +1,8 @@
 import { FileSystem, Path } from "@effect/platform";
-import { Context, Data, Effect, Layer } from "effect";
+import { Context, Effect, Layer } from "effect";
 import { stateDirPath } from "../../lib/config/stateDir.ts";
 import { EnvService } from "../platform/services/EnvService.ts";
 import { defaultSourceConfig, type SourceConfig, sourceConfigSchema } from "./schema.ts";
-
-export class SourceConfigParseError extends Data.TaggedError("SourceConfigParseError")<{
-  readonly path: string;
-  readonly cause: unknown;
-}> {}
 
 const CONFIG_DIR = "sources";
 const CONFIG_FILE = "sources.json";
@@ -58,7 +53,7 @@ export const readSourceConfig = Effect.gen(function* () {
 
   const parsed = yield* Effect.try({
     try: (): unknown => JSON.parse(content),
-    catch: (cause) => new SourceConfigParseError({ path: configPath, cause }),
+    catch: () => null,
   }).pipe(Effect.catchAll(() => Effect.succeed(null)));
 
   const result = sourceConfigSchema.safeParse(parsed);

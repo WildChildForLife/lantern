@@ -14,6 +14,7 @@ import { Loading } from "./Loading";
 import { NotificationSettings } from "./NotificationSettings";
 import { useSearch } from "./SearchProvider";
 import { SettingsControls } from "./SettingsControls";
+import { SourcesSettings } from "./SourcesSettings";
 import { SystemInfoCard } from "./SystemInfoCard";
 
 export type SidebarTab = {
@@ -84,6 +85,13 @@ export const GlobalSidebar: FC<GlobalSidebarProps> = ({
           }
         >
           <div className="flex-1 overflow-y-auto p-4 space-y-6">
+            <div className="space-y-4">
+              <h3 className="font-medium text-sm text-sidebar-foreground">
+                <Trans id="settings.section.sources" message="Agent CLIs" />
+              </h3>
+              <SourcesSettings />
+            </div>
+
             <div className="space-y-4">
               <h3 className="font-medium text-sm text-sidebar-foreground">
                 <Trans id="settings.section.session_display" />

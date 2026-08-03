@@ -63,7 +63,45 @@ const LayerImpl = Effect.gen(function* () {
 
   const setEnabledSources = (enabled: readonly SourceId[]) =>
     Effect.gen(function* () {
-      const { added, removed } = yield* configService.setEnabled(enabled);
+      // An id can exist in the schema before its adapter does. Enabling one
+      // would disable everything readable and leave no way back from the UI.
+      const unknown = enabled.filter(
+        (sourceId) => !registry.all.some((adapter) => adapter.id === sourceId),
+      );
+      if (unknown.length > 0) {
+        return {
+          status: 400,
+          response: { error: `Lantern has no adapter for: ${unknown.join(", ")}` },
+        } as const satisfies ControllerResponse;
+      }
+
+      const change = yield* configService.setEnabled(enabled).pipe(
+        Effect.map((result) => ({ ok: true, result }) as const),
+        Effect.catchTags({
+          SourceSelectionLockedError: (error) =>
+            Effect.succeed({ ok: false, reason: "locked", enabled: error.enabled } as const),
+          SourceConfigWriteError: (error) =>
+            Effect.succeed({ ok: false, reason: "write-failed", cause: error.cause } as const),
+        }),
+      );
+
+      if (!change.ok) {
+        // Nothing has been purged or synced yet, so refusing here leaves the
+        // cache exactly as it was.
+        return change.reason === "locked"
+          ? ({
+              status: 409,
+              response: {
+                error: `Sources were set on the command line for this run: ${change.enabled.join(", ")}`,
+              },
+            } as const satisfies ControllerResponse)
+          : ({
+              status: 500,
+              response: { error: "Could not save the source selection" },
+            } as const satisfies ControllerResponse);
+      }
+
+      const { added, removed } = change.result;
 
       // Reading a newly enabled source can take a while, so the response does
       // not wait for it. The client learns it finished from the SSE event.

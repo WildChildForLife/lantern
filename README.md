@@ -109,6 +109,7 @@ node dist/main.js [options]
 | `--terminal-shell <path>`   | `LANTERN_TERMINAL_SHELL`    | Shell used by terminal sessions                           | login shell |
 | `--api-only`                | `LANTERN_API_ONLY`          | Serve the API without the web UI                          | off         |
 | `-v, --verbose`             | `LANTERN_VERBOSE`           | Verbose debug logging                                     | off         |
+| `--source <id>`             | `LANTERN_SOURCES`           | Agent CLI to read; repeat for more. Scopes one run        | stored      |
 
 > **Security:** Lantern ships an in-app terminal. Binding to anything other than `localhost` without
 > `--password` hands a remote shell to whoever finds the port. Use `--terminal-disabled` and a
