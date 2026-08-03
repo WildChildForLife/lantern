@@ -13,9 +13,11 @@ import {
 import { testPlatformLayer } from "../../../../testing/layers/testPlatformLayer.ts";
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessions } from "../../../lib/db/schema.ts";
+import { ALL_SOURCE_ADAPTERS, SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import { type ISyncService, SyncService } from "../../sync/services/SyncService.ts";
 import type { SessionMeta } from "../../types.ts";
 import { SessionRepository } from "../infrastructure/SessionRepository.ts";
+import { SessionLocatorService } from "../services/SessionLocatorService.ts";
 import { SessionMetaService } from "../services/SessionMetaService.ts";
 import { createMockSessionMeta } from "../testing/createMockSessionMeta.ts";
 
@@ -108,6 +110,8 @@ describe("SessionRepository", () => {
           return yield* repo.getSession(projectId, sessionId);
         }).pipe(
           Effect.provide(SessionRepository.Live),
+          Effect.provide(SessionLocatorService.Live),
+          Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
           Effect.provide(SessionMetaServiceMock),
           Effect.provide(
             makeDrizzleServiceWithData({
@@ -178,6 +182,8 @@ describe("SessionRepository", () => {
           return yield* repo.getSession(projectId, sessionId);
         }).pipe(
           Effect.provide(SessionRepository.Live),
+          Effect.provide(SessionLocatorService.Live),
+          Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
           Effect.provide(SessionMetaServiceMock),
           Effect.provide(
             makeDrizzleServiceWithData({
@@ -224,6 +230,8 @@ describe("SessionRepository", () => {
           return yield* repo.getSessions(projectId);
         }).pipe(
           Effect.provide(SessionRepository.Live),
+          Effect.provide(SessionLocatorService.Live),
+          Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
           Effect.provide(SessionMetaServiceMock),
           Effect.provide(
             makeDrizzleServiceWithData({
@@ -270,6 +278,8 @@ describe("SessionRepository", () => {
           return yield* repo.getSessions(projectId, { maxCount: 2 });
         }).pipe(
           Effect.provide(SessionRepository.Live),
+          Effect.provide(SessionLocatorService.Live),
+          Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
           Effect.provide(SessionMetaServiceMock),
           Effect.provide(
             makeDrizzleServiceWithData({
@@ -317,6 +327,8 @@ describe("SessionRepository", () => {
           });
         }).pipe(
           Effect.provide(SessionRepository.Live),
+          Effect.provide(SessionLocatorService.Live),
+          Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
           Effect.provide(SessionMetaServiceMock),
           Effect.provide(
             makeDrizzleServiceWithData({
@@ -354,6 +366,8 @@ describe("SessionRepository", () => {
           return yield* repo.getSessions(projectId);
         }).pipe(
           Effect.provide(SessionRepository.Live),
+          Effect.provide(SessionLocatorService.Live),
+          Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
           Effect.provide(SessionMetaServiceMock),
           Effect.provide(
             makeDrizzleServiceWithData({
@@ -394,6 +408,8 @@ describe("SessionRepository", () => {
           return yield* repo.getSessions(projectId);
         }).pipe(
           Effect.provide(SessionRepository.Live),
+          Effect.provide(SessionLocatorService.Live),
+          Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
           Effect.provide(SessionMetaServiceMock),
           Effect.provide(Layer.succeed(DrizzleService, { db, rawDb })),
           Effect.provide(

@@ -1,6 +1,7 @@
 import { Path } from "@effect/platform";
 import { Effect, Context as EffectContext, Layer } from "effect";
 import type { InferEffect } from "../../../lib/effect/types.ts";
+import type { SourceId } from "../../source/models/SourceId.ts";
 import { EnvService } from "./EnvService.ts";
 import { LanternOptionsService } from "./LanternOptionsService.ts";
 
@@ -48,10 +49,21 @@ const LayerImpl = Effect.gen(function* () {
    */
   const platform: NodeJS.Platform = process.platform;
 
+  /**
+   * Where a source keeps its history, when it is not the default.
+   *
+   * Read from the environment variable the CLI itself honours, so pointing
+   * Lantern at another machine's history is the same gesture as pointing that
+   * CLI at it.
+   */
+  const sourceRoot = (sourceId: SourceId): Effect.Effect<string | undefined> =>
+    sourceId === "codex" ? envService.getEnv("CODEX_HOME") : optionsService.getOption("claudeDir");
+
   return {
     claudeCodePaths,
     homeDirectory,
     platform,
+    sourceRoot,
   };
 });
 

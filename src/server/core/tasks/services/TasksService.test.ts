@@ -29,6 +29,7 @@ const testApplicationContextLayer = Layer.succeed(ApplicationContext, {
   }),
   homeDirectory: Effect.succeed("/test-home"),
   platform: process.platform,
+  sourceRoot: () => Effect.succeed(undefined),
 });
 
 describe("TasksService", () => {

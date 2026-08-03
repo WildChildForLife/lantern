@@ -1,0 +1,311 @@
+import { z } from "zod";
+import type { Conversation } from "../../../../../../lib/conversation-schema/index.ts";
+import {
+  linkParents,
+  syntheticEntryUuid,
+} from "../../../../../../lib/conversation-schema/synthetic/entryIdentity.ts";
+import type { ExtendedConversation } from "../../../../../../types/conversation.ts";
+import type { ParseStats } from "../../../models/SourceEntities.ts";
+import { CODEX_SOURCE_ID } from "../../../models/SourceId.ts";
+
+/**
+ * Codex writes one JSON object per line: a timestamp, a line type, and a
+ * payload whose own `type` says what it is.
+ *
+ * Only the shapes Lantern renders are modelled. Everything else is *recognised
+ * and ignored* rather than dropped silently — an unparsed line is a signal that
+ * the format moved, and it has to stay distinguishable from one that is simply
+ * not interesting.
+ */
+const contentPartSchema = z.union([
+  z.object({ type: z.literal("input_text"), text: z.string() }),
+  z.object({ type: z.literal("output_text"), text: z.string() }),
+  z.object({ type: z.literal("text"), text: z.string() }),
+  z.looseObject({ type: z.string() }),
+]);
+
+const messagePayloadSchema = z.object({
+  type: z.literal("message"),
+  role: z.string(),
+  content: z.array(contentPartSchema).default([]),
+});
+
+const functionCallPayloadSchema = z.object({
+  type: z.literal("function_call"),
+  name: z.string(),
+  arguments: z.string().default(""),
+  call_id: z.string().default(""),
+});
+
+const functionCallOutputPayloadSchema = z.object({
+  type: z.literal("function_call_output"),
+  call_id: z.string().default(""),
+  output: z.unknown(),
+});
+
+const sessionMetaPayloadSchema = z.looseObject({
+  id: z.string().optional(),
+  cwd: z.string().optional(),
+  cli_version: z.string().optional(),
+  timestamp: z.string().optional(),
+});
+
+const turnContextPayloadSchema = z.looseObject({
+  model: z.string().optional(),
+  cwd: z.string().optional(),
+});
+
+const rolloutLineSchema = z.object({
+  timestamp: z.string().optional(),
+  type: z.string(),
+  payload: z.unknown(),
+});
+
+export type RolloutSessionMeta = {
+  readonly sessionId: string | null;
+  readonly cwd: string | null;
+  readonly cliVersion: string;
+  readonly model: string | null;
+  readonly startedAt: string | null;
+};
+
+export type ParsedRollout = {
+  readonly meta: RolloutSessionMeta;
+  readonly entries: readonly ExtendedConversation[];
+  readonly messageCount: number;
+  readonly parseStats: ParseStats;
+  /** The first few lines that did not parse, for the log. */
+  readonly unparsedLines: readonly string[];
+};
+
+const textOf = (content: readonly z.infer<typeof contentPartSchema>[]): string =>
+  content
+    .map((part) => ("text" in part && typeof part.text === "string" ? part.text : ""))
+    .filter((text) => text !== "")
+    .join("\n");
+
+const outputText = (output: unknown): string => {
+  if (typeof output === "string") return output;
+  if (output === null || output === undefined) return "";
+
+  const asRecord = z.looseObject({ output: z.string() }).safeParse(output);
+  return asRecord.success ? asRecord.data.output : JSON.stringify(output);
+};
+
+/**
+ * Translates one rollout file into Claude-shaped conversation entries.
+ *
+ * The base fields every entry needs — uuid, parent, cwd, session id — are
+ * synthesised from the session's own identity, so re-reading the same file
+ * always produces the same entries.
+ */
+export const parseRollout = (content: string, sessionKey: string): ParsedRollout => {
+  const lines = content.split("\n");
+  const unparsedLines: string[] = [];
+  const recordUnparsed = (line: string, lineNumber: number) => {
+    if (unparsedLines.length < 3) {
+      unparsedLines.push(`line ${lineNumber}: ${line.slice(0, 200)}`);
+    }
+  };
+
+  let sessionId: string | null = null;
+  let cwd: string | null = null;
+  let cliVersion = "unknown";
+  let model: string | null = null;
+  let startedAt: string | null = null;
+
+  // Counted rather than collected: an unparsed line means the format moved and
+  // has to stay distinguishable from one that is simply not interesting.
+  let ignored = 0;
+  let unparsed = 0;
+  const pending: Array<(uuid: string) => Conversation & { uuid: string }> = [];
+
+  const base = (timestamp: string) => ({
+    isSidechain: false,
+    userType: "external" as const,
+    version: cliVersion,
+    timestamp,
+  });
+
+  for (const [lineNumber, line] of lines.entries()) {
+    if (line.trim() === "") continue;
+
+    const json = ((): unknown => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return undefined;
+      }
+    })();
+
+    const parsedLine = rolloutLineSchema.safeParse(json);
+    if (!parsedLine.success) {
+      unparsed += 1;
+      recordUnparsed(line, lineNumber + 1);
+      continue;
+    }
+
+    const { type, payload } = parsedLine.data;
+    const timestamp = parsedLine.data.timestamp ?? startedAt ?? new Date(0).toISOString();
+
+    if (type === "session_meta") {
+      const meta = sessionMetaPayloadSchema.safeParse(payload);
+      if (meta.success) {
+        sessionId = meta.data.id ?? sessionId;
+        cwd = meta.data.cwd ?? cwd;
+        cliVersion = meta.data.cli_version ?? cliVersion;
+        startedAt = meta.data.timestamp ?? parsedLine.data.timestamp ?? startedAt;
+      }
+      ignored += 1;
+      continue;
+    }
+
+    if (type === "turn_context") {
+      const context = turnContextPayloadSchema.safeParse(payload);
+      if (context.success) {
+        model = context.data.model ?? model;
+        cwd = cwd ?? context.data.cwd ?? null;
+      }
+      ignored += 1;
+      continue;
+    }
+
+    if (type === "event_msg") {
+      ignored += 1;
+      continue;
+    }
+
+    if (type !== "response_item") {
+      ignored += 1;
+      continue;
+    }
+
+    const message = messagePayloadSchema.safeParse(payload);
+    if (message.success) {
+      const text = textOf(message.data.content);
+      const role = message.data.role;
+
+      // Codex records the harness's own instructions as `developer`/`system`
+      // turns. They are not conversation.
+      if (role !== "user" && role !== "assistant") {
+        ignored += 1;
+        continue;
+      }
+
+      pending.push((uuid) =>
+        role === "user"
+          ? {
+              ...base(timestamp),
+              type: "user",
+              uuid,
+              parentUuid: null,
+              cwd: cwd ?? "",
+              sessionId: sessionId ?? sessionKey,
+              message: { role: "user", content: text },
+            }
+          : {
+              ...base(timestamp),
+              type: "assistant",
+              uuid,
+              parentUuid: null,
+              cwd: cwd ?? "",
+              sessionId: sessionId ?? sessionKey,
+              message: {
+                id: uuid,
+                type: "message",
+                role: "assistant",
+                model: model ?? "unknown",
+                content: [{ type: "text", text }],
+                stop_reason: null,
+                stop_sequence: null,
+              },
+            },
+      );
+      continue;
+    }
+
+    const call = functionCallPayloadSchema.safeParse(payload);
+    if (call.success) {
+      const input = ((): Record<string, unknown> => {
+        try {
+          const parsed: unknown = JSON.parse(call.data.arguments);
+          return typeof parsed === "object" && parsed !== null
+            ? { ...parsed }
+            : { arguments: call.data.arguments };
+        } catch {
+          return { arguments: call.data.arguments };
+        }
+      })();
+
+      pending.push((uuid) => ({
+        ...base(timestamp),
+        type: "assistant",
+        uuid,
+        parentUuid: null,
+        cwd: cwd ?? "",
+        sessionId: sessionId ?? sessionKey,
+        message: {
+          id: uuid,
+          type: "message",
+          role: "assistant",
+          model: model ?? "unknown",
+          content: [
+            {
+              type: "tool_use",
+              id: call.data.call_id === "" ? uuid : call.data.call_id,
+              name: call.data.name,
+              input,
+            },
+          ],
+          stop_reason: null,
+          stop_sequence: null,
+        },
+      }));
+      continue;
+    }
+
+    const output = functionCallOutputPayloadSchema.safeParse(payload);
+    if (output.success) {
+      const text = outputText(output.data.output);
+
+      pending.push((uuid) => ({
+        ...base(timestamp),
+        type: "user",
+        uuid,
+        parentUuid: null,
+        cwd: cwd ?? "",
+        sessionId: sessionId ?? sessionKey,
+        message: {
+          role: "user",
+          content: [
+            {
+              type: "tool_result",
+              tool_use_id: output.data.call_id === "" ? uuid : output.data.call_id,
+              content: text,
+            },
+          ],
+        },
+      }));
+      continue;
+    }
+
+    unparsed += 1;
+    recordUnparsed(line, lineNumber + 1);
+  }
+
+  const entries = linkParents(
+    pending.map((build, index) => build(syntheticEntryUuid(CODEX_SOURCE_ID, sessionKey, index))),
+  );
+
+  return {
+    meta: { sessionId, cwd, cliVersion, model, startedAt },
+    entries,
+    messageCount: entries.length,
+    parseStats: {
+      total: entries.length + ignored + unparsed,
+      ignored,
+      unparsed,
+    },
+    unparsedLines,
+  };
+};

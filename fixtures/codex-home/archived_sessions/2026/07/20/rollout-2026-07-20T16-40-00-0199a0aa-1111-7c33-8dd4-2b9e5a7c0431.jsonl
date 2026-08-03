@@ -1,0 +1,4 @@
+{"timestamp": "2026-07-20T16:40:00.000Z", "type": "session_meta", "payload": {"id": "0199a0aa-1111-7c33-8dd4-2b9e5a7c0431", "timestamp": "2026-07-20T16:40:00.000Z", "cwd": "/home/demo/orders-api", "cli_version": "0.140.2"}}
+{"timestamp": "2026-07-20T16:40:01.000Z", "type": "turn_context", "payload": {"model": "gpt-5-codex"}}
+{"timestamp": "2026-07-20T16:40:02.000Z", "type": "response_item", "payload": {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "Add a retry to the payment webhook"}]}}
+{"timestamp": "2026-07-20T16:40:08.000Z", "type": "response_item", "payload": {"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": "Added three attempts with backoff."}]}}

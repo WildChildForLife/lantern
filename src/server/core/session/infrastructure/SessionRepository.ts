@@ -1,12 +1,14 @@
-import { FileSystem } from "@effect/platform";
+import { FileSystem, Path } from "@effect/platform";
 import { desc, eq, sql } from "drizzle-orm";
-import { Context, Effect, Layer, Option } from "effect";
+import { Context, Effect, Layer } from "effect";
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessionTopics, sessions } from "../../../lib/db/schema.ts";
 import type { InferEffect } from "../../../lib/effect/types.ts";
-import { parseJsonl } from "../../claude-code/functions/parseJsonl.ts";
 import { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
 import { decodeProjectId, validateProjectPath } from "../../project/functions/id.ts";
+import type { SourceEnv } from "../../source/models/SourceAdapter.ts";
+import { sourceIdSchema } from "../../source/models/SourceId.ts";
+import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import { SyncService } from "../../sync/services/SyncService.ts";
 import type { Session, SessionDetail } from "../../types.ts";
 import {
@@ -20,7 +22,7 @@ import {
   type TopicRef,
   UNCATEGORIZED_TOPIC,
 } from "../functions/groupConversationsByTopic.ts";
-import { decodeSessionId, validateSessionId } from "../functions/id.ts";
+import { validateSessionId } from "../functions/id.ts";
 import { SessionMetaService } from "../services/SessionMetaService.ts";
 
 const LayerImpl = Effect.gen(function* () {
@@ -29,56 +31,95 @@ const LayerImpl = Effect.gen(function* () {
   const appContext = yield* ApplicationContext;
   const { db } = yield* DrizzleService;
   const syncService = yield* SyncService;
+  const registry = yield* SourceRegistry;
+  const path = yield* Path.Path;
+
+  // Adapters declare what they need; this service hands them the runtime it was
+  // built with, so its own signatures stay free of those requirements.
+  const withEnv = <A, E>(effect: Effect.Effect<A, E, SourceEnv>): Effect.Effect<A, E> =>
+    effect.pipe(
+      Effect.provide(
+        Layer.mergeAll(
+          Layer.succeed(FileSystem.FileSystem, fs),
+          Layer.succeed(Path.Path, path),
+          Layer.succeed(ApplicationContext, appContext),
+        ),
+      ),
+    );
+
+  /**
+   * The adapter that owns a session, from the cache.
+   *
+   * The session row is the better answer, but a session can be on disk before
+   * it has been synced — opening a conversation the moment it starts — so the
+   * project it sits in stands in when there is no session row yet.
+   */
+  const adapterFor = (projectId: string, sessionId: string) => {
+    const sessionRow = db
+      .select({ source: sessions.source })
+      .from(sessions)
+      .where(eq(sessions.id, sessionId))
+      .get();
+
+    const projectRow = db
+      .select({ source: projects.source })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .get();
+
+    const parsed = sourceIdSchema.safeParse(sessionRow?.source ?? projectRow?.source);
+    return parsed.success ? registry.get(parsed.data) : undefined;
+  };
 
   const getSession = (projectId: string, sessionId: string) =>
     Effect.gen(function* () {
-      // Validate sessionId contains only safe characters
       if (!validateSessionId(sessionId)) {
         return yield* Effect.fail(new Error("Invalid session ID: contains unsafe characters"));
       }
 
-      // Validate that the project path is within the Claude projects directory
       const projectPath = decodeProjectId(projectId);
       const { claudeProjectsDirPath } = yield* appContext.claudeCodePaths;
-      if (!validateProjectPath(projectPath, claudeProjectsDirPath)) {
-        return yield* Effect.fail(new Error("Invalid project path: outside allowed directory"));
-      }
 
-      const sessionPath = decodeSessionId(projectId, sessionId);
-
-      // Check if session file exists
-      const exists = yield* fs.exists(sessionPath);
-      if (!exists) {
+      // Which file holds a session, and which dialect it is written in, both
+      // depend on the source. Deriving the path from the ids only ever
+      // described Claude Code's layout.
+      const adapter = adapterFor(projectId, sessionId);
+      if (adapter === undefined) {
         return { session: null };
       }
 
-      const sessionDetail = yield* Effect.gen(function* () {
-        // Read session file
-        const content = yield* fs.readFileString(sessionPath);
-        const allLines = content.split("\n").filter((line) => line.trim());
+      if (
+        adapter.id === "claude-code" &&
+        !validateProjectPath(projectPath, claudeProjectsDirPath)
+      ) {
+        return yield* Effect.fail(new Error("Invalid project path: outside allowed directory"));
+      }
 
-        const conversations = parseJsonl(allLines.join("\n"));
+      const ref = yield* withEnv(adapter.resolveSessionRef(projectPath, sessionId)).pipe(
+        Effect.catchAll(() => Effect.succeed(null)),
+      );
+      if (ref === null) {
+        return { session: null };
+      }
 
-        // Get file stats
-        const stat = yield* fs.stat(sessionPath);
+      const read = yield* withEnv(adapter.readSession(ref)).pipe(
+        Effect.catchAll(() => Effect.succeed(null)),
+      );
+      if (read === null) {
+        return { session: null };
+      }
 
-        // Get session metadata
-        const meta = yield* sessionMetaService.getSessionMeta(projectId, sessionId);
+      const meta = yield* sessionMetaService.getSessionMeta(projectId, sessionId);
 
-        const sessionDetail: SessionDetail = {
-          id: sessionId,
-          jsonlFilePath: sessionPath,
-          meta,
-          conversations,
-          lastModifiedAt: Option.getOrElse(stat.mtime, () => new Date()),
-        };
-
-        return sessionDetail;
-      });
-
-      return {
-        session: sessionDetail,
+      const sessionDetail: SessionDetail = {
+        id: sessionId,
+        jsonlFilePath: ref.filePath,
+        meta,
+        conversations: [...read.entries],
+        lastModifiedAt: new Date(ref.fileMtimeMs),
       };
+
+      return { session: sessionDetail };
     });
 
   const getSessions = (

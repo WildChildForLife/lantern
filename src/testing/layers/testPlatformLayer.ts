@@ -13,6 +13,7 @@ import {
   LanternOptionsService,
 } from "../../server/core/platform/services/LanternOptionsService";
 import { UserConfigService } from "../../server/core/platform/services/UserConfigService";
+import type { SourceId } from "../../server/core/source/models/SourceId";
 import type { UserConfig } from "../../server/lib/config/config";
 
 const claudeDirForTest = `${process.cwd()}/fixtures/claude-home`;
@@ -23,6 +24,7 @@ export const testPlatformLayer = (overrides?: {
   userConfig?: Partial<UserConfig>;
   lanternOptions?: Partial<LanternOptions>;
   platform?: NodeJS.Platform;
+  sourceRoots?: Partial<Record<SourceId, string>>;
 }) => {
   const applicationContextLayer = Layer.mock(ApplicationContext, {
     claudeCodePaths: Effect.succeed({
@@ -35,6 +37,9 @@ export const testPlatformLayer = (overrides?: {
     }),
     homeDirectory: Effect.succeed(overrides?.env?.HOME ?? process.cwd()),
     platform: overrides?.platform ?? process.platform,
+    // Every adapter reads its root through this, so a test can point one at a
+    // fixture tree and no test can wander into the developer's real history.
+    sourceRoot: (sourceId) => Effect.succeed(overrides?.sourceRoots?.[sourceId]),
   });
 
   const optionsServiceLayer = Layer.mock(LanternOptionsService, {
@@ -62,6 +67,8 @@ export const testPlatformLayer = (overrides?: {
             return overrides?.env?.LANTERN_TERMINAL_SHELL ?? undefined;
           case "LANTERN_TERMINAL_UNRESTRICTED":
             return overrides?.env?.LANTERN_TERMINAL_UNRESTRICTED ?? undefined;
+          case "CODEX_HOME":
+            return overrides?.env?.CODEX_HOME ?? undefined;
           case "LANTERN_TERMINAL_DISABLED":
             return overrides?.env?.LANTERN_TERMINAL_DISABLED ?? undefined;
           default:
