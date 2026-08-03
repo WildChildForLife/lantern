@@ -113,7 +113,7 @@
     "jotai": "2.20.0",
     "jsdom": "^30.0.1",
     "lefthook": "2.1.6",
-    "lucide-react": "1.14.0",
+    "lucide-react": "1.28.0",
     "npm-run-all2": "8.0.4",
     "oxfmt": "^0.61.0",
     "oxlint": "^1.76.0",
