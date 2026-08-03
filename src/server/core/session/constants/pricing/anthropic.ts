@@ -6,7 +6,7 @@
  * Source: https://claude.com/pricing
  */
 
-export type ModelName =
+export type AnthropicModelName =
   | "claude-opus-4.5"
   | "claude-opus-4.1"
   | "claude-sonnet-4.5"
@@ -15,14 +15,7 @@ export type ModelName =
   | "claude-3-opus"
   | "claude-3-haiku";
 
-export type TokenType = "input" | "output" | "cache_creation" | "cache_read";
-
-export type ModelPricing = {
-  readonly input: number;
-  readonly output: number;
-  readonly cache_creation: number;
-  readonly cache_read: number;
-};
+import type { ModelPricing } from "./index.ts";
 
 /**
  * Pricing per million tokens (MTok) in USD
@@ -33,7 +26,7 @@ export type ModelPricing = {
  * This implementation uses standard tier pricing as the default approximation
  * since prompt length is not tracked at pricing calculation time.
  */
-export const MODEL_PRICING: Record<ModelName, ModelPricing> = {
+export const ANTHROPIC_MODEL_PRICING: Record<AnthropicModelName, ModelPricing> = {
   "claude-opus-4.5": {
     input: 5.0,
     output: 25.0,
@@ -79,7 +72,41 @@ export const MODEL_PRICING: Record<ModelName, ModelPricing> = {
 } as const;
 
 /**
- * Default pricing for unknown models
- * Uses Claude 3.5 Sonnet pricing as a safe default
+ * Maps an API model id onto a priced model, or null when this build has never
+ * heard of it — a new Claude release, or another provider's model entirely.
+ *
+ * Returning null is the point: the previous version answered "claude-3.5-sonnet"
+ * for every unrecognised name, so an unknown model was silently billed at Sonnet
+ * rates and shown as a fact.
  */
-export const DEFAULT_MODEL_PRICING: ModelPricing = MODEL_PRICING["claude-3.5-sonnet"];
+export const normalizeAnthropicModelName = (modelName: string): AnthropicModelName | null => {
+  const normalized = modelName.toLowerCase();
+
+  if (normalized.includes("opus-4-5") || normalized.includes("opus-4.5")) {
+    return "claude-opus-4.5";
+  }
+  if (normalized.includes("opus-4-1") || normalized.includes("opus-4.1")) {
+    return "claude-opus-4.1";
+  }
+  if (normalized.includes("sonnet-4-5") || normalized.includes("sonnet-4.5")) {
+    return "claude-sonnet-4.5";
+  }
+  if (normalized.includes("haiku-4-5") || normalized.includes("haiku-4.5")) {
+    return "claude-haiku-4.5";
+  }
+  if (
+    normalized.includes("sonnet-4") ||
+    normalized.includes("3-5-sonnet") ||
+    normalized.includes("3.5-sonnet")
+  ) {
+    return "claude-3.5-sonnet";
+  }
+  if (normalized.includes("3-opus") || normalized.includes("opus-20")) {
+    return "claude-3-opus";
+  }
+  if (normalized.includes("3-haiku") || normalized.includes("haiku-20")) {
+    return "claude-3-haiku";
+  }
+
+  return null;
+};

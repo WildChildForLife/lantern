@@ -38,7 +38,9 @@ describe("aggregateTokenUsageAndCost", () => {
       expect(result.totalUsage.input_tokens).toBe(0);
       expect(result.totalUsage.output_tokens).toBe(0);
       expect(result.totalCost.totalUsd).toBe(0);
-      expect(result.modelName).toBe("claude-3.5-sonnet"); // Default model
+      // No assistant message means no model, so nothing to price against.
+      expect(result.modelName).toBeNull();
+      expect(result.totalCost.confidence).toBe("estimated");
     });
   });
 
@@ -135,7 +137,7 @@ describe("aggregateTokenUsageAndCost", () => {
       expect(result.totalUsage.input_tokens).toBe(0);
       expect(result.totalUsage.output_tokens).toBe(0);
       expect(result.totalCost.totalUsd).toBe(0);
-      expect(result.modelName).toBe("claude-3.5-sonnet"); // Default
+      expect(result.modelName).toBeNull();
     });
 
     test("handles array with only empty strings", () => {

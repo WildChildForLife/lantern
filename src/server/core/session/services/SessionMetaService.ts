@@ -69,6 +69,7 @@ const rowToSessionMeta = (row: SessionRow): SessionMeta => {
     customTitle: row.customTitle,
     cost: {
       totalUsd: row.totalCostUsd,
+      confidence: row.costConfidence,
       breakdown,
       tokenUsage,
     },

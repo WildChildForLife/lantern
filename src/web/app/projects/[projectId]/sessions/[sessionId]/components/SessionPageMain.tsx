@@ -33,6 +33,7 @@ import { useSchedulerJobs } from "@/web/hooks/useScheduler";
 import { useTaskNotifications } from "@/web/hooks/useTaskNotifications";
 import { honoClient } from "@/web/lib/api/client";
 import { cn } from "@/web/utils";
+import { formatCost } from "../../../../../../lib/formatCost.ts";
 import { useProject } from "../../../hooks/useProject";
 import { resolveSessionTitle } from "../../../services/firstCommandToTitle";
 import { useExportSession } from "../hooks/useExportSession";
@@ -584,8 +585,12 @@ const SessionPageMainContent: FC<
                                 variant="secondary"
                                 className="h-7 text-xs flex items-center w-fit font-semibold"
                               >
-                                <Trans id="session.cost.total" />: $
-                                {sessionData.session.meta.cost.totalUsd.toFixed(3)}
+                                <Trans id="session.cost.total" />:{" "}
+                                {formatCost(
+                                  sessionData.session.meta.cost.totalUsd,
+                                  sessionData.session.meta.cost.confidence,
+                                  { fractionDigits: 3 },
+                                )}
                               </Badge>
                               <div className="text-xs space-y-1 pl-2">
                                 <div className="flex justify-between gap-4">

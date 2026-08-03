@@ -16,6 +16,7 @@ import {
   TooltipTrigger,
 } from "@/web/components/ui/tooltip";
 import { cn } from "@/web/utils";
+import { formatCost } from "../../lib/formatCost.ts";
 import { useConfig } from "../hooks/useConfig";
 import { useProject } from "../projects/[projectId]/hooks/useProject";
 import { firstUserMessageToTitle } from "../projects/[projectId]/services/firstCommandToTitle";
@@ -206,7 +207,9 @@ export const SessionHistoryPopover: FC<SessionHistoryPopoverProps> = ({
                     </div>
                     <div className="flex items-center gap-1">
                       <CoinsIcon className="w-2.5 h-2.5" />
-                      <span>${session.meta.cost.totalUsd.toFixed(2)}</span>
+                      <span>
+                        {formatCost(session.meta.cost.totalUsd, session.meta.cost.confidence)}
+                      </span>
                     </div>
                     {session.lastModifiedAt && (
                       <span>

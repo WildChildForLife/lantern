@@ -46,6 +46,8 @@ export const sessionMetaSchema = z.object({
   customTitle: z.string().nullable(),
   cost: z.object({
     totalUsd: z.number(),
+    /** Whether totalUsd is reported, estimated, or not knowable. */
+    confidence: z.enum(["reported", "estimated", "unknown"]),
     breakdown: z.object({
       inputTokensUsd: z.number(),
       outputTokensUsd: z.number(),
