@@ -39,7 +39,7 @@
     "prepare": "lefthook install"
   },
   "dependencies": {
-    "@anthropic-ai/claude-code": "2.1.90",
+    "@anthropic-ai/claude-code": "2.1.220",
     "@replit/ruspty": "3.7.0"
   },
   "devDependencies": {
