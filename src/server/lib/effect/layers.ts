@@ -2,8 +2,8 @@ import { NodeContext } from "@effect/platform-node";
 import { Layer } from "effect";
 import { EventBus } from "../../core/events/services/EventBus.ts";
 import { ApplicationContext } from "../../core/platform/services/ApplicationContext.ts";
-import { CcvOptionsService } from "../../core/platform/services/CcvOptionsService.ts";
 import { EnvService } from "../../core/platform/services/EnvService.ts";
+import { LanternOptionsService } from "../../core/platform/services/LanternOptionsService.ts";
 import { UserConfigService } from "../../core/platform/services/UserConfigService.ts";
 
 export const platformLayer = Layer.mergeAll(
@@ -11,9 +11,9 @@ export const platformLayer = Layer.mergeAll(
   UserConfigService.Live,
   EventBus.Live,
   EnvService.Live,
-  CcvOptionsService.Live,
+  LanternOptionsService.Live,
 ).pipe(
   Layer.provide(EnvService.Live),
-  Layer.provide(CcvOptionsService.Live),
+  Layer.provide(LanternOptionsService.Live),
   Layer.provide(NodeContext.layer),
 );

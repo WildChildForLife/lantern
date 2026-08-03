@@ -1,1 +1,2 @@
-export const isDevelopmentEnv = (ccvEnv: string | undefined): boolean => ccvEnv === "development";
+export const isDevelopmentEnv = (runtimeEnv: string | undefined): boolean =>
+  runtimeEnv === "development";

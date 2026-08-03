@@ -2,11 +2,11 @@ services:
   lantern:
     image: ghcr.io/wildchildforlife/lantern:latest
     environment:
-      CCV_ENV: production
+      LANTERN_ENV: production
       PORT: 3400
       # Strongly recommended: Lantern ships an in-app terminal and this
       # container publishes a port. Put it in a .env file next to this one.
-      CCV_PASSWORD: "${CCV_PASSWORD:-}"
+      LANTERN_PASSWORD: "${LANTERN_PASSWORD:-}"
     ports:
       # Bound to loopback. Change to "3400:3400" only behind a VPN or a proxy.
       - "127.0.0.1:3400:3400"
@@ -14,7 +14,7 @@ services:
       # Your session logs. Read-only, because Lantern only ever reads them.
       - "${HOME}/.claude:/root/.claude:ro"
       # Its own cache, kept out of your home directory.
-      - lantern_cache:/root/.claude-code-viewer
+      - lantern_cache:/root/.lantern
     restart: unless-stopped
     init: true
 
@@ -23,14 +23,14 @@ services:
     profiles: ["dev"]
     build: .
     environment:
-      CCV_ENV: production
+      LANTERN_ENV: production
       PORT: 3400
-      CCV_PASSWORD: "${CCV_PASSWORD:-}"
+      LANTERN_PASSWORD: "${LANTERN_PASSWORD:-}"
     ports:
       - "127.0.0.1:3400:3400"
     volumes:
       - "${HOME}/.claude:/root/.claude:ro"
-      - lantern_cache:/root/.claude-code-viewer
+      - lantern_cache:/root/.lantern
     restart: unless-stopped
     init: true
 

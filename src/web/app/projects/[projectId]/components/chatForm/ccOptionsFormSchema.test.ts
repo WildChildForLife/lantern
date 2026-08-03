@@ -164,7 +164,7 @@ describe("ccOptionsFormSchema", () => {
           mode: "preset",
           append: "Additional instructions",
         },
-        env: { CCV_ENV: "production", API_KEY: "secret" },
+        env: { LANTERN_ENV: "production", API_KEY: "secret" },
         settingSources: ["user", "project"],
         maxTurns: 10,
         maxThinkingTokens: 5000,
@@ -179,7 +179,7 @@ describe("ccOptionsFormSchema", () => {
           preset: "claude_code",
           append: "Additional instructions",
         },
-        env: { CCV_ENV: "production", API_KEY: "secret" },
+        env: { LANTERN_ENV: "production", API_KEY: "secret" },
         settingSources: ["user", "project"],
         maxTurns: 10,
         maxThinkingTokens: 5000,
@@ -319,7 +319,7 @@ describe("ccOptionsFormSchema", () => {
 
     test("should return true when env is set with values", () => {
       const options: CCOptionsSchema = {
-        env: { CCV_ENV: "production" },
+        env: { LANTERN_ENV: "production" },
         settingSources: ["user", "project", "local"],
       };
       expect(hasNonDefaultCCOptions(options)).toBe(true);

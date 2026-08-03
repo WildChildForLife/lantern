@@ -7,6 +7,7 @@ import { drizzle, type NodeSQLiteDatabase } from "drizzle-orm/node-sqlite";
 import { migrate } from "drizzle-orm/node-sqlite/migrator";
 import { Context, Effect, Layer } from "effect";
 import { ApplicationContext } from "../../core/platform/services/ApplicationContext.ts";
+import { migrateLegacyStateDir, stateDirPath } from "../config/stateDir.ts";
 import * as schema from "./schema.ts";
 
 const migrationsFolder = fileURLToPath(new URL("./migrations", import.meta.url));
@@ -59,7 +60,12 @@ export class DrizzleService extends Context.Tag("DrizzleService")<
       const claudeCodePaths = yield* context.claudeCodePaths;
 
       const homeDirectory = path.dirname(claudeCodePaths.globalClaudeDirectoryPath);
-      const dbDirPath = path.resolve(homeDirectory, ".claude-code-viewer");
+
+      // First service to touch the state directory, so it is the one that
+      // carries a pre-rename directory over.
+      yield* migrateLegacyStateDir(homeDirectory);
+
+      const dbDirPath = stateDirPath(path, homeDirectory);
       const dbPath = path.resolve(dbDirPath, "cache.db");
 
       yield* fs.makeDirectory(dbDirPath, { recursive: true });

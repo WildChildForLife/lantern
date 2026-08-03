@@ -1,5 +1,6 @@
 import { Context, Effect, Layer, Ref } from "effect";
 import type { InferEffect } from "../../../lib/effect/types.ts";
+import { withLegacyEnvAliases } from "../legacyEnv.ts";
 
 export type CliOptions = {
   port: string;
@@ -14,7 +15,7 @@ export type CliOptions = {
   apiOnly?: boolean | undefined;
 };
 
-export type CcvOptions = {
+export type LanternOptions = {
   port: number;
   hostname: string;
   verbose?: boolean | undefined;
@@ -30,7 +31,7 @@ export type CcvOptions = {
 const getOptionalEnv = (key: string): string | undefined => {
   // biome-ignore lint/style/noProcessEnv: allow only here
   // oxlint-disable-next-line node/no-process-env -- configuration boundary
-  return process.env[key] ?? undefined;
+  return withLegacyEnvAliases(process.env)[key] ?? undefined;
 };
 
 const isFlagEnabled = (value: string | undefined) => {
@@ -38,54 +39,55 @@ const isFlagEnabled = (value: string | undefined) => {
   return value === "1" || value.toLowerCase() === "true";
 };
 
-const toCcvOptions = (cliOptions?: CliOptions): CcvOptions => {
+const toLanternOptions = (cliOptions?: CliOptions): LanternOptions => {
   return {
     port: Number.parseInt(cliOptions?.port ?? getOptionalEnv("PORT") ?? "3000", 10),
     hostname: cliOptions?.hostname ?? getOptionalEnv("HOSTNAME") ?? "localhost",
     verbose:
-      cliOptions?.verbose ?? (isFlagEnabled(getOptionalEnv("CCV_VERBOSE")) ? true : undefined),
-    password: cliOptions?.password ?? getOptionalEnv("CCV_PASSWORD") ?? undefined,
-    executable: cliOptions?.executable ?? getOptionalEnv("CCV_CC_EXECUTABLE_PATH") ?? undefined,
-    claudeDir: cliOptions?.claudeDir ?? getOptionalEnv("CCV_GLOBAL_CLAUDE_DIR"),
+      cliOptions?.verbose ?? (isFlagEnabled(getOptionalEnv("LANTERN_VERBOSE")) ? true : undefined),
+    password: cliOptions?.password ?? getOptionalEnv("LANTERN_PASSWORD") ?? undefined,
+    executable: cliOptions?.executable ?? getOptionalEnv("LANTERN_CLAUDE_EXECUTABLE") ?? undefined,
+    claudeDir: cliOptions?.claudeDir ?? getOptionalEnv("LANTERN_CLAUDE_DIR"),
     terminalDisabled:
       cliOptions?.terminalDisabled ??
-      (isFlagEnabled(getOptionalEnv("CCV_TERMINAL_DISABLED")) ? true : undefined),
-    terminalShell: cliOptions?.terminalShell ?? getOptionalEnv("CCV_TERMINAL_SHELL") ?? undefined,
+      (isFlagEnabled(getOptionalEnv("LANTERN_TERMINAL_DISABLED")) ? true : undefined),
+    terminalShell:
+      cliOptions?.terminalShell ?? getOptionalEnv("LANTERN_TERMINAL_SHELL") ?? undefined,
     terminalUnrestricted:
       cliOptions?.terminalUnrestricted ??
-      (isFlagEnabled(getOptionalEnv("CCV_TERMINAL_UNRESTRICTED")) ? true : undefined),
+      (isFlagEnabled(getOptionalEnv("LANTERN_TERMINAL_UNRESTRICTED")) ? true : undefined),
     apiOnly:
-      cliOptions?.apiOnly ?? (isFlagEnabled(getOptionalEnv("CCV_API_ONLY")) ? true : undefined),
+      cliOptions?.apiOnly ?? (isFlagEnabled(getOptionalEnv("LANTERN_API_ONLY")) ? true : undefined),
   };
 };
 
 const LayerImpl = Effect.gen(function* () {
-  const ccvOptionsRef = yield* Ref.make<CcvOptions>(toCcvOptions());
+  const optionsRef = yield* Ref.make<LanternOptions>(toLanternOptions());
 
   const loadCliOptions = (cliOptions: CliOptions) => {
     return Effect.gen(function* () {
-      yield* Ref.update(ccvOptionsRef, () => toCcvOptions(cliOptions));
+      yield* Ref.update(optionsRef, () => toLanternOptions(cliOptions));
     });
   };
 
-  const getCcvOptions = <K extends keyof CcvOptions>(key: K) => {
+  const getOption = <K extends keyof LanternOptions>(key: K) => {
     return Effect.gen(function* () {
-      const ccvOptions = yield* Ref.get(ccvOptionsRef);
-      return ccvOptions[key];
+      const lanternOptions = yield* Ref.get(optionsRef);
+      return lanternOptions[key];
     });
   };
 
   return {
     loadCliOptions,
-    getCcvOptions,
+    getOption,
   };
 });
 
-export type ICcvOptionsService = InferEffect<typeof LayerImpl>;
+export type ILanternOptionsService = InferEffect<typeof LayerImpl>;
 
-export class CcvOptionsService extends Context.Tag("CcvOptionsService")<
-  CcvOptionsService,
-  ICcvOptionsService
+export class LanternOptionsService extends Context.Tag("LanternOptionsService")<
+  LanternOptionsService,
+  ILanternOptionsService
 >() {
   static Live = Layer.effect(this, LayerImpl);
 }

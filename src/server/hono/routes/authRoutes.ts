@@ -39,7 +39,7 @@ const authRoutes = Effect.gen(function* () {
         return c.json({ error: "Invalid password" }, 401);
       }
 
-      setCookie(c, "ccv-session", validSessionToken, {
+      setCookie(c, "lantern-session", validSessionToken, {
         httpOnly: true,
         secure: false, // Set to true in production with HTTPS
         sameSite: "Lax",
@@ -51,12 +51,12 @@ const authRoutes = Effect.gen(function* () {
     })
 
     .post("/logout", (c) => {
-      deleteCookie(c, "ccv-session", { path: "/" });
+      deleteCookie(c, "lantern-session", { path: "/" });
       return c.json({ success: true });
     })
 
     .get("/check", (c) => {
-      const sessionToken = getCookie(c, "ccv-session");
+      const sessionToken = getCookie(c, "lantern-session");
       const isAuthenticated = authEnabled
         ? sessionToken !== undefined &&
           validSessionToken !== "" &&

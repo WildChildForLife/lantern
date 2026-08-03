@@ -1,31 +1,5 @@
 import { Console, Effect } from "effect";
-
-type DeprecationWarning = {
-  type: "removed" | "deprecated";
-  envKey: string;
-  message: string;
-  suggestion: string;
-};
-
-type DeprecatedEnvConfig = {
-  type: "removed" | "deprecated";
-  newEnv: string | null;
-  cliOption: string;
-};
-
-const DEPRECATED_ENVS: Record<string, DeprecatedEnvConfig> = {
-  // Removed in PR #101
-  CLAUDE_CODE_VIEWER_AUTH_PASSWORD: {
-    type: "removed",
-    newEnv: "CCV_PASSWORD",
-    cliOption: "--password",
-  },
-  CLAUDE_CODE_VIEWER_CC_EXECUTABLE_PATH: {
-    type: "removed",
-    newEnv: "CCV_CC_EXECUTABLE_PATH",
-    cliOption: "--executable",
-  },
-};
+import { LEGACY_ENV_ALIASES } from "../legacyEnv.ts";
 
 const getOptionalEnv = (key: string): string | undefined => {
   // biome-ignore lint/style/noProcessEnv: allow only here
@@ -33,74 +7,39 @@ const getOptionalEnv = (key: string): string | undefined => {
   return process.env[key] ?? undefined;
 };
 
-const detectDeprecatedEnvs = (): DeprecationWarning[] => {
-  const warnings: DeprecationWarning[] = [];
+const detectDeprecatedEnvs = (): Array<readonly [string, string]> =>
+  Object.entries(LEGACY_ENV_ALIASES).filter(
+    ([legacyKey]) => getOptionalEnv(legacyKey) !== undefined,
+  );
 
-  for (const [envKey, config] of Object.entries(DEPRECATED_ENVS)) {
-    const value = getOptionalEnv(envKey);
-    if (value !== undefined) {
-      if (config.type === "removed") {
-        warnings.push({
-          type: "removed",
-          envKey,
-          message: `Environment variable ${envKey} has been removed.`,
-          suggestion:
-            config.newEnv !== null
-              ? `Please use ${config.newEnv} environment variable or ${config.cliOption} CLI option instead.`
-              : `Please use ${config.cliOption} CLI option instead.`,
-        });
-      } else {
-        warnings.push({
-          type: "deprecated",
-          envKey,
-          message: `Environment variable ${envKey} is deprecated and will be removed in a future release.`,
-          suggestion:
-            config.newEnv !== null
-              ? `Please migrate to ${config.newEnv} environment variable or ${config.cliOption} CLI option.`
-              : `Please use ${config.cliOption} CLI option instead.`,
-        });
-      }
-    }
-  }
-
-  return warnings;
-};
-
-const formatWarning = (warning: DeprecationWarning): string => {
-  const prefix = warning.type === "removed" ? "❌ REMOVED" : "⚠️  DEPRECATED";
-  return `${prefix}: ${warning.message}\n   → ${warning.suggestion}`;
-};
-
+/**
+ * Warns about environment variables carrying the project's former name. They
+ * are still applied (see `withLegacyEnvAliases`), so this never blocks startup —
+ * it only makes sure a deployment gets updated before support is dropped.
+ */
 export const checkDeprecatedEnvs = Effect.gen(function* () {
-  const warnings = detectDeprecatedEnvs();
+  const deprecated = detectDeprecatedEnvs();
 
-  if (warnings.length === 0) {
+  if (deprecated.length === 0) {
     return;
   }
 
-  const hasRemovedEnvs = warnings.some((warning) => warning.type === "removed");
-
   yield* Console.log("");
   yield* Console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  yield* Console.log("  Migration Guide");
+  yield* Console.log("  Renamed environment variables");
   yield* Console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   yield* Console.log("");
 
-  for (const warning of warnings) {
-    yield* Console.log(formatWarning(warning));
+  for (const [legacyKey, currentKey] of deprecated) {
+    yield* Console.log(`⚠️  DEPRECATED: ${legacyKey} is now ${currentKey}.`);
+    yield* Console.log(
+      `   → Still applied for now. Rename it to ${currentKey} before the next major release.`,
+    );
     yield* Console.log("");
   }
 
-  yield* Console.log("For more details, see:");
+  yield* Console.log("For the full list of options, see:");
   yield* Console.log("  https://github.com/WildChildForLife/lantern#configuration");
   yield* Console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   yield* Console.log("");
-
-  if (hasRemovedEnvs) {
-    yield* Effect.fail(
-      new Error(
-        "Cannot start server: removed environment variables detected. Please update your configuration.",
-      ),
-    );
-  }
 });

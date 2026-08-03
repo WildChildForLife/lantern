@@ -6,11 +6,11 @@ import { Effect, Layer } from "effect";
 import { AgentSessionLayer } from "./core/agent-session/index.ts";
 import { AgentSessionController } from "./core/agent-session/presentation/AgentSessionController.ts";
 import { SessionAllowlistRepository } from "./core/claude-code/infrastructure/SessionAllowlistRepository.ts";
-import { CCVAskUserQuestionController } from "./core/claude-code/presentation/CCVAskUserQuestionController.ts";
+import { AskUserQuestionController } from "./core/claude-code/presentation/AskUserQuestionController.ts";
 import { ClaudeCodeController } from "./core/claude-code/presentation/ClaudeCodeController.ts";
 import { ClaudeCodePermissionController } from "./core/claude-code/presentation/ClaudeCodePermissionController.ts";
 import { ClaudeCodeSessionProcessController } from "./core/claude-code/presentation/ClaudeCodeSessionProcessController.ts";
-import { CCVAskUserQuestionService } from "./core/claude-code/services/CCVAskUserQuestionService.ts";
+import { AskUserQuestionService } from "./core/claude-code/services/AskUserQuestionService.ts";
 import { ClaudeCodeLifeCycleService } from "./core/claude-code/services/ClaudeCodeLifeCycleService.ts";
 import { ClaudeCodePermissionService } from "./core/claude-code/services/ClaudeCodePermissionService.ts";
 import { ClaudeCodeService } from "./core/claude-code/services/ClaudeCodeService.ts";
@@ -24,8 +24,8 @@ import { GitController } from "./core/git/presentation/GitController.ts";
 import { GitService } from "./core/git/services/GitService.ts";
 import { NotificationController } from "./core/notification/presentation/NotificationController.ts";
 import { NotificationService } from "./core/notification/services/NotificationService.ts";
-import { isDevelopmentEnv } from "./core/platform/ccvEnv.ts";
-import type { CliOptions } from "./core/platform/services/CcvOptionsService.ts";
+import { isDevelopmentEnv } from "./core/platform/runtimeEnv.ts";
+import type { CliOptions } from "./core/platform/services/LanternOptionsService.ts";
 import { ProjectRepository } from "./core/project/infrastructure/ProjectRepository.ts";
 import { ProjectController } from "./core/project/presentation/ProjectController.ts";
 import { ProjectMetaService } from "./core/project/services/ProjectMetaService.ts";
@@ -60,7 +60,7 @@ export const startServer = async (options: CliOptions) => {
 
   // biome-ignore lint/style/noProcessEnv: allow only here
   // oxlint-disable-next-line node/no-process-env -- configuration boundary
-  const isDevelopment = isDevelopmentEnv(process.env.CCV_ENV);
+  const isDevelopment = isDevelopmentEnv(process.env.LANTERN_ENV);
   const apiOnly = options.apiOnly === true;
 
   if (!isDevelopment && !apiOnly) {
@@ -149,7 +149,7 @@ const InfraRepos = Layer.mergeAll(
 const InfraLayer = AgentSessionLayer.pipe(Layer.provideMerge(InfraRepos));
 
 const DomainBase = Layer.mergeAll(
-  CCVAskUserQuestionService.Live,
+  AskUserQuestionService.Live,
   ClaudeCodePermissionService.Live,
   ClaudeCodeSessionProcessService.Live,
   ClaudeCodeService.Live,
@@ -179,7 +179,7 @@ const PresentationLayer = Layer.mergeAll(
   GitController.Live,
   ClaudeCodeController.Live,
   ClaudeCodeSessionProcessController.Live,
-  CCVAskUserQuestionController.Live,
+  AskUserQuestionController.Live,
   ClaudeCodePermissionController.Live,
   FileSystemController.Live,
   SSEController.Live,

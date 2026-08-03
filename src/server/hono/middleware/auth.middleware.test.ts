@@ -2,14 +2,14 @@ import { describe, it } from "@effect/vitest";
 import { Effect } from "effect";
 import { Hono } from "hono";
 import { expect } from "vitest";
-import { CcvOptionsService } from "../../core/platform/services/CcvOptionsService.ts";
+import { LanternOptionsService } from "../../core/platform/services/LanternOptionsService.ts";
 import type { HonoContext } from "../app.ts";
 import { AuthMiddleware } from "./auth.middleware.ts";
 
 const createTestApp = (password?: string) =>
   Effect.gen(function* () {
-    const ccvOptionsService = yield* CcvOptionsService;
-    yield* ccvOptionsService.loadCliOptions({
+    const optionsService = yield* LanternOptionsService;
+    yield* optionsService.loadCliOptions({
       port: "3000",
       hostname: "localhost",
       password,
@@ -43,13 +43,13 @@ describe("auth required middleware", () => {
         Promise.resolve(
           app.request("/api/projects", {
             headers: {
-              Cookie: `ccv-session=${validSessionToken}`,
+              Cookie: `lantern-session=${validSessionToken}`,
             },
           }),
         ),
       );
       expect(authorized.status).toBe(200);
-    }).pipe(Effect.provide(AuthMiddleware.Live), Effect.provide(CcvOptionsService.Live)),
+    }).pipe(Effect.provide(AuthMiddleware.Live), Effect.provide(LanternOptionsService.Live)),
   );
 
   it.live("accepts bearer token authorization when password is configured", () =>
@@ -77,7 +77,7 @@ describe("auth required middleware", () => {
         ),
       );
       expect(unauthorized.status).toBe(401);
-    }).pipe(Effect.provide(AuthMiddleware.Live), Effect.provide(CcvOptionsService.Live)),
+    }).pipe(Effect.provide(AuthMiddleware.Live), Effect.provide(LanternOptionsService.Live)),
   );
 
   it.live("allows access to routes defined before authRequired", () =>
@@ -86,7 +86,7 @@ describe("auth required middleware", () => {
 
       const response = yield* Effect.promise(() => Promise.resolve(app.request("/api/auth/check")));
       expect(response.status).toBe(200);
-    }).pipe(Effect.provide(AuthMiddleware.Live), Effect.provide(CcvOptionsService.Live)),
+    }).pipe(Effect.provide(AuthMiddleware.Live), Effect.provide(LanternOptionsService.Live)),
   );
 
   it.live("allows API access when password is not configured", () =>
@@ -95,6 +95,6 @@ describe("auth required middleware", () => {
 
       const response = yield* Effect.promise(() => Promise.resolve(app.request("/api/projects")));
       expect(response.status).toBe(200);
-    }).pipe(Effect.provide(AuthMiddleware.Live), Effect.provide(CcvOptionsService.Live)),
+    }).pipe(Effect.provide(AuthMiddleware.Live), Effect.provide(LanternOptionsService.Live)),
   );
 });

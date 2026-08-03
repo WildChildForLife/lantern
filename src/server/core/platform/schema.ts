@@ -1,15 +1,13 @@
 import { z } from "zod";
 
 export const envSchema = z.object({
-  // Frameworks
-  CCV_ENV: z.enum(["development", "production", "test"]).optional().default("development"),
-  NEXT_PHASE: z.string().optional(),
+  LANTERN_ENV: z.enum(["development", "production", "test"]).optional().default("development"),
   HOME: z.string().optional(),
   PATH: z.string().optional(),
   SHELL: z.string().optional(),
-  CCV_TERMINAL_SHELL: z.string().optional(),
-  CCV_TERMINAL_UNRESTRICTED: z.string().optional(),
-  CCV_TERMINAL_DISABLED: z.string().optional(),
+  LANTERN_TERMINAL_SHELL: z.string().optional(),
+  LANTERN_TERMINAL_UNRESTRICTED: z.string().optional(),
+  LANTERN_TERMINAL_DISABLED: z.string().optional(),
 });
 
 export type EnvSchema = z.infer<typeof envSchema>;

@@ -1,46 +1,46 @@
 import { describe, it } from "@effect/vitest";
 import { Effect } from "effect";
 import { expect } from "vitest";
-import { CcvOptionsService } from "./CcvOptionsService.ts";
+import { LanternOptionsService } from "./LanternOptionsService.ts";
 
-describe("CcvOptionsService", () => {
+describe("LanternOptionsService", () => {
   it.live("returns options before CLI options are loaded", () =>
     Effect.gen(function* () {
-      const ccvOptionsService = yield* CcvOptionsService;
-      const port = yield* ccvOptionsService.getCcvOptions("port");
-      const hostname = yield* ccvOptionsService.getCcvOptions("hostname");
+      const optionsService = yield* LanternOptionsService;
+      const port = yield* optionsService.getOption("port");
+      const hostname = yield* optionsService.getOption("hostname");
 
       expect(Number.isFinite(port)).toBe(true);
       expect(hostname.length).toBeGreaterThan(0);
-    }).pipe(Effect.provide(CcvOptionsService.Live)),
+    }).pipe(Effect.provide(LanternOptionsService.Live)),
   );
 
   it.live("loads verbose option from CLI", () =>
     Effect.gen(function* () {
-      const ccvOptionsService = yield* CcvOptionsService;
+      const optionsService = yield* LanternOptionsService;
 
-      yield* ccvOptionsService.loadCliOptions({
+      yield* optionsService.loadCliOptions({
         port: "3000",
         hostname: "localhost",
         verbose: true,
       });
 
-      const verbose = yield* ccvOptionsService.getCcvOptions("verbose");
+      const verbose = yield* optionsService.getOption("verbose");
       expect(verbose).toBe(true);
-    }).pipe(Effect.provide(CcvOptionsService.Live)),
+    }).pipe(Effect.provide(LanternOptionsService.Live)),
   );
 
   it.live("defaults verbose option to undefined", () =>
     Effect.gen(function* () {
-      const ccvOptionsService = yield* CcvOptionsService;
+      const optionsService = yield* LanternOptionsService;
 
-      yield* ccvOptionsService.loadCliOptions({
+      yield* optionsService.loadCliOptions({
         port: "3000",
         hostname: "localhost",
       });
 
-      const verbose = yield* ccvOptionsService.getCcvOptions("verbose");
+      const verbose = yield* optionsService.getOption("verbose");
       expect(verbose).toBeUndefined();
-    }).pipe(Effect.provide(CcvOptionsService.Live)),
+    }).pipe(Effect.provide(LanternOptionsService.Live)),
   );
 });

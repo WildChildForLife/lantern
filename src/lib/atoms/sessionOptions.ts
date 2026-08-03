@@ -2,6 +2,7 @@ import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { useCallback, useMemo } from "react";
 import { z } from "zod";
+import { storageKey } from "./storageKey";
 
 const persistedSessionOptionsSchema = z.object({
   model: z.string().optional(),
@@ -14,10 +15,7 @@ export type PersistedSessionOptions = z.infer<typeof persistedSessionOptionsSche
 
 type SessionOptionsStore = Record<string, PersistedSessionOptions>;
 
-const sessionOptionsAtom = atomWithStorage<SessionOptionsStore>(
-  "claude-code-viewer-session-options",
-  {},
-);
+const sessionOptionsAtom = atomWithStorage<SessionOptionsStore>(storageKey("session-options"), {});
 
 export const useProjectSessionOptions = (projectId: string) => {
   const [store, setStore] = useAtom(sessionOptionsAtom);
