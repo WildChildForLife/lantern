@@ -8,6 +8,7 @@ import { AgentSessionRepository } from "../../agent-session/infrastructure/Agent
 import { EventBus, type IEventBus } from "../../events/services/EventBus.ts";
 import type { InternalEventDeclaration } from "../../events/types/InternalEventDeclaration.ts";
 import { SessionRepository } from "../infrastructure/SessionRepository.ts";
+import { SessionLocatorService, SessionNotFoundError } from "../services/SessionLocatorService.ts";
 import { SessionMetaService } from "../services/SessionMetaService.ts";
 import { SessionController } from "./SessionController.ts";
 
@@ -87,6 +88,11 @@ describe("SessionController", () => {
         invalidateSession: () => Effect.void,
       });
 
+      const sessionLocatorLayer = Layer.succeed(SessionLocatorService, {
+        locate: () =>
+          Effect.succeed({ filePath: sessionPath, sourceId: "claude-code", deletable: true }),
+      });
+
       const eventBusLayer = Layer.succeed(EventBus, {
         emit: <EventName extends keyof InternalEventDeclaration>(
           event: EventName,
@@ -105,6 +111,7 @@ describe("SessionController", () => {
         sessionPath,
         layers: Layer.mergeAll(
           fileSystemLayer,
+          sessionLocatorLayer,
           sessionRepositoryLayer,
           sessionMetaServiceLayer,
           eventBusLayer,
@@ -200,6 +207,82 @@ describe("SessionController", () => {
         Effect.provide(layers),
         Effect.provide(testPlatformLayer()),
       );
+    });
+
+    /**
+     * The ids arrive from the URL and the resolved path is handed to fs.remove.
+     * Before the locator existed the path was derived by joining those ids, so
+     * nothing on this route was checked at all.
+     */
+    describe("guards", () => {
+      const withLocator = (
+        locate: () => Effect.Effect<
+          { filePath: string; sourceId: string; deletable: boolean },
+          SessionNotFoundError
+        >,
+        onRemove: (path: string) => void,
+      ) => {
+        const { projectId, sessionId, layers } = createTestLayers({
+          fileExists: true,
+          removeSuccess: true,
+          onRemove,
+        });
+
+        return {
+          projectId,
+          sessionId,
+          layers: Layer.mergeAll(layers, Layer.succeed(SessionLocatorService, { locate })),
+        };
+      };
+
+      it.live("refuses a session the locator will not resolve, without touching the disk", () => {
+        let removeCalled = false;
+        const { projectId, sessionId, layers } = withLocator(
+          () => Effect.fail(new SessionNotFoundError({ projectId: "p", sessionId: "s" })),
+          () => {
+            removeCalled = true;
+          },
+        );
+
+        return Effect.gen(function* () {
+          const controller = yield* SessionController;
+          const result = yield* controller.deleteSession({ projectId, sessionId });
+
+          expect(result.status).toBe(404);
+          expect(removeCalled).toBe(false);
+        }).pipe(
+          Effect.provide(SessionController.Live),
+          Effect.provide(layers),
+          Effect.provide(testPlatformLayer()),
+        );
+      });
+
+      it.live("refuses to delete another CLI's history", () => {
+        let removeCalled = false;
+        const { projectId, sessionId, layers } = withLocator(
+          () =>
+            Effect.succeed({
+              filePath: "/home/demo/.codex/sessions/rollout.jsonl",
+              sourceId: "codex",
+              deletable: false,
+            }),
+          () => {
+            removeCalled = true;
+          },
+        );
+
+        return Effect.gen(function* () {
+          const controller = yield* SessionController;
+          const result = yield* controller.deleteSession({ projectId, sessionId });
+
+          expect(result.status).toBe(403);
+          expect(removeCalled).toBe(false);
+        }).pipe(
+          Effect.provide(SessionController.Live),
+          Effect.provide(layers),
+          Effect.provide(testPlatformLayer()),
+        );
+      });
     });
   });
 });

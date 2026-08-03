@@ -12,6 +12,7 @@ import {
 const item = (overrides: Partial<ConversationListItem> = {}): ConversationListItem => ({
   sessionId: "session",
   projectId: "project",
+  source: "claude-code",
   projectName: null,
   projectPath: "/home/me/shop",
   title: "Fix the checkout total",
@@ -27,6 +28,7 @@ test("maps a database row onto a list item", () => {
   const built = buildConversationListItem({
     sessionId: "abc",
     projectId: "project",
+    source: "claude-code",
     projectName: "shop",
     projectPath: "/home/me/shop",
     customTitle: "Fix the checkout total",

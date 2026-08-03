@@ -5,12 +5,13 @@ import type { InferEffect } from "../../../lib/effect/types.ts";
 import { AgentSessionRepository } from "../../agent-session/infrastructure/AgentSessionRepository.ts";
 import { EventBus } from "../../events/services/EventBus.ts";
 import { SessionRepository } from "../../session/infrastructure/SessionRepository.ts";
-import { decodeSessionId } from "../functions/id.ts";
 import { generateSessionHtml } from "../services/ExportService.ts";
+import { SessionLocatorService } from "../services/SessionLocatorService.ts";
 
 const LayerImpl = Effect.gen(function* () {
   const sessionRepository = yield* SessionRepository;
   const agentSessionRepository = yield* AgentSessionRepository;
+  const sessionLocatorService = yield* SessionLocatorService;
   const fs = yield* FileSystem.FileSystem;
   const eventBus = yield* EventBus;
 
@@ -50,9 +51,30 @@ const LayerImpl = Effect.gen(function* () {
   const deleteSession = (options: { projectId: string; sessionId: string }) =>
     Effect.gen(function* () {
       const { projectId, sessionId } = options;
-      const sessionPath = decodeSessionId(projectId, sessionId);
 
-      // Check if session file exists
+      // The ids come from the URL and the result is passed to fs.remove, so the
+      // locator re-checks the path against the directories Lantern reads.
+      const location = yield* sessionLocatorService
+        .locate(projectId, sessionId)
+        .pipe(Effect.catchAll(() => Effect.succeed(null)));
+
+      if (location === null) {
+        return {
+          status: 404,
+          response: { error: "Session not found" },
+        } as const satisfies ControllerResponse;
+      }
+
+      // Lantern only ever reads another CLI's history.
+      if (!location.deletable) {
+        return {
+          status: 403,
+          response: { error: `Lantern does not delete ${location.sourceId} sessions` },
+        } as const satisfies ControllerResponse;
+      }
+
+      const sessionPath = location.filePath;
+
       const exists = yield* fs.exists(sessionPath);
       if (!exists) {
         return {

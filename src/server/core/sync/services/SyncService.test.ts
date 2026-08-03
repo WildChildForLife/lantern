@@ -52,6 +52,9 @@ describe("SyncService.fullSync", () => {
           storagePath: relativeToRepo(decodeProjectId(row.id)),
           name: row.name,
           path: row.path,
+          source: row.source,
+          sourceProjectKey: row.sourceProjectKey,
+          canonicalPath: row.canonicalPath,
           sessionCount: row.sessionCount,
         }))
         .sort((a, b) => a.storagePath.localeCompare(b.storagePath));
@@ -63,6 +66,8 @@ describe("SyncService.fullSync", () => {
         .map((row) => ({
           id: row.id,
           projectStoragePath: relativeToRepo(decodeProjectId(row.projectId)),
+          source: row.source,
+          sourceSessionKey: row.sourceSessionKey,
           filePath: relativeToRepo(row.filePath),
           messageCount: row.messageCount,
           firstUserMessageJson: row.firstUserMessageJson,
@@ -71,6 +76,7 @@ describe("SyncService.fullSync", () => {
           costBreakdownJson: row.costBreakdownJson,
           tokenUsageJson: row.tokenUsageJson,
           modelName: row.modelName,
+          costConfidence: row.costConfidence,
           prLinksJson: row.prLinksJson,
           permissionAllowlistJson: row.permissionAllowlistJson,
           ftsRowCount: Number(

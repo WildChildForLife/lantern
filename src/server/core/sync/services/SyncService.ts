@@ -9,6 +9,7 @@ import { extractSearchableText } from "../../search/functions/extractSearchableT
 import { aggregateTokenUsageAndCost } from "../../session/functions/aggregateTokenUsageAndCost.ts";
 import { extractSessionTitle } from "../../session/functions/extractSessionTitle.ts";
 import { extractFirstUserMessage } from "../../session/functions/isValidFirstMessage.ts";
+import { canonicalizeProjectPath } from "../../source/functions/canonicalizeProjectPath.ts";
 import type { SourceAdapter, SourceEnv } from "../../source/models/SourceAdapter.ts";
 import type {
   SourceProject,
@@ -50,6 +51,15 @@ const LayerImpl = Effect.gen(function* () {
 
   const withEnv = <A, E>(effect: Effect.Effect<A, E, SourceEnv>): Effect.Effect<A, E> =>
     effect.pipe(Effect.provide(sourceEnv));
+
+  const canonicalize = (projectPath: string | null) =>
+    Effect.gen(function* () {
+      const claudeCodePaths = yield* applicationContext.claudeCodePaths;
+      return canonicalizeProjectPath(projectPath, {
+        homeDirectory: path.dirname(claudeCodePaths.globalClaudeDirectoryPath),
+        platform: process.platform,
+      });
+    });
 
   // -------------------------------------------------------------------------
   // Writing one session
@@ -107,6 +117,8 @@ const LayerImpl = Effect.gen(function* () {
 
       const row = {
         projectId,
+        source: ref.sourceId,
+        sourceSessionKey: ref.sourceSessionKey,
         filePath: ref.filePath,
         messageCount: session.messageCount,
         firstUserMessageJson: firstUserMessage !== null ? JSON.stringify(firstUserMessage) : null,
@@ -183,6 +195,9 @@ const LayerImpl = Effect.gen(function* () {
           id: encodeProjectId(project.storagePath),
           name: cwd !== null ? path.basename(cwd) : null,
           path: cwd,
+          source: adapter.id,
+          sourceProjectKey: project.sourceProjectKey,
+          canonicalPath: yield* canonicalize(cwd),
           sessionCount: 0,
           dirMtimeMs: project.dirMtimeMs,
           syncedAt: Date.now(),
@@ -219,6 +234,12 @@ const LayerImpl = Effect.gen(function* () {
       const existingProject = db.select().from(projects).where(eq(projects.id, projectId)).get();
       if (existingProject === undefined) {
         yield* insertProjectRow(adapter, project);
+      } else if (existingProject.canonicalPath === null && existingProject.path !== null) {
+        // Written before the column existed; no I/O needed to fill it in.
+        db.update(projects)
+          .set({ canonicalPath: yield* canonicalize(existingProject.path) })
+          .where(eq(projects.id, projectId))
+          .run();
       }
 
       const refs = yield* withEnv(adapter.listSessions(project)).pipe(
