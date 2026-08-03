@@ -74,9 +74,9 @@ export const calculateTokenCost = (
   usage: TokenUsage,
   modelName: string | null,
 ): CostCalculationResult => {
-  const resolved = resolvePricing(modelName);
+  const pricing = resolvePricing(modelName);
 
-  if (resolved === null) {
+  if (pricing === null) {
     return {
       totalUsd: 0,
       breakdown: emptyBreakdown,
@@ -84,8 +84,6 @@ export const calculateTokenCost = (
       confidence: "unknown",
     };
   }
-
-  const { pricing } = resolved;
 
   const inputTokensUsd = (usage.input_tokens / 1_000_000) * pricing.input;
   const outputTokensUsd = (usage.output_tokens / 1_000_000) * pricing.output;

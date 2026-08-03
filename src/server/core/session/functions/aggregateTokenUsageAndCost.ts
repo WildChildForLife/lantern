@@ -95,7 +95,10 @@ export const aggregateTokenUsageAndCost = (
 
   // One unpriced message makes the whole total incomplete, so the session's
   // cost is reported as unknown rather than as a smaller-than-real number.
-  const confidence: CostConfidence = unpricedMessages > 0 ? "unknown" : "estimated";
+  // No assistant message means no model, and calculateTokenCost answers
+  // "unknown" for that same state — the two must not disagree.
+  const confidence: CostConfidence =
+    unpricedMessages > 0 || lastModelName === null ? "unknown" : "estimated";
 
   const totalCost: ReturnType<typeof calculateTokenCost> = {
     confidence,

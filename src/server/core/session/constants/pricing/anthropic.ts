@@ -6,16 +6,22 @@
  * Source: https://claude.com/pricing
  */
 
+export type ModelPricing = {
+  readonly input: number;
+  readonly output: number;
+  readonly cache_creation: number;
+  readonly cache_read: number;
+};
+
 export type AnthropicModelName =
   | "claude-opus-4.5"
   | "claude-opus-4.1"
   | "claude-sonnet-4.5"
   | "claude-3.5-sonnet"
   | "claude-haiku-4.5"
+  | "claude-3.5-haiku"
   | "claude-3-opus"
   | "claude-3-haiku";
-
-import type { ModelPricing } from "./index.ts";
 
 /**
  * Pricing per million tokens (MTok) in USD
@@ -50,6 +56,12 @@ export const ANTHROPIC_MODEL_PRICING: Record<AnthropicModelName, ModelPricing> =
     output: 15.0,
     cache_creation: 3.75,
     cache_read: 0.3,
+  },
+  "claude-3.5-haiku": {
+    input: 0.8,
+    output: 4.0,
+    cache_creation: 1.0,
+    cache_read: 0.08,
   },
   "claude-haiku-4.5": {
     input: 1.0,
@@ -94,6 +106,9 @@ export const normalizeAnthropicModelName = (modelName: string): AnthropicModelNa
   if (normalized.includes("haiku-4-5") || normalized.includes("haiku-4.5")) {
     return "claude-haiku-4.5";
   }
+  if (normalized.includes("3-5-haiku") || normalized.includes("3.5-haiku")) {
+    return "claude-3.5-haiku";
+  }
   if (
     normalized.includes("sonnet-4") ||
     normalized.includes("3-5-sonnet") ||
@@ -101,10 +116,19 @@ export const normalizeAnthropicModelName = (modelName: string): AnthropicModelNa
   ) {
     return "claude-3.5-sonnet";
   }
-  if (normalized.includes("3-opus") || normalized.includes("opus-20")) {
+  if (normalized.includes("3-opus")) {
     return "claude-3-opus";
   }
-  if (normalized.includes("3-haiku") || normalized.includes("haiku-20")) {
+  if (normalized.includes("3-haiku")) {
+    return "claude-3-haiku";
+  }
+  // Bare `<family>-<date>` ids predate the numbered families. Matching the date
+  // suffix rather than any "-20" keeps a future claude-opus-2027-x from being
+  // priced as the 2024 model.
+  if (/opus-20\d{6}/.test(normalized)) {
+    return "claude-3-opus";
+  }
+  if (/haiku-20\d{6}/.test(normalized)) {
     return "claude-3-haiku";
   }
 

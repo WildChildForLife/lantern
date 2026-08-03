@@ -15,8 +15,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/web/components/ui/tooltip";
+import { formatCost } from "@/web/lib/formatCost";
 import { cn } from "@/web/utils";
-import { formatCost } from "../../lib/formatCost.ts";
 import { useConfig } from "../hooks/useConfig";
 import { useProject } from "../projects/[projectId]/hooks/useProject";
 import { firstUserMessageToTitle } from "../projects/[projectId]/services/firstCommandToTitle";

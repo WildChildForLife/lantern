@@ -40,7 +40,7 @@ describe("aggregateTokenUsageAndCost", () => {
       expect(result.totalCost.totalUsd).toBe(0);
       // No assistant message means no model, so nothing to price against.
       expect(result.modelName).toBeNull();
-      expect(result.totalCost.confidence).toBe("estimated");
+      expect(result.totalCost.confidence).toBe("unknown");
     });
   });
 
@@ -157,6 +157,36 @@ describe("aggregateTokenUsageAndCost", () => {
       expect(result.totalUsage.input_tokens).toBe(0);
       expect(result.totalUsage.output_tokens).toBe(0);
       expect(result.totalCost.totalUsd).toBe(0);
+    });
+  });
+
+  describe("confidence", () => {
+    /**
+     * The costs of individual messages are summed before the confidence is
+     * decided, so a partly-priced session keeps a real but incomplete total.
+     * It is reported as unknown precisely because that number is smaller than
+     * the truth, and a smaller number is not a safer one.
+     */
+    test("marks a session unknown when any one message could not be priced", () => {
+      const priced =
+        '{"parentUuid": null, "isSidechain": false, "userType": "external", "cwd": "/test", "sessionId": "test-session", "version": "1.0.0", "type": "assistant", "uuid": "550e8400-e29b-41d4-a716-446655440001", "timestamp": "2024-01-01T00:00:01.000Z", "message": {"id": "msg_550e84", "type": "message", "role": "assistant", "model": "claude-sonnet-4-5-20250929", "content": [], "usage": {"input_tokens": 1000, "output_tokens": 500, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0}, "stop_reason": null, "stop_sequence": null}}';
+      const unpriced =
+        '{"parentUuid": "550e8400-e29b-41d4-a716-446655440001", "isSidechain": false, "userType": "external", "cwd": "/test", "sessionId": "test-session", "version": "1.0.0", "type": "assistant", "uuid": "550e8400-e29b-41d4-a716-446655440002", "timestamp": "2024-01-01T00:00:01.000Z", "message": {"id": "msg_550e84", "type": "message", "role": "assistant", "model": "claude-opus-7-20270115", "content": [], "usage": {"input_tokens": 1000, "output_tokens": 500, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0}, "stop_reason": null, "stop_sequence": null}}';
+
+      const result = aggregateTokenUsageAndCost([`${priced}\n${unpriced}`]);
+
+      expect(result.totalCost.confidence).toBe("unknown");
+      expect(result.totalCost.totalUsd).toBeGreaterThan(0);
+      expect(result.totalUsage.input_tokens).toBe(2000);
+    });
+
+    test("marks a fully priced session as an estimate", () => {
+      const priced =
+        '{"parentUuid": null, "isSidechain": false, "userType": "external", "cwd": "/test", "sessionId": "test-session", "version": "1.0.0", "type": "assistant", "uuid": "550e8400-e29b-41d4-a716-446655440001", "timestamp": "2024-01-01T00:00:01.000Z", "message": {"id": "msg_550e84", "type": "message", "role": "assistant", "model": "claude-sonnet-4-5-20250929", "content": [], "usage": {"input_tokens": 1000, "output_tokens": 500, "cache_creation_input_tokens": 0, "cache_read_input_tokens": 0}, "stop_reason": null, "stop_sequence": null}}';
+
+      const result = aggregateTokenUsageAndCost([priced]);
+
+      expect(result.totalCost.confidence).toBe("estimated");
     });
   });
 });

@@ -38,6 +38,21 @@ describe("normalizeAnthropicModelName", () => {
   it("returns null for a model it has no price for", () => {
     expect(normalizeAnthropicModelName("unknown-model")).toBeNull();
   });
+
+  /** It matched `haiku-20` and was billed at a third of Haiku 3.5's rate. */
+  it("prices Claude 3.5 Haiku as itself, not as Haiku 3", () => {
+    expect(normalizeAnthropicModelName("claude-3-5-haiku-20241022")).toBe("claude-3.5-haiku");
+  });
+
+  it("still recognises the dated Claude 3 ids", () => {
+    expect(normalizeAnthropicModelName("claude-3-haiku-20240307")).toBe("claude-3-haiku");
+    expect(normalizeAnthropicModelName("claude-3-opus-20240229")).toBe("claude-3-opus");
+  });
+
+  /** `opus-20` used to swallow anything with those characters in it. */
+  it("does not price a future model by its year", () => {
+    expect(normalizeAnthropicModelName("claude-opus-2027-preview")).toBeNull();
+  });
 });
 
 describe("calculateTokenCost", () => {

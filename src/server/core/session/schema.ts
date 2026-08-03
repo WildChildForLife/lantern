@@ -19,6 +19,8 @@ export const conversationListItemSchema = z.object({
   lastModifiedAt: z.string(),
   modelName: z.string().nullable(),
   totalCostUsd: z.number(),
+  /** Never render totalCostUsd without it — see formatCost. */
+  costConfidence: z.string(),
 });
 
 /**

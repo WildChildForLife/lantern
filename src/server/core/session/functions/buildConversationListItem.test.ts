@@ -21,6 +21,7 @@ const item = (overrides: Partial<ConversationListItem> = {}): ConversationListIt
   lastModifiedAt: "2026-07-01T10:00:00.000Z",
   modelName: null,
   totalCostUsd: 0,
+  costConfidence: "estimated",
   ...overrides,
 });
 
@@ -37,11 +38,14 @@ test("maps a database row onto a list item", () => {
     lastModifiedAt: "2026-07-01T10:00:00.000Z",
     modelName: "claude-sonnet-4-5",
     totalCostUsd: 1.5,
+    costConfidence: "estimated",
   });
 
   expect(built.sessionId).toBe("abc");
   expect(built.title).toBe("Fix the checkout total");
   expect(built.firstUserMessage).toEqual({ kind: "text", content: "the total is wrong" });
+  // The number is meaningless without it, so the list item carries both.
+  expect(built.costConfidence).toBe("estimated");
 });
 
 test("reads the first user message whatever shape it was logged in", () => {
