@@ -2,7 +2,7 @@ import { FileSystem, Path } from "@effect/platform";
 import { Context, Effect, Fiber, Layer, Ref, Stream } from "effect";
 import { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
 import { encodeProjectIdFromSessionFilePath } from "../../project/functions/id.ts";
-import { parseSessionFilePath } from "../functions/parseSessionFilePath.ts";
+import { parseSessionFilePath } from "../../source/adapters/claude-code/functions/parseSessionFilePath.ts";
 import { EventBus } from "./EventBus.ts";
 
 type FileWatcherServiceInterface = {

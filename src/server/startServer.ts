@@ -39,6 +39,7 @@ import { SessionRepository } from "./core/session/infrastructure/SessionReposito
 import { SessionController } from "./core/session/presentation/SessionController.ts";
 import { SessionMetaService } from "./core/session/services/SessionMetaService.ts";
 import { TopicClassifierService } from "./core/session/services/TopicClassifierService.ts";
+import { SourceRegistry } from "./core/source/services/SourceRegistry.ts";
 import { SyncService } from "./core/sync/services/SyncService.ts";
 import { TasksController } from "./core/tasks/presentation/TasksController.ts";
 import { TasksService } from "./core/tasks/services/TasksService.ts";
@@ -138,7 +139,11 @@ const InfraBasics = Layer.mergeAll(
   ProjectMetaService.Live,
   SessionMetaService.Live,
   SessionAllowlistRepository.Live,
-).pipe(Layer.provideMerge(SyncService.Live), Layer.provideMerge(DrizzleService.Live));
+).pipe(
+  Layer.provideMerge(SyncService.Live),
+  Layer.provideMerge(SourceRegistry.Live),
+  Layer.provideMerge(DrizzleService.Live),
+);
 
 const InfraRepos = Layer.mergeAll(
   ProjectRepository.Live,
