@@ -57,6 +57,9 @@ export type SSEEventDeclaration = {
 
   // oxlint-disable-next-line typescript/no-empty-object-type -- intentionally empty event payload
   schedulerJobsChanged: {};
+
+  // biome-ignore lint/complexity/noBannedTypes: the event carries no payload
+  sourcesChanged: Record<string, never>;
 };
 
 export type SSEEventMap = {

@@ -16,6 +16,7 @@ import type {
   SourceSession,
   SourceSessionRef,
 } from "../../source/models/SourceEntities.ts";
+import type { SourceId } from "../../source/models/SourceId.ts";
 import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 
 /**
@@ -27,7 +28,10 @@ import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
  * lifecycle — is the same for all of them.
  */
 export type ISyncService = {
-  readonly fullSync: () => Effect.Effect<void, Error>;
+  /** Reads every enabled source, or only the ones named. */
+  readonly fullSync: (sourceIds?: readonly SourceId[]) => Effect.Effect<void, Error>;
+  /** Forgets everything read from one source, without touching its files. */
+  readonly purgeSource: (sourceId: SourceId) => Effect.Effect<void, Error>;
   readonly syncSession: (projectId: string, sessionId: string) => Effect.Effect<void, Error>;
   readonly syncProjectList: (projectId: string) => Effect.Effect<void, Error>;
 };
@@ -288,15 +292,23 @@ const LayerImpl = Effect.gen(function* () {
   // Entry points
   // -------------------------------------------------------------------------
 
-  const fullSync = (): Effect.Effect<void, Error> =>
+  const fullSync = (sourceIds?: readonly SourceId[]): Effect.Effect<void, Error> =>
     Effect.gen(function* () {
-      const adapters = yield* registry.enabled();
+      const enabledAdapters = yield* registry.enabled();
+      const adapters =
+        sourceIds === undefined
+          ? enabledAdapters
+          : enabledAdapters.filter((adapter) => sourceIds.includes(adapter.id));
 
+      const syncedSourceIds = new Set<string>(adapters.map((adapter) => adapter.id));
       const knownProjectIds = new Set(
         db
-          .select({ id: projects.id })
+          .select({ id: projects.id, source: projects.source })
           .from(projects)
           .all()
+          // Only rows belonging to a source in this pass can be judged missing;
+          // a scoped sync knows nothing about the others.
+          .filter((project) => syncedSourceIds.has(project.source))
           .map((project) => project.id),
       );
       const seenProjectIds = new Set<string>();
@@ -320,6 +332,27 @@ const LayerImpl = Effect.gen(function* () {
           db.delete(projects).where(eq(projects.id, knownProjectId)).run();
         }
       }
+    });
+
+  const purgeSource = (sourceId: SourceId): Effect.Effect<void, Error> =>
+    Effect.gen(function* () {
+      const projectIds = db
+        .select({ id: projects.id })
+        .from(projects)
+        .where(eq(projects.source, sourceId))
+        .all()
+        .map((project) => project.id);
+
+      for (const projectId of projectIds) {
+        // The session rows go with the project by cascade, but the search index
+        // is a virtual table with no foreign keys of its own.
+        rawDb.prepare("DELETE FROM session_messages_fts WHERE project_id = ?").run(projectId);
+      }
+
+      db.delete(sessions).where(eq(sessions.source, sourceId)).run();
+      db.delete(projects).where(eq(projects.source, sourceId)).run();
+
+      yield* Effect.logInfo(`Forgot ${projectIds.length} ${sourceId} projects`);
     });
 
   /** Resolves the adapter owning a project, falling back to the first enabled one. */
@@ -390,6 +423,7 @@ const LayerImpl = Effect.gen(function* () {
 
   return {
     fullSync,
+    purgeSource,
     syncSession,
     syncProjectList,
   } satisfies ISyncService;

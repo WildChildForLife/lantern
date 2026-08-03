@@ -285,6 +285,19 @@ export const featureFlagsQuery = {
   },
 } as const;
 
+export const sourcesQuery = {
+  queryKey: ["sources"],
+  queryFn: async () => {
+    const response = await honoClient.api.sources.$get();
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sources: ${response.statusText}`);
+    }
+
+    return await response.json();
+  },
+} as const;
+
 export const agentSessionListQuery = (projectId: string, sessionId: string) =>
   ({
     queryKey: ["projects", projectId, "sessions", sessionId, "agent-sessions"],

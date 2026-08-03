@@ -31,6 +31,7 @@ const testSessionMetaServiceLayer = (meta: SessionMeta) =>
 
 const makeSyncServiceMock = (overrides?: Partial<ISyncService>): Layer.Layer<SyncService> =>
   Layer.succeed(SyncService, {
+    purgeSource: () => Effect.void,
     fullSync: () => Effect.void,
     syncSession: () => Effect.void,
     syncProjectList: () => Effect.void,

@@ -16,10 +16,14 @@ import { RateLimitAutoScheduleService } from "../core/rate-limit/services/RateLi
 import { SchedulerConfigBaseDir } from "../core/scheduler/config.ts";
 import { SchedulerService } from "../core/scheduler/domain/Scheduler.ts";
 import { createMockSessionMeta } from "../core/session/testing/createMockSessionMeta.ts";
+import { ALL_SOURCE_ADAPTERS, SourceRegistry } from "../core/source/services/SourceRegistry.ts";
 import { SyncService } from "../core/sync/services/SyncService.ts";
 import { InitializeService } from "./initialize.ts";
 
-const fileWatcherWithEventBus = FileWatcherService.Live.pipe(Layer.provide(EventBus.Live));
+const fileWatcherWithEventBus = FileWatcherService.Live.pipe(
+  Layer.provide(EventBus.Live),
+  Layer.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
+);
 
 // Mock RateLimitAutoScheduleService for testing
 const mockRateLimitAutoScheduleService = Layer.succeed(RateLimitAutoScheduleService, {
@@ -30,6 +34,7 @@ const mockRateLimitAutoScheduleService = Layer.succeed(RateLimitAutoScheduleServ
 // Mock SyncService for testing
 const mockSyncService = Layer.succeed(SyncService, {
   fullSync: () => Effect.void,
+  purgeSource: () => Effect.void,
   syncSession: () => Effect.void,
   syncProjectList: () => Effect.void,
 });

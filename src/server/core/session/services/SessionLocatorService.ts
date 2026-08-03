@@ -60,11 +60,12 @@ const LayerImpl = Effect.gen(function* () {
     Layer.succeed(ApplicationContext, applicationContext),
   );
 
-  // Roots are fixed for the life of the process — they come from the Claude
-  // directory the server was started with — so they are resolved once here
-  // rather than on every lookup.
+  // Roots come from the directory the server was started with, so they are
+  // fixed for the process and resolved once. Every known adapter is included,
+  // not only the enabled ones: disabling a source purges its rows, so a row
+  // that still exists must still be checkable.
   const rootsBySource = new Map<SourceId, readonly string[]>();
-  for (const adapter of yield* registry.enabled()) {
+  for (const adapter of registry.all) {
     rootsBySource.set(adapter.id, yield* adapter.watchRoots().pipe(Effect.provide(sourceEnv)));
   }
 

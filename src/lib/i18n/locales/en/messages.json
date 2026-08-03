@@ -183,7 +183,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        290
+        300
       ]
     ],
     "translation": "Select Enter key behavior"
@@ -194,7 +194,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        348
+        358
       ]
     ],
     "translation": "Select Find Hotkey"
@@ -205,7 +205,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        434
+        444
       ]
     ],
     "translation": "Select Language"
@@ -216,7 +216,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        322
+        332
       ]
     ],
     "translation": "Select Search Hotkey"
@@ -227,7 +227,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        463
+        473
       ]
     ],
     "translation": "Select Theme"
@@ -3454,7 +3454,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        282
+        292
       ]
     ],
     "translation": "Enter Key Behavior"
@@ -3465,7 +3465,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        300
+        310
       ]
     ],
     "translation": "Send with Command+Enter"
@@ -3476,7 +3476,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        306
+        316
       ]
     ],
     "translation": "Select Enter key behavior for message input"
@@ -3487,7 +3487,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        297
+        307
       ]
     ],
     "translation": "Send with Enter"
@@ -3498,7 +3498,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        294
+        304
       ]
     ],
     "translation": "Send with Shift+Enter (Default)"
@@ -3509,7 +3509,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        343
+        353
       ]
     ],
     "translation": "Find Hotkey"
@@ -3520,7 +3520,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        355
+        365
       ]
     ],
     "translation": "Command+F"
@@ -3531,7 +3531,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        352
+        362
       ]
     ],
     "translation": "Ctrl+F"
@@ -3542,7 +3542,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        361
+        371
       ]
     ],
     "translation": "Select the hotkey to open in-page find"
@@ -3553,7 +3553,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        314
+        324
       ]
     ],
     "translation": "Search Hotkey"
@@ -3564,7 +3564,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        329
+        339
       ]
     ],
     "translation": "Command+K"
@@ -3575,7 +3575,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        326
+        336
       ]
     ],
     "translation": "Ctrl+K"
@@ -3586,7 +3586,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        335
+        345
       ]
     ],
     "translation": "Select the hotkey to open search dialog"
@@ -3612,7 +3612,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        429
+        439
       ]
     ],
     "translation": "Language"
@@ -3623,7 +3623,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        450
+        460
       ]
     ],
     "translation": "Select your preferred language"
@@ -3634,7 +3634,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        441
+        451
       ]
     ],
     "translation": "English"
@@ -3645,7 +3645,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        438
+        448
       ]
     ],
     "translation": "Japanese"
@@ -3656,7 +3656,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        444
+        454
       ]
     ],
     "translation": "Chinese (Simplified)"
@@ -3704,7 +3704,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        418
+        428
       ]
     ],
     "translation": "Configure the model options available in the session toolbar"
@@ -3716,7 +3716,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        369
+        379
       ]
     ],
     "translation": "Model Choices"
@@ -3728,7 +3728,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        399
+        409
       ]
     ],
     "translation": "Add model choice..."
@@ -3855,7 +3855,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        267
+        277
       ]
     ],
     "translation": "Auto-schedule Continue on Rate Limit"
@@ -3866,7 +3866,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        273
+        283
       ]
     ],
     "translation": "Automatically schedule a continue message when Claude hits rate limits"
@@ -3888,7 +3888,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        223
+        233
       ]
     ],
     "translation": "Hide Sessions Without User Messages"
@@ -3899,7 +3899,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        229
+        239
       ]
     ],
     "translation": "Show only sessions that contain user commands or messages"
@@ -3910,7 +3910,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        244
+        254
       ]
     ],
     "translation": "Unify Sessions with Same Title"
@@ -3921,7 +3921,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        250
+        260
       ]
     ],
     "translation": "When multiple sessions have the same title, show only the latest session"
@@ -3937,6 +3937,18 @@
       ]
     ],
     "translation": "Setting Sources"
+  },
+  "settings.sources": {
+    "message": "Agent CLIs",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        179
+      ]
+    ],
+    "translation": "Agent CLIs"
   },
   "settings.systemPrompt.includeDefault": {
     "message": "Include Claude Code system prompt",
@@ -3967,7 +3979,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        458
+        468
       ]
     ],
     "translation": "Theme"
@@ -3978,7 +3990,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        470
+        480
       ]
     ],
     "translation": "Dark"
@@ -3989,7 +4001,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        479
+        489
       ]
     ],
     "translation": "Select your preferred color theme"
@@ -4000,7 +4012,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        467
+        477
       ]
     ],
     "translation": "Light"
@@ -4011,7 +4023,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        473
+        483
       ]
     ],
     "translation": "System"
@@ -4039,7 +4051,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        178
+        188
       ]
     ],
     "translation": "Usage Mode"
@@ -4051,7 +4063,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        198
+        208
       ]
     ],
     "translation": "API"
@@ -4063,7 +4075,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        204
+        214
       ]
     ],
     "translation": "Select how you use Claude Code. Subscription mode restricts features that require the Agent SDK."
@@ -4075,7 +4087,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        184
+        194
       ]
     ],
     "translation": "Select usage mode"
@@ -4087,7 +4099,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        192
+        202
       ]
     ],
     "translation": "Subscription (Max, Pro, etc.)"
@@ -4287,6 +4299,109 @@
       ]
     ],
     "translation": "Tasks"
+  },
+  "sources.description": {
+    "message": "Which agent CLIs Lantern reads sessions from. Turning one off forgets its conversations; it never touches the files.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        78
+      ]
+    ],
+    "translation": "Which agent CLIs Lantern reads sessions from. Turning one off forgets its conversations; it never touches the files."
+  },
+  "sources.read_only": {
+    "message": "read-only",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        129
+      ]
+    ],
+    "translation": "read-only"
+  },
+  "sources.reason.no_data": {
+    "message": "no sessions recorded yet",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        31
+      ]
+    ],
+    "translation": "no sessions recorded yet"
+  },
+  "sources.reason.not_installed": {
+    "message": "not found on this machine",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        27
+      ]
+    ],
+    "translation": "not found on this machine"
+  },
+  "sources.reason.schema_changed": {
+    "message": "storage format changed in a newer release",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        36
+      ]
+    ],
+    "translation": "storage format changed in a newer release"
+  },
+  "sources.reason.sqlite_storage": {
+    "message": "stores sessions in a database Lantern cannot read yet",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        32
+      ]
+    ],
+    "translation": "stores sessions in a database Lantern cannot read yet"
+  },
+  "sources.reason.unknown_shape": {
+    "message": "sessions are in a format Lantern does not recognise",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        40
+      ]
+    ],
+    "translation": "sessions are in a format Lantern does not recognise"
+  },
+  "sources.stats": {
+    "message": "{sessionCount} conversations across {projectCount} projects",
+    "placeholders": {
+      "sessionCount": [
+        "source.stats.sessions"
+      ],
+      "projectCount": [
+        "source.stats.projects"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        115
+      ]
+    ],
+    "translation": "{sessionCount} conversations across {projectCount} projects"
   },
   "system_info.available_features": {
     "placeholders": {},

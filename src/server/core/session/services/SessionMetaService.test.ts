@@ -16,6 +16,7 @@ import { SessionMetaService } from "../services/SessionMetaService.ts";
 
 const makeSyncServiceMock = (overrides?: Partial<ISyncService>): Layer.Layer<SyncService> =>
   Layer.succeed(SyncService, {
+    purgeSource: () => Effect.void,
     fullSync: () => Effect.void,
     syncSession: () => Effect.void,
     syncProjectList: () => Effect.void,

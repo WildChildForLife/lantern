@@ -183,7 +183,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        290
+        300
       ]
     ],
     "translation": "选择回车键行为"
@@ -194,7 +194,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        348
+        358
       ]
     ],
     "translation": "选择页内搜索快捷键"
@@ -205,7 +205,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        434
+        444
       ]
     ],
     "translation": "选择语言"
@@ -216,7 +216,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        322
+        332
       ]
     ],
     "translation": "选择搜索快捷键"
@@ -227,7 +227,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        463
+        473
       ]
     ],
     "translation": "选择主题"
@@ -3454,7 +3454,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        282
+        292
       ]
     ],
     "translation": "回车键行为"
@@ -3465,7 +3465,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        300
+        310
       ]
     ],
     "translation": "使用 Command+Enter 发送"
@@ -3476,7 +3476,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        306
+        316
       ]
     ],
     "translation": "选择消息输入的回车键行为"
@@ -3487,7 +3487,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        297
+        307
       ]
     ],
     "translation": "使用 Enter 发送"
@@ -3498,7 +3498,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        294
+        304
       ]
     ],
     "translation": "使用 Shift+Enter 发送(默认)"
@@ -3509,7 +3509,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        343
+        353
       ]
     ],
     "translation": "页内搜索快捷键"
@@ -3520,7 +3520,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        355
+        365
       ]
     ],
     "translation": "Command+F"
@@ -3531,7 +3531,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        352
+        362
       ]
     ],
     "translation": "Ctrl+F"
@@ -3542,7 +3542,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        361
+        371
       ]
     ],
     "translation": "选择打开页内搜索的快捷键"
@@ -3553,7 +3553,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        314
+        324
       ]
     ],
     "translation": "搜索快捷键"
@@ -3564,7 +3564,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        329
+        339
       ]
     ],
     "translation": "Command+K"
@@ -3575,7 +3575,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        326
+        336
       ]
     ],
     "translation": "Ctrl+K"
@@ -3586,7 +3586,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        335
+        345
       ]
     ],
     "translation": "选择打开搜索对话框的快捷键"
@@ -3612,7 +3612,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        429
+        439
       ]
     ],
     "translation": "语言"
@@ -3623,7 +3623,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        450
+        460
       ]
     ],
     "translation": "选择您偏好的语言"
@@ -3634,7 +3634,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        441
+        451
       ]
     ],
     "translation": "英语"
@@ -3645,7 +3645,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        438
+        448
       ]
     ],
     "translation": "日语"
@@ -3656,7 +3656,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        444
+        454
       ]
     ],
     "translation": "简体中文"
@@ -3704,7 +3704,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        418
+        428
       ]
     ],
     "translation": "配置会话工具栏中可用的模型选项"
@@ -3716,7 +3716,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        369
+        379
       ]
     ],
     "translation": "模型选项"
@@ -3728,7 +3728,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        399
+        409
       ]
     ],
     "translation": "添加模型选项..."
@@ -3855,7 +3855,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        267
+        277
       ]
     ],
     "translation": "达到速率限制时自动调度继续"
@@ -3866,7 +3866,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        273
+        283
       ]
     ],
     "translation": "当 Claude 达到速率限制时,自动调度继续消息"
@@ -3888,7 +3888,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        223
+        233
       ]
     ],
     "translation": "隐藏无用户消息的会话"
@@ -3899,7 +3899,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        229
+        239
       ]
     ],
     "translation": "仅显示包含用户命令或消息的会话"
@@ -3910,7 +3910,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        244
+        254
       ]
     ],
     "translation": "合并同名会话"
@@ -3921,7 +3921,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        250
+        260
       ]
     ],
     "translation": "当多个会话标题相同时,仅显示最新的会话"
@@ -3937,6 +3937,18 @@
       ]
     ],
     "translation": "设置来源"
+  },
+  "settings.sources": {
+    "message": "Agent CLIs",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        179
+      ]
+    ],
+    "translation": "代理 CLI"
   },
   "settings.systemPrompt.includeDefault": {
     "message": "Include Claude Code system prompt",
@@ -3967,7 +3979,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        458
+        468
       ]
     ],
     "translation": "主题"
@@ -3978,7 +3990,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        470
+        480
       ]
     ],
     "translation": "深色"
@@ -3989,7 +4001,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        479
+        489
       ]
     ],
     "translation": "选择您偏好的颜色主题"
@@ -4000,7 +4012,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        467
+        477
       ]
     ],
     "translation": "浅色"
@@ -4011,7 +4023,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        473
+        483
       ]
     ],
     "translation": "跟随系统"
@@ -4039,7 +4051,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        178
+        188
       ]
     ],
     "translation": "使用模式"
@@ -4051,7 +4063,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        198
+        208
       ]
     ],
     "translation": "API"
@@ -4063,7 +4075,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        204
+        214
       ]
     ],
     "translation": "选择您使用Claude Code的方式。订阅模式会限制需要Agent SDK的功能。"
@@ -4075,7 +4087,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        184
+        194
       ]
     ],
     "translation": "选择使用模式"
@@ -4087,7 +4099,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        192
+        202
       ]
     ],
     "translation": "订阅 (Max, Pro等)"
@@ -4287,6 +4299,109 @@
       ]
     ],
     "translation": "任务列表"
+  },
+  "sources.description": {
+    "message": "Which agent CLIs Lantern reads sessions from. Turning one off forgets its conversations; it never touches the files.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        78
+      ]
+    ],
+    "translation": "Lantern 从这些代理 CLI 读取会话。关闭后其会话将不再显示，但不会改动任何文件。"
+  },
+  "sources.read_only": {
+    "message": "read-only",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        129
+      ]
+    ],
+    "translation": "只读"
+  },
+  "sources.reason.no_data": {
+    "message": "no sessions recorded yet",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        31
+      ]
+    ],
+    "translation": "尚未记录任何会话"
+  },
+  "sources.reason.not_installed": {
+    "message": "not found on this machine",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        27
+      ]
+    ],
+    "translation": "在本机上未找到"
+  },
+  "sources.reason.schema_changed": {
+    "message": "storage format changed in a newer release",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        36
+      ]
+    ],
+    "translation": "较新版本更改了存储格式"
+  },
+  "sources.reason.sqlite_storage": {
+    "message": "stores sessions in a database Lantern cannot read yet",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        32
+      ]
+    ],
+    "translation": "会话存储在 Lantern 暂时无法读取的数据库中"
+  },
+  "sources.reason.unknown_shape": {
+    "message": "sessions are in a format Lantern does not recognise",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        40
+      ]
+    ],
+    "translation": "会话格式无法被 Lantern 识别"
+  },
+  "sources.stats": {
+    "message": "{sessionCount} conversations across {projectCount} projects",
+    "placeholders": {
+      "sessionCount": [
+        "source.stats.sessions"
+      ],
+      "projectCount": [
+        "source.stats.projects"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        115
+      ]
+    ],
+    "translation": "{projectCount} 个项目中的 {sessionCount} 个会话"
   },
   "system_info.available_features": {
     "placeholders": {},
