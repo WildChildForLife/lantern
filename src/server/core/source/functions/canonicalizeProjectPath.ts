@@ -7,6 +7,10 @@
  * Deliberately pure — no symlink resolution. That needs the filesystem, gives
  * different answers on different machines, and would make the grouping depend
  * on when it was computed.
+ *
+ * The result is a grouping key and nothing else. It is lower-cased wherever the
+ * filesystem is case-insensitive, so it must never be opened, joined onto, or
+ * shown to anyone: use `projects.path` for that.
  */
 export const canonicalizeProjectPath = (
   projectPath: string | null,
@@ -29,6 +33,8 @@ export const canonicalizeProjectPath = (
 
   const posix = withHome.replaceAll("\\", "/");
   const isAbsolute = posix.startsWith("/");
+  // `\\server\share` is one host's export, not a directory off the local root.
+  const isUnc = posix.startsWith("//");
   // A Windows drive letter is part of the path, not a segment to case-fold away.
   const driveMatch = /^([a-zA-Z]):\//.exec(posix);
 
@@ -36,17 +42,28 @@ export const canonicalizeProjectPath = (
   for (const segment of posix.slice(driveMatch === null ? 0 : 3).split("/")) {
     if (segment === "" || segment === ".") continue;
     if (segment === "..") {
+      // A `..` with nothing to climb out of only survives on a relative path,
+      // where dropping it would make `../api` and `api` the same workspace.
+      if (segments.length === 0 || segments.at(-1) === "..") {
+        if (!isAbsolute && driveMatch === null) segments.push("..");
+        continue;
+      }
       segments.pop();
       continue;
     }
     segments.push(segment);
   }
 
+  const rootPrefix = isUnc ? "//" : "/";
   const prefix =
-    driveMatch === null ? (isAbsolute ? "/" : "") : `${driveMatch[1]?.toLowerCase() ?? ""}:/`;
+    driveMatch === null
+      ? isAbsolute
+        ? rootPrefix
+        : ""
+      : `${driveMatch[1]?.toLowerCase() ?? ""}:/`;
   const joined = `${prefix}${segments.join("/")}`;
 
-  if (joined === "" || joined === "/" || /^[a-z]:\/$/.test(joined)) {
+  if (joined === "" || joined === "/" || joined === "//" || /^[a-z]:\/$/.test(joined)) {
     return joined === "" ? null : joined;
   }
 

@@ -22,6 +22,7 @@ export const testPlatformLayer = (overrides?: {
   env?: Partial<EnvSchema>;
   userConfig?: Partial<UserConfig>;
   lanternOptions?: Partial<LanternOptions>;
+  platform?: NodeJS.Platform;
 }) => {
   const applicationContextLayer = Layer.mock(ApplicationContext, {
     claudeCodePaths: Effect.succeed({
@@ -32,6 +33,8 @@ export const testPlatformLayer = (overrides?: {
       claudeProjectsDirPath: `${claudeDirForTest}/projects`,
       ...overrides?.claudeCodePaths,
     }),
+    homeDirectory: Effect.succeed(overrides?.env?.HOME ?? process.cwd()),
+    platform: overrides?.platform ?? process.platform,
   });
 
   const optionsServiceLayer = Layer.mock(LanternOptionsService, {

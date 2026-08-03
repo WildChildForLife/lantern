@@ -5,7 +5,7 @@ import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { sessions } from "../../../lib/db/schema.ts";
 import { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
 import { validateProjectPath } from "../../project/functions/id.ts";
-import { sourceIdSchema } from "../../source/models/SourceId.ts";
+import { type SourceId, sourceIdSchema } from "../../source/models/SourceId.ts";
 import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import { validateSessionId } from "../functions/id.ts";
 
@@ -16,6 +16,7 @@ export class SessionNotFoundError extends Data.TaggedError("SessionNotFoundError
 
 export class UnsafeSessionPathError extends Data.TaggedError("UnsafeSessionPathError")<{
   readonly filePath: string;
+  readonly reason: "outside-source-roots" | "source-not-readable";
 }> {}
 
 export type SessionLocation = {
@@ -33,9 +34,11 @@ export type SessionLocation = {
  * split one session across two directories, so the cached `file_path` is the
  * authority instead.
  *
- * Every path is re-checked against the directories the enabled sources actually
- * read before it is handed back. The ids arrive from the URL, and a resolved
- * path is used to read and to delete.
+ * Every path is re-checked before it is handed back, against the roots of the
+ * one source the row claims — not against every root Lantern reads. Checking
+ * the union would let a row marked deletable pass on the strength of a
+ * directory belonging to a source Lantern must never delete from. The ids
+ * arrive from the URL, and a resolved path is used to read and to delete.
  */
 export type ISessionLocatorService = {
   readonly locate: (
@@ -57,14 +60,13 @@ const LayerImpl = Effect.gen(function* () {
     Layer.succeed(ApplicationContext, applicationContext),
   );
 
-  const allowedRoots = Effect.gen(function* () {
-    const adapters = yield* registry.enabled();
-    const roots: string[] = [];
-    for (const adapter of adapters) {
-      roots.push(...(yield* adapter.watchRoots()));
-    }
-    return roots;
-  }).pipe(Effect.provide(sourceEnv));
+  // Roots are fixed for the life of the process — they come from the Claude
+  // directory the server was started with — so they are resolved once here
+  // rather than on every lookup.
+  const rootsBySource = new Map<SourceId, readonly string[]>();
+  for (const adapter of yield* registry.enabled()) {
+    rootsBySource.set(adapter.id, yield* adapter.watchRoots().pipe(Effect.provide(sourceEnv)));
+  }
 
   const locate = (projectId: string, sessionId: string) =>
     Effect.gen(function* () {
@@ -86,18 +88,31 @@ const LayerImpl = Effect.gen(function* () {
         return yield* new SessionNotFoundError({ projectId, sessionId });
       }
 
-      const roots = yield* allowedRoots;
-      if (!validateProjectPath(row.filePath, roots)) {
-        return yield* new UnsafeSessionPathError({ filePath: row.filePath });
-      }
-
       const parsedSource = sourceIdSchema.safeParse(row.source);
       const adapter = parsedSource.success ? registry.get(parsedSource.data) : undefined;
+      const roots = adapter === undefined ? undefined : rootsBySource.get(adapter.id);
+
+      // A row whose source has no enabled adapter names no directory Lantern
+      // reads, so there is nothing to validate its path against and no way to
+      // serve the file. Refusing beats handing back an unchecked path.
+      if (adapter === undefined || roots === undefined) {
+        return yield* new UnsafeSessionPathError({
+          filePath: row.filePath,
+          reason: "source-not-readable",
+        });
+      }
+
+      if (!validateProjectPath(row.filePath, roots)) {
+        return yield* new UnsafeSessionPathError({
+          filePath: row.filePath,
+          reason: "outside-source-roots",
+        });
+      }
 
       return {
         filePath: row.filePath,
-        sourceId: row.source,
-        deletable: adapter?.capabilities.deletable ?? false,
+        sourceId: adapter.id,
+        deletable: adapter.capabilities.deletable,
       } satisfies SessionLocation;
     });
 

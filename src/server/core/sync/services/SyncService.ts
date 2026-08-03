@@ -54,10 +54,12 @@ const LayerImpl = Effect.gen(function* () {
 
   const canonicalize = (projectPath: string | null) =>
     Effect.gen(function* () {
-      const claudeCodePaths = yield* applicationContext.claudeCodePaths;
+      // The home directory, not the parent of the Claude directory: those are
+      // the same folder only when `--claude-dir` was left alone.
+      const homeDirectory = yield* applicationContext.homeDirectory;
       return canonicalizeProjectPath(projectPath, {
-        homeDirectory: path.dirname(claudeCodePaths.globalClaudeDirectoryPath),
-        platform: process.platform,
+        homeDirectory,
+        platform: applicationContext.platform,
       });
     });
 

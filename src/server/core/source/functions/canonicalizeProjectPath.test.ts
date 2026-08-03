@@ -55,4 +55,22 @@ describe("canonicalizeProjectPath", () => {
   it("keeps the filesystem root as a root", () => {
     expect(canonicalizeProjectPath("/")).toBe("/");
   });
+
+  it("keeps a relative path that climbs above itself distinct from one that does not", () => {
+    expect(canonicalizeProjectPath("../api")).toBe("../api");
+    expect(canonicalizeProjectPath("../api")).not.toBe(canonicalizeProjectPath("api"));
+  });
+
+  it("cannot climb out of an absolute path", () => {
+    expect(canonicalizeProjectPath("/../../etc")).toBe("/etc");
+  });
+
+  it("keeps a UNC share off the local root", () => {
+    expect(canonicalizeProjectPath("\\\\build\\share\\api", { platform: "win32" })).toBe(
+      "//build/share/api",
+    );
+    expect(canonicalizeProjectPath("//build/share/api")).not.toBe(
+      canonicalizeProjectPath("/build/share/api"),
+    );
+  });
 });

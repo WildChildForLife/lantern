@@ -49,6 +49,10 @@ export const sessions = sqliteTable(
     lastModifiedAt: text("last_modified_at").notNull(),
     syncedAt: integer("synced_at").notNull(),
     permissionAllowlistJson: text("permission_allowlist_json"),
+    // Deliberately not narrowed to `SourceId`: a row outlives the adapter that
+    // wrote it, so a downgrade or a removed adapter must read back as data
+    // rather than as a type error. `SessionLocatorService` is where an id
+    // without an adapter is turned into a refusal.
     source: text("source").notNull().default("claude-code"),
     // The source's own identifier — a filename, a row id, a thread id.
     sourceSessionKey: text("source_session_key"),
@@ -57,7 +61,11 @@ export const sessions = sqliteTable(
     nativeCostUsd: real("native_cost_usd"),
     // Whether `total_cost_usd` was reported by the source, derived from a known
     // price table, or is not knowable. Unknown must never render as $0.00.
-    costConfidence: text("cost_confidence").notNull().default("estimated"),
+    // A closed set, unlike `source`: it is Lantern's own judgement about a row,
+    // so it can never hold a value this build does not understand.
+    costConfidence: text("cost_confidence", { enum: ["reported", "estimated", "unknown"] })
+      .notNull()
+      .default("estimated"),
   },
   (table) => [
     index("idx_sessions_project_id").on(table.projectId),

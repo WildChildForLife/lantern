@@ -1,4 +1,7 @@
 /* Node built-ins are used directly here: driving the real migrator is the only way to reproduce an upgrade. */
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 import { drizzle } from "drizzle-orm/node-sqlite";
@@ -90,9 +93,31 @@ describe("cache database migrations", () => {
     expect(row?.label).toBe("Infra");
   });
 
-  it("is safe to run twice", () => {
-    const sqlite = migrateInMemory();
+  /**
+   * What a restart after an upgrade actually does: a second process opens the
+   * same file and runs the migrator again. An in-memory database cannot show
+   * this, since it dies with its connection.
+   */
+  it("is safe to run again against a database on disk", () => {
+    const directory = mkdtempSync(join(tmpdir(), "lantern-migrations-"));
+    const databasePath = join(directory, "cache.db");
 
-    expect(() => migrate(drizzle({ client: sqlite, schema }), { migrationsFolder })).not.toThrow();
+    try {
+      const first = new DatabaseSync(databasePath);
+      migrate(drizzle({ client: first, schema }), { migrationsFolder });
+      first.prepare("INSERT INTO projects (id, dir_mtime_ms, synced_at) VALUES ('p1', 0, 0)").run();
+      first.close();
+
+      const second = new DatabaseSync(databasePath);
+      expect(() =>
+        migrate(drizzle({ client: second, schema }), { migrationsFolder }),
+      ).not.toThrow();
+
+      const row = second.prepare("SELECT source FROM projects WHERE id = 'p1'").get();
+      expect(row?.source).toBe("claude-code");
+      second.close();
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 });

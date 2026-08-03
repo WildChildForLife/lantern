@@ -62,10 +62,10 @@ describe("SessionLocatorService", () => {
   );
 
   /**
-   * The cached path is the authority now, so a row pointing outside every root
-   * — however it got there — must not be handed to a caller that deletes.
+   * The cached path is the authority now, so a row pointing outside its source's
+   * roots — however it got there — must not be handed to a caller that deletes.
    */
-  it.live("rejects a cached path that escapes every source root", () =>
+  it.live("rejects a cached path that escapes the source's roots", () =>
     Effect.gen(function* () {
       const locator = yield* SessionLocatorService;
 
@@ -74,6 +74,7 @@ describe("SessionLocatorService", () => {
       expect(result._tag).toBe("Left");
       if (result._tag === "Left") {
         expect(result.left._tag).toBe("UnsafeSessionPathError");
+        expect(result.left).toMatchObject({ reason: "outside-source-roots" });
       }
     }).pipe(
       Effect.provide(SessionLocatorService.Live),
@@ -83,19 +84,29 @@ describe("SessionLocatorService", () => {
     ),
   );
 
-  it.live("treats a session from an unregistered source as not deletable", () =>
+  /**
+   * Roots are read from the adapter the row names, so a source with no enabled
+   * adapter has none — there is nothing to check the path against and nothing
+   * that could read the file. Validating against the union of every source's
+   * roots instead would let such a row pass on another CLI's directory.
+   */
+  it.live("refuses a session whose source has no enabled adapter", () =>
     Effect.gen(function* () {
       const locator = yield* SessionLocatorService;
 
-      const location = yield* locator.locate(PROJECT_ID, "foreign");
+      const result = yield* Effect.either(locator.locate(PROJECT_ID, "foreign"));
 
-      expect(location.deletable).toBe(false);
+      expect(result._tag).toBe("Left");
+      if (result._tag === "Left") {
+        expect(result.left).toMatchObject({ reason: "source-not-readable" });
+      }
     }).pipe(
       Effect.provide(SessionLocatorService.Live),
       Effect.provide(
         layerFor(
           seedSession({
             id: "foreign",
+            // Inside a root Lantern does read, so only the source rules it out.
             filePath: `${FIXTURE_PROJECT}/foreign.jsonl`,
             source: "some-future-cli",
           }),
@@ -111,6 +122,9 @@ describe("SessionLocatorService", () => {
       const result = yield* Effect.either(locator.locate(PROJECT_ID, "../../etc/shadow"));
 
       expect(result._tag).toBe("Left");
+      if (result._tag === "Left") {
+        expect(result.left._tag).toBe("SessionNotFoundError");
+      }
     }).pipe(
       Effect.provide(SessionLocatorService.Live),
       Effect.provide(
@@ -134,6 +148,9 @@ describe("SessionLocatorService", () => {
       );
 
       expect(result._tag).toBe("Left");
+      if (result._tag === "Left") {
+        expect(result.left._tag).toBe("SessionNotFoundError");
+      }
     }).pipe(
       Effect.provide(SessionLocatorService.Live),
       Effect.provide(

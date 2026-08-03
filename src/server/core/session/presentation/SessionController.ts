@@ -54,9 +54,19 @@ const LayerImpl = Effect.gen(function* () {
 
       // The ids come from the URL and the result is passed to fs.remove, so the
       // locator re-checks the path against the directories Lantern reads.
-      const location = yield* sessionLocatorService
-        .locate(projectId, sessionId)
-        .pipe(Effect.catchAll(() => Effect.succeed(null)));
+      const location = yield* sessionLocatorService.locate(projectId, sessionId).pipe(
+        // A cached path the locator refuses is corruption or tampering rather
+        // than a missing session. Both answer 404, but this one must not pass
+        // unrecorded.
+        Effect.tapError((error) =>
+          error._tag === "UnsafeSessionPathError"
+            ? Effect.logWarning(
+                `Refused a session whose cached path failed validation (${error.reason}): ${error.filePath}`,
+              )
+            : Effect.void,
+        ),
+        Effect.catchAll(() => Effect.succeed(null)),
+      );
 
       if (location === null) {
         return {
