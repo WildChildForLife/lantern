@@ -108,7 +108,7 @@
     "es-toolkit": "1.50.0",
     "esbuild": "0.28.0",
     "gatecheck": "0.0.1-beta.5",
-    "hono": "4.12.18",
+    "hono": "4.12.33",
     "inquirer": "13.4.2",
     "jotai": "2.20.0",
     "jsdom": "^30.0.1",
