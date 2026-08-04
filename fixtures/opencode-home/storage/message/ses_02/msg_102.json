@@ -24,6 +24,11 @@
       "type": "text",
       "id": "txt_2",
       "text": "The lock file was held by a cancelled job."
+    },
+    {
+      "type": "quantum-part",
+      "id": "qp_1",
+      "payload": "a shape this version does not know"
     }
   ]
 }

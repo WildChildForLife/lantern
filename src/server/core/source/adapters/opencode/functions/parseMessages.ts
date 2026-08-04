@@ -10,14 +10,21 @@ import { OPENCODE_SOURCE_ID } from "../../../models/SourceId.ts";
 
 /**
  * opencode writes one JSON file per message under
- * `storage/message/<sessionID>/<messageID>.json`. Every message carries a
- * `type` that says which of eight shapes it is, and an assistant message
- * carries its content inline as an array of text, reasoning and tool parts.
+ * `storage/message/<sessionID>/<messageID>.json`, and has done so in two
+ * shapes:
+ *
+ *   v1  the message is `{role, ...}` and its text, reasoning and tool parts are
+ *       separate files under `storage/part/<messageID>/<partID>.json`
+ *   v2  the message is `{type, ...}` and an assistant message carries the same
+ *       parts inline as `content`
+ *
+ * Both are read. The two differ only in where the parts live and in what a tool
+ * part calls its name and its call id, so one renderer handles both spellings.
  *
  * Only the shapes Lantern renders are modelled. Everything else is *recognised
- * and ignored* rather than dropped silently — an unparsed message means the
- * format moved, and that has to stay distinguishable from one that is simply
- * not conversation.
+ * and ignored* rather than dropped silently — a part shape that is neither
+ * rendered nor named is counted unreadable, because a format that moved has to
+ * be distinguishable from one that is simply not conversation.
  */
 const toolStateSchema = z.looseObject({
   status: z.string(),
@@ -26,64 +33,51 @@ const toolStateSchema = z.looseObject({
   error: z.unknown().optional(),
 });
 
-const assistantContentSchema = z.union([
-  z.object({ type: z.literal("text"), id: z.string().optional(), text: z.string() }),
-  z.object({ type: z.literal("reasoning"), id: z.string().optional(), text: z.string() }),
-  z.looseObject({
-    type: z.literal("tool"),
-    id: z.string().optional(),
-    name: z.string(),
-    state: toolStateSchema.optional(),
-  }),
-  z.looseObject({ type: z.string() }),
-]);
+const textPartSchema = z.looseObject({
+  type: z.literal("text"),
+  text: z.string(),
+  /** v1 marks harness-injected text so the CLI can hide it. So does Lantern. */
+  synthetic: z.boolean().optional(),
+  ignored: z.boolean().optional(),
+});
 
-const baseSchema = {
+const reasoningPartSchema = z.looseObject({
+  type: z.literal("reasoning"),
+  text: z.string(),
+});
+
+const toolPartSchema = z.looseObject({
+  type: z.literal("tool"),
+  /** `tool` in v1, `name` in v2. */
+  tool: z.string().optional(),
+  name: z.string().optional(),
+  /** `callID` in v1, the part's own `id` in v2. */
+  callID: z.string().optional(),
   id: z.string().optional(),
-  time: z.looseObject({ created: z.number().optional() }).optional(),
-};
-
-const userMessageSchema = z.looseObject({
-  ...baseSchema,
-  type: z.literal("user"),
-  text: z.string().default(""),
+  state: toolStateSchema.optional(),
 });
 
-const assistantMessageSchema = z.looseObject({
-  ...baseSchema,
-  type: z.literal("assistant"),
-  model: z.unknown().optional(),
-  content: z.array(assistantContentSchema).default([]),
-  cost: z.number().optional(),
-  tokens: z
-    .looseObject({
-      input: z.number().optional(),
-      output: z.number().optional(),
-      reasoning: z.number().optional(),
-      cache: z
-        .looseObject({ read: z.number().optional(), write: z.number().optional() })
-        .optional(),
-    })
-    .optional(),
-});
-
-const shellMessageSchema = z.looseObject({
-  ...baseSchema,
-  type: z.literal("shell"),
-  callID: z.string().default(""),
-  command: z.string().default(""),
-  output: z.string().default(""),
-});
-
-const typedMessageSchema = z.looseObject({ type: z.string() });
+const typedShapeSchema = z.looseObject({ type: z.string() });
 
 /**
- * Message types opencode writes that are not conversation.
+ * Part types opencode writes that are not conversation.
  *
- * Naming them is the point. `synthetic` and `system` are prompt scaffolding the
- * CLI injects, and the `-switched` records are UI bookkeeping. Letting them
- * fall through to the unparsed count would mean the count no longer says
- * anything about whether the format moved.
+ * Naming them is the point. Anything not listed and not rendered is counted
+ * unreadable, so a part shape that appears after a format change shows up as a
+ * number rather than as a turn that quietly went missing.
+ */
+const IGNORED_PART_TYPES = new Set([
+  "snapshot",
+  "patch",
+  "file",
+  "step-start",
+  "step-finish",
+  "agent",
+]);
+
+/**
+ * Message types that are not conversation: `synthetic` and `system` are prompt
+ * scaffolding the CLI injects, and the `-switched` records are bookkeeping.
  */
 const IGNORED_MESSAGE_TYPES = new Set([
   "synthetic",
@@ -93,9 +87,51 @@ const IGNORED_MESSAGE_TYPES = new Set([
   "compaction",
 ]);
 
+const baseFields = {
+  id: z.string().optional(),
+  time: z.looseObject({ created: z.number().optional() }).optional(),
+};
+
+/** v2: the shape is named by `type`. */
+const v2UserSchema = z.looseObject({ ...baseFields, type: z.literal("user"), text: z.string() });
+
+const v2AssistantSchema = z.looseObject({
+  ...baseFields,
+  type: z.literal("assistant"),
+  model: z.unknown().optional(),
+  content: z.array(z.unknown()).optional(),
+  cost: z.number().optional(),
+  tokens: z.unknown().optional(),
+});
+
+const v2ShellSchema = z.looseObject({
+  ...baseFields,
+  type: z.literal("shell"),
+  callID: z.string().optional(),
+  command: z.string().default(""),
+  output: z.string().default(""),
+});
+
+/** v1: the shape is named by `role`, and the parts live elsewhere. */
+const v1MessageSchema = z.looseObject({
+  ...baseFields,
+  role: z.enum(["user", "assistant"]),
+  modelID: z.string().optional(),
+  providerID: z.string().optional(),
+  cost: z.number().optional(),
+  tokens: z.unknown().optional(),
+  path: z.looseObject({ cwd: z.string().optional() }).optional(),
+});
+
+const tokensSchema = z.looseObject({
+  input: z.number().optional(),
+  output: z.number().optional(),
+  cache: z.looseObject({ read: z.number().optional(), write: z.number().optional() }).optional(),
+});
+
 /**
  * opencode names a model as a provider/model pair rather than a string. Only
- * the model part is a name Lantern's pricing would recognise, and neither is
+ * the model part is a name a price table would recognise, and neither is
  * trusted to exist.
  */
 const modelRefSchema = z.union([
@@ -103,11 +139,11 @@ const modelRefSchema = z.union([
   z.looseObject({ providerID: z.string().optional(), modelID: z.string().optional() }),
 ]);
 
-const modelName = (value: unknown): string => {
+const modelName = (value: unknown): string | null => {
   const parsed = modelRefSchema.safeParse(value);
-  if (!parsed.success) return "unknown";
+  if (!parsed.success) return null;
   if (typeof parsed.data === "string") return parsed.data;
-  return parsed.data.modelID ?? "unknown";
+  return parsed.data.modelID ?? null;
 };
 
 export type OpencodeUsage = {
@@ -122,6 +158,8 @@ export type ParsedMessages = {
   readonly entries: readonly ExtendedConversation[];
   readonly messageCount: number;
   readonly modelName: string | null;
+  /** The working directory v1 records on each assistant message, if it did. */
+  readonly cwd: string | null;
   /**
    * What the CLI itself recorded spending. opencode is one of the few that
    * writes a cost per assistant turn, so Lantern never has to estimate it.
@@ -131,21 +169,26 @@ export type ParsedMessages = {
   readonly unparsedFiles: readonly string[];
 };
 
-/** One message file, still in the order its filename sorts to. */
+/**
+ * One message file, and — for the version that stores them separately — the
+ * part files belonging to it, both already in the order their names sort to.
+ */
 export type MessageFile = {
   readonly fileName: string;
   readonly json: unknown;
+  readonly parts?: readonly unknown[];
 };
 
 const toolResultText = (state: z.infer<typeof toolStateSchema> | undefined): string => {
   if (state === undefined) return "";
   if (typeof state.output === "string" && state.output !== "") return state.output;
+  if (typeof state.error === "string" && state.error !== "") return state.error;
   if (state.error !== undefined && state.error !== null) return JSON.stringify(state.error);
   return "";
 };
 
 /**
- * Translates a session's message files into Claude-shaped conversation entries.
+ * Translates a session's messages into Claude-shaped conversation entries.
  *
  * The base fields every entry needs — uuid, parent, cwd, session id — are
  * synthesised from the session's own identity, so re-reading the same session
@@ -159,6 +202,7 @@ export const parseMessages = (
   let ignored = 0;
   let unparsed = 0;
   let lastModel: string | null = null;
+  let recordedCwd: string | null = null;
 
   let costUsd: number | null = null;
   let inputTokens = 0;
@@ -167,6 +211,11 @@ export const parseMessages = (
   let cacheCreationTokens = 0;
 
   const pending: Array<(uuid: string) => Conversation & { uuid: string }> = [];
+
+  const recordUnparsed = (fileName: string) => {
+    unparsed += 1;
+    if (unparsedFiles.length < 3) unparsedFiles.push(fileName);
+  };
 
   const base = (createdMs: number | undefined) => ({
     isSidechain: false,
@@ -177,23 +226,259 @@ export const parseMessages = (
     sessionId: options.sessionKey,
   });
 
-  for (const { fileName, json } of files) {
-    const typed = typedMessageSchema.safeParse(json);
-    if (!typed.success) {
-      unparsed += 1;
-      if (unparsedFiles.length < 3) unparsedFiles.push(fileName);
+  const addUsage = (cost: number | undefined, tokens: unknown) => {
+    if (typeof cost === "number") {
+      costUsd = (costUsd ?? 0) + cost;
+    }
+
+    const parsed = tokensSchema.safeParse(tokens);
+    if (!parsed.success) return;
+
+    inputTokens += parsed.data.input ?? 0;
+    outputTokens += parsed.data.output ?? 0;
+    cacheReadTokens += parsed.data.cache?.read ?? 0;
+    cacheCreationTokens += parsed.data.cache?.write ?? 0;
+  };
+
+  const pushText = (entryBase: ReturnType<typeof base>, model: string, text: string) => {
+    pending.push((uuid) => ({
+      ...entryBase,
+      type: "assistant",
+      uuid,
+      parentUuid: null,
+      message: {
+        id: uuid,
+        type: "message",
+        role: "assistant",
+        model,
+        content: [{ type: "text", text }],
+        stop_reason: null,
+        stop_sequence: null,
+      },
+    }));
+  };
+
+  const pushThinking = (entryBase: ReturnType<typeof base>, model: string, thinking: string) => {
+    pending.push((uuid) => ({
+      ...entryBase,
+      type: "assistant",
+      uuid,
+      parentUuid: null,
+      message: {
+        id: uuid,
+        type: "message",
+        role: "assistant",
+        model,
+        content: [{ type: "thinking", thinking }],
+        stop_reason: null,
+        stop_sequence: null,
+      },
+    }));
+  };
+
+  const pushToolPair = (
+    entryBase: ReturnType<typeof base>,
+    model: string,
+    call: { readonly id: string; readonly name: string; readonly input: Record<string, unknown> },
+    output: string,
+  ) => {
+    pending.push((uuid) => ({
+      ...entryBase,
+      type: "assistant",
+      uuid,
+      parentUuid: null,
+      message: {
+        id: uuid,
+        type: "message",
+        role: "assistant",
+        model,
+        content: [
+          {
+            type: "tool_use",
+            id: call.id === "" ? uuid : call.id,
+            name: call.name,
+            input: call.input,
+          },
+        ],
+        stop_reason: null,
+        stop_sequence: null,
+      },
+    }));
+
+    // A tool that has not finished has no result to show yet. An unpaired call
+    // is ordinary in a transcript of an interrupted turn, and renders.
+    if (output === "") return;
+
+    pending.push((uuid) => ({
+      ...entryBase,
+      type: "user",
+      uuid,
+      parentUuid: null,
+      message: {
+        role: "user",
+        content: [
+          { type: "tool_result", tool_use_id: call.id === "" ? uuid : call.id, content: output },
+        ],
+      },
+    }));
+  };
+
+  /**
+   * Renders the parts of one assistant turn, wherever they came from.
+   *
+   * Returns the text of any user-role text parts, which v1 keeps here rather
+   * than on the message.
+   */
+  const renderParts = (
+    parts: readonly unknown[],
+    entryBase: ReturnType<typeof base>,
+    model: string,
+    fileName: string,
+    collectTextInsteadOfRendering: boolean,
+  ): string => {
+    const collected: string[] = [];
+
+    for (const part of parts) {
+      const text = textPartSchema.safeParse(part);
+      if (text.success) {
+        // v1 flags harness-injected text; it is not something the user wrote.
+        if (text.data.synthetic === true || text.data.ignored === true || text.data.text === "") {
+          ignored += 1;
+          continue;
+        }
+        if (collectTextInsteadOfRendering) {
+          collected.push(text.data.text);
+          continue;
+        }
+        pushText(entryBase, model, text.data.text);
+        continue;
+      }
+
+      const reasoning = reasoningPartSchema.safeParse(part);
+      if (reasoning.success) {
+        if (reasoning.data.text === "") {
+          ignored += 1;
+          continue;
+        }
+        pushThinking(entryBase, model, reasoning.data.text);
+        continue;
+      }
+
+      const tool = toolPartSchema.safeParse(part);
+      if (tool.success) {
+        const name = tool.data.tool ?? tool.data.name;
+        if (name === undefined) {
+          // A tool part whose name is under neither spelling is a shape this
+          // does not know, not a tool it chose not to show.
+          recordUnparsed(fileName);
+          continue;
+        }
+
+        const state = toolStateSchema.safeParse(tool.data.state);
+        pushToolPair(
+          entryBase,
+          model,
+          {
+            id: tool.data.callID ?? tool.data.id ?? "",
+            name,
+            input: state.success ? (state.data.input ?? {}) : {},
+          },
+          state.success ? toolResultText(state.data) : "",
+        );
+        continue;
+      }
+
+      const typed = typedShapeSchema.safeParse(part);
+      if (typed.success && IGNORED_PART_TYPES.has(typed.data.type)) {
+        ignored += 1;
+        continue;
+      }
+
+      recordUnparsed(fileName);
+    }
+
+    return collected.join("\n");
+  };
+
+  for (const { fileName, json, parts } of files) {
+    const typed = typedShapeSchema.safeParse(json);
+
+    if (typed.success) {
+      if (IGNORED_MESSAGE_TYPES.has(typed.data.type)) {
+        ignored += 1;
+        continue;
+      }
+
+      const user = v2UserSchema.safeParse(json);
+      if (user.success) {
+        const entryBase = base(user.data.time?.created);
+        const text = user.data.text;
+        pending.push((uuid) => ({
+          ...entryBase,
+          type: "user",
+          uuid,
+          parentUuid: null,
+          message: { role: "user", content: text },
+        }));
+        continue;
+      }
+
+      const assistant = v2AssistantSchema.safeParse(json);
+      if (assistant.success) {
+        const entryBase = base(assistant.data.time?.created);
+        const model = modelName(assistant.data.model);
+        lastModel = model ?? lastModel;
+        addUsage(assistant.data.cost, assistant.data.tokens);
+
+        // Inline in v2, in sibling files in v1. A message with neither is a
+        // shape this does not know: saying nothing about it would render the
+        // turn as though the assistant had not spoken.
+        const own = assistant.data.content ?? parts;
+        if (own === undefined) {
+          recordUnparsed(fileName);
+          continue;
+        }
+
+        renderParts(own, entryBase, model ?? "unknown", fileName, false);
+        continue;
+      }
+
+      const shell = v2ShellSchema.safeParse(json);
+      if (shell.success) {
+        const entryBase = base(shell.data.time?.created);
+        pushToolPair(
+          entryBase,
+          lastModel ?? "unknown",
+          {
+            id: shell.data.callID ?? shell.data.id ?? "",
+            name: "shell",
+            input: { command: shell.data.command },
+          },
+          shell.data.output,
+        );
+        continue;
+      }
+
+      recordUnparsed(fileName);
       continue;
     }
 
-    if (IGNORED_MESSAGE_TYPES.has(typed.data.type)) {
-      ignored += 1;
-      continue;
-    }
+    const v1 = v1MessageSchema.safeParse(json);
+    if (v1.success) {
+      const entryBase = base(v1.data.time?.created);
+      recordedCwd = v1.data.path?.cwd ?? recordedCwd;
 
-    const user = userMessageSchema.safeParse(json);
-    if (user.success) {
-      const entryBase = base(user.data.time?.created);
-      const text = user.data.text;
+      if (v1.data.role === "assistant") {
+        lastModel = v1.data.modelID ?? lastModel;
+        addUsage(v1.data.cost, v1.data.tokens);
+        renderParts(parts ?? [], entryBase, v1.data.modelID ?? "unknown", fileName, false);
+        continue;
+      }
+
+      // A v1 user message keeps its text in parts rather than on the message,
+      // so the parts are collected into the one turn the user took.
+      const text = renderParts(parts ?? [], entryBase, "unknown", fileName, true);
+      if (text === "") continue;
 
       pending.push((uuid) => ({
         ...entryBase,
@@ -205,180 +490,7 @@ export const parseMessages = (
       continue;
     }
 
-    const assistant = assistantMessageSchema.safeParse(json);
-    if (assistant.success) {
-      const entryBase = base(assistant.data.time?.created);
-      const model = modelName(assistant.data.model);
-      lastModel = model === "unknown" ? lastModel : model;
-
-      if (typeof assistant.data.cost === "number") {
-        costUsd = (costUsd ?? 0) + assistant.data.cost;
-      }
-      inputTokens += assistant.data.tokens?.input ?? 0;
-      outputTokens += assistant.data.tokens?.output ?? 0;
-      cacheReadTokens += assistant.data.tokens?.cache?.read ?? 0;
-      cacheCreationTokens += assistant.data.tokens?.cache?.write ?? 0;
-
-      // One opencode message holds a whole turn. Its tool parts become the
-      // tool_use/tool_result pairs the viewer threads, which means one message
-      // can produce several entries.
-      for (const part of assistant.data.content) {
-        if (part.type === "text" && "text" in part && typeof part.text === "string") {
-          const text = part.text;
-          if (text === "") {
-            ignored += 1;
-            continue;
-          }
-          pending.push((uuid) => ({
-            ...entryBase,
-            type: "assistant",
-            uuid,
-            parentUuid: null,
-            message: {
-              id: uuid,
-              type: "message",
-              role: "assistant",
-              model,
-              content: [{ type: "text", text }],
-              stop_reason: null,
-              stop_sequence: null,
-            },
-          }));
-          continue;
-        }
-
-        if (part.type === "reasoning" && "text" in part && typeof part.text === "string") {
-          const text = part.text;
-          if (text === "") {
-            ignored += 1;
-            continue;
-          }
-          pending.push((uuid) => ({
-            ...entryBase,
-            type: "assistant",
-            uuid,
-            parentUuid: null,
-            message: {
-              id: uuid,
-              type: "message",
-              role: "assistant",
-              model,
-              content: [{ type: "thinking", thinking: text }],
-              stop_reason: null,
-              stop_sequence: null,
-            },
-          }));
-          continue;
-        }
-
-        const tool = assistantContentSchema.options[2].safeParse(part);
-        if (tool.success) {
-          const callId = tool.data.id ?? "";
-          const state = toolStateSchema.safeParse(tool.data.state);
-          const input = state.success ? (state.data.input ?? {}) : {};
-          const output = state.success ? toolResultText(state.data) : "";
-
-          pending.push((uuid) => ({
-            ...entryBase,
-            type: "assistant",
-            uuid,
-            parentUuid: null,
-            message: {
-              id: uuid,
-              type: "message",
-              role: "assistant",
-              model,
-              content: [
-                {
-                  type: "tool_use",
-                  id: callId === "" ? uuid : callId,
-                  name: tool.data.name,
-                  input,
-                },
-              ],
-              stop_reason: null,
-              stop_sequence: null,
-            },
-          }));
-
-          // A tool part that has not finished has no result to show yet.
-          if (output === "") continue;
-
-          pending.push((uuid) => ({
-            ...entryBase,
-            type: "user",
-            uuid,
-            parentUuid: null,
-            message: {
-              role: "user",
-              content: [
-                {
-                  type: "tool_result",
-                  tool_use_id: callId === "" ? uuid : callId,
-                  content: output,
-                },
-              ],
-            },
-          }));
-          continue;
-        }
-
-        ignored += 1;
-      }
-      continue;
-    }
-
-    // A shell message is a command the user ran through the CLI rather than a
-    // turn. It reads like a tool call, so it is shown as one.
-    const shell = shellMessageSchema.safeParse(json);
-    if (shell.success) {
-      const entryBase = base(shell.data.time?.created);
-      const callId = shell.data.callID === "" ? shell.data.id : shell.data.callID;
-
-      pending.push((uuid) => ({
-        ...entryBase,
-        type: "assistant",
-        uuid,
-        parentUuid: null,
-        message: {
-          id: uuid,
-          type: "message",
-          role: "assistant",
-          model: lastModel ?? "unknown",
-          content: [
-            {
-              type: "tool_use",
-              id: callId === undefined || callId === "" ? uuid : callId,
-              name: "shell",
-              input: { command: shell.data.command },
-            },
-          ],
-          stop_reason: null,
-          stop_sequence: null,
-        },
-      }));
-
-      pending.push((uuid) => ({
-        ...entryBase,
-        type: "user",
-        uuid,
-        parentUuid: null,
-        message: {
-          role: "user",
-          content: [
-            {
-              type: "tool_result",
-              tool_use_id: callId === undefined || callId === "" ? uuid : callId,
-              content: shell.data.output,
-            },
-          ],
-        },
-      }));
-      continue;
-    }
-
-    unparsed += 1;
-    if (unparsedFiles.length < 3) unparsedFiles.push(fileName);
+    recordUnparsed(fileName);
   }
 
   const entries = linkParents(
@@ -391,6 +503,7 @@ export const parseMessages = (
     entries,
     messageCount: entries.length,
     modelName: lastModel,
+    cwd: recordedCwd,
     usage: { costUsd, inputTokens, outputTokens, cacheReadTokens, cacheCreationTokens },
     parseStats: {
       total: entries.length + ignored + unparsed,

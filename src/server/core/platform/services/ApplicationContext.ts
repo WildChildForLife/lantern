@@ -72,11 +72,13 @@ const LayerImpl = Effect.gen(function* () {
     if (sourceId === OPENCODE_SOURCE_ID) {
       // opencode has no home of its own — it sits under the XDG data directory,
       // so the variable that moves it is the one that moves everything there.
+      // Empty means "use the default" under the XDG spec, not "the current
+      // directory" — which is what joining onto it would produce.
       return envService
         .getEnv("XDG_DATA_HOME")
         .pipe(
           Effect.map((dataHome) =>
-            dataHome === undefined ? undefined : path.join(dataHome, "opencode"),
+            dataHome === undefined || dataHome === "" ? undefined : path.join(dataHome, "opencode"),
           ),
         );
     }

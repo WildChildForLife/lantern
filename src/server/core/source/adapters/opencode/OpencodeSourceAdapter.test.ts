@@ -115,6 +115,54 @@ const byCodePoint = (a: string | null, b: string | null): number => {
   return left < right ? -1 : left > right ? 1 : 0;
 };
 
+const readSessionOf = (cwd: string) =>
+  Effect.gen(function* () {
+    const found = yield* opencodeSourceAdapter.listProjects();
+    const project = found.find((candidate) => candidate.cwd === cwd);
+    if (project === undefined) {
+      throw new Error(`fixture workspace missing: ${cwd}`);
+    }
+
+    const refs = yield* opencodeSourceAdapter.listSessions(project);
+    const ref = refs.at(0);
+    if (ref === undefined) {
+      throw new Error(`fixture session missing: ${cwd}`);
+    }
+
+    return yield* opencodeSourceAdapter.readSession(ref);
+  });
+
+/** One field of an entry, for fields the error-entry variant does not carry. */
+const fieldOf = (entry: { readonly type: string }, key: string): string | undefined => {
+  if (!(key in entry)) return undefined;
+  const value: unknown = Reflect.get(entry, key);
+  return typeof value === "string" ? value : undefined;
+};
+
+/** Every entry's text, in order, whatever kind of block carries it. */
+const textsOf = (entries: readonly { readonly type: string }[]): string[] =>
+  entries.flatMap((entry) => {
+    if (!("message" in entry) || typeof entry.message !== "object" || entry.message === null) {
+      return [];
+    }
+    if (!("content" in entry.message)) return [];
+
+    const content = entry.message.content;
+    if (typeof content === "string") return [content];
+    if (!Array.isArray(content)) return [];
+
+    return content.flatMap((part: unknown) => {
+      if (typeof part !== "object" || part === null || !("type" in part)) return [];
+      if (part.type === "text" && "text" in part && typeof part.text === "string") {
+        return [part.text];
+      }
+      if (part.type === "thinking" && "thinking" in part && typeof part.thinking === "string") {
+        return [part.thinking];
+      }
+      return [];
+    });
+  });
+
 describe("opencodeSourceAdapter", () => {
   it.live("reads a workspace from the project file its session directory is named for", () =>
     Effect.gen(function* () {
@@ -122,6 +170,7 @@ describe("opencodeSourceAdapter", () => {
 
       expect(found.map((project) => project.cwd).toSorted(byCodePoint)).toStrictEqual([
         "/home/demo/infra",
+        "/home/demo/legacy-app",
         "/home/demo/orders-api",
       ]);
       // opencode keeps a real directory per project, so the id is an ordinary
@@ -174,6 +223,126 @@ describe("opencodeSourceAdapter", () => {
       expect(read.parseStats.ignored).toBeGreaterThanOrEqual(2);
       expect(read.parseStats.unparsed).toBe(1);
     }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("renders every turn, in the order they were taken", () =>
+    Effect.gen(function* () {
+      const read = yield* findSession;
+
+      // Asserting the whole conversation, not that something came back: a
+      // dialect that quietly drops user turns, or one that emits them out of
+      // order, produces a plausible-looking session either way.
+      expect(textsOf(read.entries)).toStrictEqual([
+        "The orders endpoint 500s on empty carts",
+        "Check the handler before reading the tests.",
+        "`create_order` divides by `len(cart.items)` without guarding the empty case.",
+      ]);
+      expect(read.entries.every((entry) => fieldOf(entry, "cwd") === "/home/demo/orders-api")).toBe(
+        true,
+      );
+      expect(read.reportedUsage?.modelName).toBe("claude-sonnet-4-5");
+    }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("chains each entry to the one before it", () =>
+    Effect.gen(function* () {
+      const read = yield* findSession;
+
+      // The viewer threads a conversation by parentUuid; an unchained list
+      // renders as a pile.
+      const uuids = read.entries.map((entry) => fieldOf(entry, "uuid"));
+      const parents = read.entries.map((entry) => fieldOf(entry, "parentUuid"));
+
+      expect(parents.at(0)).toBeUndefined();
+      expect(parents.slice(1)).toStrictEqual(uuids.slice(0, -1));
+    }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("reads the older layout, where parts are files of their own", () =>
+    Effect.gen(function* () {
+      const read = yield* readSessionOf("/home/demo/legacy-app");
+
+      // opencode has shipped two storage shapes: one keeping a message's parts
+      // beside it, one inline. Reading only the newer would render every
+      // session of an older install as a list of blank turns.
+      expect(textsOf(read.entries)).toStrictEqual([
+        "Bump the node version",
+        "Check the engines field.",
+        "Raised it to >=24.",
+      ]);
+      expect(read.reportedUsage?.modelName).toBe("claude-sonnet-4-5");
+      // `step-start` is bookkeeping; the synthetic text part is injected
+      // context rather than something the user wrote.
+      expect(read.parseStats.unparsed).toBe(0);
+      expect(read.parseStats.ignored).toBeGreaterThanOrEqual(2);
+    }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("pairs the older layout's tool call, which spells its name differently", () =>
+    Effect.gen(function* () {
+      const read = yield* readSessionOf("/home/demo/legacy-app");
+
+      const callIds = read.entries.flatMap((entry) => idsOfType(entry, "tool_use", "id"));
+      const resultIds = read.entries.flatMap((entry) =>
+        idsOfType(entry, "tool_result", "tool_use_id"),
+      );
+
+      // The older layout names a tool `tool` and its call `callID`; the newer
+      // uses `name` and `id`. Reading only one spelling loses every tool call
+      // in half the installations.
+      expect(callIds).toContain("call_legacy");
+      expect(resultIds).toContain("call_legacy");
+    }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("shows a shell command and what it printed", () =>
+    Effect.gen(function* () {
+      const read = yield* findSession;
+
+      const shellResults = read.entries.flatMap((entry) =>
+        idsOfType(entry, "tool_result", "tool_use_id"),
+      );
+
+      expect(shellResults).toContain("sh_1");
+    }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("counts a part shape it does not recognise as unreadable", () =>
+    Effect.gen(function* () {
+      const read = yield* readSessionOf("/home/demo/infra");
+
+      // A part type that is neither rendered nor named is the signal that the
+      // format moved. Folding it in with the kinds Lantern skips by choice
+      // would leave a version change showing up as nothing at all.
+      expect(read.parseStats.unparsed).toBe(1);
+      expect(textsOf(read.entries)).toStrictEqual([
+        "Why did the nightly deploy stall?",
+        "The lock file was held by a cancelled job.",
+      ]);
+    }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("refuses to claim support when a session reads back empty", () =>
+    Effect.gen(function* () {
+      const detection = yield* opencodeSourceAdapter.detect();
+
+      // "Parsed without complaint" is not the test. A schema that expects a
+      // field the format no longer has parses every message happily and yields
+      // an empty conversation — which is how a whole history renders blank
+      // while the settings panel reports the source as working.
+      expect(detection.hasData).toBe(true);
+      expect(detection.supported).toBe(false);
+      expect(detection.unsupportedReason).toBe("unknown-shape");
+    }).pipe(
+      Effect.provide(
+        Layer.mergeAll(
+          testPlatformLayer({
+            sourceRoots: { opencode: `${process.cwd()}/fixtures/opencode-empty` },
+          }),
+          NodeContext.layer,
+        ),
+      ),
+    ),
   );
 
   it.live("takes the cost opencode recorded rather than pricing it again", () =>
@@ -246,7 +415,7 @@ describe("opencodeSourceAdapter", () => {
       const sessionRows = db.select().from(sessions).all();
 
       expect(projectRows.every((row) => row.source === "opencode")).toBe(true);
-      expect(sessionRows).toHaveLength(2);
+      expect(sessionRows).toHaveLength(3);
 
       // The cost came from opencode, so it is reported rather than estimated
       // and is kept as the source's own number too.

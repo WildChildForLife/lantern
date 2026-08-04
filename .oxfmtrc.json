@@ -5,5 +5,9 @@
     "newlinesBetween": false
   },
   "experimentalSortPackageJson": true,
-  "ignorePatterns": ["src/web/routeTree.gen.ts", "src/lib/i18n/locales/**", "fixtures/**"]
+  "ignorePatterns": [
+    "src/web/routeTree.gen.ts",
+    "src/lib/i18n/locales/**",
+    "fixtures/opencode-home/storage/message/ses_01/msg_006.json"
+  ]
 }

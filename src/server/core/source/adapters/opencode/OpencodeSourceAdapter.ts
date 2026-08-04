@@ -28,6 +28,8 @@ const STORAGE_DIR = "storage";
 const PROJECT_DIR = "project";
 const SESSION_DIR = "session";
 const MESSAGE_DIR = "message";
+/** Only the older layout writes these; the newer one keeps parts on the message. */
+const PART_DIR = "part";
 
 const projectFileSchema = z.looseObject({
   id: z.string(),
@@ -90,11 +92,11 @@ const makeAdapter = (): SourceAdapter => {
         .pipe(Effect.catchAll(() => Effect.succeed(null)));
       if (content === null) return null;
 
-      try {
-        return JSON.parse(content) as unknown;
-      } catch {
-        return null;
-      }
+      // Typed on the parse rather than cast after it, so nothing here claims to
+      // know the shape of a file another program wrote.
+      return yield* Effect.try((): unknown => JSON.parse(content)).pipe(
+        Effect.catchAll(() => Effect.succeed(null)),
+      );
     });
 
   /** Every `*.json` directly inside a directory, sorted by name. */
@@ -106,6 +108,42 @@ const makeAdapter = (): SourceAdapter => {
         .pipe(Effect.catchAll(() => Effect.succeed<string[]>([])));
 
       return names.filter((name) => name.endsWith(".json")).sort();
+    });
+
+  /**
+   * A session's messages, each with the part files belonging to it.
+   *
+   * The version that keeps parts inline leaves the part directory absent, so
+   * this reads it for both and passes on whatever it finds. A message file that
+   * did not parse is passed on rather than skipped: dropping it here would lose
+   * a message and count nothing, which is the shape of a format change that
+   * looks like it worked.
+   */
+  const readMessages = (storage: string, sessionId: string) =>
+    Effect.gen(function* () {
+      const path = yield* Path.Path;
+      const messageDirectory = path.join(storage, MESSAGE_DIR, sessionId);
+
+      const files: MessageFile[] = [];
+      // opencode ids sort chronologically, so directory order is conversation
+      // order and nothing has to be sorted by timestamp.
+      for (const name of yield* listJsonFiles(messageDirectory)) {
+        const messageId = name.replace(/\.json$/, "");
+        const partDirectory = path.join(storage, PART_DIR, messageId);
+
+        const parts: unknown[] = [];
+        for (const partName of yield* listJsonFiles(partDirectory)) {
+          parts.push(yield* readJson(path.join(partDirectory, partName)));
+        }
+
+        files.push({
+          fileName: name,
+          json: yield* readJson(path.join(messageDirectory, name)),
+          parts: parts.length === 0 ? undefined : parts,
+        });
+      }
+
+      return files;
     });
 
   const listProjects = () =>
@@ -185,16 +223,7 @@ const makeAdapter = (): SourceAdapter => {
         });
       }
 
-      const messageDirectory = path.join(storage, MESSAGE_DIR, info.data.id);
-      const files: MessageFile[] = [];
-      // opencode ids sort chronologically, so the directory order is the
-      // conversation order and nothing has to be sorted by timestamp.
-      for (const name of yield* listJsonFiles(messageDirectory)) {
-        // A file that did not parse is passed on rather than skipped. Dropping
-        // it here would lose a message and count nothing, which is the shape of
-        // a format change that looks like it worked.
-        files.push({ fileName: name, json: yield* readJson(path.join(messageDirectory, name)) });
-      }
+      const files = yield* readMessages(storage, info.data.id);
 
       const parsed = parseMessages(files, {
         sessionKey: ref.sourceSessionKey,
@@ -204,7 +233,7 @@ const makeAdapter = (): SourceAdapter => {
 
       if (parsed.parseStats.unparsed > 0) {
         yield* Effect.logWarning(
-          `${parsed.parseStats.unparsed} unreadable messages in ${messageDirectory}: ${parsed.unparsedFiles.join(" | ")}`,
+          `${parsed.parseStats.unparsed} unreadable messages in ${path.join(storage, MESSAGE_DIR, info.data.id)}: ${parsed.unparsedFiles.join(" | ")}`,
         );
       }
 
@@ -226,9 +255,20 @@ const makeAdapter = (): SourceAdapter => {
    *
    * Entries carry a `cwd`, and getting it wrong is worse than leaving it empty:
    * it is what the viewer shows as the session's directory.
+   *
+   * Memoised because every session read needs it and a project has thousands of
+   * them, while the file it comes from changes about never. There are as many
+   * entries as there are projects.
    */
+  const projectCwds = new Map<string, string>();
+
   const projectCwdFor = (projectStoragePath: string) =>
     Effect.gen(function* () {
+      const cached = projectCwds.get(projectStoragePath);
+      if (cached !== undefined) {
+        return cached;
+      }
+
       const path = yield* Path.Path;
       const storage = yield* storagePath;
       const projectId = path.basename(projectStoragePath);
@@ -237,7 +277,9 @@ const makeAdapter = (): SourceAdapter => {
         yield* readJson(path.join(storage, PROJECT_DIR, `${projectId}.json`)),
       );
 
-      return parsed.success ? (parsed.data.worktree ?? "") : "";
+      const cwd = parsed.success ? (parsed.data.worktree ?? "") : "";
+      projectCwds.set(projectStoragePath, cwd);
+      return cwd;
     });
 
   const resolveSessionRef = (projectStoragePath: string, sessionId: string) =>
@@ -290,30 +332,27 @@ const makeAdapter = (): SourceAdapter => {
         } satisfies SourceDetection;
       }
 
-      // Parse a real session rather than trusting the layout: an installation
-      // that has moved its history into SQLite still has these directories, and
-      // must report itself rather than render as an empty list.
+      // Read a real session rather than trusting the layout, and require it to
+      // have produced something. "Parsed without complaint" is not the test: a
+      // schema that expects a field the format no longer has parses every
+      // message happily and yields an empty conversation, which is precisely
+      // how a whole history renders blank while looking like it worked.
       for (const project of projects) {
-        const refs = yield* listSessions(project);
-        const ref = refs.at(0);
-        if (ref === undefined) continue;
+        const sessionName = (yield* listJsonFiles(project.storagePath)).at(0);
+        if (sessionName === undefined) continue;
 
-        const info = sessionInfoSchema.safeParse(yield* readJson(ref.filePath));
+        const info = sessionInfoSchema.safeParse(
+          yield* readJson(path.join(project.storagePath, sessionName)),
+        );
         if (!info.success) continue;
 
-        const messageDirectory = path.join(storage, MESSAGE_DIR, info.data.id);
-        const names = yield* listJsonFiles(messageDirectory);
-        if (names.length === 0) continue;
+        const parsed = parseMessages(yield* readMessages(storage, info.data.id), {
+          sessionKey: info.data.id,
+          cwd: project.cwd ?? "",
+          version: "unknown",
+        });
 
-        const first = names.at(0);
-        if (first === undefined) continue;
-
-        const parsed = parseMessages(
-          [{ fileName: first, json: yield* readJson(path.join(messageDirectory, first)) }],
-          { sessionKey: info.data.id, cwd: project.cwd ?? "", version: "unknown" },
-        );
-
-        if (parsed.parseStats.unparsed === 0) {
+        if (parsed.entries.length > 0 && parsed.parseStats.unparsed === 0) {
           return {
             sourceId: OPENCODE_SOURCE_ID,
             rootPath: root,

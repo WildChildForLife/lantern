@@ -1,0 +1,8 @@
+{
+  "id": "prt_b",
+  "sessionID": "ses_03",
+  "messageID": "msg_201",
+  "type": "text",
+  "text": "Injected context",
+  "synthetic": true
+}
