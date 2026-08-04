@@ -183,7 +183,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        290
+        305
       ]
     ],
     "translation": "Enterキーの動作を選択"
@@ -194,7 +194,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        348
+        363
       ]
     ],
     "translation": "ページ内検索ホットキーを選択"
@@ -205,7 +205,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        434
+        449
       ]
     ],
     "translation": "言語を選択"
@@ -216,7 +216,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        322
+        337
       ]
     ],
     "translation": "検索ホットキーを選択"
@@ -227,7 +227,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        463
+        478
       ]
     ],
     "translation": "テーマを選択"
@@ -3454,7 +3454,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        282
+        297
       ]
     ],
     "translation": "Enterキーの動作"
@@ -3465,7 +3465,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        300
+        315
       ]
     ],
     "translation": "Command+Enterで送信"
@@ -3476,7 +3476,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        306
+        321
       ]
     ],
     "translation": "メッセージ入力でのEnterキーの動作を選択"
@@ -3487,7 +3487,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        297
+        312
       ]
     ],
     "translation": "Enterで送信"
@@ -3498,7 +3498,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        294
+        309
       ]
     ],
     "translation": "Shift+Enterで送信（デフォルト）"
@@ -3509,7 +3509,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        343
+        358
       ]
     ],
     "translation": "ページ内検索ホットキー"
@@ -3520,7 +3520,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        355
+        370
       ]
     ],
     "translation": "Command+F"
@@ -3531,7 +3531,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        352
+        367
       ]
     ],
     "translation": "Ctrl+F"
@@ -3542,7 +3542,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        361
+        376
       ]
     ],
     "translation": "ページ内検索を開くホットキーを選択します"
@@ -3553,7 +3553,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        314
+        329
       ]
     ],
     "translation": "検索ホットキー"
@@ -3564,7 +3564,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        329
+        344
       ]
     ],
     "translation": "Command+K"
@@ -3575,7 +3575,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        326
+        341
       ]
     ],
     "translation": "Ctrl+K"
@@ -3586,7 +3586,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        335
+        350
       ]
     ],
     "translation": "検索ダイアログを開くホットキーを選択します"
@@ -3612,7 +3612,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        429
+        444
       ]
     ],
     "translation": "言語"
@@ -3623,7 +3623,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        450
+        465
       ]
     ],
     "translation": "お好みの言語を選択"
@@ -3634,7 +3634,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        441
+        456
       ]
     ],
     "translation": "English"
@@ -3645,7 +3645,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        438
+        453
       ]
     ],
     "translation": "日本語"
@@ -3656,7 +3656,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        444
+        459
       ]
     ],
     "translation": "中国語（簡体字）"
@@ -3704,7 +3704,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        418
+        433
       ]
     ],
     "translation": "セッションツールバーで利用可能なモデル選択肢を設定します"
@@ -3716,7 +3716,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        369
+        384
       ]
     ],
     "translation": "モデル選択肢"
@@ -3728,7 +3728,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        399
+        414
       ]
     ],
     "translation": "モデル選択肢を追加..."
@@ -3743,6 +3743,54 @@
       ]
     ],
     "translation": "通知"
+  },
+  "settings.primary_source": {
+    "message": "Agent CLI",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        180
+      ]
+    ],
+    "translation": "エージェント CLI"
+  },
+  "settings.primary_source.description": {
+    "message": "The CLI Lantern centres on, and the one asked to name topics. Other enabled CLIs stay readable.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/PrimarySourceSelect.tsx",
+        57
+      ]
+    ],
+    "translation": "Lantern が中心に扱う CLI で、トピック名の生成を依頼する相手でもあります。有効にした他の CLI も引き続き閲覧できます。"
+  },
+  "settings.primary_source.select": {
+    "message": "Select an agent CLI",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/PrimarySourceSelect.tsx",
+        37
+      ]
+    ],
+    "translation": "エージェント CLI を選択"
+  },
+  "settings.primary_source.unavailable": {
+    "message": "not available",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/PrimarySourceSelect.tsx",
+        51
+      ]
+    ],
+    "translation": "利用不可"
   },
   "settings.sandbox.allowUnsandboxedCommands": {
     "message": "Allow unsandboxed commands",
@@ -3871,7 +3919,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        267
+        282
       ]
     ],
     "translation": "レート制限時に自動的に継続をスケジュール"
@@ -3882,7 +3930,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        273
+        288
       ]
     ],
     "translation": "Claude がレート制限に達した際に、自動的に継続メッセージをスケジュール実行します"
@@ -3904,7 +3952,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        223
+        238
       ]
     ],
     "translation": "ユーザーメッセージのないセッションを非表示"
@@ -3915,7 +3963,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        229
+        244
       ]
     ],
     "translation": "ユーザーコマンドまたはメッセージを含むセッションのみを表示"
@@ -3926,7 +3974,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        244
+        259
       ]
     ],
     "translation": "同じタイトルのセッションを統合"
@@ -3937,7 +3985,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        250
+        265
       ]
     ],
     "translation": "同じタイトルの複数のセッションがある場合、最新のセッションのみを表示"
@@ -3983,7 +4031,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        458
+        473
       ]
     ],
     "translation": "テーマ"
@@ -3994,7 +4042,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        470
+        485
       ]
     ],
     "translation": "ダーク"
@@ -4005,7 +4053,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        479
+        494
       ]
     ],
     "translation": "お好みのカラーテーマを選択"
@@ -4016,7 +4064,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        467
+        482
       ]
     ],
     "translation": "ライト"
@@ -4027,7 +4075,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        473
+        488
       ]
     ],
     "translation": "システム"
@@ -4055,7 +4103,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        178
+        192
       ]
     ],
     "translation": "利用モード"
@@ -4067,7 +4115,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        198
+        212
       ]
     ],
     "translation": "API"
@@ -4079,7 +4127,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        204
+        218
       ]
     ],
     "translation": "Claude Codeの利用方法を選択してください。サブスクリプションモードではAgent SDKが必要な機能が制限されます。"
@@ -4091,7 +4139,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        184
+        198
       ]
     ],
     "translation": "利用モードを選択"
@@ -4103,10 +4151,86 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        192
+        206
       ]
     ],
     "translation": "サブスクリプション (Max, Proなど)"
+  },
+  "setup.source.description": {
+    "message": "Lantern reads this CLI's conversations and asks it to name topics. You can change this later in settings.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        76
+      ]
+    ],
+    "translation": "Lantern はこの CLI の会話を読み取り、トピック名の生成も依頼します。後から設定で変更できます。"
+  },
+  "setup.source.detected": {
+    "message": "Detected",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        103
+      ]
+    ],
+    "translation": "検出済み"
+  },
+  "setup.source.detecting": {
+    "message": "Looking for installed CLIs…",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        86
+      ]
+    ],
+    "translation": "インストール済みの CLI を検索中…"
+  },
+  "setup.source.session_count": {
+    "message": "{count} conversations found",
+    "placeholders": {
+      "count": [
+        "source.stats.sessions"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        109
+      ]
+    ],
+    "translation": "{count} 件の会話が見つかりました"
+  },
+  "setup.source.title": {
+    "message": "Which agent CLI should Lantern use?",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        73
+      ]
+    ],
+    "translation": "Lantern で使うエージェント CLI はどれですか？"
+  },
+  "setup.source.unavailable": {
+    "message": "Not available on this machine",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        115
+      ]
+    ],
+    "translation": "このマシンでは利用できません"
   },
   "sidebar.back.to.projects": {
     "placeholders": {},
@@ -4655,7 +4779,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        75
+        172
       ]
     ],
     "translation": "APIキーを使用してClaude Codeを利用します。すべての機能が利用可能です。"
@@ -4667,7 +4791,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        71
+        168
       ]
     ],
     "translation": "API"
@@ -4679,7 +4803,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        36
+        133
       ]
     ],
     "translation": "利用モードを選択してください。この設定は後から変更できます。"
@@ -4691,7 +4815,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        33
+        130
       ]
     ],
     "translation": "Claude Codeの利用方法は？"
@@ -4703,7 +4827,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        56
+        153
       ]
     ],
     "translation": "サブスクリプションプラン（Max、Proなど）でClaude Codeを利用します。Agent SDKを必要とする一部の機能が制限されます。"
@@ -4715,7 +4839,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        52
+        149
       ]
     ],
     "translation": "サブスクリプション"

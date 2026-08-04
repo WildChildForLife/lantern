@@ -5,6 +5,7 @@ import { type FC, useId, useMemo, useState } from "react";
 import { DEFAULT_LOCALE, detectLocaleFromNavigator } from "@/lib/i18n/localeDetection";
 import type { SupportedLocale } from "@/lib/i18n/schema";
 import { useConfig } from "@/web/app/hooks/useConfig";
+import { PrimarySourceSelect } from "@/web/components/PrimarySourceSelect";
 import { Button } from "@/web/components/ui/button";
 import { Checkbox } from "@/web/components/ui/checkbox";
 import { Input } from "@/web/components/ui/input";
@@ -43,6 +44,7 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
   const [newModelChoice, setNewModelChoice] = useState("");
   const checkboxId = useId();
   const usageModeId = useId();
+  const primarySourceId = useId();
   const enterKeyBehaviorId = useId();
   const searchHotkeyId = useId();
   const findHotkeyId = useId();
@@ -174,40 +176,53 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
     <div className={`space-y-4 ${className}`}>
       <div className="space-y-2">
         {showLabels && (
-          <label htmlFor={usageModeId} className="text-sm font-medium leading-none">
-            <Trans id="settings.usage_mode" message="Usage Mode" />
+          <label htmlFor={primarySourceId} className="text-sm font-medium leading-none">
+            <Trans id="settings.primary_source" message="Agent CLI" />
           </label>
         )}
-        <Select value={config?.usageMode ?? ""} onValueChange={handleUsageModeChange}>
-          <SelectTrigger id={usageModeId} className="w-full">
-            <SelectValue
-              placeholder={i18n._({
-                id: "settings.usage_mode.select",
-                message: "Select usage mode",
-              })}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="subscription">
-              <Trans
-                id="settings.usage_mode.subscription"
-                message="Subscription (Max, Pro, etc.)"
-              />
-            </SelectItem>
-            <SelectItem value="api">
-              <Trans id="settings.usage_mode.api" message="API" />
-            </SelectItem>
-          </SelectContent>
-        </Select>
-        {showDescriptions && (
-          <p className="text-xs text-muted-foreground mt-1">
-            <Trans
-              id="settings.usage_mode.description"
-              message="Select how you use Claude Code. Subscription mode restricts features that require the Agent SDK."
-            />
-          </p>
-        )}
+        <PrimarySourceSelect id={primarySourceId} />
       </div>
+
+      {/* Only Claude Code has a subscription-versus-API distinction; for any
+          other CLI the question has no answer worth storing. */}
+      {config?.primarySource === "claude-code" || config?.primarySource === undefined ? (
+        <div className="space-y-2">
+          {showLabels && (
+            <label htmlFor={usageModeId} className="text-sm font-medium leading-none">
+              <Trans id="settings.usage_mode" message="Usage Mode" />
+            </label>
+          )}
+          <Select value={config?.usageMode ?? ""} onValueChange={handleUsageModeChange}>
+            <SelectTrigger id={usageModeId} className="w-full">
+              <SelectValue
+                placeholder={i18n._({
+                  id: "settings.usage_mode.select",
+                  message: "Select usage mode",
+                })}
+              />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="subscription">
+                <Trans
+                  id="settings.usage_mode.subscription"
+                  message="Subscription (Max, Pro, etc.)"
+                />
+              </SelectItem>
+              <SelectItem value="api">
+                <Trans id="settings.usage_mode.api" message="API" />
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          {showDescriptions && (
+            <p className="text-xs text-muted-foreground mt-1">
+              <Trans
+                id="settings.usage_mode.description"
+                message="Select how you use Claude Code. Subscription mode restricts features that require the Agent SDK."
+              />
+            </p>
+          )}
+        </div>
+      ) : null}
 
       <div className="flex items-center space-x-2">
         <Checkbox

@@ -83,7 +83,13 @@ version" is not checkable a month later; "works with 2.1.221" is.
 
 ## Reading the results
 
-Two things look like bugs and are not:
+Three things look like bugs and are not:
+
+- **"Sort N new" classifies nothing on the default model.** The classification
+  prompt asks for a JSON array covering forty conversations; a 0.6B model
+  answers, but not in a parseable shape. Everything up to that point is real —
+  the CLI is found, run headlessly, and its structured output parsed correctly.
+  Raise `OLLAMA_MODEL` to watch it succeed.
 
 - **Cost shows as unknown for every session.** The harness model is not in any
   price table, so nothing is invented. That is the intended behaviour, and it is
