@@ -182,8 +182,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        305
+        "src/web/components/settings/InputSettings.tsx",
+        82
       ]
     ],
     "translation": "Enterキーの動作を選択"
@@ -193,8 +193,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        363
+        "src/web/components/settings/InputSettings.tsx",
+        137
       ]
     ],
     "translation": "ページ内検索ホットキーを選択"
@@ -204,8 +204,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        449
+        "src/web/components/settings/AppearanceSettings.tsx",
+        47
       ]
     ],
     "translation": "言語を選択"
@@ -215,8 +215,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        337
+        "src/web/components/settings/InputSettings.tsx",
+        111
       ]
     ],
     "translation": "検索ホットキーを選択"
@@ -226,8 +226,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        478
+        "src/web/components/settings/AppearanceSettings.tsx",
+        76
       ]
     ],
     "translation": "テーマを選択"
@@ -1374,6 +1374,18 @@
     ],
     "translation": "この会話エントリの解析に失敗しました。フォーマットの変更または解析の問題が考えられます。"
   },
+  "conversations.filter.placeholder": {
+    "message": "Filter by title, first message or project...",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        99
+      ]
+    ],
+    "translation": "タイトル・最初のメッセージ・プロジェクトで絞り込む…"
+  },
   "cron_builder.cron_expression": {
     "placeholders": {},
     "comments": [],
@@ -1961,6 +1973,54 @@
       ]
     ],
     "translation": "MCPサーバー"
+  },
+  "nav.all_conversations": {
+    "message": "All conversations",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/page.tsx",
+        85
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        38
+      ]
+    ],
+    "translation": "すべての会話"
+  },
+  "nav.projects": {
+    "message": "Projects",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        53
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        47
+      ]
+    ],
+    "translation": "プロジェクト"
+  },
+  "nav.topics": {
+    "message": "Topics",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        44
+      ],
+      [
+        "src/web/app/projects/page.tsx",
+        76
+      ]
+    ],
+    "translation": "トピック"
   },
   "notfound.button.go_home": {
     "placeholders": {},
@@ -2601,7 +2661,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        92
+        96
       ]
     ],
     "translation": "プロジェクトを読み込み中..."
@@ -3421,7 +3481,7 @@
     "origin": [
       [
         "src/web/components/SettingsButton.tsx",
-        41
+        42
       ]
     ],
     "translation": "Lantern が読み取るエージェント CLI と、その動作設定です。"
@@ -3433,10 +3493,22 @@
     "origin": [
       [
         "src/web/components/SettingsButton.tsx",
-        50
+        51
       ]
     ],
     "translation": "読み取るエージェント CLI"
+  },
+  "settings.dialog.sources.description": {
+    "message": "Turning one off forgets its conversations; it never touches the files.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        53
+      ]
+    ],
+    "translation": "オフにするとその会話は忘れられますが、ファイルには一切触れません。"
   },
   "settings.dialog.title": {
     "message": "Settings",
@@ -3445,7 +3517,7 @@
     "origin": [
       [
         "src/web/components/SettingsButton.tsx",
-        38
+        39
       ]
     ],
     "translation": "設定"
@@ -3489,8 +3561,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        297
+        "src/web/components/settings/InputSettings.tsx",
+        74
       ]
     ],
     "translation": "Enterキーの動作"
@@ -3500,8 +3572,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        315
+        "src/web/components/settings/InputSettings.tsx",
+        92
       ]
     ],
     "translation": "Command+Enterで送信"
@@ -3511,8 +3583,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        321
+        "src/web/components/settings/InputSettings.tsx",
+        98
       ]
     ],
     "translation": "メッセージ入力でのEnterキーの動作を選択"
@@ -3522,8 +3594,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        312
+        "src/web/components/settings/InputSettings.tsx",
+        89
       ]
     ],
     "translation": "Enterで送信"
@@ -3533,8 +3605,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        309
+        "src/web/components/settings/InputSettings.tsx",
+        86
       ]
     ],
     "translation": "Shift+Enterで送信（デフォルト）"
@@ -3544,8 +3616,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        358
+        "src/web/components/settings/InputSettings.tsx",
+        132
       ]
     ],
     "translation": "ページ内検索ホットキー"
@@ -3555,8 +3627,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        370
+        "src/web/components/settings/InputSettings.tsx",
+        144
       ]
     ],
     "translation": "Command+F"
@@ -3566,8 +3638,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        367
+        "src/web/components/settings/InputSettings.tsx",
+        141
       ]
     ],
     "translation": "Ctrl+F"
@@ -3577,8 +3649,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        376
+        "src/web/components/settings/InputSettings.tsx",
+        150
       ]
     ],
     "translation": "ページ内検索を開くホットキーを選択します"
@@ -3588,8 +3660,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        329
+        "src/web/components/settings/InputSettings.tsx",
+        106
       ]
     ],
     "translation": "検索ホットキー"
@@ -3599,8 +3671,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        344
+        "src/web/components/settings/InputSettings.tsx",
+        118
       ]
     ],
     "translation": "Command+K"
@@ -3610,8 +3682,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        341
+        "src/web/components/settings/InputSettings.tsx",
+        115
       ]
     ],
     "translation": "Ctrl+K"
@@ -3621,8 +3693,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        350
+        "src/web/components/settings/InputSettings.tsx",
+        124
       ]
     ],
     "translation": "検索ダイアログを開くホットキーを選択します"
@@ -3647,8 +3719,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        444
+        "src/web/components/settings/AppearanceSettings.tsx",
+        42
       ]
     ],
     "translation": "言語"
@@ -3658,8 +3730,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        465
+        "src/web/components/settings/AppearanceSettings.tsx",
+        63
       ]
     ],
     "translation": "お好みの言語を選択"
@@ -3669,8 +3741,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        456
+        "src/web/components/settings/AppearanceSettings.tsx",
+        54
       ]
     ],
     "translation": "English"
@@ -3680,8 +3752,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        453
+        "src/web/components/settings/AppearanceSettings.tsx",
+        51
       ]
     ],
     "translation": "日本語"
@@ -3691,8 +3763,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        459
+        "src/web/components/settings/AppearanceSettings.tsx",
+        57
       ]
     ],
     "translation": "中国語（簡体字）"
@@ -3739,8 +3811,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        433
+        "src/web/components/settings/InputSettings.tsx",
+        207
       ]
     ],
     "translation": "セッションツールバーで利用可能なモデル選択肢を設定します"
@@ -3751,8 +3823,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        384
+        "src/web/components/settings/InputSettings.tsx",
+        158
       ]
     ],
     "translation": "モデル選択肢"
@@ -3763,8 +3835,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        414
+        "src/web/components/settings/InputSettings.tsx",
+        188
       ]
     ],
     "translation": "モデル選択肢を追加..."
@@ -3787,7 +3859,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        180
+        113
       ]
     ],
     "translation": "エージェント CLI"
@@ -3799,10 +3871,22 @@
     "origin": [
       [
         "src/web/components/PrimarySourceSelect.tsx",
-        57
+        78
       ]
     ],
     "translation": "Lantern が中心に扱う CLI で、トピック名の生成を依頼する相手でもあります。有効にした他の CLI も引き続き閲覧できます。"
+  },
+  "settings.primary_source.none": {
+    "message": "No agent CLI is switched on above, so there is nothing to work with.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/PrimarySourceSelect.tsx",
+        46
+      ]
+    ],
+    "translation": "上でエージェント CLI が有効になっていないため、対象がありません。"
   },
   "settings.primary_source.select": {
     "message": "Select an agent CLI",
@@ -3811,22 +3895,10 @@
     "origin": [
       [
         "src/web/components/PrimarySourceSelect.tsx",
-        37
+        63
       ]
     ],
     "translation": "エージェント CLI を選択"
-  },
-  "settings.primary_source.unavailable": {
-    "message": "not available",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/components/PrimarySourceSelect.tsx",
-        51
-      ]
-    ],
-    "translation": "利用不可"
   },
   "settings.sandbox.allowUnsandboxedCommands": {
     "message": "Allow unsandboxed commands",
@@ -3900,6 +3972,114 @@
     ],
     "translation": "ネットワーク設定"
   },
+  "settings.section.agent_cli": {
+    "message": "Agent CLI",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        102
+      ]
+    ],
+    "translation": "エージェント CLI"
+  },
+  "settings.section.agent_cli.description": {
+    "message": "Which CLI Lantern works with, and how it is paid for.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        104
+      ]
+    ],
+    "translation": "Lantern が使う CLI と、その支払い方法です。"
+  },
+  "settings.section.appearance": {
+    "message": "Appearance",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        250
+      ]
+    ],
+    "translation": "外観"
+  },
+  "settings.section.automation": {
+    "message": "Automation",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        208
+      ]
+    ],
+    "translation": "自動化"
+  },
+  "settings.section.automation.description": {
+    "message": "What Lantern does on its own.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        210
+      ]
+    ],
+    "translation": "Lantern が自動で行うことです。"
+  },
+  "settings.section.conversations": {
+    "message": "Conversations",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        155
+      ]
+    ],
+    "translation": "会話"
+  },
+  "settings.section.conversations.description": {
+    "message": "What appears in the lists.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        157
+      ]
+    ],
+    "translation": "一覧に表示される内容です。"
+  },
+  "settings.section.input": {
+    "message": "Keyboard & models",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        239
+      ]
+    ],
+    "translation": "キーボードとモデル"
+  },
+  "settings.section.input.description": {
+    "message": "Shortcuts, and the models offered in the session toolbar.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        241
+      ]
+    ],
+    "translation": "ショートカットと、セッションツールバーに表示するモデルです。"
+  },
   "settings.section.notifications": {
     "placeholders": {},
     "comments": [],
@@ -3955,7 +4135,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        282
+        225
       ]
     ],
     "translation": "レート制限時に自動的に継続をスケジュール"
@@ -3966,7 +4146,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        288
+        231
       ]
     ],
     "translation": "Claude がレート制限に達した際に、自動的に継続メッセージをスケジュール実行します"
@@ -3988,7 +4168,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        238
+        172
       ]
     ],
     "translation": "ユーザーメッセージのないセッションを非表示"
@@ -3999,7 +4179,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        244
+        178
       ]
     ],
     "translation": "ユーザーコマンドまたはメッセージを含むセッションのみを表示"
@@ -4010,7 +4190,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        259
+        192
       ]
     ],
     "translation": "同じタイトルのセッションを統合"
@@ -4021,7 +4201,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        265
+        198
       ]
     ],
     "translation": "同じタイトルの複数のセッションがある場合、最新のセッションのみを表示"
@@ -4066,8 +4246,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        473
+        "src/web/components/settings/AppearanceSettings.tsx",
+        71
       ]
     ],
     "translation": "テーマ"
@@ -4077,8 +4257,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        485
+        "src/web/components/settings/AppearanceSettings.tsx",
+        83
       ]
     ],
     "translation": "ダーク"
@@ -4088,8 +4268,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        494
+        "src/web/components/settings/AppearanceSettings.tsx",
+        92
       ]
     ],
     "translation": "お好みのカラーテーマを選択"
@@ -4099,8 +4279,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        482
+        "src/web/components/settings/AppearanceSettings.tsx",
+        80
       ]
     ],
     "translation": "ライト"
@@ -4110,8 +4290,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        488
+        "src/web/components/settings/AppearanceSettings.tsx",
+        86
       ]
     ],
     "translation": "システム"
@@ -4139,7 +4319,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        192
+        123
       ]
     ],
     "translation": "利用モード"
@@ -4151,7 +4331,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        212
+        138
       ]
     ],
     "translation": "API"
@@ -4163,22 +4343,10 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        218
+        144
       ]
     ],
     "translation": "Claude Codeの利用方法を選択してください。サブスクリプションモードではAgent SDKが必要な機能が制限されます。"
-  },
-  "settings.usage_mode.select": {
-    "message": "Select usage mode",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/components/SettingsControls.tsx",
-        198
-      ]
-    ],
-    "translation": "利用モードを選択"
   },
   "settings.usage_mode.subscription": {
     "message": "Subscription (Max, Pro, etc.)",
@@ -4187,7 +4355,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        206
+        132
       ]
     ],
     "translation": "サブスクリプション (Max, Proなど)"
@@ -4471,7 +4639,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        103
+        105
       ]
     ],
     "translation": "Lantern がセッションを読み取るエージェント CLI です。オフにするとその会話は表示されなくなりますが、ファイルには一切触れません。"
@@ -4483,7 +4651,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        94
+        96
       ]
     ],
     "translation": "エージェント CLI の一覧を読み込めませんでした。"
@@ -4495,7 +4663,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        86
+        88
       ]
     ],
     "translation": "エージェント CLI を検出しています…"
@@ -4506,8 +4674,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SourcesSettings.tsx",
-        158
+        "src/web/components/settings/SourceTile.tsx",
+        99
       ]
     ],
     "translation": "読み取り専用"
@@ -4519,7 +4687,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        31
+        32
       ]
     ],
     "translation": "セッションがまだ記録されていません"
@@ -4531,7 +4699,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        27
+        28
       ]
     ],
     "translation": "このマシンでは見つかりませんでした"
@@ -4543,7 +4711,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        36
+        37
       ]
     ],
     "translation": "新しいリリースで保存形式が変更されました"
@@ -4555,7 +4723,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        32
+        33
       ]
     ],
     "translation": "Lantern がまだ読み取れないデータベースにセッションを保存しています"
@@ -4567,7 +4735,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        40
+        41
       ]
     ],
     "translation": "Lantern が認識できない形式のセッションです"
@@ -4576,20 +4744,44 @@
     "message": "{sessionCount} conversations across {projectCount} projects",
     "placeholders": {
       "sessionCount": [
-        "source.stats.sessions"
+        "sessions"
       ],
       "projectCount": [
-        "source.stats.projects"
+        "projects"
       ]
     },
     "comments": [],
     "origin": [
       [
-        "src/web/components/SourcesSettings.tsx",
-        144
+        "src/web/components/settings/SourceTile.tsx",
+        88
       ]
     ],
     "translation": "{projectCount} 個のプロジェクトにまたがる {sessionCount} 件の会話"
+  },
+  "sources.status.ready": {
+    "message": "Ready",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/SourceTile.tsx",
+        77
+      ]
+    ],
+    "translation": "利用可能"
+  },
+  "sources.status.unavailable": {
+    "message": "Unavailable",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/SourceTile.tsx",
+        82
+      ]
+    ],
+    "translation": "利用不可"
   },
   "system_info.available_features": {
     "placeholders": {},
@@ -4807,6 +4999,42 @@
       ]
     ],
     "translation": "Lantern"
+  },
+  "topics.filter.placeholder": {
+    "message": "Filter topics...",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        79
+      ]
+    ],
+    "translation": "トピックを絞り込む…"
+  },
+  "topics.subtitle": {
+    "message": "Conversations grouped by what they are about, not by the folder they were started in.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        68
+      ]
+    ],
+    "translation": "会話は、開始したフォルダーではなく内容ごとにまとめられています。"
+  },
+  "topics.title": {
+    "message": "Topics",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        65
+      ]
+    ],
+    "translation": "トピック"
   },
   "usage_mode.api.description": {
     "message": "You use Claude Code with API keys. All features are available.",

@@ -72,14 +72,18 @@ export const ProjectsPage: FC = () => {
                     className="flex items-center gap-1.5 h-8 px-3 rounded-md border border-border text-sm transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
                   >
                     <LayoutGridIcon className="w-4 h-4" />
-                    <span>Topics</span>
+                    <span>
+                      <Trans id="nav.topics" message="Topics" />
+                    </span>
                   </Link>
                   <Link
                     to="/conversations"
                     className="flex items-center gap-1.5 h-8 px-3 rounded-md border border-border text-sm transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
                   >
                     <MessagesSquareIcon className="w-4 h-4" />
-                    <span>All conversations</span>
+                    <span>
+                      <Trans id="nav.all_conversations" message="All conversations" />
+                    </span>
                   </Link>
                   <ViewModeToggle />
                   <SetupProjectDialog />

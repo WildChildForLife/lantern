@@ -1,6 +1,7 @@
 import { Trans } from "@lingui/react";
 import { SettingsIcon } from "lucide-react";
 import { type FC, useState } from "react";
+import { SettingsSection } from "@/web/components/settings/SettingsSection";
 import { SettingsControls } from "@/web/components/SettingsControls";
 import { SourcesSettings } from "@/web/components/SourcesSettings";
 import {
@@ -45,18 +46,23 @@ export const SettingsButton: FC = () => {
           </DialogDescription>
         </DialogHeader>
 
-        <section className="space-y-3">
-          <h3 className="text-sm font-medium leading-none">
-            <Trans id="settings.dialog.sources" message="Agent CLIs to read" />
-          </h3>
-          <SourcesSettings />
-        </section>
+        <div className="space-y-8">
+          <SettingsSection
+            title={<Trans id="settings.dialog.sources" message="Agent CLIs to read" />}
+            description={
+              <Trans
+                id="settings.dialog.sources.description"
+                message="Turning one off forgets its conversations; it never touches the files."
+              />
+            }
+          >
+            <SourcesSettings showDescriptions={false} />
+          </SettingsSection>
 
-        <section className="space-y-3 border-t border-border/40 pt-4">
           {/* No project in scope on the screens this opens from; the controls
               that need one hide themselves rather than guess. */}
           <SettingsControls openingProjectId="" />
-        </section>
+        </div>
       </DialogContent>
     </Dialog>
   );

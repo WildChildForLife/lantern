@@ -182,8 +182,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        305
+        "src/web/components/settings/InputSettings.tsx",
+        82
       ]
     ],
     "translation": "选择回车键行为"
@@ -193,8 +193,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        363
+        "src/web/components/settings/InputSettings.tsx",
+        137
       ]
     ],
     "translation": "选择页内搜索快捷键"
@@ -204,8 +204,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        449
+        "src/web/components/settings/AppearanceSettings.tsx",
+        47
       ]
     ],
     "translation": "选择语言"
@@ -215,8 +215,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        337
+        "src/web/components/settings/InputSettings.tsx",
+        111
       ]
     ],
     "translation": "选择搜索快捷键"
@@ -226,8 +226,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        478
+        "src/web/components/settings/AppearanceSettings.tsx",
+        76
       ]
     ],
     "translation": "选择主题"
@@ -1374,6 +1374,18 @@
     ],
     "translation": "无法解析此对话条目。这可能是由于格式更改或解析问题。"
   },
+  "conversations.filter.placeholder": {
+    "message": "Filter by title, first message or project...",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        99
+      ]
+    ],
+    "translation": "按标题、首条消息或项目筛选…"
+  },
   "cron_builder.cron_expression": {
     "placeholders": {},
     "comments": [],
@@ -1961,6 +1973,54 @@
       ]
     ],
     "translation": "MCP 服务器"
+  },
+  "nav.all_conversations": {
+    "message": "All conversations",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/page.tsx",
+        85
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        38
+      ]
+    ],
+    "translation": "所有会话"
+  },
+  "nav.projects": {
+    "message": "Projects",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        53
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        47
+      ]
+    ],
+    "translation": "项目"
+  },
+  "nav.topics": {
+    "message": "Topics",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        44
+      ],
+      [
+        "src/web/app/projects/page.tsx",
+        76
+      ]
+    ],
+    "translation": "主题"
   },
   "notfound.button.go_home": {
     "placeholders": {},
@@ -2601,7 +2661,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        92
+        96
       ]
     ],
     "translation": "正在加载项目..."
@@ -3421,7 +3481,7 @@
     "origin": [
       [
         "src/web/components/SettingsButton.tsx",
-        41
+        42
       ]
     ],
     "translation": "Lantern 读取哪些智能体 CLI，以及它的行为方式。"
@@ -3433,10 +3493,22 @@
     "origin": [
       [
         "src/web/components/SettingsButton.tsx",
-        50
+        51
       ]
     ],
     "translation": "要读取的智能体 CLI"
+  },
+  "settings.dialog.sources.description": {
+    "message": "Turning one off forgets its conversations; it never touches the files.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        53
+      ]
+    ],
+    "translation": "关闭后会忘记其会话，但绝不会改动文件。"
   },
   "settings.dialog.title": {
     "message": "Settings",
@@ -3445,7 +3517,7 @@
     "origin": [
       [
         "src/web/components/SettingsButton.tsx",
-        38
+        39
       ]
     ],
     "translation": "设置"
@@ -3489,8 +3561,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        297
+        "src/web/components/settings/InputSettings.tsx",
+        74
       ]
     ],
     "translation": "回车键行为"
@@ -3500,8 +3572,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        315
+        "src/web/components/settings/InputSettings.tsx",
+        92
       ]
     ],
     "translation": "使用 Command+Enter 发送"
@@ -3511,8 +3583,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        321
+        "src/web/components/settings/InputSettings.tsx",
+        98
       ]
     ],
     "translation": "选择消息输入的回车键行为"
@@ -3522,8 +3594,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        312
+        "src/web/components/settings/InputSettings.tsx",
+        89
       ]
     ],
     "translation": "使用 Enter 发送"
@@ -3533,8 +3605,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        309
+        "src/web/components/settings/InputSettings.tsx",
+        86
       ]
     ],
     "translation": "使用 Shift+Enter 发送(默认)"
@@ -3544,8 +3616,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        358
+        "src/web/components/settings/InputSettings.tsx",
+        132
       ]
     ],
     "translation": "页内搜索快捷键"
@@ -3555,8 +3627,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        370
+        "src/web/components/settings/InputSettings.tsx",
+        144
       ]
     ],
     "translation": "Command+F"
@@ -3566,8 +3638,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        367
+        "src/web/components/settings/InputSettings.tsx",
+        141
       ]
     ],
     "translation": "Ctrl+F"
@@ -3577,8 +3649,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        376
+        "src/web/components/settings/InputSettings.tsx",
+        150
       ]
     ],
     "translation": "选择打开页内搜索的快捷键"
@@ -3588,8 +3660,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        329
+        "src/web/components/settings/InputSettings.tsx",
+        106
       ]
     ],
     "translation": "搜索快捷键"
@@ -3599,8 +3671,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        344
+        "src/web/components/settings/InputSettings.tsx",
+        118
       ]
     ],
     "translation": "Command+K"
@@ -3610,8 +3682,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        341
+        "src/web/components/settings/InputSettings.tsx",
+        115
       ]
     ],
     "translation": "Ctrl+K"
@@ -3621,8 +3693,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        350
+        "src/web/components/settings/InputSettings.tsx",
+        124
       ]
     ],
     "translation": "选择打开搜索对话框的快捷键"
@@ -3647,8 +3719,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        444
+        "src/web/components/settings/AppearanceSettings.tsx",
+        42
       ]
     ],
     "translation": "语言"
@@ -3658,8 +3730,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        465
+        "src/web/components/settings/AppearanceSettings.tsx",
+        63
       ]
     ],
     "translation": "选择您偏好的语言"
@@ -3669,8 +3741,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        456
+        "src/web/components/settings/AppearanceSettings.tsx",
+        54
       ]
     ],
     "translation": "英语"
@@ -3680,8 +3752,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        453
+        "src/web/components/settings/AppearanceSettings.tsx",
+        51
       ]
     ],
     "translation": "日语"
@@ -3691,8 +3763,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        459
+        "src/web/components/settings/AppearanceSettings.tsx",
+        57
       ]
     ],
     "translation": "简体中文"
@@ -3739,8 +3811,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        433
+        "src/web/components/settings/InputSettings.tsx",
+        207
       ]
     ],
     "translation": "配置会话工具栏中可用的模型选项"
@@ -3751,8 +3823,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        384
+        "src/web/components/settings/InputSettings.tsx",
+        158
       ]
     ],
     "translation": "模型选项"
@@ -3763,8 +3835,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        414
+        "src/web/components/settings/InputSettings.tsx",
+        188
       ]
     ],
     "translation": "添加模型选项..."
@@ -3787,7 +3859,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        180
+        113
       ]
     ],
     "translation": "智能体 CLI"
@@ -3799,10 +3871,22 @@
     "origin": [
       [
         "src/web/components/PrimarySourceSelect.tsx",
-        57
+        78
       ]
     ],
     "translation": "Lantern 以此 CLI 为中心，并由它命名主题。其他已启用的 CLI 仍可查看。"
+  },
+  "settings.primary_source.none": {
+    "message": "No agent CLI is switched on above, so there is nothing to work with.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/PrimarySourceSelect.tsx",
+        46
+      ]
+    ],
+    "translation": "上方没有启用任何智能体 CLI，因此没有可用对象。"
   },
   "settings.primary_source.select": {
     "message": "Select an agent CLI",
@@ -3811,22 +3895,10 @@
     "origin": [
       [
         "src/web/components/PrimarySourceSelect.tsx",
-        37
+        63
       ]
     ],
     "translation": "选择智能体 CLI"
-  },
-  "settings.primary_source.unavailable": {
-    "message": "not available",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/components/PrimarySourceSelect.tsx",
-        51
-      ]
-    ],
-    "translation": "不可用"
   },
   "settings.sandbox.allowUnsandboxedCommands": {
     "message": "Allow unsandboxed commands",
@@ -3900,6 +3972,114 @@
     ],
     "translation": "网络设置"
   },
+  "settings.section.agent_cli": {
+    "message": "Agent CLI",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        102
+      ]
+    ],
+    "translation": "智能体 CLI"
+  },
+  "settings.section.agent_cli.description": {
+    "message": "Which CLI Lantern works with, and how it is paid for.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        104
+      ]
+    ],
+    "translation": "Lantern 使用哪个 CLI，以及它的计费方式。"
+  },
+  "settings.section.appearance": {
+    "message": "Appearance",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        250
+      ]
+    ],
+    "translation": "外观"
+  },
+  "settings.section.automation": {
+    "message": "Automation",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        208
+      ]
+    ],
+    "translation": "自动化"
+  },
+  "settings.section.automation.description": {
+    "message": "What Lantern does on its own.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        210
+      ]
+    ],
+    "translation": "Lantern 自动执行的操作。"
+  },
+  "settings.section.conversations": {
+    "message": "Conversations",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        155
+      ]
+    ],
+    "translation": "会话"
+  },
+  "settings.section.conversations.description": {
+    "message": "What appears in the lists.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        157
+      ]
+    ],
+    "translation": "列表中显示的内容。"
+  },
+  "settings.section.input": {
+    "message": "Keyboard & models",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        239
+      ]
+    ],
+    "translation": "键盘与模型"
+  },
+  "settings.section.input.description": {
+    "message": "Shortcuts, and the models offered in the session toolbar.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        241
+      ]
+    ],
+    "translation": "快捷键，以及会话工具栏中提供的模型。"
+  },
   "settings.section.notifications": {
     "placeholders": {},
     "comments": [],
@@ -3955,7 +4135,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        282
+        225
       ]
     ],
     "translation": "达到速率限制时自动调度继续"
@@ -3966,7 +4146,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        288
+        231
       ]
     ],
     "translation": "当 Claude 达到速率限制时,自动调度继续消息"
@@ -3988,7 +4168,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        238
+        172
       ]
     ],
     "translation": "隐藏无用户消息的会话"
@@ -3999,7 +4179,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        244
+        178
       ]
     ],
     "translation": "仅显示包含用户命令或消息的会话"
@@ -4010,7 +4190,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        259
+        192
       ]
     ],
     "translation": "合并同名会话"
@@ -4021,7 +4201,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        265
+        198
       ]
     ],
     "translation": "当多个会话标题相同时,仅显示最新的会话"
@@ -4066,8 +4246,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        473
+        "src/web/components/settings/AppearanceSettings.tsx",
+        71
       ]
     ],
     "translation": "主题"
@@ -4077,8 +4257,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        485
+        "src/web/components/settings/AppearanceSettings.tsx",
+        83
       ]
     ],
     "translation": "深色"
@@ -4088,8 +4268,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        494
+        "src/web/components/settings/AppearanceSettings.tsx",
+        92
       ]
     ],
     "translation": "选择您偏好的颜色主题"
@@ -4099,8 +4279,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        482
+        "src/web/components/settings/AppearanceSettings.tsx",
+        80
       ]
     ],
     "translation": "浅色"
@@ -4110,8 +4290,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        488
+        "src/web/components/settings/AppearanceSettings.tsx",
+        86
       ]
     ],
     "translation": "跟随系统"
@@ -4139,7 +4319,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        192
+        123
       ]
     ],
     "translation": "使用模式"
@@ -4151,7 +4331,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        212
+        138
       ]
     ],
     "translation": "API"
@@ -4163,22 +4343,10 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        218
+        144
       ]
     ],
     "translation": "选择您使用Claude Code的方式。订阅模式会限制需要Agent SDK的功能。"
-  },
-  "settings.usage_mode.select": {
-    "message": "Select usage mode",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/components/SettingsControls.tsx",
-        198
-      ]
-    ],
-    "translation": "选择使用模式"
   },
   "settings.usage_mode.subscription": {
     "message": "Subscription (Max, Pro, etc.)",
@@ -4187,7 +4355,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        206
+        132
       ]
     ],
     "translation": "订阅 (Max, Pro等)"
@@ -4471,7 +4639,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        103
+        105
       ]
     ],
     "translation": "Lantern 从这些代理 CLI 读取会话。关闭后其会话将不再显示，但不会改动任何文件。"
@@ -4483,7 +4651,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        94
+        96
       ]
     ],
     "translation": "无法读取代理 CLI 列表。"
@@ -4495,7 +4663,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        86
+        88
       ]
     ],
     "translation": "正在查找代理 CLI…"
@@ -4506,8 +4674,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SourcesSettings.tsx",
-        158
+        "src/web/components/settings/SourceTile.tsx",
+        99
       ]
     ],
     "translation": "只读"
@@ -4519,7 +4687,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        31
+        32
       ]
     ],
     "translation": "尚未记录任何会话"
@@ -4531,7 +4699,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        27
+        28
       ]
     ],
     "translation": "在本机上未找到"
@@ -4543,7 +4711,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        36
+        37
       ]
     ],
     "translation": "较新版本更改了存储格式"
@@ -4555,7 +4723,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        32
+        33
       ]
     ],
     "translation": "会话存储在 Lantern 暂时无法读取的数据库中"
@@ -4567,7 +4735,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        40
+        41
       ]
     ],
     "translation": "会话格式无法被 Lantern 识别"
@@ -4576,20 +4744,44 @@
     "message": "{sessionCount} conversations across {projectCount} projects",
     "placeholders": {
       "sessionCount": [
-        "source.stats.sessions"
+        "sessions"
       ],
       "projectCount": [
-        "source.stats.projects"
+        "projects"
       ]
     },
     "comments": [],
     "origin": [
       [
-        "src/web/components/SourcesSettings.tsx",
-        144
+        "src/web/components/settings/SourceTile.tsx",
+        88
       ]
     ],
     "translation": "{projectCount} 个项目中的 {sessionCount} 个会话"
+  },
+  "sources.status.ready": {
+    "message": "Ready",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/SourceTile.tsx",
+        77
+      ]
+    ],
+    "translation": "可用"
+  },
+  "sources.status.unavailable": {
+    "message": "Unavailable",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/SourceTile.tsx",
+        82
+      ]
+    ],
+    "translation": "不可用"
   },
   "system_info.available_features": {
     "placeholders": {},
@@ -4807,6 +4999,42 @@
       ]
     ],
     "translation": "Lantern"
+  },
+  "topics.filter.placeholder": {
+    "message": "Filter topics...",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        79
+      ]
+    ],
+    "translation": "筛选主题…"
+  },
+  "topics.subtitle": {
+    "message": "Conversations grouped by what they are about, not by the folder they were started in.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        68
+      ]
+    ],
+    "translation": "会话按内容分组，而不是按最初启动的文件夹。"
+  },
+  "topics.title": {
+    "message": "Topics",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        65
+      ]
+    ],
+    "translation": "主题"
   },
   "usage_mode.api.description": {
     "message": "You use Claude Code with API keys. All features are available.",
