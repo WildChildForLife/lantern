@@ -1,0 +1,8 @@
+{
+  "id": "msg_002",
+  "type": "system",
+  "text": "You are a coding agent.",
+  "time": {
+    "created": 1785100000100
+  }
+}

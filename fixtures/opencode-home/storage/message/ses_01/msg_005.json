@@ -1,0 +1,11 @@
+{
+  "id": "msg_005",
+  "type": "model-switched",
+  "model": {
+    "providerID": "anthropic",
+    "modelID": "claude-opus-4-5"
+  },
+  "time": {
+    "created": 1785100013000
+  }
+}

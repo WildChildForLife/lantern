@@ -107,7 +107,37 @@ const LayerImpl = Effect.gen(function* () {
       }
       const prLinks = [...prLinksMap.values()];
 
-      const { totalCost, modelName } = aggregateTokenUsageAndCost([...session.usageTexts]);
+      const scanned = aggregateTokenUsageAndCost([...session.usageTexts]);
+
+      // A source that priced its own turns is believed over anything computed
+      // here: it knows its provider's rates, and Lantern's table only holds
+      // Anthropic's. A source that counts tokens without pricing them still
+      // reports the counts, and the cost stays unknown rather than being
+      // guessed from the wrong table.
+      const reported = session.reportedUsage;
+      const { totalCost, modelName } =
+        reported === undefined
+          ? scanned
+          : {
+              modelName: reported.modelName,
+              totalCost: {
+                totalUsd: reported.costUsd ?? 0,
+                breakdown: {
+                  inputTokensUsd: 0,
+                  outputTokensUsd: 0,
+                  cacheCreationUsd: 0,
+                  cacheReadUsd: 0,
+                },
+                tokenUsage: {
+                  inputTokens: reported.inputTokens,
+                  outputTokens: reported.outputTokens,
+                  cacheCreationTokens: reported.cacheCreationTokens,
+                  cacheReadTokens: reported.cacheReadTokens,
+                },
+                confidence:
+                  reported.costUsd === null ? ("unknown" as const) : ("reported" as const),
+              },
+            };
 
       const now = Date.now();
 
@@ -150,6 +180,7 @@ const LayerImpl = Effect.gen(function* () {
         firstUserMessageJson: firstUserMessage !== null ? JSON.stringify(firstUserMessage) : null,
         customTitle,
         totalCostUsd: totalCost.totalUsd,
+        nativeCostUsd: reported?.costUsd ?? null,
         costBreakdownJson: JSON.stringify(totalCost.breakdown),
         tokenUsageJson: JSON.stringify(totalCost.tokenUsage),
         modelName,

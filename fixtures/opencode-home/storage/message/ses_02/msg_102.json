@@ -1,0 +1,29 @@
+{
+  "id": "msg_102",
+  "type": "assistant",
+  "agent": "build",
+  "model": {
+    "providerID": "openai",
+    "modelID": "gpt-5"
+  },
+  "cost": 0.0093,
+  "tokens": {
+    "input": 800,
+    "output": 120,
+    "reasoning": 0,
+    "cache": {
+      "read": 0,
+      "write": 0
+    }
+  },
+  "time": {
+    "created": 1785200001000
+  },
+  "content": [
+    {
+      "type": "text",
+      "id": "txt_2",
+      "text": "The lock file was held by a cancelled job."
+    }
+  ]
+}
