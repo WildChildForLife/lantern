@@ -13,11 +13,11 @@
  * these ids only have to be stable and collision-free within one session.
  */
 
-const OFFSET_BASIS = 0x811c9dc5;
+export const FNV_OFFSET_BASIS = 0x811c9dc5;
 const PRIME = 0x01000193;
 
 /** FNV-1a, seeded, returned as 8 hex characters. */
-const hash32 = (input: string, seed: number): string => {
+export const hash32 = (input: string, seed: number): string => {
   let value = seed;
 
   for (let index = 0; index < input.length; index += 1) {
@@ -38,15 +38,16 @@ const hash32 = (input: string, seed: number): string => {
 export const syntheticEntryUuid = (sourceId: string, sessionKey: string, index: number): string => {
   const seed = `${sourceId}:${sessionKey}:${index}`;
 
-  const a = hash32(seed, OFFSET_BASIS);
+  const a = hash32(seed, FNV_OFFSET_BASIS);
   const b = hash32(seed, 0x9e3779b9);
   const c = hash32(seed, 0x85ebca6b);
   const d = hash32(seed, 0xc2b2ae35);
 
   const timeLow = a;
   const timeMid = b.slice(0, 4);
-  // Version 5.
-  const timeHigh = `5${b.slice(5, 8)}`;
+  // Version 5. The three characters after it are the rest of `b`, so the whole
+  // hash is used: slicing from 5 would have dropped one and repeated nothing.
+  const timeHigh = `5${b.slice(4, 7)}`;
   // Variant 10xx.
   const clockSeq = `${((Number.parseInt(c.slice(0, 1), 16) & 0x3) | 0x8).toString(16)}${c.slice(1, 4)}`;
   const node = `${c.slice(4, 8)}${d}`;

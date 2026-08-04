@@ -142,7 +142,7 @@ export class FileWatcherService extends Context.Tag("FileWatcherService")<
             if (!adapter.capabilities.watch) {
               continue;
             }
-            const roots = yield* adapter.watchRoots().pipe(Effect.provide(sourceEnv));
+            const roots = yield* adapter.roots().pipe(Effect.provide(sourceEnv));
             for (const root of roots) {
               byRoot.set(root, { adapter, roots });
             }

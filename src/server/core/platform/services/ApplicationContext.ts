@@ -55,9 +55,13 @@ const LayerImpl = Effect.gen(function* () {
    * Read from the environment variable the CLI itself honours, so pointing
    * Lantern at another machine's history is the same gesture as pointing that
    * CLI at it.
+   *
+   * Claude Code is absent on purpose: `--claude-dir` names the whole `.claude`
+   * directory, not a history root, and its adapter reads `claudeCodePaths`.
+   * Answering with it here would have handed out a path one level too high.
    */
   const sourceRoot = (sourceId: SourceId): Effect.Effect<string | undefined> =>
-    sourceId === "codex" ? envService.getEnv("CODEX_HOME") : optionsService.getOption("claudeDir");
+    sourceId === "codex" ? envService.getEnv("CODEX_HOME") : Effect.succeed(undefined);
 
   return {
     claudeCodePaths,

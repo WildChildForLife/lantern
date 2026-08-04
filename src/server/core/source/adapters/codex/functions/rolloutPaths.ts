@@ -1,4 +1,8 @@
 import type { Path } from "@effect/platform";
+import {
+  FNV_OFFSET_BASIS,
+  hash32,
+} from "../../../../../../lib/conversation-schema/synthetic/entryIdentity.ts";
 
 /**
  * Codex names its files `rollout-<ISO timestamp>-<uuid>.jsonl`. The uuid is the
@@ -13,18 +17,6 @@ export const rolloutSessionId = (filePath: string): string => {
   );
 
   return uuid?.[1] ?? withoutExtension.replace(/^rollout-/, "");
-};
-
-const OFFSET_BASIS = 0x811c9dc5;
-const PRIME = 0x01000193;
-
-const hash32 = (input: string, seed: number): string => {
-  let value = seed;
-  for (let index = 0; index < input.length; index += 1) {
-    value ^= input.charCodeAt(index);
-    value = Math.imul(value, PRIME) >>> 0;
-  }
-  return value.toString(16).padStart(8, "0");
 };
 
 /**
@@ -43,5 +35,5 @@ export const virtualProjectPath = (
   path.join(
     rootPath,
     "#projects",
-    `${hash32(canonicalProjectPath, OFFSET_BASIS)}${hash32(canonicalProjectPath, 0x9e3779b9)}`,
+    `${hash32(canonicalProjectPath, FNV_OFFSET_BASIS)}${hash32(canonicalProjectPath, 0x9e3779b9)}`,
   );

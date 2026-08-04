@@ -12,10 +12,35 @@ import {
   type SourceSessionRef,
 } from "../../models/SourceEntities.ts";
 import { CODEX_SOURCE_ID } from "../../models/SourceId.ts";
-import { parseRollout } from "./functions/parseRollout.ts";
+import { parseRollout, type RolloutSessionMeta } from "./functions/parseRollout.ts";
 import { rolloutSessionId, virtualProjectPath } from "./functions/rolloutPaths.ts";
 
 const SESSION_DIRS = ["sessions", "archived_sessions"] as const;
+
+/**
+ * Enough of a rollout to reach `session_meta` and the first `turn_context`,
+ * which are the first lines of the file. Reading whole transcripts to group
+ * them by workspace would mean reading every byte of a history that runs to
+ * gigabytes.
+ */
+const HEAD_BYTES = 16 * 1024;
+
+/**
+ * How long one filesystem scan is reused.
+ *
+ * A sync calls `listProjects` and then `listSessions` once per project. Without
+ * this that is one full walk of the tree per project, and the same file's
+ * metadata parsed as many times as there are workspaces. Short enough that a
+ * later sync always starts from disk; correctness never rests on it, since a
+ * miss just does the walk again.
+ */
+const SCAN_TTL_MS = 2_000;
+
+type ScannedRollout = {
+  readonly filePath: string;
+  readonly mtimeMs: number;
+  readonly meta: RolloutSessionMeta;
+};
 
 /**
  * OpenAI's Codex CLI.
@@ -29,6 +54,11 @@ const SESSION_DIRS = ["sessions", "archived_sessions"] as const;
  * Read-only, and not watched: which project a changed file belongs to is inside
  * the file, and classifying a path has to stay a pure function. Codex sessions
  * refresh when a sync runs rather than the moment they change.
+ *
+ * Codex also keeps a `session_index.jsonl` beside the trees, which would make
+ * this listing far cheaper. It is deliberately not read: its schema has not
+ * been verified against a real installation, and a listing built on a guessed
+ * format fails by *omitting* sessions, which looks exactly like having none.
  */
 const makeAdapter = (): SourceAdapter => {
   const rootPath = Effect.gen(function* () {
@@ -40,7 +70,24 @@ const makeAdapter = (): SourceAdapter => {
     return codexHome ?? path.resolve(home ?? "/", ".codex");
   });
 
-  /** Every rollout file under both trees, newest directories first. */
+  /**
+   * The options that decide which working directories count as one workspace.
+   *
+   * Every call that canonicalises a path has to pass the same ones. Canonicalise
+   * without them and `~/work/api` stays literal while the listing expanded it,
+   * so a project's own sessions no longer match it and the source reads empty.
+   */
+  const canonicalizeOptions = Effect.gen(function* () {
+    const context = yield* ApplicationContext;
+    const home = yield* context.homeDirectory;
+
+    return {
+      homeDirectory: home ?? undefined,
+      platform: context.platform,
+    };
+  });
+
+  /** Every rollout file under both trees. */
   const listRolloutFiles = Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
@@ -82,42 +129,86 @@ const makeAdapter = (): SourceAdapter => {
   /**
    * Reads only as far as the metadata: the working directory and session id are
    * in the first lines, and grouping thousands of sessions must not mean
-   * parsing every transcript in full.
+   * reading every transcript in full.
+   *
+   * The final line of a `HEAD_BYTES` window is almost always cut mid-JSON, so it
+   * is dropped rather than counted as a line that failed to parse.
    */
   const readMeta = (filePath: string) =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem;
-      const content = yield* fs
-        .readFileString(filePath)
-        .pipe(Effect.catchAll(() => Effect.succeed("")));
 
-      const head = content.split("\n").slice(0, 8).join("\n");
-      return parseRollout(head, rolloutSessionId(filePath)).meta;
+      const head = yield* Effect.scoped(
+        Effect.gen(function* () {
+          const file = yield* fs.open(filePath, { flag: "r" });
+          const buffer = new Uint8Array(HEAD_BYTES);
+          const read = yield* file.read(buffer);
+          return new TextDecoder().decode(buffer.subarray(0, Number(read)));
+        }),
+      ).pipe(Effect.catchAll(() => Effect.succeed("")));
+
+      const lines = head.split("\n");
+      const complete = head.length < HEAD_BYTES ? lines : lines.slice(0, -1);
+
+      return parseRollout(complete.join("\n"), rolloutSessionId(filePath)).meta;
     });
+
+  /**
+   * One walk of both trees with each file's metadata, reused across the calls a
+   * single sync makes.
+   *
+   * A file whose mtime has not moved keeps the metadata already parsed for it,
+   * so re-scanning an unchanged history costs stats and no reads at all.
+   */
+  let lastScan: { root: string; at: number; entries: readonly ScannedRollout[] } | null = null;
+
+  const scan = Effect.gen(function* () {
+    const root = yield* rootPath;
+    // Keyed by root, not only by time: the adapter is one value for the whole
+    // process, and a second Lantern pointed at another history — or a test at a
+    // fixture tree — must never be served the first one's scan.
+    const cached = lastScan?.root === root ? lastScan : null;
+    if (cached !== null && Date.now() - cached.at < SCAN_TTL_MS) {
+      return cached.entries;
+    }
+
+    const fs = yield* FileSystem.FileSystem;
+    const files = yield* listRolloutFiles;
+    const previous = new Map(cached?.entries.map((entry) => [entry.filePath, entry]) ?? []);
+
+    const entries: ScannedRollout[] = [];
+    for (const filePath of files) {
+      const stat = yield* fs.stat(filePath).pipe(Effect.catchAll(() => Effect.succeed(null)));
+      if (stat === null) continue;
+
+      const mtimeMs = Option.getOrElse(stat.mtime, () => new Date(0)).getTime();
+      const reusable = previous.get(filePath);
+
+      entries.push(
+        reusable !== undefined && reusable.mtimeMs === mtimeMs
+          ? reusable
+          : { filePath, mtimeMs, meta: yield* readMeta(filePath) },
+      );
+    }
+
+    lastScan = { root, at: Date.now(), entries };
+    return entries;
+  });
 
   const listProjects = () =>
     Effect.gen(function* () {
       const path = yield* Path.Path;
-      const context = yield* ApplicationContext;
       const root = yield* rootPath;
-      const files = yield* listRolloutFiles;
+      const options = yield* canonicalizeOptions;
+      const scanned = yield* scan;
 
       const byCanonicalPath = new Map<string, { cwd: string; mtimeMs: number }>();
-      const fs = yield* FileSystem.FileSystem;
 
-      for (const filePath of files) {
-        const meta = yield* readMeta(filePath);
+      for (const { meta, mtimeMs } of scanned) {
         if (meta.cwd === null) continue;
 
-        const canonical = canonicalizeProjectPath(meta.cwd, {
-          homeDirectory: (yield* context.homeDirectory) ?? undefined,
-          platform: context.platform,
-        });
+        const canonical = canonicalizeProjectPath(meta.cwd, options);
         if (canonical === null) continue;
-
-        const stat = yield* fs.stat(filePath).pipe(Effect.catchAll(() => Effect.succeed(null)));
-        const mtimeMs =
-          stat === null ? 0 : Option.getOrElse(stat.mtime, () => new Date(0)).getTime();
 
         const existing = byCanonicalPath.get(canonical);
         byCanonicalPath.set(canonical, {
@@ -141,24 +232,19 @@ const makeAdapter = (): SourceAdapter => {
 
   const listSessions = (project: SourceProject) =>
     Effect.gen(function* () {
-      const fs = yield* FileSystem.FileSystem;
-      const files = yield* listRolloutFiles;
+      const options = yield* canonicalizeOptions;
+      const scanned = yield* scan;
 
       const refs: SourceSessionRef[] = [];
-      for (const filePath of files) {
-        const meta = yield* readMeta(filePath);
-        const canonical = canonicalizeProjectPath(meta.cwd);
-        if (canonical !== project.sourceProjectKey) continue;
-
-        const stat = yield* fs.stat(filePath).pipe(Effect.catchAll(() => Effect.succeed(null)));
-        if (stat === null) continue;
+      for (const { filePath, mtimeMs, meta } of scanned) {
+        if (canonicalizeProjectPath(meta.cwd, options) !== project.sourceProjectKey) continue;
 
         refs.push({
           sourceId: CODEX_SOURCE_ID,
           sessionId: rolloutSessionId(filePath),
           projectStoragePath: project.storagePath,
           filePath,
-          fileMtimeMs: Option.getOrElse(stat.mtime, () => new Date(0)).getTime(),
+          fileMtimeMs: mtimeMs,
           sourceSessionKey: meta.sessionId ?? rolloutSessionId(filePath),
         });
       }
@@ -204,28 +290,31 @@ const makeAdapter = (): SourceAdapter => {
 
   const resolveSessionRef = (projectStoragePath: string, sessionId: string) =>
     Effect.gen(function* () {
-      const fs = yield* FileSystem.FileSystem;
-      const files = yield* listRolloutFiles;
+      const path = yield* Path.Path;
+      const root = yield* rootPath;
+      const options = yield* canonicalizeOptions;
+      const scanned = yield* scan;
 
-      const filePath = files.find((candidate) => rolloutSessionId(candidate) === sessionId);
-      if (filePath === undefined) {
+      const found = scanned.find((entry) => rolloutSessionId(entry.filePath) === sessionId);
+      if (found === undefined) {
         return yield* new SourceSessionGoneError({ sourceId: CODEX_SOURCE_ID, sessionId });
       }
 
-      const stat = yield* fs.stat(filePath).pipe(Effect.catchAll(() => Effect.succeed(null)));
-      if (stat === null) {
+      // The session id alone would open any session under any project id. Codex
+      // records the workspace inside the transcript, so the file has to agree
+      // that it belongs to the project being asked about.
+      const canonical = canonicalizeProjectPath(found.meta.cwd, options);
+      if (canonical === null || virtualProjectPath(path, root, canonical) !== projectStoragePath) {
         return yield* new SourceSessionGoneError({ sourceId: CODEX_SOURCE_ID, sessionId });
       }
-
-      const meta = yield* readMeta(filePath);
 
       return {
         sourceId: CODEX_SOURCE_ID,
         sessionId,
         projectStoragePath,
-        filePath,
-        fileMtimeMs: Option.getOrElse(stat.mtime, () => new Date(0)).getTime(),
-        sourceSessionKey: meta.sessionId ?? sessionId,
+        filePath: found.filePath,
+        fileMtimeMs: found.mtimeMs,
+        sourceSessionKey: found.meta.sessionId ?? sessionId,
       } satisfies SourceSessionRef;
     });
 
@@ -291,7 +380,9 @@ const makeAdapter = (): SourceAdapter => {
     listSessions,
     readSession,
     resolveSessionRef,
-    watchRoots: () => Effect.succeed([]),
+    // Not watched, but still declared: this is what every resolved Codex path
+    // is validated against before it is opened.
+    roots: () => rootPath.pipe(Effect.map((root) => [root])),
     classifyChange: () => null,
   };
 };

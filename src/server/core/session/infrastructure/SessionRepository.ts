@@ -6,8 +6,13 @@ import { projects, sessionTopics, sessions } from "../../../lib/db/schema.ts";
 import type { InferEffect } from "../../../lib/effect/types.ts";
 import { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
 import { decodeProjectId, validateProjectPath } from "../../project/functions/id.ts";
+import { resolveSourceRoots } from "../../source/functions/sourceRoots.ts";
 import type { SourceEnv } from "../../source/models/SourceAdapter.ts";
-import { sourceIdSchema } from "../../source/models/SourceId.ts";
+import {
+  CLAUDE_CODE_SOURCE_ID,
+  type SourceId,
+  sourceIdSchema,
+} from "../../source/models/SourceId.ts";
 import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import { SyncService } from "../../sync/services/SyncService.ts";
 import type { Session, SessionDetail } from "../../types.ts";
@@ -47,6 +52,36 @@ const LayerImpl = Effect.gen(function* () {
       ),
     );
 
+  const rootsBySource = yield* withEnv(resolveSourceRoots(registry.all));
+
+  /**
+   * Whether a decoded project id names a directory the source that owns it
+   * reads.
+   *
+   * Every source is checked against its own roots. Checking the Claude
+   * directory alone rejected every project belonging to a CLI that stores its
+   * history somewhere else — which is all of them.
+   */
+  const isProjectPathAllowed = (projectPath: string, sourceId: SourceId): boolean => {
+    const roots = rootsBySource.get(sourceId);
+    return roots !== undefined && validateProjectPath(projectPath, roots);
+  };
+
+  /**
+   * The source a project id belongs to. An unsynced project is Claude Code's:
+   * only it has directories that exist before Lantern has read them.
+   */
+  const sourceForProject = (projectId: string): SourceId => {
+    const row = db
+      .select({ source: projects.source })
+      .from(projects)
+      .where(eq(projects.id, projectId))
+      .get();
+
+    const parsed = sourceIdSchema.safeParse(row?.source);
+    return parsed.success ? parsed.data : CLAUDE_CODE_SOURCE_ID;
+  };
+
   /**
    * The adapter that owns a session, from the cache.
    *
@@ -78,7 +113,6 @@ const LayerImpl = Effect.gen(function* () {
       }
 
       const projectPath = decodeProjectId(projectId);
-      const { claudeProjectsDirPath } = yield* appContext.claudeCodePaths;
 
       // Which file holds a session, and which dialect it is written in, both
       // depend on the source. Deriving the path from the ids only ever
@@ -88,10 +122,7 @@ const LayerImpl = Effect.gen(function* () {
         return { session: null };
       }
 
-      if (
-        adapter.id === "claude-code" &&
-        !validateProjectPath(projectPath, claudeProjectsDirPath)
-      ) {
+      if (!isProjectPathAllowed(projectPath, adapter.id)) {
         return yield* Effect.fail(new Error("Invalid project path: outside allowed directory"));
       }
 
@@ -134,9 +165,8 @@ const LayerImpl = Effect.gen(function* () {
 
       const claudeProjectPath = decodeProjectId(projectId);
 
-      // Validate that the project path is within the Claude projects directory
-      const { claudeProjectsDirPath } = yield* appContext.claudeCodePaths;
-      if (!validateProjectPath(claudeProjectPath, claudeProjectsDirPath)) {
+      // Validate the project path against the roots of the source that owns it.
+      if (!isProjectPathAllowed(claudeProjectPath, sourceForProject(projectId))) {
         return yield* Effect.fail(new Error("Invalid project path: outside allowed directory"));
       }
 

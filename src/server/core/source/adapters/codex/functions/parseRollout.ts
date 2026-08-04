@@ -55,11 +55,35 @@ const turnContextPayloadSchema = z.looseObject({
   cwd: z.string().optional(),
 });
 
+const reasoningPayloadSchema = z.object({
+  type: z.literal("reasoning"),
+  summary: z.array(z.looseObject({ type: z.string(), text: z.string().optional() })).default([]),
+});
+
 const rolloutLineSchema = z.object({
   timestamp: z.string().optional(),
   type: z.string(),
   payload: z.unknown(),
 });
+
+/**
+ * `response_item` kinds Lantern knowingly skips.
+ *
+ * Naming them is the point. An unparsed line means the format moved, and that
+ * signal is worthless if every kind this adapter merely does not render counts
+ * as one — which is what "anything I did not match" amounts to. A kind listed
+ * here is a decision; a kind that reaches the unparsed count is news.
+ */
+const IGNORED_RESPONSE_ITEMS = new Set([
+  "local_shell_call",
+  "local_shell_call_output",
+  "custom_tool_call",
+  "custom_tool_call_output",
+  "web_search_call",
+  "file_search_call",
+  "item_reference",
+  "other",
+]);
 
 export type RolloutSessionMeta = {
   readonly sessionId: string | null;
@@ -120,11 +144,21 @@ export const parseRollout = (content: string, sessionKey: string): ParsedRollout
   let unparsed = 0;
   const pending: Array<(uuid: string) => Conversation & { uuid: string }> = [];
 
+  /**
+   * The fields every entry carries, read *now*.
+   *
+   * Deliberately not a closure over the running state. Entries are built after
+   * the loop, once their uuids exist, so a builder that read `model` or `cwd`
+   * when it ran would stamp every entry in the file with the last turn's model
+   * — and a session that switched models would report only the one it ended on.
+   */
   const base = (timestamp: string) => ({
     isSidechain: false,
     userType: "external" as const,
     version: cliVersion,
     timestamp,
+    cwd: cwd ?? "",
+    sessionId: sessionId ?? sessionKey,
   });
 
   for (const [lineNumber, line] of lines.entries()) {
@@ -180,6 +214,11 @@ export const parseRollout = (content: string, sessionKey: string): ParsedRollout
       continue;
     }
 
+    // Read once per line and closed over by value. The model in particular
+    // changes mid-file whenever a turn switches it.
+    const entryBase = base(timestamp);
+    const turnModel = model ?? "unknown";
+
     const message = messagePayloadSchema.safeParse(payload);
     if (message.success) {
       const text = textOf(message.data.content);
@@ -195,26 +234,22 @@ export const parseRollout = (content: string, sessionKey: string): ParsedRollout
       pending.push((uuid) =>
         role === "user"
           ? {
-              ...base(timestamp),
+              ...entryBase,
               type: "user",
               uuid,
               parentUuid: null,
-              cwd: cwd ?? "",
-              sessionId: sessionId ?? sessionKey,
               message: { role: "user", content: text },
             }
           : {
-              ...base(timestamp),
+              ...entryBase,
               type: "assistant",
               uuid,
               parentUuid: null,
-              cwd: cwd ?? "",
-              sessionId: sessionId ?? sessionKey,
               message: {
                 id: uuid,
                 type: "message",
                 role: "assistant",
-                model: model ?? "unknown",
+                model: turnModel,
                 content: [{ type: "text", text }],
                 stop_reason: null,
                 stop_sequence: null,
@@ -238,17 +273,15 @@ export const parseRollout = (content: string, sessionKey: string): ParsedRollout
       })();
 
       pending.push((uuid) => ({
-        ...base(timestamp),
+        ...entryBase,
         type: "assistant",
         uuid,
         parentUuid: null,
-        cwd: cwd ?? "",
-        sessionId: sessionId ?? sessionKey,
         message: {
           id: uuid,
           type: "message",
           role: "assistant",
-          model: model ?? "unknown",
+          model: turnModel,
           content: [
             {
               type: "tool_use",
@@ -269,12 +302,10 @@ export const parseRollout = (content: string, sessionKey: string): ParsedRollout
       const text = outputText(output.data.output);
 
       pending.push((uuid) => ({
-        ...base(timestamp),
+        ...entryBase,
         type: "user",
         uuid,
         parentUuid: null,
-        cwd: cwd ?? "",
-        sessionId: sessionId ?? sessionKey,
         message: {
           role: "user",
           content: [
@@ -286,6 +317,45 @@ export const parseRollout = (content: string, sessionKey: string): ParsedRollout
           ],
         },
       }));
+      continue;
+    }
+
+    // Codex's reasoning summaries are shown in its own transcript, so they are
+    // conversation rather than bookkeeping. A summary with no text is the
+    // common case when reasoning summaries are turned off — nothing to render.
+    const reasoning = reasoningPayloadSchema.safeParse(payload);
+    if (reasoning.success) {
+      const text = reasoning.data.summary
+        .map((part) => part.text ?? "")
+        .filter((part) => part !== "")
+        .join("\n");
+
+      if (text === "") {
+        ignored += 1;
+        continue;
+      }
+
+      pending.push((uuid) => ({
+        ...entryBase,
+        type: "assistant",
+        uuid,
+        parentUuid: null,
+        message: {
+          id: uuid,
+          type: "message",
+          role: "assistant",
+          model: turnModel,
+          content: [{ type: "thinking", thinking: text }],
+          stop_reason: null,
+          stop_sequence: null,
+        },
+      }));
+      continue;
+    }
+
+    const kind = z.looseObject({ type: z.string() }).safeParse(payload);
+    if (kind.success && IGNORED_RESPONSE_ITEMS.has(kind.data.type)) {
+      ignored += 1;
       continue;
     }
 
