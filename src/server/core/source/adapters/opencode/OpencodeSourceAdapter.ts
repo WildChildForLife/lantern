@@ -321,7 +321,29 @@ const makeAdapter = (): SourceAdapter => {
         } satisfies SourceDetection;
       }
 
+      // A database beside the storage tree means this install keeps its
+      // sessions in SQLite, which is a different storage mode rather than
+      // another dialect and is not read here. Saying so is the difference
+      // between a user checking their install and a user filing a bug: as of
+      // 1.18.13 — the current release — this is what a normal install looks
+      // like, and reporting "no data" would send them looking for the wrong
+      // problem entirely.
+      const database = yield* fs
+        .exists(path.join(root, "opencode.db"))
+        .pipe(Effect.catchAll(() => Effect.succeed(false)));
+
       const projects = yield* listProjects();
+
+      if (database && projects.length === 0) {
+        return {
+          sourceId: OPENCODE_SOURCE_ID,
+          rootPath: root,
+          hasData: true,
+          supported: false,
+          unsupportedReason: "sqlite-storage",
+        } satisfies SourceDetection;
+      }
+
       if (projects.length === 0) {
         return {
           sourceId: OPENCODE_SOURCE_ID,
