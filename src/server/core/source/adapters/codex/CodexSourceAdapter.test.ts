@@ -18,14 +18,21 @@ import { codexSourceAdapter } from "./CodexSourceAdapter.ts";
 
 const CODEX_HOME = `${process.cwd()}/fixtures/codex-home`;
 
-// The fixture's third workspace records its cwd as `~/notes`, which only
-// resolves to a directory once the home directory is applied. It is there so a
-// call that canonicalises without the platform options cannot pass.
-const HOME = "/home/demo";
+/** Codepoint order, so an upper-case first letter sorts predictably. */
+const byCodePoint = (a: string | null, b: string | null): number => {
+  const left = a ?? "";
+  const right = b ?? "";
+  return left < right ? -1 : left > right ? 1 : 0;
+};
 
+// Run as macOS. The fixture's third workspace records its cwd as
+// `/home/demo/Notes`, and only a canonicalisation told the filesystem is
+// case-insensitive folds it — so a call that omits the platform options gets a
+// different answer from the listing and matches nothing.
 const platformLayer = testPlatformLayer({
   sourceRoots: { codex: CODEX_HOME },
-  env: { HOME },
+  env: { HOME: "/home/demo" },
+  platform: "darwin",
 });
 
 const adapterLayer = Layer.mergeAll(platformLayer, NodeContext.layer);
@@ -70,9 +77,12 @@ describe("codexSourceAdapter", () => {
     Effect.gen(function* () {
       const found = yield* codexSourceAdapter.listProjects();
 
-      expect(
-        found.map((project) => project.cwd).sort((a, b) => (a ?? "").localeCompare(b ?? "")),
-      ).toStrictEqual(["/home/demo/infra", "/home/demo/orders-api", "~/notes"]);
+      // Case is preserved in what is shown; only the grouping key is folded.
+      expect(found.map((project) => project.cwd).toSorted(byCodePoint)).toStrictEqual([
+        "/home/demo/Notes",
+        "/home/demo/infra",
+        "/home/demo/orders-api",
+      ]);
       // Codex has no project directory, so the id is a path it will never write.
       expect(found.every((project) => project.storagePath.includes("/#projects/"))).toBe(true);
     }).pipe(Effect.provide(adapterLayer)),
@@ -130,10 +140,12 @@ describe("codexSourceAdapter", () => {
       const sessionRows = db.select().from(sessions).all();
 
       expect(projectRows.every((row) => row.source === "codex")).toBe(true);
-      expect(
-        projectRows.map((row) => row.name).sort((a, b) => (a ?? "").localeCompare(b ?? "")),
-      ).toStrictEqual(["infra", "notes", "orders-api"]);
-      expect(sessionRows).toHaveLength(4);
+      expect(projectRows.map((row) => row.name).toSorted(byCodePoint)).toStrictEqual([
+        "Notes",
+        "infra",
+        "orders-api",
+      ]);
+      expect(sessionRows).toHaveLength(5);
 
       // Codex reports no token usage Lantern reads yet, so its cost must not be
       // presented as a number.
@@ -222,10 +234,53 @@ describe("codexSourceAdapter", () => {
     }).pipe(Effect.provide(readPathLayer)),
   );
 
+  it.live("still finds a session whose metadata line is larger than the read window", () =>
+    Effect.gen(function* () {
+      const found = yield* codexSourceAdapter.listProjects();
+      const infra = found.find((project) => project.cwd === "/home/demo/infra");
+      if (infra === undefined) {
+        throw new Error("fixture workspace missing");
+      }
+
+      const refs = yield* codexSourceAdapter.listSessions(infra);
+
+      // One fixture session carries a 20 KB `instructions` payload, so its
+      // `session_meta` does not fit the window the listing reads. Dropping the
+      // tail of that window would leave nothing at all, and the session would
+      // be missing from every listing with nothing to say why.
+      expect(refs.map((ref) => ref.sessionId)).toContain("0199a3f1-7c22-7d44-b8e5-3a1c9f2b6e08");
+    }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("locates a Codex session's file and refuses to delete it", () =>
+    Effect.gen(function* () {
+      const syncService = yield* SyncService;
+      const locator = yield* SessionLocatorService;
+      const { db } = yield* DrizzleService;
+
+      yield* syncService.fullSync();
+
+      const row = db.select().from(sessions).all().at(0);
+      if (row === undefined) {
+        throw new Error("sync produced no sessions");
+      }
+
+      // The locator validates a cached path against the roots of the source
+      // that owns it. A source declaring none — which an unwatched one used to
+      // — makes every one of its sessions unreachable.
+      const location = yield* locator.locate(row.projectId, row.id);
+
+      expect(location.filePath).toBe(row.filePath);
+      expect(location.sourceId).toBe("codex");
+      // Lantern only ever reads another CLI's history.
+      expect(location.deletable).toBe(false);
+    }).pipe(Effect.provide(readPathLayer)),
+  );
+
   it.live("records the model each turn actually ran on", () =>
     Effect.gen(function* () {
       const found = yield* codexSourceAdapter.listProjects();
-      const notes = found.find((project) => project.cwd === "~/notes");
+      const notes = found.find((project) => project.cwd === "/home/demo/Notes");
       if (notes === undefined) {
         throw new Error("fixture workspace missing");
       }
@@ -251,7 +306,7 @@ describe("codexSourceAdapter", () => {
   it.live("counts kinds it does not render as ignored, never as unreadable", () =>
     Effect.gen(function* () {
       const found = yield* codexSourceAdapter.listProjects();
-      const notes = found.find((project) => project.cwd === "~/notes");
+      const notes = found.find((project) => project.cwd === "/home/demo/Notes");
       if (notes === undefined) {
         throw new Error("fixture workspace missing");
       }

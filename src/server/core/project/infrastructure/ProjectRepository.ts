@@ -52,8 +52,6 @@ const LayerImpl = Effect.gen(function* () {
         return yield* Effect.fail(new Error("Invalid project path: outside allowed directory"));
       }
 
-      const meta = yield* projectMetaService.getProjectMeta(projectId);
-
       // A source that partitions its history by date has no project directory:
       // the id decodes to a path under its root that is never opened, so there
       // is nothing to stat and the cached timestamp is the only one there is.
@@ -61,6 +59,8 @@ const LayerImpl = Effect.gen(function* () {
         if (row === undefined) {
           return yield* Effect.fail(new Error("Project not found"));
         }
+
+        const meta = yield* projectMetaService.getProjectMeta(projectId);
 
         return {
           project: {
@@ -80,6 +80,9 @@ const LayerImpl = Effect.gen(function* () {
 
       // Get file stats
       const stat = yield* fs.stat(fullPath);
+
+      // Get project metadata
+      const meta = yield* projectMetaService.getProjectMeta(projectId);
 
       return {
         project: {

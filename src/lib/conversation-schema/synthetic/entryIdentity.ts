@@ -45,8 +45,8 @@ export const syntheticEntryUuid = (sourceId: string, sessionKey: string, index: 
 
   const timeLow = a;
   const timeMid = b.slice(0, 4);
-  // Version 5. The three characters after it are the rest of `b`, so the whole
-  // hash is used: slicing from 5 would have dropped one and repeated nothing.
+  // Version 5. A uuid has 32 hex digits and the version nibble occupies one of
+  // them, so exactly one character of `b` has to give way; this takes the last.
   const timeHigh = `5${b.slice(4, 7)}`;
   // Variant 10xx.
   const clockSeq = `${((Number.parseInt(c.slice(0, 1), 16) & 0x3) | 0x8).toString(16)}${c.slice(1, 4)}`;

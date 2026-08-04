@@ -1,7 +1,7 @@
 import { Path } from "@effect/platform";
 import { Effect, Context as EffectContext, Layer } from "effect";
 import type { InferEffect } from "../../../lib/effect/types.ts";
-import type { SourceId } from "../../source/models/SourceId.ts";
+import { CODEX_SOURCE_ID, type SourceId } from "../../source/models/SourceId.ts";
 import { EnvService } from "./EnvService.ts";
 import { LanternOptionsService } from "./LanternOptionsService.ts";
 
@@ -61,7 +61,7 @@ const LayerImpl = Effect.gen(function* () {
    * Answering with it here would have handed out a path one level too high.
    */
   const sourceRoot = (sourceId: SourceId): Effect.Effect<string | undefined> =>
-    sourceId === "codex" ? envService.getEnv("CODEX_HOME") : Effect.succeed(undefined);
+    sourceId === CODEX_SOURCE_ID ? envService.getEnv("CODEX_HOME") : Effect.succeed(undefined);
 
   return {
     claudeCodePaths,

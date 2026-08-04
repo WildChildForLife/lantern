@@ -19,22 +19,21 @@ const SESSION_DIRS = ["sessions", "archived_sessions"] as const;
 
 /**
  * Enough of a rollout to reach `session_meta` and the first `turn_context`,
- * which are the first lines of the file. Reading whole transcripts to group
- * them by workspace would mean reading every byte of a history that runs to
- * gigabytes.
+ * which are its opening lines. Reading whole transcripts only to group them by
+ * workspace would mean reading every byte of a history that runs to gigabytes.
  */
 const HEAD_BYTES = 16 * 1024;
 
+/** Metadata is in the opening lines; parsing further buys nothing. */
+const META_LINES = 8;
+
 /**
- * How long one filesystem scan is reused.
+ * How many rollouts' metadata is kept.
  *
- * A sync calls `listProjects` and then `listSessions` once per project. Without
- * this that is one full walk of the tree per project, and the same file's
- * metadata parsed as many times as there are workspaces. Short enough that a
- * later sync always starts from disk; correctness never rests on it, since a
- * miss just does the walk again.
+ * A bound rather than a policy: the cache exists so a sync does not re-read
+ * files it has already read, and a history larger than this simply reads more.
  */
-const SCAN_TTL_MS = 2_000;
+const META_CACHE_LIMIT = 20_000;
 
 type ScannedRollout = {
   readonly filePath: string;
@@ -127,54 +126,105 @@ const makeAdapter = (): SourceAdapter => {
   });
 
   /**
+   * The opening bytes of a file.
+   *
+   * `read` is allowed to return fewer bytes than asked for, so it is called
+   * until the window is full or the file ends. `atEnd` says which happened,
+   * because it is the only way to know whether the last line is whole.
+   */
+  const readHead = (filePath: string) =>
+    Effect.scoped(
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const file = yield* fs.open(filePath, { flag: "r" });
+        const buffer = new Uint8Array(HEAD_BYTES);
+
+        let filled = 0;
+        while (filled < HEAD_BYTES) {
+          const read = Number(yield* file.read(buffer.subarray(filled)));
+          if (read === 0) break;
+          filled += read;
+        }
+
+        return {
+          text: new TextDecoder().decode(buffer.subarray(0, filled)),
+          atEnd: filled < HEAD_BYTES,
+        };
+      }),
+    ).pipe(Effect.catchAll(() => Effect.succeed(null)));
+
+  /**
    * Reads only as far as the metadata: the working directory and session id are
-   * in the first lines, and grouping thousands of sessions must not mean
+   * in the opening lines, and grouping thousands of sessions must not mean
    * reading every transcript in full.
    *
-   * The final line of a `HEAD_BYTES` window is almost always cut mid-JSON, so it
-   * is dropped rather than counted as a line that failed to parse.
+   * Null means the file could not be read, which is not the same as a file with
+   * nothing in it — a session that momentarily failed to open must not be
+   * remembered as one without a workspace.
    */
   const readMeta = (filePath: string) =>
     Effect.gen(function* () {
+      const head = yield* readHead(filePath);
+      if (head === null) {
+        return null;
+      }
+
+      const lines = head.text.split("\n");
+      // A window that stopped before the end of the file almost always cuts its
+      // last line mid-JSON, so that line is dropped rather than counted as one
+      // that failed to parse.
+      const complete = head.atEnd ? lines : lines.slice(0, -1);
+      const meta = parseRollout(
+        complete.slice(0, META_LINES).join("\n"),
+        rolloutSessionId(filePath),
+      ).meta;
+
+      if (meta.cwd !== null || head.atEnd) {
+        return meta;
+      }
+
+      // The window held no complete line carrying a workspace, so `session_meta`
+      // is bigger than it. Rare, and worth one whole-file read: the alternative
+      // is a session missing from every listing with nothing to say why.
       const fs = yield* FileSystem.FileSystem;
+      const whole = yield* fs
+        .readFileString(filePath)
+        .pipe(Effect.catchAll(() => Effect.succeed(null)));
 
-      const head = yield* Effect.scoped(
-        Effect.gen(function* () {
-          const file = yield* fs.open(filePath, { flag: "r" });
-          const buffer = new Uint8Array(HEAD_BYTES);
-          const read = yield* file.read(buffer);
-          return new TextDecoder().decode(buffer.subarray(0, Number(read)));
-        }),
-      ).pipe(Effect.catchAll(() => Effect.succeed("")));
-
-      const lines = head.split("\n");
-      const complete = head.length < HEAD_BYTES ? lines : lines.slice(0, -1);
-
-      return parseRollout(complete.join("\n"), rolloutSessionId(filePath)).meta;
+      return whole === null
+        ? meta
+        : parseRollout(
+            whole.split("\n").slice(0, META_LINES).join("\n"),
+            rolloutSessionId(filePath),
+          ).meta;
     });
 
   /**
-   * One walk of both trees with each file's metadata, reused across the calls a
-   * single sync makes.
+   * Metadata already parsed for a rollout, keyed by the file it came from.
    *
-   * A file whose mtime has not moved keeps the metadata already parsed for it,
-   * so re-scanning an unchanged history costs stats and no reads at all.
+   * Deliberately not a snapshot with a lifetime. Every listing walks the trees
+   * afresh, so no two calls disagree about which files exist; what is reused is
+   * only a file's own metadata, and only while its mtime says the file has not
+   * changed. That makes reuse correct by construction rather than by timing,
+   * and leaves a concurrent second reader costing duplicated work rather than a
+   * different answer.
    */
-  let lastScan: { root: string; at: number; entries: readonly ScannedRollout[] } | null = null;
+  const metaCache = new Map<string, { mtimeMs: number; meta: RolloutSessionMeta }>();
 
-  const scan = Effect.gen(function* () {
-    const root = yield* rootPath;
-    // Keyed by root, not only by time: the adapter is one value for the whole
-    // process, and a second Lantern pointed at another history — or a test at a
-    // fixture tree — must never be served the first one's scan.
-    const cached = lastScan?.root === root ? lastScan : null;
-    if (cached !== null && Date.now() - cached.at < SCAN_TTL_MS) {
-      return cached.entries;
+  const rememberMeta = (filePath: string, mtimeMs: number, meta: RolloutSessionMeta) => {
+    if (metaCache.size >= META_CACHE_LIMIT) {
+      const oldest = metaCache.keys().next();
+      if (oldest.done !== true) {
+        metaCache.delete(oldest.value);
+      }
     }
+    metaCache.set(filePath, { mtimeMs, meta });
+  };
 
+  /** Every rollout under both trees, with the metadata needed to group it. */
+  const scan = Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const files = yield* listRolloutFiles;
-    const previous = new Map(cached?.entries.map((entry) => [entry.filePath, entry]) ?? []);
 
     const entries: ScannedRollout[] = [];
     for (const filePath of files) {
@@ -182,16 +232,21 @@ const makeAdapter = (): SourceAdapter => {
       if (stat === null) continue;
 
       const mtimeMs = Option.getOrElse(stat.mtime, () => new Date(0)).getTime();
-      const reusable = previous.get(filePath);
+      const cached = metaCache.get(filePath);
+      if (cached !== undefined && cached.mtimeMs === mtimeMs) {
+        entries.push({ filePath, mtimeMs, meta: cached.meta });
+        continue;
+      }
 
-      entries.push(
-        reusable !== undefined && reusable.mtimeMs === mtimeMs
-          ? reusable
-          : { filePath, mtimeMs, meta: yield* readMeta(filePath) },
-      );
+      const meta = yield* readMeta(filePath);
+      // A file that could not be read this time is left out of this listing and
+      // retried on the next one, rather than cached as unreadable.
+      if (meta === null) continue;
+
+      rememberMeta(filePath, mtimeMs, meta);
+      entries.push({ filePath, mtimeMs, meta });
     }
 
-    lastScan = { root, at: Date.now(), entries };
     return entries;
   });
 
@@ -290,20 +345,30 @@ const makeAdapter = (): SourceAdapter => {
 
   const resolveSessionRef = (projectStoragePath: string, sessionId: string) =>
     Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const root = yield* rootPath;
       const options = yield* canonicalizeOptions;
-      const scanned = yield* scan;
 
-      const found = scanned.find((entry) => rolloutSessionId(entry.filePath) === sessionId);
-      if (found === undefined) {
+      // Only this one file is read. Opening a single session must not cost a
+      // pass over the whole history, which is what grouping needs and this
+      // does not.
+      const files = yield* listRolloutFiles;
+      const filePath = files.find((candidate) => rolloutSessionId(candidate) === sessionId);
+      if (filePath === undefined) {
+        return yield* new SourceSessionGoneError({ sourceId: CODEX_SOURCE_ID, sessionId });
+      }
+
+      const stat = yield* fs.stat(filePath).pipe(Effect.catchAll(() => Effect.succeed(null)));
+      const meta = yield* readMeta(filePath);
+      if (stat === null || meta === null) {
         return yield* new SourceSessionGoneError({ sourceId: CODEX_SOURCE_ID, sessionId });
       }
 
       // The session id alone would open any session under any project id. Codex
       // records the workspace inside the transcript, so the file has to agree
       // that it belongs to the project being asked about.
-      const canonical = canonicalizeProjectPath(found.meta.cwd, options);
+      const canonical = canonicalizeProjectPath(meta.cwd, options);
       if (canonical === null || virtualProjectPath(path, root, canonical) !== projectStoragePath) {
         return yield* new SourceSessionGoneError({ sourceId: CODEX_SOURCE_ID, sessionId });
       }
@@ -312,9 +377,9 @@ const makeAdapter = (): SourceAdapter => {
         sourceId: CODEX_SOURCE_ID,
         sessionId,
         projectStoragePath,
-        filePath: found.filePath,
-        fileMtimeMs: found.mtimeMs,
-        sourceSessionKey: found.meta.sessionId ?? sessionId,
+        filePath,
+        fileMtimeMs: Option.getOrElse(stat.mtime, () => new Date(0)).getTime(),
+        sourceSessionKey: meta.sessionId ?? sessionId,
       } satisfies SourceSessionRef;
     });
 
