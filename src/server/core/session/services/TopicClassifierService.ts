@@ -136,6 +136,10 @@ const LayerImpl = Effect.gen(function* () {
 
       const executable = yield* runner.executable();
 
+      // Which CLI answered is the first thing anyone asks when a topic name
+      // looks wrong, and it is not otherwise recoverable from the result.
+      yield* Effect.logInfo(`[TopicClassifier] asking ${adapter.id} via ${executable}`);
+
       // Claude Code is pinned to a cheap model for this; the others run on
       // whatever the user configured, which is not Lantern's to override.
       const args =
