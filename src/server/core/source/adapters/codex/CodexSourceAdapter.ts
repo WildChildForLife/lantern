@@ -24,6 +24,15 @@ const SESSION_DIRS = ["sessions", "archived_sessions"] as const;
  */
 const HEAD_BYTES = 16 * 1024;
 
+/**
+ * Where growing the window stops.
+ *
+ * A `session_meta` larger than this is not a big line, it is a file that is not
+ * a rollout. Stopping bounds what one unreadable file can cost, and the session
+ * is reported as unreadable rather than read at any price.
+ */
+const MAX_HEAD_BYTES = 1024 * 1024;
+
 /** Metadata is in the opening lines; parsing further buys nothing. */
 const META_LINES = 8;
 
@@ -31,13 +40,18 @@ const META_LINES = 8;
  * How many rollouts' metadata is kept.
  *
  * A bound rather than a policy: the cache exists so a sync does not re-read
- * files it has already read, and a history larger than this simply reads more.
+ * files it has already read. Eviction is least-recently-used, which matters
+ * more than the number — evicting in insertion order would, for a history past
+ * the limit, throw away exactly what the next pass reads first.
  */
 const META_CACHE_LIMIT = 20_000;
 
-type ScannedRollout = {
+type RolloutFile = {
   readonly filePath: string;
   readonly mtimeMs: number;
+};
+
+type ScannedRollout = RolloutFile & {
   readonly meta: RolloutSessionMeta;
 };
 
@@ -86,19 +100,23 @@ const makeAdapter = (): SourceAdapter => {
     };
   });
 
-  /** Every rollout file under both trees. */
+  /**
+   * Every rollout file under both trees, with the modification time the walk
+   * already had to read to tell a file from a directory. Returning it means the
+   * caller does not stat the whole history a second time.
+   */
   const listRolloutFiles = Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
     const path = yield* Path.Path;
     const root = yield* rootPath;
 
-    const walk = (directory: string): Effect.Effect<string[], never, FileSystem.FileSystem> =>
+    const walk = (directory: string): Effect.Effect<RolloutFile[], never, FileSystem.FileSystem> =>
       Effect.gen(function* () {
         const names = yield* fs
           .readDirectory(directory)
           .pipe(Effect.catchAll(() => Effect.succeed<string[]>([])));
 
-        const found: string[] = [];
+        const found: RolloutFile[] = [];
         for (const name of names) {
           const entryPath = path.join(directory, name);
           const stat = yield* fs.stat(entryPath).pipe(Effect.catchAll(() => Effect.succeed(null)));
@@ -110,46 +128,72 @@ const makeAdapter = (): SourceAdapter => {
           }
 
           if (name.endsWith(".jsonl") && name.startsWith("rollout-")) {
-            found.push(entryPath);
+            found.push({
+              filePath: entryPath,
+              mtimeMs: Option.getOrElse(stat.mtime, () => new Date(0)).getTime(),
+            });
           }
         }
 
         return found;
       });
 
-    const files: string[] = [];
+    const files: RolloutFile[] = [];
     for (const directory of SESSION_DIRS) {
       files.push(...(yield* walk(path.join(root, directory))));
     }
 
-    return files.sort();
+    return files.sort((a, b) => (a.filePath < b.filePath ? -1 : a.filePath > b.filePath ? 1 : 0));
   });
 
   /**
-   * The opening bytes of a file.
+   * The opening lines of a file, reading as little as will yield a whole one.
    *
-   * `read` is allowed to return fewer bytes than asked for, so it is called
-   * until the window is full or the file ends. `atEnd` says which happened,
-   * because it is the only way to know whether the last line is whole.
+   * A window is only useful if it ends on a line boundary, and `session_meta`
+   * can be bigger than any window worth starting with — Codex records the
+   * assembled instructions in it. So the window grows until it holds a newline
+   * rather than falling back to reading the file, which for a rollout running
+   * to hundreds of megabytes would cost more than the listing it serves.
+   *
+   * `read` may return fewer bytes than asked for, so each pass reads until its
+   * chunk is full or the file ends.
    */
   const readHead = (filePath: string) =>
     Effect.scoped(
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem;
         const file = yield* fs.open(filePath, { flag: "r" });
-        const buffer = new Uint8Array(HEAD_BYTES);
 
-        let filled = 0;
-        while (filled < HEAD_BYTES) {
-          const read = Number(yield* file.read(buffer.subarray(filled)));
-          if (read === 0) break;
-          filled += read;
+        const chunks: Uint8Array[] = [];
+        let total = 0;
+        let atEnd = false;
+        let sawNewline = false;
+
+        while (!sawNewline && !atEnd && total < MAX_HEAD_BYTES) {
+          const buffer = new Uint8Array(HEAD_BYTES);
+          let filled = 0;
+          while (filled < HEAD_BYTES) {
+            const read = Number(yield* file.read(buffer.subarray(filled)));
+            if (read === 0) {
+              atEnd = true;
+              break;
+            }
+            filled += read;
+          }
+
+          chunks.push(buffer.subarray(0, filled));
+          total += filled;
+          sawNewline = buffer.subarray(0, filled).includes(0x0a);
         }
 
-        return {
-          text: new TextDecoder().decode(buffer.subarray(0, filled)),
-          atEnd: filled < HEAD_BYTES,
-        };
+        const joined = new Uint8Array(total);
+        let offset = 0;
+        for (const chunk of chunks) {
+          joined.set(chunk, offset);
+          offset += chunk.length;
+        }
+
+        return { text: new TextDecoder().decode(joined), atEnd };
       }),
     ).pipe(Effect.catchAll(() => Effect.succeed(null)));
 
@@ -160,7 +204,8 @@ const makeAdapter = (): SourceAdapter => {
    *
    * Null means the file could not be read, which is not the same as a file with
    * nothing in it — a session that momentarily failed to open must not be
-   * remembered as one without a workspace.
+   * remembered as one without a workspace, because the mtime that would
+   * invalidate that memory never moves again once the session is archived.
    */
   const readMeta = (filePath: string) =>
     Effect.gen(function* () {
@@ -170,33 +215,13 @@ const makeAdapter = (): SourceAdapter => {
       }
 
       const lines = head.text.split("\n");
-      // A window that stopped before the end of the file almost always cuts its
-      // last line mid-JSON, so that line is dropped rather than counted as one
-      // that failed to parse.
+      // A window that stopped before the end of the file cuts its last line
+      // mid-JSON, so that line is dropped rather than counted as one that
+      // failed to parse. A file that ended inside the window has no such line.
       const complete = head.atEnd ? lines : lines.slice(0, -1);
-      const meta = parseRollout(
-        complete.slice(0, META_LINES).join("\n"),
-        rolloutSessionId(filePath),
-      ).meta;
 
-      if (meta.cwd !== null || head.atEnd) {
-        return meta;
-      }
-
-      // The window held no complete line carrying a workspace, so `session_meta`
-      // is bigger than it. Rare, and worth one whole-file read: the alternative
-      // is a session missing from every listing with nothing to say why.
-      const fs = yield* FileSystem.FileSystem;
-      const whole = yield* fs
-        .readFileString(filePath)
-        .pipe(Effect.catchAll(() => Effect.succeed(null)));
-
-      return whole === null
-        ? meta
-        : parseRollout(
-            whole.split("\n").slice(0, META_LINES).join("\n"),
-            rolloutSessionId(filePath),
-          ).meta;
+      return parseRollout(complete.slice(0, META_LINES).join("\n"), rolloutSessionId(filePath))
+        .meta;
     });
 
   /**
@@ -221,29 +246,43 @@ const makeAdapter = (): SourceAdapter => {
     metaCache.set(filePath, { mtimeMs, meta });
   };
 
-  /** Every rollout under both trees, with the metadata needed to group it. */
-  const scan = Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const files = yield* listRolloutFiles;
-
-    const entries: ScannedRollout[] = [];
-    for (const filePath of files) {
-      const stat = yield* fs.stat(filePath).pipe(Effect.catchAll(() => Effect.succeed(null)));
-      if (stat === null) continue;
-
-      const mtimeMs = Option.getOrElse(stat.mtime, () => new Date(0)).getTime();
+  /**
+   * A file's metadata, from the cache when its mtime says nothing has changed.
+   *
+   * A hit re-inserts the entry so it becomes the most recently used. Without
+   * that the eviction order is insertion order, and since a scan walks files in
+   * a stable order, every scan of a history past the limit would evict exactly
+   * what the next scan asks for first — taking the hit rate from complete to
+   * nothing at the moment the limit is crossed, rather than degrading.
+   */
+  const metaFor = (filePath: string, mtimeMs: number) =>
+    Effect.gen(function* () {
       const cached = metaCache.get(filePath);
       if (cached !== undefined && cached.mtimeMs === mtimeMs) {
-        entries.push({ filePath, mtimeMs, meta: cached.meta });
-        continue;
+        metaCache.delete(filePath);
+        metaCache.set(filePath, cached);
+        return cached.meta;
       }
 
       const meta = yield* readMeta(filePath);
-      // A file that could not be read this time is left out of this listing and
-      // retried on the next one, rather than cached as unreadable.
-      if (meta === null) continue;
+      // A file that could not be read this time is retried on the next listing
+      // rather than remembered as unreadable: an archived rollout's mtime never
+      // moves again, so a cached failure would be permanent.
+      if (meta === null) return null;
 
       rememberMeta(filePath, mtimeMs, meta);
+      return meta;
+    });
+
+  /** Every rollout under both trees, with the metadata needed to group it. */
+  const scan = Effect.gen(function* () {
+    const files = yield* listRolloutFiles;
+
+    const entries: ScannedRollout[] = [];
+    for (const { filePath, mtimeMs } of files) {
+      const meta = yield* metaFor(filePath, mtimeMs);
+      if (meta === null) continue;
+
       entries.push({ filePath, mtimeMs, meta });
     }
 
@@ -345,23 +384,23 @@ const makeAdapter = (): SourceAdapter => {
 
   const resolveSessionRef = (projectStoragePath: string, sessionId: string) =>
     Effect.gen(function* () {
-      const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const root = yield* rootPath;
       const options = yield* canonicalizeOptions;
 
-      // Only this one file is read. Opening a single session must not cost a
-      // pass over the whole history, which is what grouping needs and this
-      // does not.
+      // Only the matched file's metadata is read, and from the cache when the
+      // listing already read it. Locating a session still has to walk the trees
+      // — a date-partitioned history offers no other way to find one file — but
+      // it must not read them.
       const files = yield* listRolloutFiles;
-      const filePath = files.find((candidate) => rolloutSessionId(candidate) === sessionId);
-      if (filePath === undefined) {
+      const found = files.find((candidate) => rolloutSessionId(candidate.filePath) === sessionId);
+      if (found === undefined) {
         return yield* new SourceSessionGoneError({ sourceId: CODEX_SOURCE_ID, sessionId });
       }
 
-      const stat = yield* fs.stat(filePath).pipe(Effect.catchAll(() => Effect.succeed(null)));
-      const meta = yield* readMeta(filePath);
-      if (stat === null || meta === null) {
+      const { filePath, mtimeMs } = found;
+      const meta = yield* metaFor(filePath, mtimeMs);
+      if (meta === null) {
         return yield* new SourceSessionGoneError({ sourceId: CODEX_SOURCE_ID, sessionId });
       }
 
@@ -378,7 +417,7 @@ const makeAdapter = (): SourceAdapter => {
         sessionId,
         projectStoragePath,
         filePath,
-        fileMtimeMs: Option.getOrElse(stat.mtime, () => new Date(0)).getTime(),
+        fileMtimeMs: mtimeMs,
         sourceSessionKey: meta.sessionId ?? sessionId,
       } satisfies SourceSessionRef;
     });
@@ -400,7 +439,7 @@ const makeAdapter = (): SourceAdapter => {
       }
 
       const files = yield* listRolloutFiles;
-      const probePath = files.at(-1);
+      const probePath = files.at(-1)?.filePath;
       if (probePath === undefined) {
         return {
           sourceId: CODEX_SOURCE_ID,

@@ -1,5 +1,6 @@
 import { NodeContext } from "@effect/platform-node";
 import { it } from "@effect/vitest";
+import { eq } from "drizzle-orm";
 import { Effect, Layer } from "effect";
 import { describe, expect } from "vitest";
 import { makeDrizzleTestServiceLayer } from "../../../../../testing/layers/testDrizzleServiceLayer.ts";
@@ -250,6 +251,36 @@ describe("codexSourceAdapter", () => {
       // be missing from every listing with nothing to say why.
       expect(refs.map((ref) => ref.sessionId)).toContain("0199a3f1-7c22-7d44-b8e5-3a1c9f2b6e08");
     }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("keeps a project's timestamp when a single session is re-synced", () =>
+    Effect.gen(function* () {
+      const syncService = yield* SyncService;
+      const { db } = yield* DrizzleService;
+
+      yield* syncService.fullSync();
+
+      const row = db.select().from(sessions).all().at(0);
+      if (row === undefined) {
+        throw new Error("sync produced no sessions");
+      }
+
+      const before = db.select().from(projects).where(eq(projects.id, row.projectId)).get();
+      expect(before?.dirMtimeMs).toBeGreaterThan(0);
+
+      // The cached mtime has to be stale or the sync returns without writing
+      // anything, and the test would pass whatever the write does.
+      db.update(sessions).set({ fileMtimeMs: 0 }).where(eq(sessions.id, row.id)).run();
+      yield* syncService.syncSession(row.projectId, row.id);
+
+      const after = db.select().from(projects).where(eq(projects.id, row.projectId)).get();
+
+      // A single-session sync stats the project's storage path, which for a
+      // date-partitioned source is one the CLI never creates. Writing the
+      // failed stat's zero would date the project to 1970 and sink it to the
+      // bottom of every list.
+      expect(after?.dirMtimeMs).toBeGreaterThan(0);
+    }).pipe(Effect.provide(SyncService.Live), Effect.provide(syncLayer)),
   );
 
   it.live("locates a Codex session's file and refuses to delete it", () =>

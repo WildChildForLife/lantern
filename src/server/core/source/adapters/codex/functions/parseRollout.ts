@@ -81,7 +81,6 @@ const IGNORED_RESPONSE_ITEMS = new Set([
   "custom_tool_call_output",
   "web_search_call",
   "file_search_call",
-  "file_search_result",
   "image_generation_call",
   "code_interpreter_call",
   "computer_call",
