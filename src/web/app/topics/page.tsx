@@ -4,6 +4,7 @@ import { type FC, useState } from "react";
 import { useDoneConversations } from "@/lib/atoms/doneConversations";
 import { useViewMode } from "@/lib/atoms/viewMode";
 import { NotificationBell } from "@/web/app/components/NotificationBell";
+import { SettingsButton } from "@/web/components/SettingsButton";
 import { Button } from "@/web/components/ui/button";
 import { Input } from "@/web/components/ui/input";
 import { ViewModeToggle } from "@/web/components/ViewModeToggle";
@@ -41,6 +42,7 @@ export const TopicsPage: FC = () => {
             <span>Projects</span>
           </Link>
           <ClassifyTopicsButton />
+          <SettingsButton />
           <NotificationBell />
         </div>
       </header>

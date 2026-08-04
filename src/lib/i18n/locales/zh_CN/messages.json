@@ -2590,7 +2590,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        57
+        59
       ]
     ],
     "translation": "查看 Claude Code 对话历史和项目操作"
@@ -2601,7 +2601,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        90
+        92
       ]
     ],
     "translation": "正在加载项目..."
@@ -2612,7 +2612,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        65
+        67
       ]
     ],
     "translation": "项目"
@@ -3413,6 +3413,42 @@
       ]
     ],
     "translation": "显示和行为设置"
+  },
+  "settings.dialog.description": {
+    "message": "Which agent CLIs Lantern reads, and how it behaves.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        41
+      ]
+    ],
+    "translation": "Lantern 读取哪些智能体 CLI，以及它的行为方式。"
+  },
+  "settings.dialog.sources": {
+    "message": "Agent CLIs to read",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        50
+      ]
+    ],
+    "translation": "要读取的智能体 CLI"
+  },
+  "settings.dialog.title": {
+    "message": "Settings",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        38
+      ]
+    ],
+    "translation": "设置"
   },
   "settings.disallowedTools.label": {
     "placeholders": {},

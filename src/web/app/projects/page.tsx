@@ -4,6 +4,7 @@ import { InfoIcon, LayoutGridIcon, MessagesSquareIcon, SearchIcon } from "lucide
 import { type FC, Suspense, useState } from "react";
 import { NotificationBell } from "@/web/app/components/NotificationBell";
 import { useSearch } from "@/web/components/SearchProvider";
+import { SettingsButton } from "@/web/components/SettingsButton";
 import { SystemInfoCard } from "@/web/components/SystemInfoCard";
 import { Dialog, DialogContent, DialogTitle } from "@/web/components/ui/dialog";
 import { ViewModeToggle } from "@/web/components/ViewModeToggle";
@@ -35,6 +36,7 @@ export const ProjectsPage: FC = () => {
           >
             <SearchIcon className="w-3.5 h-3.5" />
           </button>
+          <SettingsButton />
           <NotificationBell />
         </div>
       </header>

@@ -4,6 +4,7 @@ import { CheckCheckIcon, FolderIcon, LayoutGridIcon, XIcon } from "lucide-react"
 import { type FC, useState } from "react";
 import { useDoneConversations } from "@/lib/atoms/doneConversations";
 import { NotificationBell } from "@/web/app/components/NotificationBell";
+import { SettingsButton } from "@/web/components/SettingsButton";
 import { TopicIcon } from "@/web/components/TopicIcon";
 import { Button } from "@/web/components/ui/button";
 import { Input } from "@/web/components/ui/input";
@@ -46,6 +47,7 @@ export const ConversationsPage: FC<Props> = ({ topic }) => {
             <FolderIcon className="w-3.5 h-3.5" />
             <span>Projects</span>
           </Link>
+          <SettingsButton />
           <NotificationBell />
         </div>
       </header>

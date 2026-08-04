@@ -2590,7 +2590,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        57
+        59
       ]
     ],
     "translation": "Claude Codeの会話履歴とプロジェクトの操作を閲覧"
@@ -2601,7 +2601,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        90
+        92
       ]
     ],
     "translation": "プロジェクトを読み込み中..."
@@ -2612,7 +2612,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        65
+        67
       ]
     ],
     "translation": "プロジェクト"
@@ -3413,6 +3413,42 @@
       ]
     ],
     "translation": "表示と動作の設定"
+  },
+  "settings.dialog.description": {
+    "message": "Which agent CLIs Lantern reads, and how it behaves.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        41
+      ]
+    ],
+    "translation": "Lantern が読み取るエージェント CLI と、その動作設定です。"
+  },
+  "settings.dialog.sources": {
+    "message": "Agent CLIs to read",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        50
+      ]
+    ],
+    "translation": "読み取るエージェント CLI"
+  },
+  "settings.dialog.title": {
+    "message": "Settings",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        38
+      ]
+    ],
+    "translation": "設定"
   },
   "settings.disallowedTools.label": {
     "placeholders": {},
