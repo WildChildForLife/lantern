@@ -13,6 +13,7 @@ const TILE_STYLES: Record<string, { readonly initial: string; readonly accent: s
   "claude-code": { initial: "C", accent: "bg-orange-500/15 text-orange-500 border-orange-500/30" },
   codex: { initial: "◇", accent: "bg-sky-500/15 text-sky-400 border-sky-500/30" },
   opencode: { initial: "◈", accent: "bg-violet-500/15 text-violet-400 border-violet-500/30" },
+  "qwen-code": { initial: "◆", accent: "bg-teal-500/15 text-teal-400 border-teal-500/30" },
 };
 
 const FALLBACK = { initial: "•", accent: "bg-muted text-muted-foreground border-border" };
