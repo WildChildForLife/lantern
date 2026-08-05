@@ -6,6 +6,7 @@ import {
   OPENCODE_SOURCE_ID,
   type SourceId,
 } from "../../source/models/SourceId.ts";
+import { resolveHomeDirectory } from "../resolveHomeDirectory.ts";
 import { EnvService } from "./EnvService.ts";
 import { LanternOptionsService } from "./LanternOptionsService.ts";
 
@@ -22,9 +23,15 @@ const LayerImpl = Effect.gen(function* () {
   const optionsService = yield* LanternOptionsService;
   const envService = yield* EnvService;
 
+  /** `HOME`, or `USERPROFILE` on the Windows shells that set only that. */
+  const resolvedHomeDirectory = Effect.all([
+    envService.getEnv("HOME"),
+    envService.getEnv("USERPROFILE"),
+  ]).pipe(Effect.map(([home, userProfile]) => resolveHomeDirectory(home, userProfile)));
+
   const claudeCodePaths = Effect.gen(function* () {
     const cliClaudeDir = yield* optionsService.getOption("claudeDir");
-    const homeDirectory = yield* envService.getEnv("HOME");
+    const homeDirectory = yield* resolvedHomeDirectory;
     const globalClaudeDirectoryPath =
       cliClaudeDir === undefined
         ? path.resolve(homeDirectory ?? "/", ".claude")
@@ -45,7 +52,7 @@ const LayerImpl = Effect.gen(function* () {
    * Not derivable from `globalClaudeDirectoryPath`: `--claude-dir` can point
    * anywhere, and its parent is then an unrelated directory.
    */
-  const homeDirectory = envService.getEnv("HOME");
+  const homeDirectory = resolvedHomeDirectory;
 
   /**
    * Read here rather than at each call site, so a test can drive the rules of a

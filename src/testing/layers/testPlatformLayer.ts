@@ -59,6 +59,10 @@ export const testPlatformLayer = (overrides?: {
             return overrides?.env?.LANTERN_ENV ?? "development";
           case "HOME":
             return overrides?.env?.HOME ?? process.cwd();
+          // Left unset by default: HOME already answers on the platforms tests
+          // run on, and defaulting both would hide which one a test is exercising.
+          case "USERPROFILE":
+            return overrides?.env?.USERPROFILE ?? undefined;
           case "PATH":
             return overrides?.env?.PATH ?? undefined;
           case "SHELL":
