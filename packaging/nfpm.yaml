@@ -1,0 +1,39 @@
+# nfpm recipe for the Debian and RPM packages.
+#
+# Built by scripts/build-packages.sh, which stages the application and its
+# production dependencies into packaging/staging first. VERSION and PKG_ARCH come
+# from the environment so one recipe covers every architecture.
+name: lantern
+arch: ${PKG_ARCH}
+platform: linux
+version: ${VERSION}
+section: utils
+priority: optional
+maintainer: WildChildForLife <noreply@users.noreply.github.com>
+description: |
+  Self-hosted dashboard for agent CLI sessions.
+  Reads the logs Claude Code, Codex CLI and opencode already write, then groups
+  every conversation by what it is about rather than by the folder it started in.
+vendor: Lantern contributors
+homepage: https://github.com/WildChildForLife/lantern
+license: MIT
+
+contents:
+  # Paths are relative to packaging/, which is where the build script runs nfpm.
+  - src: ./staging/lantern
+    dst: /usr/lib/lantern
+    type: tree
+  - src: ./lantern.sh
+    dst: /usr/bin/lantern
+    file_info:
+      mode: 0755
+
+overrides:
+  deb:
+    depends:
+      # Debian and Ubuntu both name it nodejs. The floor matches the engines
+      # field in package.json.
+      - nodejs (>= 24)
+  rpm:
+    depends:
+      - nodejs >= 24
