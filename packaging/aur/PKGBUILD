@@ -15,7 +15,7 @@ license=('MIT')
 depends=('nodejs>=24')
 makedepends=('npm')
 source=("$pkgname-$pkgver.tgz::https://registry.npmjs.org/lantern-viewer/-/lantern-viewer-$pkgver.tgz")
-sha256sums=('REPLACE_WITH_TARBALL_SHA256')
+sha256sums=('fbd655b0523e3f10690babcffa5bd1651d1d573b108695c08c7006028c04014e')
 options=('!strip')
 
 package() {
