@@ -160,6 +160,7 @@ const LayerImpl = Effect.gen(function* () {
       .select({
         sessionId: sessions.id,
         projectId: sessions.projectId,
+        source: sessions.source,
         projectName: projects.name,
         projectPath: projects.path,
         customTitle: sessions.customTitle,

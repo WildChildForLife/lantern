@@ -34,8 +34,24 @@ const LayerImpl = Effect.gen(function* () {
     } as const satisfies ClaudeCodePaths;
   });
 
+  /**
+   * The user's home directory.
+   *
+   * Not derivable from `globalClaudeDirectoryPath`: `--claude-dir` can point
+   * anywhere, and its parent is then an unrelated directory.
+   */
+  const homeDirectory = envService.getEnv("HOME");
+
+  /**
+   * Read here rather than at each call site, so a test can drive the rules of a
+   * platform it is not running on — path case-folding above all.
+   */
+  const platform: NodeJS.Platform = process.platform;
+
   return {
     claudeCodePaths,
+    homeDirectory,
+    platform,
   };
 });
 

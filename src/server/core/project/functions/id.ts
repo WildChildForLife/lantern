@@ -51,14 +51,21 @@ export const encodeProjectIdFromSessionFilePath = (sessionFilePath: string) => {
 };
 
 /**
- * Validates that a decoded project path is within the Claude projects directory.
- * Prevents path traversal attacks via crafted projectId values.
+ * Whether a decoded project path lies inside one of the directories Lantern is
+ * allowed to read, so a crafted projectId cannot walk out of them.
+ *
+ * The roots come from the enabled source adapters — server state, never a
+ * request — and a path only has to be inside one of them.
  */
 export const validateProjectPath = (
   decodedPath: string,
-  claudeProjectsDirPath: string,
+  allowedRoots: string | readonly string[],
 ): boolean => {
   const normalizedPath = normalizeAbsolutePath(decodedPath);
-  const normalizedBase = normalizeAbsolutePath(claudeProjectsDirPath);
-  return normalizedPath.startsWith(`${normalizedBase}/`) || normalizedPath === normalizedBase;
+  const roots = typeof allowedRoots === "string" ? [allowedRoots] : allowedRoots;
+
+  return roots.some((root) => {
+    const normalizedBase = normalizeAbsolutePath(root);
+    return normalizedPath === normalizedBase || normalizedPath.startsWith(`${normalizedBase}/`);
+  });
 };

@@ -14,6 +14,7 @@ const conversation = (
 ): ConversationListItem => ({
   sessionId,
   projectId: "project",
+  source: "claude-code",
   projectName: null,
   projectPath,
   title,

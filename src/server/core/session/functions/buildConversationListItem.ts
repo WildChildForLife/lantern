@@ -7,6 +7,7 @@ const parsedUserMessageOrNullSchema = parsedUserMessageSchema.nullable();
 export type ConversationListRow = {
   sessionId: string;
   projectId: string;
+  source: string;
   projectName: string | null;
   projectPath: string | null;
   customTitle: string | null;
@@ -26,6 +27,7 @@ export type ConversationListRow = {
 export const buildConversationListItem = (row: ConversationListRow): ConversationListItem => ({
   sessionId: row.sessionId,
   projectId: row.projectId,
+  source: row.source,
   projectName: row.projectName,
   projectPath: row.projectPath,
   title: row.customTitle,

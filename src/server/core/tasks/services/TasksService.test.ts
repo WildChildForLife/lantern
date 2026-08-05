@@ -27,6 +27,8 @@ const testApplicationContextLayer = Layer.succeed(ApplicationContext, {
     claudeAgentsDirPath: `${getClaudeDir()}/agents`,
     claudeProjectsDirPath: `${getClaudeDir()}/projects`,
   }),
+  homeDirectory: Effect.succeed("/test-home"),
+  platform: process.platform,
 });
 
 describe("TasksService", () => {
