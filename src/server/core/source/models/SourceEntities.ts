@@ -58,7 +58,26 @@ export type SourceSession = {
    * once cost handling becomes provider-aware.
    */
   readonly usageTexts: readonly string[];
+  /**
+   * Usage the source recorded for itself.
+   *
+   * Preferred over anything Lantern computes: a CLI that writes down what a
+   * turn cost knows its own provider's prices, and Lantern's table only covers
+   * Anthropic's. Absent means there is nothing to prefer and the transcript is
+   * scanned instead.
+   */
+  readonly reportedUsage?: ReportedUsage;
   readonly parseStats: ParseStats;
+};
+
+export type ReportedUsage = {
+  /** Null when the source counts tokens but does not price them. */
+  readonly costUsd: number | null;
+  readonly inputTokens: number;
+  readonly outputTokens: number;
+  readonly cacheReadTokens: number;
+  readonly cacheCreationTokens: number;
+  readonly modelName: string | null;
 };
 
 /** What a filesystem change under a source's roots means. */

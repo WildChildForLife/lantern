@@ -1,0 +1,19 @@
+{
+  "id": "ses_02",
+  "projectID": "prj_infra",
+  "title": "Nightly deploy stall",
+  "cost": 0.0093,
+  "tokens": {
+    "input": 800,
+    "output": 120,
+    "reasoning": 0,
+    "cache": {
+      "read": 0,
+      "write": 0
+    }
+  },
+  "time": {
+    "created": 1785200000000,
+    "updated": 1785200100000
+  }
+}

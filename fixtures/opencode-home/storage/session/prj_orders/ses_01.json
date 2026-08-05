@@ -1,0 +1,19 @@
+{
+  "id": "ses_01",
+  "projectID": "prj_orders",
+  "title": "Empty carts 500",
+  "cost": 0.0412,
+  "tokens": {
+    "input": 5120,
+    "output": 240,
+    "reasoning": 0,
+    "cache": {
+      "read": 4096,
+      "write": 0
+    }
+  },
+  "time": {
+    "created": 1785100000000,
+    "updated": 1785100200000
+  }
+}

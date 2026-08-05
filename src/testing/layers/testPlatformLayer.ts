@@ -69,6 +69,8 @@ export const testPlatformLayer = (overrides?: {
             return overrides?.env?.LANTERN_TERMINAL_UNRESTRICTED ?? undefined;
           case "CODEX_HOME":
             return overrides?.env?.CODEX_HOME ?? undefined;
+          case "XDG_DATA_HOME":
+            return overrides?.env?.XDG_DATA_HOME ?? undefined;
           case "LANTERN_TERMINAL_DISABLED":
             return overrides?.env?.LANTERN_TERMINAL_DISABLED ?? undefined;
           default:
