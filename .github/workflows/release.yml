@@ -85,6 +85,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    # Must match the environment name on npm's trusted publisher for
+    # lantern-viewer. npm checks the environment claim in the id-token, so if the
+    # two ever disagree the exchange fails and nothing publishes. Add protection
+    # rules to this environment in the repository settings — an environment with
+    # none only narrows the claim, it does not gate anything.
+    environment: release
+
     permissions:
       contents: read
       # Required for npm provenance.
