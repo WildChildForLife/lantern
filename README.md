@@ -93,11 +93,11 @@ sudo dnf install https://github.com/WildChildForLife/lantern/releases/latest/dow
 lantern --port 3400
 ```
 
-Arch, from the AUR:
+Arch, from the AUR — the recipe lives in
+[`packaging/aur`](packaging/aur/PKGBUILD) and is not on the AUR itself yet:
 
 ```bash
 paru -S lantern      # or: yay -S lantern
-lantern --port 3400
 ```
 
 Sessions are read from `~/.claude/projects`. On `x86_64` everything works. On `aarch64` the in-app
