@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { NodeContext } from "@effect/platform-node";
@@ -14,8 +14,10 @@ describe("getDirectoryListing", () => {
     );
 
   beforeEach(async () => {
-    testDir = join(tmpdir(), `test-dir-${Date.now()}`);
-    await mkdir(testDir, { recursive: true });
+    // mkdtemp, not a timestamped name: it creates the directory atomically with
+    // a random suffix and owner-only permissions, so a parallel run cannot land
+    // on the same path and nothing else on the machine can read or pre-create it.
+    testDir = await mkdtemp(join(tmpdir(), "test-dir-"));
   });
 
   afterEach(async () => {
