@@ -1,5 +1,9 @@
 import { parseJsonl } from "../../claude-code/functions/parseJsonl.ts";
-import { calculateTokenCost, type TokenUsage } from "./calculateSessionCost.ts";
+import {
+  type CostConfidence,
+  calculateTokenCost,
+  type TokenUsage,
+} from "./calculateSessionCost.ts";
 
 /**
  * Aggregates token usage and cost from multiple file contents.
@@ -27,7 +31,7 @@ export const aggregateTokenUsageAndCost = (
 ): {
   totalUsage: TokenUsage;
   totalCost: ReturnType<typeof calculateTokenCost>;
-  modelName: string;
+  modelName: string | null;
 } => {
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
@@ -37,7 +41,10 @@ export const aggregateTokenUsageAndCost = (
   let totalOutputTokensUsd = 0;
   let totalCacheCreationUsd = 0;
   let totalCacheReadUsd = 0;
-  let lastModelName = "claude-3.5-sonnet"; // Default model
+  // No default: a session with no assistant message has no model, and claiming
+  // one would put a price on it.
+  let lastModelName: string | null = null;
+  let unpricedMessages = 0;
 
   // Process each file content
   for (const content of fileContents) {
@@ -76,13 +83,25 @@ export const aggregateTokenUsageAndCost = (
         totalCacheCreationUsd += messageCost.breakdown.cacheCreationUsd;
         totalCacheReadUsd += messageCost.breakdown.cacheReadUsd;
 
+        if (messageCost.confidence === "unknown") {
+          unpricedMessages += 1;
+        }
+
         // Track the latest model name
         lastModelName = modelName;
       }
     }
   }
 
+  // One unpriced message makes the whole total incomplete, so the session's
+  // cost is reported as unknown rather than as a smaller-than-real number.
+  // No assistant message means no model, and calculateTokenCost answers
+  // "unknown" for that same state — the two must not disagree.
+  const confidence: CostConfidence =
+    unpricedMessages > 0 || lastModelName === null ? "unknown" : "estimated";
+
   const totalCost: ReturnType<typeof calculateTokenCost> = {
+    confidence,
     totalUsd:
       totalInputTokensUsd + totalOutputTokensUsd + totalCacheCreationUsd + totalCacheReadUsd,
     breakdown: {

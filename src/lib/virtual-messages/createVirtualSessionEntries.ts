@@ -1,3 +1,4 @@
+import type { CostConfidence } from "../../web/lib/formatCost.ts";
 import type { VirtualMessage } from "./virtualMessageStore.ts";
 
 /**
@@ -24,6 +25,8 @@ export const createVirtualSessionEntries = (
         customTitle: null,
         cost: {
           totalUsd: 0,
+          // Nothing has run yet, so there is no model and no price.
+          confidence: "unknown" satisfies CostConfidence,
           breakdown: {
             inputTokensUsd: 0,
             outputTokensUsd: 0,

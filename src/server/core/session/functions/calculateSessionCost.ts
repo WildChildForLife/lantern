@@ -1,9 +1,4 @@
-import {
-  DEFAULT_MODEL_PRICING,
-  MODEL_PRICING,
-  type ModelName,
-  type ModelPricing,
-} from "../constants/pricing.ts";
+import { resolvePricing } from "../constants/pricing/index.ts";
 
 /**
  * Token usage information extracted from assistant messages
@@ -36,121 +31,75 @@ export type TokenUsageSummary = {
 };
 
 /**
+ * How much the figure can be trusted.
+ *
+ * - `reported` — the source stated the cost itself.
+ * - `estimated` — derived from token counts and a known price table.
+ * - `unknown` — the model has no price here; the total is not a number to show.
+ */
+export type CostConfidence = "reported" | "estimated" | "unknown";
+
+/**
  * Cost calculation result
  */
 export type CostCalculationResult = {
   readonly totalUsd: number;
   readonly breakdown: CostBreakdown;
   readonly tokenUsage: TokenUsageSummary;
+  readonly confidence: CostConfidence;
 };
 
-/**
- * Normalizes Claude API model names to standard model identifiers
- *
- * Examples:
- * - "claude-opus-4-5-20251101" -> "claude-opus-4.5"
- * - "claude-opus-4-1-20250101" -> "claude-opus-4.1"
- * - "claude-sonnet-4-5-20250929" -> "claude-sonnet-4.5"
- * - "claude-haiku-4-5-20251001" -> "claude-haiku-4.5"
- * - "claude-sonnet-4-20250514" -> "claude-3.5-sonnet"
- * - "claude-3-5-sonnet-20240620" -> "claude-3.5-sonnet"
- * - "claude-3-opus-20240229" -> "claude-3-opus"
- * - "claude-3-haiku-20240307" -> "claude-3-haiku"
- *
- * @param modelName Raw model name from API
- * @returns Normalized model name or default model name if unknown
- */
-export const normalizeModelName = (modelName: string): ModelName => {
-  const normalized = modelName.toLowerCase();
-
-  // Claude Opus 4.5 patterns (more specific first)
-  if (normalized.includes("opus-4-5") || normalized.includes("opus-4.5")) {
-    return "claude-opus-4.5";
-  }
-
-  // Claude Opus 4.1 patterns
-  if (normalized.includes("opus-4-1") || normalized.includes("opus-4.1")) {
-    return "claude-opus-4.1";
-  }
-
-  // Claude Sonnet 4.5 patterns
-  if (normalized.includes("sonnet-4-5") || normalized.includes("sonnet-4.5")) {
-    return "claude-sonnet-4.5";
-  }
-
-  // Claude Haiku 4.5 patterns
-  if (normalized.includes("haiku-4-5") || normalized.includes("haiku-4.5")) {
-    return "claude-haiku-4.5";
-  }
-
-  // Claude 3.5 Sonnet patterns (Sonnet 4 without version suffix)
-  if (
-    normalized.includes("sonnet-4") ||
-    normalized.includes("3-5-sonnet") ||
-    normalized.includes("3.5-sonnet")
-  ) {
-    return "claude-3.5-sonnet";
-  }
-
-  // Claude 3 Opus patterns
-  if (normalized.includes("3-opus") || normalized.includes("opus-20")) {
-    return "claude-3-opus";
-  }
-
-  // Claude 3 Haiku patterns
-  if (normalized.includes("3-haiku") || normalized.includes("haiku-20")) {
-    return "claude-3-haiku";
-  }
-
-  // Unknown model - return default
-  return "claude-3.5-sonnet";
+const emptyBreakdown: CostBreakdown = {
+  inputTokensUsd: 0,
+  outputTokensUsd: 0,
+  cacheCreationUsd: 0,
+  cacheReadUsd: 0,
 };
 
-/**
- * Gets pricing for a model, with fallback to default pricing
- */
-const getModelPricing = (modelName: string): ModelPricing => {
-  const normalized = normalizeModelName(modelName);
-  return MODEL_PRICING[normalized] ?? DEFAULT_MODEL_PRICING;
-};
+const summarizeUsage = (usage: TokenUsage): TokenUsageSummary => ({
+  inputTokens: usage.input_tokens,
+  outputTokens: usage.output_tokens,
+  cacheCreationTokens: usage.cache_creation_input_tokens ?? 0,
+  cacheReadTokens: usage.cache_read_input_tokens ?? 0,
+});
 
 /**
- * Calculates the cost in USD for token usage
+ * Costs token usage against the price table for the model that produced it.
  *
- * @param usage Token usage information
- * @param modelName Model name (will be normalized)
- * @returns Cost calculation result with breakdown
+ * A model with no known price yields zeros and `unknown` confidence rather than
+ * a plausible number: token counts are still recorded, but the money is not
+ * something this build can claim to know.
  */
-export const calculateTokenCost = (usage: TokenUsage, modelName: string): CostCalculationResult => {
-  const pricing = getModelPricing(modelName);
+export const calculateTokenCost = (
+  usage: TokenUsage,
+  modelName: string | null,
+): CostCalculationResult => {
+  const pricing = resolvePricing(modelName);
 
-  // Convert tokens to millions for cost calculation
-  const inputMTok = usage.input_tokens / 1_000_000;
-  const outputMTok = usage.output_tokens / 1_000_000;
-  const cacheCreationMTok = (usage.cache_creation_input_tokens ?? 0) / 1_000_000;
-  const cacheReadMTok = (usage.cache_read_input_tokens ?? 0) / 1_000_000;
+  if (pricing === null) {
+    return {
+      totalUsd: 0,
+      breakdown: emptyBreakdown,
+      tokenUsage: summarizeUsage(usage),
+      confidence: "unknown",
+    };
+  }
 
-  // Calculate costs
-  const inputTokensUsd = inputMTok * pricing.input;
-  const outputTokensUsd = outputMTok * pricing.output;
-  const cacheCreationUsd = cacheCreationMTok * pricing.cache_creation;
-  const cacheReadUsd = cacheReadMTok * pricing.cache_read;
-
-  const totalUsd = inputTokensUsd + outputTokensUsd + cacheCreationUsd + cacheReadUsd;
+  const inputTokensUsd = (usage.input_tokens / 1_000_000) * pricing.input;
+  const outputTokensUsd = (usage.output_tokens / 1_000_000) * pricing.output;
+  const cacheCreationUsd =
+    ((usage.cache_creation_input_tokens ?? 0) / 1_000_000) * pricing.cache_creation;
+  const cacheReadUsd = ((usage.cache_read_input_tokens ?? 0) / 1_000_000) * pricing.cache_read;
 
   return {
-    totalUsd,
+    totalUsd: inputTokensUsd + outputTokensUsd + cacheCreationUsd + cacheReadUsd,
     breakdown: {
       inputTokensUsd,
       outputTokensUsd,
       cacheCreationUsd,
       cacheReadUsd,
     },
-    tokenUsage: {
-      inputTokens: usage.input_tokens,
-      outputTokens: usage.output_tokens,
-      cacheCreationTokens: usage.cache_creation_input_tokens ?? 0,
-      cacheReadTokens: usage.cache_read_input_tokens ?? 0,
-    },
+    tokenUsage: summarizeUsage(usage),
+    confidence: "estimated",
   };
 };
