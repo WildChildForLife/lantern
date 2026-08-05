@@ -23,6 +23,17 @@ searchable list of everything, and a board view of the lot.
   <img src="docs/screenshots/topics.jpg" alt="Topics grouped by subject, each with an icon and a conversation count" width="100%">
 </p>
 
+## Contents
+
+- [What it does](#what-it-does)
+- [Install](#install) · [Docker](#docker) · [npm](#npm) · [From source](#from-source)
+- [Usage](#usage) · [Options](#options) · [Security](#security)
+- [Reading other agent CLIs](#reading-other-agent-clis)
+- [Reading logs from more than one machine](#reading-logs-from-more-than-one-machine)
+- [How grouping works](#how-grouping-works)
+- [Development](#development) · [Contributing](#contributing) · [Support](#support)
+- [Privacy](#privacy) · [Licence](#licence)
+
 ## What it does
 
 - **Topics instead of folders.** Conversations are clustered by subject, each topic with its own icon,
@@ -67,8 +78,13 @@ echo "LANTERN_PASSWORD=pick-something" > .env
 docker compose up -d
 ```
 
+That mounts Claude Code's logs only. To read Codex or opencode as well, see
+[Reading other agent CLIs](#reading-other-agent-clis).
+
 Images are published for `linux/amd64` and `linux/arm64`, so a Raspberry Pi or an Apple Silicon
-machine works the same way.
+machine works the same way — with one exception: the in-app terminal is unavailable on the `arm64`
+image, because the PTY library it uses publishes no `linux/arm64` build. Everything else is identical,
+and Lantern says so in its startup log rather than failing.
 
 ### npm
 
@@ -104,27 +120,71 @@ Then open <http://localhost:3400>.
 node dist/main.js [options]
 ```
 
-| Option                      | Environment                 | Description                                               | Default     |
-| --------------------------- | --------------------------- | --------------------------------------------------------- | ----------- |
-| `-p, --port <port>`         | `PORT`                      | Port to listen on                                         | `3000`      |
-| `-h, --hostname <hostname>` | `HOSTNAME`                  | Hostname to bind                                          | `localhost` |
-| `-P, --password <password>` | `LANTERN_PASSWORD`          | Require a password. **Set this if you bind to `0.0.0.0`** | (none)      |
-| `--claude-dir <path>`       | `LANTERN_CLAUDE_DIR`        | Path to the Claude directory to read                      | `~/.claude` |
-| `-e, --executable <path>`   | `LANTERN_CLAUDE_EXECUTABLE` | Path to the `claude` executable                           | auto        |
-| `--terminal-disabled`       | `LANTERN_TERMINAL_DISABLED` | Turn off the in-app terminal                              | enabled     |
-| `--terminal-shell <path>`   | `LANTERN_TERMINAL_SHELL`    | Shell used by terminal sessions                           | login shell |
-| `--api-only`                | `LANTERN_API_ONLY`          | Serve the API without the web UI                          | off         |
-| `-v, --verbose`             | `LANTERN_VERBOSE`           | Verbose debug logging                                     | off         |
-| `--source <id>`             | `LANTERN_SOURCES`           | Agent CLI to read; repeat for more. Scopes one run        | stored      |
+### Options
 
-> **Security:** Lantern ships an in-app terminal. Binding to anything other than `localhost` without
+| Option                      | Environment                     | Description                                                 | Default     |
+| --------------------------- | ------------------------------- | ----------------------------------------------------------- | ----------- |
+| `-p, --port <port>`         | `PORT`                          | Port to listen on                                           | `3000`      |
+| `-h, --hostname <hostname>` | `HOSTNAME`                      | Hostname to bind                                            | `localhost` |
+| `-P, --password <password>` | `LANTERN_PASSWORD`              | Require a password. **Set this if you bind to `0.0.0.0`**   | (none)      |
+| `--claude-dir <path>`       | `LANTERN_CLAUDE_DIR`            | Path to the Claude directory to read                        | `~/.claude` |
+| `-e, --executable <path>`   | `LANTERN_CLAUDE_EXECUTABLE`     | Path to the `claude` executable                             | auto        |
+| `--terminal-disabled`       | `LANTERN_TERMINAL_DISABLED`     | Turn off the in-app terminal                                | enabled     |
+| `--terminal-shell <path>`   | `LANTERN_TERMINAL_SHELL`        | Shell used by terminal sessions                             | login shell |
+| `--terminal-unrestricted`   | `LANTERN_TERMINAL_UNRESTRICTED` | Drop the restricted shell flags from bash terminal sessions | restricted  |
+| `--api-only`                | `LANTERN_API_ONLY`              | Serve the API without the web UI                            | off         |
+| `-v, --verbose`             | `LANTERN_VERBOSE`               | Verbose debug logging                                       | off         |
+| `--source <id>`             | `LANTERN_SOURCES`               | Agent CLI to read; repeat for more. Scopes one run          | stored      |
+
+Valid `--source` ids are `claude-code`, `codex` and `opencode`. Repeat the flag for more than one
+(`--source claude-code --source codex`), or set `LANTERN_SOURCES` to a comma-separated list. Passing it
+scopes a single run without changing what is stored in settings.
+
+Flag-style environment variables are on for `1` or `true` and off otherwise.
+
+### Security
+
+> Lantern ships an in-app terminal. Binding to anything other than `localhost` without
 > `--password` hands a remote shell to whoever finds the port. Use `--terminal-disabled` and a
-> password, or keep it behind a VPN such as Tailscale.
+> password, or keep it behind a VPN such as Tailscale. `--terminal-unrestricted` removes the guard
+> rails from bash sessions, so treat it as widening that same hole.
+
+The threat model, what a running instance exposes, and how to report a vulnerability privately are all
+in [SECURITY.md](SECURITY.md). Please use
+[GitHub Security Advisories](https://github.com/WildChildForLife/lantern/security/advisories/new)
+rather than a public issue.
 
 Lantern keeps its cache, push keys and schedules in `~/.lantern/`. Deleting that directory costs
 nothing but a rebuild on the next start.
 
-### Reading logs from more than one machine
+## Reading other agent CLIs
+
+Codex and opencode are read from wherever those CLIs themselves keep their history, so pointing Lantern
+at them is the same gesture as pointing the CLI at them:
+
+| Source        | Default location          | Moved by                              |
+| ------------- | ------------------------- | ------------------------------------- |
+| `claude-code` | `~/.claude`               | `--claude-dir` / `LANTERN_CLAUDE_DIR` |
+| `codex`       | `~/.codex`                | `CODEX_HOME`                          |
+| `opencode`    | `~/.local/share/opencode` | `XDG_DATA_HOME`                       |
+
+Enable the ones you want in settings, or scope a single run with `--source`.
+
+In Docker each one needs its own mount, since only `~/.claude` is mounted by default:
+
+```bash
+docker run -d --name lantern \
+  -p 127.0.0.1:3400:3400 \
+  -v "$HOME/.claude:/root/.claude:ro" \
+  -v "$HOME/.codex:/root/.codex:ro" \
+  -v "$HOME/.local/share/opencode:/root/.local/share/opencode:ro" \
+  -v lantern_cache:/root/.lantern \
+  ghcr.io/wildchildforlife/lantern:latest
+```
+
+Read-only mounts are deliberate: Lantern only ever reads these directories.
+
+## Reading logs from more than one machine
 
 Lantern lists whatever lives under the Claude directory it reads. To pull in sessions from another
 machine, symlink or mount that machine's project directories into `~/.claude/projects/`:
@@ -162,8 +222,28 @@ pnpm test
 pnpm build
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the workflow and house rules, and [AGENTS.md](AGENTS.md) for
-the architecture (Hono + Effect-TS backend, Vite + TanStack Router frontend, SQLite cache).
+To work against the bundled fixtures instead of your own conversations:
+
+```bash
+node dist/main.js --port 4100 --claude-dir ./fixtures/claude-home
+```
+
+[AGENTS.md](AGENTS.md) describes the architecture: a Hono + Effect-TS backend, a Vite + TanStack Router
+frontend, and a SQLite cache.
+
+## Contributing
+
+Bug reports, ideas and pull requests are all welcome. [CONTRIBUTING.md](CONTRIBUTING.md) covers the
+setup, the quality gate to run before opening a pull request, and the house rules — no `as` casting,
+Effect-TS for backend side effects, Hono RPC for API calls, and a preference for pure functions.
+
+By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Support
+
+- **Something broken, or an idea?** Open an [issue](https://github.com/WildChildForLife/lantern/issues).
+- **A vulnerability?** Report it privately — see [Security](#security).
+- **What changed?** See the [releases](https://github.com/WildChildForLife/lantern/releases).
 
 ## Privacy
 
