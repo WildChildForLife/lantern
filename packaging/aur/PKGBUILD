@@ -1,0 +1,37 @@
+# Maintainer: WildChildForLife <noreply@users.noreply.github.com>
+#
+# AUR recipe. Built from the published npm tarball rather than from git, so what
+# users install is the same artifact the other channels ship.
+#
+# Publishing needs an AUR account with a registered SSH key — see
+# packaging/aur/README.md. scripts/bump-tap.sh refreshes pkgver and the checksum.
+pkgname=lantern
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Self-hosted dashboard for your agent CLI sessions, grouped by topic"
+arch=('any')
+url="https://github.com/WildChildForLife/lantern"
+license=('MIT')
+depends=('nodejs>=24')
+makedepends=('npm')
+source=("$pkgname-$pkgver.tgz::https://registry.npmjs.org/lantern-viewer/-/lantern-viewer-$pkgver.tgz")
+sha256sums=('REPLACE_WITH_TARBALL_SHA256')
+options=('!strip')
+
+package() {
+  local nodedir="$pkgdir/usr/lib/node_modules/lantern-viewer"
+  install -d "$nodedir"
+
+  cd "$srcdir"
+  # --prefix installs into the package root; --omit=dev keeps build-only
+  # dependencies out of what ships.
+  npm install --global --omit=dev --no-audit --no-fund \
+    --prefix "$pkgdir/usr" "$srcdir/$pkgname-$pkgver.tgz"
+
+  # npm records the build root in these; leaving them makes the package
+  # unreproducible and leaks the builder's paths.
+  find "$pkgdir/usr" -name '.package-lock.json' -delete
+  chmod -R u=rwX,go=rX "$pkgdir/usr"
+
+  install -Dm644 "$nodedir/LICENSE" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
