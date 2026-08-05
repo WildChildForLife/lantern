@@ -95,5 +95,13 @@ export const SSEEventListeners: FC<PropsWithChildren> = ({ children }) => {
     });
   });
 
+  useServerEventListener("sourcesChanged", () => {
+    // Enabling or disabling a source rewrites which projects and conversations
+    // exist, so everything derived from them is stale.
+    void queryClient.invalidateQueries({ queryKey: ["sources"] });
+    void queryClient.invalidateQueries({ queryKey: projectListQuery.queryKey });
+    invalidateConversations();
+  });
+
   return <>{children}</>;
 };

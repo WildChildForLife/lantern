@@ -27,7 +27,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        227
+        235
       ]
     ],
     "translation": "サイドバーを閉じる"
@@ -146,7 +146,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        216
+        224
       ]
     ],
     "translation": "新規チャット"
@@ -3409,7 +3409,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        73
+        74
       ]
     ],
     "translation": "表示と動作の設定"
@@ -3597,11 +3597,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        138
+        139
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
-        81
+        82
       ]
     ],
     "translation": "設定を読み込み中..."
@@ -3739,7 +3739,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        153
+        161
       ]
     ],
     "translation": "通知"
@@ -3822,7 +3822,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        96
+        104
       ]
     ],
     "translation": "通知"
@@ -3833,10 +3833,26 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        89
+        97
       ]
     ],
     "translation": "セッション表示"
+  },
+  "settings.section.sources": {
+    "message": "Agent CLIs",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
+        147
+      ],
+      [
+        "src/web/components/GlobalSidebar.tsx",
+        90
+      ]
+    ],
+    "translation": "エージェント CLI"
   },
   "settings.section.system_info": {
     "placeholders": {},
@@ -3844,7 +3860,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        109
+        117
       ]
     ],
     "translation": "システム情報"
@@ -3877,7 +3893,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        146
+        154
       ]
     ],
     "translation": "セッション表示"
@@ -3956,7 +3972,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        65
+        66
       ]
     ],
     "translation": "表示と通知の設定"
@@ -4027,7 +4043,7 @@
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
-        70
+        71
       ]
     ],
     "translation": "設定"
@@ -4216,7 +4232,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        62
+        63
       ]
     ],
     "translation": "MCP"
@@ -4228,7 +4244,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        195
+        203
       ]
     ],
     "translation": "プロジェクト一覧"
@@ -4239,7 +4255,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        64
+        65
       ]
     ],
     "translation": "スケジューラー"
@@ -4250,7 +4266,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        61
+        62
       ]
     ],
     "translation": "セッション一覧"
@@ -4261,7 +4277,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        65
+        66
       ]
     ],
     "translation": "設定"
@@ -4272,7 +4288,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        66
+        67
       ]
     ],
     "translation": "システム情報"
@@ -4283,10 +4299,137 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        63
+        64
       ]
     ],
     "translation": "タスク一覧"
+  },
+  "sources.description": {
+    "message": "Which agent CLIs Lantern reads sessions from. Turning one off forgets its conversations; it never touches the files.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        103
+      ]
+    ],
+    "translation": "Lantern がセッションを読み取るエージェント CLI です。オフにするとその会話は表示されなくなりますが、ファイルには一切触れません。"
+  },
+  "sources.error": {
+    "message": "Could not read the list of agent CLIs.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        94
+      ]
+    ],
+    "translation": "エージェント CLI の一覧を読み込めませんでした。"
+  },
+  "sources.loading": {
+    "message": "Looking for agent CLIs…",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        86
+      ]
+    ],
+    "translation": "エージェント CLI を検出しています…"
+  },
+  "sources.read_only": {
+    "message": "read-only",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        158
+      ]
+    ],
+    "translation": "読み取り専用"
+  },
+  "sources.reason.no_data": {
+    "message": "no sessions recorded yet",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        31
+      ]
+    ],
+    "translation": "セッションがまだ記録されていません"
+  },
+  "sources.reason.not_installed": {
+    "message": "not found on this machine",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        27
+      ]
+    ],
+    "translation": "このマシンでは見つかりませんでした"
+  },
+  "sources.reason.schema_changed": {
+    "message": "storage format changed in a newer release",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        36
+      ]
+    ],
+    "translation": "新しいリリースで保存形式が変更されました"
+  },
+  "sources.reason.sqlite_storage": {
+    "message": "stores sessions in a database Lantern cannot read yet",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        32
+      ]
+    ],
+    "translation": "Lantern がまだ読み取れないデータベースにセッションを保存しています"
+  },
+  "sources.reason.unknown_shape": {
+    "message": "sessions are in a format Lantern does not recognise",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        40
+      ]
+    ],
+    "translation": "Lantern が認識できない形式のセッションです"
+  },
+  "sources.stats": {
+    "message": "{sessionCount} conversations across {projectCount} projects",
+    "placeholders": {
+      "sessionCount": [
+        "source.stats.sessions"
+      ],
+      "projectCount": [
+        "source.stats.projects"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        144
+      ]
+    ],
+    "translation": "{projectCount} 個のプロジェクトにまたがる {sessionCount} 件の会話"
   },
   "system_info.available_features": {
     "placeholders": {},

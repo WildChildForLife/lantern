@@ -53,4 +53,8 @@ export type InternalEventDeclaration = {
 
   // biome-ignore lint/complexity/noBannedTypes: correct type
   schedulerJobsChanged: Record<string, never>;
+
+  /** The set of agent CLIs Lantern reads has changed and been applied. */
+  // biome-ignore lint/complexity/noBannedTypes: correct type
+  sourcesChanged: Record<string, never>;
 };

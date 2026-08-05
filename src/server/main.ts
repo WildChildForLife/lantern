@@ -25,6 +25,11 @@ program
   .option("--terminal-shell <path>", "shell executable for terminal sessions")
   .option("--terminal-unrestricted", "disable restricted shell flags for bash sessions")
   .option("--api-only", "run in API-only mode without Web UI")
+  .option(
+    "--source <id>",
+    "agent CLI to read sessions from; repeat for more than one",
+    (value: string, previous: string[] | undefined) => [...(previous ?? []), value],
+  )
   .action(async (options: CliOptions) => {
     await Effect.runPromise(checkDeprecatedEnvs);
 

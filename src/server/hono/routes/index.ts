@@ -24,6 +24,7 @@ import { notificationRoutes } from "./notificationRoutes.ts";
 import { projectRoutes } from "./projectRoutes.ts";
 import { schedulerRoutes } from "./schedulerRoutes.ts";
 import { searchRoutes } from "./searchRoutes.ts";
+import { sourceRoutes } from "./sourceRoutes.ts";
 import { sseRoutes } from "./sseRoutes.ts";
 import { tasksRoutes } from "./tasksRoutes.ts";
 
@@ -36,6 +37,7 @@ const API_ONLY_ALLOWED_PREFIXES = [
   "/api/search",
   "/api/notifications",
   "/api/sse",
+  "/api/sources",
 ];
 
 const createApiOnlyMiddleware = (apiOnly: boolean) =>
@@ -127,6 +129,7 @@ export const routes = (app: HonoAppType, options: CliOptions) =>
         .route("/api/file-system", yield* fileSystemRoutes)
         .route("/api/search", yield* searchRoutes)
         .route("/api/feature-flags", yield* featureFlagRoutes)
+        .route("/api/sources", yield* sourceRoutes)
         .route("/api/tasks", yield* tasksRoutes)
         .route("/api/notifications", yield* notificationRoutes)
         .route("/api/sse", yield* sseRoutes)

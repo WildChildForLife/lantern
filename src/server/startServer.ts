@@ -40,6 +40,9 @@ import { SessionController } from "./core/session/presentation/SessionController
 import { SessionLocatorService } from "./core/session/services/SessionLocatorService.ts";
 import { SessionMetaService } from "./core/session/services/SessionMetaService.ts";
 import { TopicClassifierService } from "./core/session/services/TopicClassifierService.ts";
+import { SourceConfigBaseDir } from "./core/source/config.ts";
+import { SourceController } from "./core/source/presentation/SourceController.ts";
+import { SourceConfigService } from "./core/source/services/SourceConfigService.ts";
 import { SourceRegistry } from "./core/source/services/SourceRegistry.ts";
 import { SyncService } from "./core/sync/services/SyncService.ts";
 import { TasksController } from "./core/tasks/presentation/TasksController.ts";
@@ -143,6 +146,8 @@ const InfraBasics = Layer.mergeAll(
 ).pipe(
   Layer.provideMerge(SyncService.Live),
   Layer.provideMerge(SourceRegistry.Live),
+  Layer.provideMerge(SourceConfigService.Live),
+  Layer.provideMerge(SourceConfigBaseDir.Live),
   Layer.provideMerge(DrizzleService.Live),
 );
 
@@ -182,6 +187,7 @@ const ApplicationLayer = InitializeService.Live.pipe(Layer.provideMerge(AppServi
 const PresentationLayer = Layer.mergeAll(
   ProjectController.Live,
   SessionController.Live,
+  SourceController.Live,
   AgentSessionController.Live,
   GitController.Live,
   ClaudeCodeController.Live,

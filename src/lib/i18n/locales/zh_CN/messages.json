@@ -27,7 +27,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        227
+        235
       ]
     ],
     "translation": "关闭侧边栏"
@@ -146,7 +146,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        216
+        224
       ]
     ],
     "translation": "新建聊天"
@@ -3409,7 +3409,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        73
+        74
       ]
     ],
     "translation": "显示和行为设置"
@@ -3597,11 +3597,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        138
+        139
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
-        81
+        82
       ]
     ],
     "translation": "正在加载设置..."
@@ -3739,7 +3739,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        153
+        161
       ]
     ],
     "translation": "通知"
@@ -3822,7 +3822,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        96
+        104
       ]
     ],
     "translation": "通知"
@@ -3833,10 +3833,26 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        89
+        97
       ]
     ],
     "translation": "会话显示"
+  },
+  "settings.section.sources": {
+    "message": "Agent CLIs",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
+        147
+      ],
+      [
+        "src/web/components/GlobalSidebar.tsx",
+        90
+      ]
+    ],
+    "translation": "代理 CLI"
   },
   "settings.section.system_info": {
     "placeholders": {},
@@ -3844,7 +3860,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        109
+        117
       ]
     ],
     "translation": "系统信息"
@@ -3877,7 +3893,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        146
+        154
       ]
     ],
     "translation": "会话显示"
@@ -3956,7 +3972,7 @@
     "origin": [
       [
         "src/web/components/GlobalSidebar.tsx",
-        65
+        66
       ]
     ],
     "translation": "显示和通知设置"
@@ -4027,7 +4043,7 @@
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
-        70
+        71
       ]
     ],
     "translation": "设置"
@@ -4216,7 +4232,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        62
+        63
       ]
     ],
     "translation": "MCP"
@@ -4228,7 +4244,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        195
+        203
       ]
     ],
     "translation": "项目列表"
@@ -4239,7 +4255,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        64
+        65
       ]
     ],
     "translation": "调度器"
@@ -4250,7 +4266,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        61
+        62
       ]
     ],
     "translation": "会话列表"
@@ -4261,7 +4277,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        65
+        66
       ]
     ],
     "translation": "设置"
@@ -4272,7 +4288,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        66
+        67
       ]
     ],
     "translation": "系统信息"
@@ -4283,10 +4299,137 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        63
+        64
       ]
     ],
     "translation": "任务列表"
+  },
+  "sources.description": {
+    "message": "Which agent CLIs Lantern reads sessions from. Turning one off forgets its conversations; it never touches the files.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        103
+      ]
+    ],
+    "translation": "Lantern 从这些代理 CLI 读取会话。关闭后其会话将不再显示，但不会改动任何文件。"
+  },
+  "sources.error": {
+    "message": "Could not read the list of agent CLIs.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        94
+      ]
+    ],
+    "translation": "无法读取代理 CLI 列表。"
+  },
+  "sources.loading": {
+    "message": "Looking for agent CLIs…",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        86
+      ]
+    ],
+    "translation": "正在查找代理 CLI…"
+  },
+  "sources.read_only": {
+    "message": "read-only",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        158
+      ]
+    ],
+    "translation": "只读"
+  },
+  "sources.reason.no_data": {
+    "message": "no sessions recorded yet",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        31
+      ]
+    ],
+    "translation": "尚未记录任何会话"
+  },
+  "sources.reason.not_installed": {
+    "message": "not found on this machine",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        27
+      ]
+    ],
+    "translation": "在本机上未找到"
+  },
+  "sources.reason.schema_changed": {
+    "message": "storage format changed in a newer release",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        36
+      ]
+    ],
+    "translation": "较新版本更改了存储格式"
+  },
+  "sources.reason.sqlite_storage": {
+    "message": "stores sessions in a database Lantern cannot read yet",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        32
+      ]
+    ],
+    "translation": "会话存储在 Lantern 暂时无法读取的数据库中"
+  },
+  "sources.reason.unknown_shape": {
+    "message": "sessions are in a format Lantern does not recognise",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        40
+      ]
+    ],
+    "translation": "会话格式无法被 Lantern 识别"
+  },
+  "sources.stats": {
+    "message": "{sessionCount} conversations across {projectCount} projects",
+    "placeholders": {
+      "sessionCount": [
+        "source.stats.sessions"
+      ],
+      "projectCount": [
+        "source.stats.projects"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        144
+      ]
+    ],
+    "translation": "{projectCount} 个项目中的 {sessionCount} 个会话"
   },
   "system_info.available_features": {
     "placeholders": {},
