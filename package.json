@@ -1,7 +1,7 @@
 {
   "name": "lantern-viewer",
   "version": "0.1.1",
-  "description": "Find the conversation you forgot you started. A self-hosted dashboard for Claude Code sessions, grouped by topic across every project and machine.",
+  "description": "Find the conversation you forgot you started. A self-hosted, cross-agent dashboard for your coding agent sessions, grouped by topic across every project and machine.",
   "homepage": "https://github.com/WildChildForLife/lantern",
   "license": "MIT",
   "repository": {
