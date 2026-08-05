@@ -12,15 +12,15 @@ import { useClassifyTopics } from "@/web/lib/api/useClassifyTopics";
  */
 export const RedoAllTopicsButton: FC = () => {
   const { i18n } = useLingui();
-  const classify = useClassifyTopics();
+  const { classify, isClassifying } = useClassifyTopics();
 
   return (
     <Button
       variant="ghost"
       size="sm"
       className="h-7 px-2 text-xs text-muted-foreground"
-      disabled={classify.isPending}
-      onClick={() => classify.mutate({ kind: "all" })}
+      disabled={isClassifying}
+      onClick={() => classify({ kind: "all" })}
       title={i18n._({
         id: "topics.classify.redo_all_tooltip",
         message: "Throw away every topic and classify all conversations again",

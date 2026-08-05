@@ -51,6 +51,21 @@ export const selectConversations = (
 };
 
 /**
+ * Drops a batch from the selection, leaving the rest picked. What a pass that
+ * only got through part of a selection needs: the remainder stays selected, so
+ * pressing again continues instead of redoing what was just paid for.
+ */
+export const deselectConversations = (
+  state: ConversationSelection,
+  sessionIds: readonly string[],
+): ConversationSelection => {
+  const next = { ...state.selected };
+  for (const sessionId of sessionIds) delete next[sessionId];
+
+  return { selected: next, anchorId: state.anchorId };
+};
+
+/**
  * Adds everything between the anchor and `toId` inclusive, in the order the rows
  * are on screen. Additive, so a range never silently drops an earlier pick.
  *
@@ -113,6 +128,13 @@ export const useConversationSelection = () => {
     [setState],
   );
 
+  const deselect = useCallback(
+    (sessionIds: readonly string[]) => {
+      setState((previous) => deselectConversations(previous, sessionIds));
+    },
+    [setState],
+  );
+
   const clearSelection = useCallback(() => setState(emptyConversationSelection), [setState]);
 
   const selectedInOrder = useCallback(
@@ -127,6 +149,7 @@ export const useConversationSelection = () => {
     setSelected,
     selectRange,
     selectAll,
+    deselect,
     clearSelection,
     selectedInOrder,
     selectedCount,

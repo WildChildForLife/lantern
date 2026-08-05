@@ -47,7 +47,7 @@ export const TopicTable: FC<Props> = ({ query, hideDone }) => {
     selectedInOrder,
     selectedCount,
   } = useConversationSelection();
-  const classify = useClassifyTopics();
+  const { classify, isClassifying } = useClassifyTopics();
 
   /** See ConversationList: Radix reports the new state, not the event. */
   const rangeIntent = useRef(false);
@@ -123,6 +123,10 @@ export const TopicTable: FC<Props> = ({ query, hideDone }) => {
   const orderedIds = columns.flatMap(({ rows }) => rows.map((row) => row.sessionId));
   const selectedIds = selectedInOrder(orderedIds);
 
+  /** What the buttons would act on — see ConversationList for why this differs. */
+  const actionableCount = selectedIds.length;
+  const sortableIds = selectedIds.slice(0, MAX_CLASSIFY_PER_PASS);
+
   const markSelectedDone = (done: boolean) => {
     setManyDone(selectedIds, done);
     clearSelection();
@@ -132,16 +136,16 @@ export const TopicTable: FC<Props> = ({ query, hideDone }) => {
     <div className="flex min-h-0 flex-1 flex-col gap-2">
       {selectedCount > 0 && (
         <ConversationSelectionBar
-          selectedCount={selectedCount}
+          selectedCount={actionableCount}
           visibleCount={orderedIds.length}
-          allVisibleSelected={selectedIds.length === orderedIds.length}
-          isClassifying={classify.isPending}
-          exceedsPassCap={selectedIds.length > MAX_CLASSIFY_PER_PASS}
+          allVisibleSelected={actionableCount === orderedIds.length}
+          isClassifying={isClassifying}
+          exceedsPassCap={actionableCount > MAX_CLASSIFY_PER_PASS}
           onSelectAllVisible={() => selectAll(orderedIds)}
           onClear={clearSelection}
           onMarkDone={() => markSelectedDone(true)}
           onMarkNotDone={() => markSelectedDone(false)}
-          onSortSelected={() => classify.mutate({ kind: "selection", sessionIds: selectedIds })}
+          onSortSelected={() => classify({ kind: "selection", sessionIds: sortableIds })}
         />
       )}
 
@@ -200,9 +204,14 @@ export const TopicTable: FC<Props> = ({ query, hideDone }) => {
                     <Checkbox
                       checked={row.selected}
                       onCheckedChange={(checked) => {
-                        const columnIds = rows.map((sibling) => sibling.sessionId);
-                        if (rangeIntent.current && checked === true) {
-                          selectRange(columnIds, row.sessionId);
+                        const range = rangeIntent.current && checked === true;
+                        rangeIntent.current = false;
+
+                        if (range) {
+                          selectRange(
+                            rows.map((sibling) => sibling.sessionId),
+                            row.sessionId,
+                          );
                           return;
                         }
                         setSelected(row.sessionId, checked === true);

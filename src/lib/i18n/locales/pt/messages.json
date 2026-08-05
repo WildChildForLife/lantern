@@ -1393,11 +1393,11 @@
     "origin": [
       [
         "src/web/app/conversations/components/ConversationList.tsx",
-        160
+        174
       ],
       [
         "src/web/app/topics/components/TopicTable.tsx",
-        210
+        219
       ]
     ],
     "translation": "Selecionar conversa"
@@ -1453,11 +1453,11 @@
     "origin": [
       [
         "src/web/app/conversations/components/ConversationList.tsx",
-        170
+        184
       ],
       [
         "src/web/app/topics/components/TopicTable.tsx",
-        249
+        258
       ],
       [
         "src/web/components/conversations/ConversationSelectionBar.tsx",
@@ -1473,11 +1473,11 @@
     "origin": [
       [
         "src/web/app/conversations/components/ConversationList.tsx",
-        169
+        183
       ],
       [
         "src/web/app/topics/components/TopicTable.tsx",
-        245
+        254
       ],
       [
         "src/web/components/conversations/ConversationSelectionBar.tsx",
@@ -1509,7 +1509,7 @@
     "origin": [
       [
         "src/web/components/conversations/ConversationSelectionBar.tsx",
-        106
+        108
       ]
     ],
     "translation": "Classificar a seleção em tópicos"
@@ -5275,10 +5275,26 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        78
+        114
       ]
     ],
     "translation": "A classificação falhou"
+  },
+  "topics.classify.toast.failed_status": {
+    "message": "Classification failed ({status})",
+    "placeholders": {
+      "status": [
+        "error.status"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        109
+      ]
+    ],
+    "translation": "A classificação falhou ({status})"
   },
   "topics.classify.toast.left_over": {
     "message": "{count} were left for the next pass",
@@ -5291,7 +5307,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        66
+        98
       ]
     ],
     "translation": "{count} ficaram para a próxima passagem"
@@ -5303,10 +5319,22 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        42
+        62
       ]
     ],
     "translation": "Todas as conversas já têm um tópico"
+  },
+  "topics.classify.toast.nothing_matched": {
+    "message": "None of the selected conversations could be sorted",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        72
+      ]
+    ],
+    "translation": "Nenhuma das conversas selecionadas pôde ser classificada"
   },
   "topics.classify.toast.sorted": {
     "message": "Sorted {count} conversations into topics",
@@ -5319,7 +5347,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        57
+        87
       ]
     ],
     "translation": "{count} conversas classificadas em tópicos"
@@ -5338,7 +5366,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        52
+        82
       ]
     ],
     "translation": "{count} conversas classificadas em tópicos ({cost} USD de uso)"
@@ -5357,7 +5385,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        31
+        51
       ]
     ],
     "translation": "{count} classificadas e então a passagem parou antes do fim. {remaining} ainda estão sem tópico."

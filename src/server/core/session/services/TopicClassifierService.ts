@@ -59,6 +59,13 @@ const LayerImpl = Effect.gen(function* () {
   const userConfigService = yield* UserConfigService;
 
   /**
+   * One pass at a time. Passes cost money and a forced one deletes rows, so
+   * overlapping them is never what the user meant — two tabs, or the header
+   * button and the selection bar, used to be enough to interleave.
+   */
+  const passLock = yield* Effect.makeSemaphore(1);
+
+  /**
    * The four columns a candidate needs. Selecting a whole list-item row and
    * rebuilding a `ConversationListItem` per session is what made counting
    * candidates cost more as the log grew.
@@ -70,18 +77,28 @@ const LayerImpl = Effect.gen(function* () {
     firstUserMessageJson: sessions.firstUserMessageJson,
   };
 
-  /** Something to classify at all. Neither column set means no text either way. */
-  const hasText = () =>
-    or(isNotNull(sessions.customTitle), isNotNull(sessions.firstUserMessageJson));
+  /**
+   * Something to classify at all. Neither column set means no text either way.
+   *
+   * Deliberately looser than the JS check that follows: an empty-string title
+   * passes this and is then dropped. SQL narrowing may only ever admit too much.
+   */
+  const hasText = or(isNotNull(sessions.customTitle), isNotNull(sessions.firstUserMessageJson));
 
-  /** Conversations with no topic row. Newest first, so a capped pass takes those. */
+  /**
+   * `leftJoin` on projects because a candidate's `projectPath` is nullable and
+   * the join contributes nothing else. A session cannot currently outlive its
+   * project — the foreign key cascades — so this only says that a candidate does
+   * not depend on one, rather than fixing a reachable case.
+   */
   const unclassifiedRows = (): ClassificationCandidateRow[] =>
     db
       .select(candidateColumns)
       .from(sessions)
-      .innerJoin(projects, eq(sessions.projectId, projects.id))
+      .leftJoin(projects, eq(sessions.projectId, projects.id))
       .leftJoin(sessionTopics, eq(sessionTopics.sessionId, sessions.id))
-      .where(and(hasText(), isNull(sessionTopics.sessionId)))
+      .where(and(hasText, isNull(sessionTopics.sessionId)))
+      // Newest first, so a capped pass takes the ones most worth naming.
       .orderBy(desc(sessions.lastModifiedAt))
       .all();
 
@@ -93,8 +110,18 @@ const LayerImpl = Effect.gen(function* () {
     db
       .select(candidateColumns)
       .from(sessions)
-      .innerJoin(projects, eq(sessions.projectId, projects.id))
-      .where(and(hasText(), inArray(sessions.id, [...sessionIds])))
+      .leftJoin(projects, eq(sessions.projectId, projects.id))
+      .where(and(hasText, inArray(sessions.id, [...sessionIds])))
+      .orderBy(desc(sessions.lastModifiedAt))
+      .all();
+
+  /** Every classifiable conversation, filed or not. Only `all` wants this. */
+  const allRows = (): ClassificationCandidateRow[] =>
+    db
+      .select(candidateColumns)
+      .from(sessions)
+      .leftJoin(projects, eq(sessions.projectId, projects.id))
+      .where(hasText)
       .orderBy(desc(sessions.lastModifiedAt))
       .all();
 
@@ -127,17 +154,24 @@ const LayerImpl = Effect.gen(function* () {
     return registry.get(sourceId);
   });
 
+  /**
+   * The CLI, resolved but not yet asked anything. Separate from `runClassifier`
+   * so a pass can find out whether it *can* classify before doing something it
+   * cannot undo — see the wipe in `classify`.
+   */
+  const classifierRunner = Effect.gen(function* () {
+    const adapter = yield* classifierAdapter;
+    const runner = adapter?.headless;
+    if (adapter === undefined || runner === undefined) {
+      return yield* Effect.fail(new Error("The selected agent CLI cannot be asked to name topics"));
+    }
+
+    return { adapter, runner, executable: yield* runner.executable() };
+  });
+
   const runClassifier = (prompt: string) =>
     Effect.gen(function* () {
-      const adapter = yield* classifierAdapter;
-      const runner = adapter?.headless;
-      if (adapter === undefined || runner === undefined) {
-        return yield* Effect.fail(
-          new Error("The selected agent CLI cannot be asked to name topics"),
-        );
-      }
-
-      const executable = yield* runner.executable();
+      const { adapter, runner, executable } = yield* classifierRunner;
 
       // Which CLI answered is the first thing anyone asks when a topic name
       // looks wrong, and it is not otherwise recoverable from the result.
@@ -194,16 +228,11 @@ const LayerImpl = Effect.gen(function* () {
     return stored;
   };
 
-  /**
-   * The rows a scope resolves to. `all` throws the cached topics away first,
-   * which is what you want after changing how topics are named, and leaves
-   * every conversation unclassified for the query that follows.
-   */
+  /** The rows a scope resolves to. Reading only — nothing here mutates. */
   const rowsForScope = (scope: ClassifyScope): ClassificationCandidateRow[] => {
     switch (scope.kind) {
       case "all":
-        db.delete(sessionTopics).run();
-        return unclassifiedRows();
+        return allRows();
       case "unclassified":
         return unclassifiedRows();
       case "selection":
@@ -214,39 +243,99 @@ const LayerImpl = Effect.gen(function* () {
     }
   };
 
+  const storedTopics = () => db.select().from(sessionTopics).all();
+
+  const restoreTopics = (rows: readonly (typeof sessionTopics.$inferSelect)[]): void => {
+    if (rows.length === 0) return;
+    db.insert(sessionTopics)
+      .values([...rows])
+      .onConflictDoNothing()
+      .run();
+  };
+
+  /**
+   * A forced pass throws the cached topics away, which is what you want after
+   * changing how topics are named — but only once it is known the CLI can
+   * answer, and it is put back if the pass turns out to classify nothing.
+   *
+   * Wiping first and asking afterwards is how "Redo all" with no CLI installed
+   * used to lose every topic and file none.
+   */
+  const wipeForForcedPass = Effect.gen(function* () {
+    const usable = yield* classifierRunner.pipe(
+      Effect.as(true),
+      Effect.catchAll((error) =>
+        Effect.logError(`[TopicClassifier] not wiping topics: ${String(error)}`).pipe(
+          Effect.as(false),
+        ),
+      ),
+    );
+    if (!usable) return null;
+
+    const snapshot = storedTopics();
+    db.delete(sessionTopics).run();
+    return snapshot;
+  });
+
   /**
    * Classifies what the scope resolves to, in batches, capped per pass. What the
-   * cap left over is reported rather than dropped, so a big selection reads as
+   * cap left over is reported rather than dropped, so a big pass reads as
    * deferred instead of as finished.
+   *
+   * Passes are serialised. Two at once used to interleave, and a forced one
+   * could delete the rows another had already paid for.
    */
   const classify = (options: { scope: ClassifyScope; maxCandidates?: number }) =>
-    Effect.gen(function* () {
-      const max = options.maxCandidates ?? MAX_CLASSIFY_PER_PASS;
-      const { queued, requested } = selectPassCandidates(rowsForScope(options.scope), max);
+    passLock.withPermits(1)(
+      Effect.gen(function* () {
+        const max = options.maxCandidates ?? MAX_CLASSIFY_PER_PASS;
+        const forced = options.scope.kind === "all";
 
-      const outcome = yield* runClassificationBatches(queued, BATCH_SIZE, {
-        existingTopics,
-        ask: (prompt) =>
-          runClassifier(prompt).pipe(
-            Effect.catchAll((error) =>
-              Effect.logError(`[TopicClassifier] CLI failed: ${String(error)}`).pipe(
-                Effect.as(null),
+        const snapshot = forced ? yield* wipeForForcedPass : null;
+        if (forced && snapshot === null) {
+          return {
+            classified: 0,
+            remaining: countUnclassifiedNow(),
+            batches: 0,
+            costUsd: 0,
+            requested: 0,
+            queued: 0,
+            failed: true,
+          } satisfies ClassifyResult;
+        }
+
+        const { queued, requested } = selectPassCandidates(rowsForScope(options.scope), max);
+
+        const outcome = yield* runClassificationBatches(queued, BATCH_SIZE, {
+          existingTopics,
+          ask: (prompt) =>
+            runClassifier(prompt).pipe(
+              Effect.catchAll((error) =>
+                Effect.logError(`[TopicClassifier] CLI failed: ${String(error)}`).pipe(
+                  Effect.as(null),
+                ),
               ),
             ),
-          ),
-        store: (batch, answer) => storeBatch(batch, answer, Date.now()),
-      });
+          store: (batch, answer) => storeBatch(batch, answer, Date.now()),
+        });
 
-      return {
-        classified: outcome.classified,
-        remaining: countUnclassifiedNow(),
-        batches: outcome.batches,
-        costUsd: outcome.costUsd,
-        requested,
-        queued: queued.length,
-        failed: outcome.failed,
-      } satisfies ClassifyResult;
-    });
+        // A forced pass that filed nothing has thrown away topics and replaced
+        // them with nothing. Put them back rather than leave the user empty.
+        if (snapshot !== null && outcome.classified === 0) {
+          restoreTopics(snapshot);
+        }
+
+        return {
+          classified: outcome.classified,
+          remaining: countUnclassifiedNow(),
+          batches: outcome.batches,
+          costUsd: outcome.costUsd,
+          requested,
+          queued: queued.length,
+          failed: outcome.failed,
+        } satisfies ClassifyResult;
+      }),
+    );
 
   /** How many conversations have no topic at all. Backs the header button. */
   const countUnclassified = () => Effect.sync(countUnclassifiedNow);

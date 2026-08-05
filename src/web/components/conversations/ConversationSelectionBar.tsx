@@ -95,7 +95,9 @@ export const ConversationSelectionBar: FC<Props> = ({
           data-testid="conversation-selection-sort"
           size="sm"
           className="h-7 px-2 text-xs"
-          disabled={isClassifying}
+          // Nothing actionable happens when every pick is filtered out of view,
+          // and asking anyway would only earn a rejected request.
+          disabled={isClassifying || selectedCount === 0}
           onClick={onSortSelected}
         >
           {isClassifying ? (

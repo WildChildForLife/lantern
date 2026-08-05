@@ -12,6 +12,20 @@ export type ClassifyRequest =
   | { readonly kind: "all" }
   | { readonly kind: "selection"; readonly sessionIds: readonly string[] };
 
+/**
+ * Carries the status rather than a message, so the toast can be written in the
+ * user's language instead of echoing an English HTTP reason phrase at them.
+ */
+export class ClassificationRequestError extends Error {
+  readonly status: number;
+
+  constructor(status: number) {
+    super(`Classification request failed with status ${status}`);
+    this.name = "ClassificationRequestError";
+    this.status = status;
+  }
+}
+
 export const requestClassification = async (request: ClassifyRequest) => {
   const response =
     request.kind === "selection"
@@ -24,7 +38,7 @@ export const requestClassification = async (request: ClassifyRequest) => {
         });
 
   if (!response.ok) {
-    throw new Error(`Classification failed: ${response.statusText}`);
+    throw new ClassificationRequestError(response.status);
   }
 
   return await response.json();

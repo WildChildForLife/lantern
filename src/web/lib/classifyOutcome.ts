@@ -1,4 +1,5 @@
 import type { ClassifyResult } from "@/server/core/session/schema";
+import type { ClassifyRequest } from "@/web/lib/api/classifyTopics";
 
 /**
  * What a classification pass amounted to, decided before any wording is chosen.
@@ -9,7 +10,10 @@ import type { ClassifyResult } from "@/server/core/session/schema";
  */
 export type ClassifyOutcome =
   | { readonly kind: "stopped-early"; readonly classified: number; readonly remaining: number }
+  /** Nothing was asked of the CLI because every conversation already has a topic. */
   | { readonly kind: "nothing-to-do" }
+  /** Nothing was asked because none of the picked conversations could be sorted. */
+  | { readonly kind: "nothing-matched" }
   | {
       readonly kind: "sorted";
       readonly classified: number;
@@ -18,14 +22,20 @@ export type ClassifyOutcome =
       readonly leftOver: number;
     };
 
-export const describeClassifyOutcome = (result: ClassifyResult): ClassifyOutcome => {
+export const describeClassifyOutcome = (
+  result: ClassifyResult,
+  scope: ClassifyRequest["kind"],
+): ClassifyOutcome => {
   if (result.failed) {
     return { kind: "stopped-early", classified: result.classified, remaining: result.remaining };
   }
 
-  // Nothing was asked of the CLI, which is the only case where "everything is
-  // already filed" is true.
-  if (result.requested === 0) return { kind: "nothing-to-do" };
+  // Nothing was asked of the CLI. For a default pass that means everything is
+  // filed; for a hand-picked one it means the picks were unclassifiable, which
+  // is a different sentence entirely.
+  if (result.requested === 0) {
+    return { kind: scope === "selection" ? "nothing-matched" : "nothing-to-do" };
+  }
 
   return {
     kind: "sorted",

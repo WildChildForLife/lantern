@@ -18,21 +18,21 @@ export const SortUnsortedTopicsButton: FC = () => {
   const { i18n } = useLingui();
   const { data } = useQuery(conversationTopicsPendingQuery);
   const unsorted = data?.pending ?? 0;
-  const classify = useClassifyTopics();
+  const { classify, isClassifying } = useClassifyTopics();
 
   return (
     <Button
       variant="ghost"
       size="sm"
       className="h-7 px-2 text-xs"
-      disabled={classify.isPending || unsorted === 0}
-      onClick={() => classify.mutate({ kind: "unclassified" })}
+      disabled={isClassifying || unsorted === 0}
+      onClick={() => classify({ kind: "unclassified" })}
       title={i18n._({
         id: "topics.classify.tooltip",
         message: "Ask the agent CLI to file conversations that have no topic yet",
       })}
     >
-      {classify.isPending ? (
+      {isClassifying ? (
         <Loader2Icon className="w-4 h-4 animate-spin" />
       ) : (
         <SparklesIcon className="w-4 h-4" />

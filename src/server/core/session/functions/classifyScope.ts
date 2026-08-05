@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_CLASSIFY_PER_PASS } from "../../../../lib/topics/classifyLimits.ts";
 
 /**
  * Which conversations a classification pass is allowed to touch.
@@ -25,11 +26,14 @@ export const classifyQuerySchema = z.object({
 export type ClassifyQuery = z.infer<typeof classifyQuerySchema>;
 
 /**
- * A selection is a body rather than a query: session ids are unbounded in
- * number and would blow the URL length well before the cap.
+ * A selection is a body rather than a query: session ids run to the hundreds and
+ * would blow the URL length well before the cap.
+ *
+ * Capped at what one pass can actually take. Accepting more would mean silently
+ * discarding the overflow, and a caller cannot tell which ids survived.
  */
 export const classifySelectionBodySchema = z.object({
-  sessionIds: z.array(z.string().min(1)).min(1).max(1000),
+  sessionIds: z.array(z.string().min(1)).min(1).max(MAX_CLASSIFY_PER_PASS),
 });
 
 /** An explicit `scope` wins; `force=true` is only consulted without one. */

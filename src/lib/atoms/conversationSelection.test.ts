@@ -2,6 +2,7 @@ import { expect, test } from "vitest";
 import {
   type ConversationSelection,
   conversationSelectionCount,
+  deselectConversations,
   emptyConversationSelection,
   isConversationSelected,
   selectConversationRange,
@@ -87,6 +88,19 @@ test("selects everything visible at once", () => {
   expect(next.anchorId).toBe("e");
 });
 
+test("drops a batch while leaving the rest picked", () => {
+  // What a capped pass needs: the ones it covered leave, the remainder stays so
+  // pressing again continues instead of redoing what was just paid for.
+  const next = deselectConversations(selection(["a", "b", "c"], "c"), ["a", "b"]);
+
+  expect(selectedConversationsInOrder(next, rows)).toEqual(["c"]);
+  expect(next.anchorId).toBe("c");
+});
+
+test("deselecting ids that were never picked changes nothing", () => {
+  expect(deselectConversations(selection(["a"]), ["b", "unknown"]).selected).toEqual({ a: true });
+});
+
 test("reports the selection in the order the rows are on screen", () => {
   expect(selectedConversationsInOrder(selection(["d", "a", "c"]), rows)).toEqual(["a", "c", "d"]);
 });
@@ -102,6 +116,7 @@ test("leaves the state it was given alone", () => {
   setConversationSelected(state, "b", true);
   selectConversationRange(state, rows, "d");
   selectConversations(state, rows);
+  deselectConversations(state, ["a"]);
 
   expect(state).toEqual(snapshot);
 });

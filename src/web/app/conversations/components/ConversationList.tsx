@@ -46,7 +46,7 @@ export const ConversationList: FC<Props> = ({ query, topic, limit, hideDone, onL
     selectedInOrder,
     selectedCount,
   } = useConversationSelection();
-  const classify = useClassifyTopics();
+  const { classify, isClassifying } = useClassifyTopics();
 
   /**
    * Radix's checkbox reports a new checked state, not the event that caused it,
@@ -105,8 +105,22 @@ export const ConversationList: FC<Props> = ({ query, topic, limit, hideDone, onL
   const orderedIds = rows.map((row) => row.sessionId);
   const selectedIds = selectedInOrder(orderedIds);
 
+  /**
+   * The bar counts what the buttons would act on, not what the atom holds. They
+   * differ the moment a selected conversation is filtered out of view, and
+   * reporting the larger number made "Sort" send an empty request.
+   */
+  const actionableCount = selectedIds.length;
+
+  // Rows are newest first, so the head of the selection is what a capped pass
+  // would have picked anyway. Sending only that many keeps the request honest.
+  const sortableIds = selectedIds.slice(0, MAX_CLASSIFY_PER_PASS);
+
   const onRowCheckedChange = (sessionId: string, checked: boolean) => {
-    if (rangeIntent.current && checked) {
+    const range = rangeIntent.current && checked;
+    rangeIntent.current = false;
+
+    if (range) {
       selectRange(orderedIds, sessionId);
       return;
     }
@@ -122,16 +136,16 @@ export const ConversationList: FC<Props> = ({ query, topic, limit, hideDone, onL
     <div className="space-y-4">
       {selectedCount > 0 && (
         <ConversationSelectionBar
-          selectedCount={selectedCount}
+          selectedCount={actionableCount}
           visibleCount={rows.length}
-          allVisibleSelected={selectedIds.length === rows.length}
-          isClassifying={classify.isPending}
-          exceedsPassCap={selectedIds.length > MAX_CLASSIFY_PER_PASS}
+          allVisibleSelected={actionableCount === rows.length}
+          isClassifying={isClassifying}
+          exceedsPassCap={actionableCount > MAX_CLASSIFY_PER_PASS}
           onSelectAllVisible={() => selectAll(orderedIds)}
           onClear={clearSelection}
           onMarkDone={() => markSelectedDone(true)}
           onMarkNotDone={() => markSelectedDone(false)}
-          onSortSelected={() => classify.mutate({ kind: "selection", sessionIds: selectedIds })}
+          onSortSelected={() => classify({ kind: "selection", sessionIds: sortableIds })}
         />
       )}
 

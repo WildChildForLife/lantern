@@ -1393,11 +1393,11 @@
     "origin": [
       [
         "src/web/app/conversations/components/ConversationList.tsx",
-        160
+        174
       ],
       [
         "src/web/app/topics/components/TopicTable.tsx",
-        210
+        219
       ]
     ],
     "translation": "选择会话"
@@ -1453,11 +1453,11 @@
     "origin": [
       [
         "src/web/app/conversations/components/ConversationList.tsx",
-        170
+        184
       ],
       [
         "src/web/app/topics/components/TopicTable.tsx",
-        249
+        258
       ],
       [
         "src/web/components/conversations/ConversationSelectionBar.tsx",
@@ -1473,11 +1473,11 @@
     "origin": [
       [
         "src/web/app/conversations/components/ConversationList.tsx",
-        169
+        183
       ],
       [
         "src/web/app/topics/components/TopicTable.tsx",
-        245
+        254
       ],
       [
         "src/web/components/conversations/ConversationSelectionBar.tsx",
@@ -1509,7 +1509,7 @@
     "origin": [
       [
         "src/web/components/conversations/ConversationSelectionBar.tsx",
-        106
+        108
       ]
     ],
     "translation": "将所选会话归入主题"
@@ -5275,10 +5275,26 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        78
+        114
       ]
     ],
     "translation": "归类失败"
+  },
+  "topics.classify.toast.failed_status": {
+    "message": "Classification failed ({status})",
+    "placeholders": {
+      "status": [
+        "error.status"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        109
+      ]
+    ],
+    "translation": "归类失败（{status}）"
   },
   "topics.classify.toast.left_over": {
     "message": "{count} were left for the next pass",
@@ -5291,7 +5307,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        66
+        98
       ]
     ],
     "translation": "有 {count} 条留到下次归类"
@@ -5303,10 +5319,22 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        42
+        62
       ]
     ],
     "translation": "所有会话都已有主题"
+  },
+  "topics.classify.toast.nothing_matched": {
+    "message": "None of the selected conversations could be sorted",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        72
+      ]
+    ],
+    "translation": "所选会话均无法归类"
   },
   "topics.classify.toast.sorted": {
     "message": "Sorted {count} conversations into topics",
@@ -5319,7 +5347,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        57
+        87
       ]
     ],
     "translation": "已将 {count} 条会话归入主题"
@@ -5338,7 +5366,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        52
+        82
       ]
     ],
     "translation": "已将 {count} 条会话归入主题（用量 {cost} 美元）"
@@ -5357,7 +5385,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        31
+        51
       ]
     ],
     "translation": "已归类 {count} 条后提前停止，仍有 {remaining} 条没有主题。"

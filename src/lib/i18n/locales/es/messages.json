@@ -1393,11 +1393,11 @@
     "origin": [
       [
         "src/web/app/conversations/components/ConversationList.tsx",
-        160
+        174
       ],
       [
         "src/web/app/topics/components/TopicTable.tsx",
-        210
+        219
       ]
     ],
     "translation": "Seleccionar conversación"
@@ -1453,11 +1453,11 @@
     "origin": [
       [
         "src/web/app/conversations/components/ConversationList.tsx",
-        170
+        184
       ],
       [
         "src/web/app/topics/components/TopicTable.tsx",
-        249
+        258
       ],
       [
         "src/web/components/conversations/ConversationSelectionBar.tsx",
@@ -1473,11 +1473,11 @@
     "origin": [
       [
         "src/web/app/conversations/components/ConversationList.tsx",
-        169
+        183
       ],
       [
         "src/web/app/topics/components/TopicTable.tsx",
-        245
+        254
       ],
       [
         "src/web/components/conversations/ConversationSelectionBar.tsx",
@@ -1509,7 +1509,7 @@
     "origin": [
       [
         "src/web/components/conversations/ConversationSelectionBar.tsx",
-        106
+        108
       ]
     ],
     "translation": "Clasificar la selección en temas"
@@ -5275,10 +5275,26 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        78
+        114
       ]
     ],
     "translation": "La clasificación falló"
+  },
+  "topics.classify.toast.failed_status": {
+    "message": "Classification failed ({status})",
+    "placeholders": {
+      "status": [
+        "error.status"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        109
+      ]
+    ],
+    "translation": "La clasificación falló ({status})"
   },
   "topics.classify.toast.left_over": {
     "message": "{count} were left for the next pass",
@@ -5291,7 +5307,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        66
+        98
       ]
     ],
     "translation": "{count} quedaron para la próxima pasada"
@@ -5303,10 +5319,22 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        42
+        62
       ]
     ],
     "translation": "Todas las conversaciones ya tienen un tema"
+  },
+  "topics.classify.toast.nothing_matched": {
+    "message": "None of the selected conversations could be sorted",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        72
+      ]
+    ],
+    "translation": "No se pudo clasificar ninguna de las conversaciones seleccionadas"
   },
   "topics.classify.toast.sorted": {
     "message": "Sorted {count} conversations into topics",
@@ -5319,7 +5347,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        57
+        87
       ]
     ],
     "translation": "Se clasificaron {count} conversaciones en temas"
@@ -5338,7 +5366,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        52
+        82
       ]
     ],
     "translation": "Se clasificaron {count} conversaciones en temas ({cost} USD de uso)"
@@ -5357,7 +5385,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        31
+        51
       ]
     ],
     "translation": "Se clasificaron {count} y luego se detuvo antes de terminar. {remaining} siguen sin tema."

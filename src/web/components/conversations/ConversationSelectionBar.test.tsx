@@ -100,18 +100,49 @@ describe("ConversationSelectionBar", () => {
     ).toContain("240");
   });
 
-  it("calls back for each bulk action", () => {
-    const onMarkDone = vi.fn();
-    const onSortSelected = vi.fn();
-    renderBar({ onMarkDone, onSortSelected });
+  it("refuses to sort when nothing actionable is picked", () => {
+    // Happens when every selected conversation is filtered out of view. Asking
+    // anyway would send an empty request and earn a rejection.
+    renderBar({ selectedCount: 0 });
 
-    act(() => {
+    expect(
       container
         ?.querySelector("[data-testid='conversation-selection-sort']")
-        ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-    });
+        ?.hasAttribute("disabled"),
+    ).toBe(true);
+  });
 
+  it("routes each button to its own callback", () => {
+    const onMarkDone = vi.fn();
+    const onMarkNotDone = vi.fn();
+    const onSortSelected = vi.fn();
+    const onClear = vi.fn();
+    renderBar({ onMarkDone, onMarkNotDone, onSortSelected, onClear });
+
+    const click = (selector: string) => {
+      act(() => {
+        container
+          ?.querySelector(selector)
+          ?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      });
+    };
+
+    click("[data-testid='conversation-selection-sort']");
     expect(onSortSelected).toHaveBeenCalledTimes(1);
     expect(onMarkDone).not.toHaveBeenCalled();
+    expect(onMarkNotDone).not.toHaveBeenCalled();
+    expect(onClear).not.toHaveBeenCalled();
+
+    const buttons = [...(container?.querySelectorAll("button") ?? [])];
+    const byText = (text: string) => buttons.find((button) => button.textContent?.includes(text));
+
+    byText("Mark as done")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(onMarkDone).toHaveBeenCalledTimes(1);
+
+    byText("Mark as not done")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(onMarkNotDone).toHaveBeenCalledTimes(1);
+
+    byText("Clear selection")?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(onClear).toHaveBeenCalledTimes(1);
   });
 });
