@@ -5,7 +5,8 @@ import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { sessions } from "../../../lib/db/schema.ts";
 import { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
 import { validateProjectPath } from "../../project/functions/id.ts";
-import { type SourceId, sourceIdSchema } from "../../source/models/SourceId.ts";
+import { resolveSourceRoots } from "../../source/functions/sourceRoots.ts";
+import { sourceIdSchema } from "../../source/models/SourceId.ts";
 import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import { validateSessionId } from "../functions/id.ts";
 
@@ -60,14 +61,7 @@ const LayerImpl = Effect.gen(function* () {
     Layer.succeed(ApplicationContext, applicationContext),
   );
 
-  // Roots come from the directory the server was started with, so they are
-  // fixed for the process and resolved once. Every known adapter is included,
-  // not only the enabled ones: disabling a source purges its rows, so a row
-  // that still exists must still be checkable.
-  const rootsBySource = new Map<SourceId, readonly string[]>();
-  for (const adapter of registry.all) {
-    rootsBySource.set(adapter.id, yield* adapter.watchRoots().pipe(Effect.provide(sourceEnv)));
-  }
+  const rootsBySource = yield* resolveSourceRoots(registry.all).pipe(Effect.provide(sourceEnv));
 
   const locate = (projectId: string, sessionId: string) =>
     Effect.gen(function* () {

@@ -10,9 +10,9 @@
 
 > Find the conversation you forgot you started.
 
-Lantern is a self-hosted dashboard for your Claude Code sessions. It reads the JSONL logs Claude Code
-already writes to `~/.claude/projects/` and groups every conversation by **what it is about** — not by
-which folder it happened to be started in.
+Lantern is a self-hosted dashboard for your agent CLI sessions. It reads the logs Claude Code already
+writes to `~/.claude/projects/` — and, optionally, Codex CLI's rollouts in `~/.codex/sessions/` —
+then groups every conversation by **what it is about**, not by which folder it happened to start in.
 
 If you run a lot of Claude Code sessions across a lot of projects and machines, the folder view stops
 helping: one directory ends up holding thirty unrelated conversations. Lantern gives you topics, a
@@ -31,6 +31,9 @@ searchable list of everything, and a board view of the lot.
   are cached per session, nothing runs in the background, and each pass reports the usage it drew.
 - **Every session in one place.** A flat, filterable list across every project — and every machine, if
   you point Lantern at more than one log directory.
+- **More than one CLI.** Claude Code and Codex CLI sessions sit side by side, grouped into the same
+  workspace when they ran in the same repo. Pick which CLIs to read in settings. Claude Code stays the
+  interactive one; other sources are read-only.
 - **Three layouts.** Rows, cards, or a full-width board with one column per topic, newest first.
 - **Pick up where you left off.** Copy a conversation id to resume it from a terminal, or tick
   conversations off as done once you have dealt with them.

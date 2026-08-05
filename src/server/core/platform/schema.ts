@@ -8,6 +8,8 @@ export const envSchema = z.object({
   LANTERN_TERMINAL_SHELL: z.string().optional(),
   LANTERN_TERMINAL_UNRESTRICTED: z.string().optional(),
   LANTERN_TERMINAL_DISABLED: z.string().optional(),
+  /** Codex CLI honours this for its own history; Lantern reads the same one. */
+  CODEX_HOME: z.string().optional(),
 });
 
 export type EnvSchema = z.infer<typeof envSchema>;

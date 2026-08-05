@@ -114,8 +114,22 @@ const LayerImpl = Effect.gen(function* () {
       const projectStat = yield* fs
         .stat(ref.projectStoragePath)
         .pipe(Effect.catchAll(() => Effect.succeed(null)));
+
+      // A source that partitions its history by date has no project directory
+      // to take a timestamp from — its storage path is one the CLI will never
+      // write — so the newest session stands in for one, exactly as the listing
+      // computes it. Writing the failed stat's zero instead would date the
+      // project to 1970 and sink it to the bottom of every list.
+      const cachedDirMtimeMs =
+        db
+          .select({ dirMtimeMs: projects.dirMtimeMs })
+          .from(projects)
+          .where(eq(projects.id, projectId))
+          .get()?.dirMtimeMs ?? 0;
       const projectDirMtimeMs =
-        projectStat === null ? 0 : Option.getOrElse(projectStat.mtime, () => new Date(0)).getTime();
+        projectStat === null
+          ? Math.max(cachedDirMtimeMs, ref.fileMtimeMs)
+          : Option.getOrElse(projectStat.mtime, () => new Date(0)).getTime();
 
       const ftsEntries: Array<{ role: string; content: string; index: number }> = [];
       for (let index = 0; index < entries.length; index++) {

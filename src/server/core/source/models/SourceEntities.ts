@@ -32,15 +32,14 @@ export type SourceSessionRef = {
 };
 
 /**
- * How one line of a source's transcript was handled. Foreign adapters return
- * this per line rather than dropping unrecognised lines silently: a wrong format
- * assumption has to surface as a count, not as a history that renders blank.
+ * How a source's transcript was read.
+ *
+ * `ignored` and `unparsed` are counted apart on purpose. Unrecognised lines are
+ * never dropped silently — a wrong format assumption has to surface as a count
+ * rather than as a history that renders blank — but a line an adapter has
+ * decided not to render is not evidence of anything, and folding the two
+ * together would bury the signal in it.
  */
-export type DialectLineResult =
-  | { readonly _tag: "entry"; readonly entry: ExtendedConversation }
-  | { readonly _tag: "ignored"; readonly reason: string }
-  | { readonly _tag: "unparsed"; readonly line: string; readonly lineNumber: number };
-
 export type ParseStats = {
   readonly total: number;
   readonly ignored: number;

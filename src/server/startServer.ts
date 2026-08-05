@@ -153,8 +153,7 @@ const InfraBasics = Layer.mergeAll(
 
 const InfraRepos = Layer.mergeAll(
   ProjectRepository.Live,
-  SessionRepository.Live,
-  SessionLocatorService.Live,
+  SessionRepository.Live.pipe(Layer.provideMerge(SessionLocatorService.Live)),
   TopicClassifierService.Live,
 ).pipe(Layer.provideMerge(InfraBasics));
 
