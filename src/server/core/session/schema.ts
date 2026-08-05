@@ -42,6 +42,25 @@ export const conversationListEntrySchema = conversationListItemSchema.extend({
   topic: topicRefSchema,
 });
 
+/**
+ * What one classification pass amounted to. A plain type rather than a schema:
+ * it is produced by Lantern, not read from anywhere, so there is nothing to
+ * validate — the frontend gets it typed through Hono RPC.
+ */
+export type ClassifyResult = {
+  classified: number;
+  /** Conversations that still have no topic at all, after this pass. */
+  remaining: number;
+  batches: number;
+  /** What this pass drew from the signed-in CLI account, in USD. */
+  costUsd: number;
+  /** Conversations the scope resolved to, before the per-pass cap. */
+  requested: number;
+  /** Conversations this pass queued. `requested - queued` were left for later. */
+  queued: number;
+  failed: boolean;
+};
+
 export const sessionMetaSchema = z.object({
   messageCount: z.number(),
   firstUserMessage: parsedUserMessageSchema.nullable(),

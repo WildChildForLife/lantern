@@ -85,8 +85,9 @@ export const sessionTopics = sqliteTable("session_topics", {
   sessionId: text("session_id").primaryKey(),
   label: text("label").notNull(),
   icon: text("icon").notNull(),
-  // What was classified. When the conversation gets a better title, the stored
-  // topic is stale and the session is queued again.
+  // The text the topic was decided from, kept so a wrong topic can be explained.
+  // A later title change does not re-queue the session: re-classifying costs a
+  // CLI call, so it happens when the user asks for it, not on drift.
   sourceText: text("source_text").notNull(),
   classifiedAt: integer("classified_at").notNull(),
 });
