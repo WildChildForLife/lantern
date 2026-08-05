@@ -2,7 +2,7 @@ import { randomBytes, timingSafeEqual } from "node:crypto";
 import { Context, Effect, Layer, Runtime } from "effect";
 import { getCookie } from "hono/cookie";
 import { createMiddleware } from "hono/factory";
-import { CcvOptionsService } from "../../core/platform/services/CcvOptionsService.ts";
+import { LanternOptionsService } from "../../core/platform/services/LanternOptionsService.ts";
 import type { InferEffect } from "../../lib/effect/types.ts";
 import type { HonoContext } from "../app.ts";
 
@@ -47,7 +47,7 @@ const createAuthRequiredMiddleware = (
       return next();
     }
 
-    const sessionToken = getCookie(c, "ccv-session");
+    const sessionToken = getCookie(c, "lantern-session");
     const bearerToken = getBearerToken(c.req.header("Authorization"));
     const cookieAuthorized =
       sessionToken !== undefined &&
@@ -67,15 +67,15 @@ const createAuthRequiredMiddleware = (
 };
 
 const LayerImpl = Effect.gen(function* () {
-  const ccvOptionsService = yield* CcvOptionsService;
-  const runtime = yield* Effect.runtime<CcvOptionsService>();
+  const optionsService = yield* LanternOptionsService;
+  const runtime = yield* Effect.runtime<LanternOptionsService>();
   const runPromise = Runtime.runPromise(runtime);
 
   // Cache the session token so it remains stable across calls (generated once on first access)
   let cachedSessionToken: string | undefined;
 
   const getAuthState = Effect.gen(function* () {
-    const authPassword = yield* ccvOptionsService.getCcvOptions("password");
+    const authPassword = yield* optionsService.getOption("password");
     const authEnabled = authPassword !== undefined;
     cachedSessionToken ??= generateSessionToken(authPassword);
     return { authEnabled, authPassword, validSessionToken: cachedSessionToken };

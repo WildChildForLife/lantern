@@ -7,6 +7,7 @@ import type {
   SessionNotification,
   SessionNotificationType,
 } from "../../../../types/notification.ts";
+import { STATE_DIR_NAME } from "../../../lib/config/stateDir.ts";
 import type { InferEffect } from "../../../lib/effect/types.ts";
 import { EventBus } from "../../events/services/EventBus.ts";
 import { formatPushError, shouldDropSubscriptionForPushError } from "./pushError.ts";
@@ -26,7 +27,7 @@ const vapidKeysSchema = z.object({
 
 type VapidKeys = z.infer<typeof vapidKeysSchema>;
 
-const VAPID_KEYS_FILENAME = ".claude-code-viewer/vapid-keys.json";
+const VAPID_KEYS_FILENAME = "vapid-keys.json";
 const DEFAULT_VAPID_SUBJECT = "mailto:noreply@example.com";
 
 const getVapidKeysPath = (fs: FileSystem.FileSystem) =>
@@ -34,14 +35,14 @@ const getVapidKeysPath = (fs: FileSystem.FileSystem) =>
     // biome-ignore lint/style/noProcessEnv: required for home directory
     // oxlint-disable-next-line node/no-process-env -- configuration boundary
     const home = process.env.HOME ?? process.env.USERPROFILE ?? "/tmp";
-    const dirPath = `${home}/.claude-code-viewer`;
+    const dirPath = `${home}/${STATE_DIR_NAME}`;
 
     const dirExists = yield* fs.exists(dirPath);
     if (!dirExists) {
       yield* fs.makeDirectory(dirPath, { recursive: true });
     }
 
-    return `${home}/${VAPID_KEYS_FILENAME}`;
+    return `${dirPath}/${VAPID_KEYS_FILENAME}`;
   });
 
 const loadOrCreateVapidKeys = (fs: FileSystem.FileSystem) =>

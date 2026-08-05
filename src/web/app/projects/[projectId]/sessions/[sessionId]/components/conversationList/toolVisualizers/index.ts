@@ -1,5 +1,5 @@
+import { AskUserQuestionVisualizer } from "./AskUserQuestionVisualizer";
 import { BashVisualizer } from "./BashVisualizer";
-import { CCVAskUserQuestionVisualizer } from "./CCVAskUserQuestionVisualizer";
 import { EditVisualizer } from "./EditVisualizer";
 import { ReadVisualizer } from "./ReadVisualizer";
 import { TaskManagementVisualizer } from "./TaskManagementVisualizer";
@@ -18,7 +18,9 @@ const TOOL_VISUALIZERS: Record<string, ToolVisualizerComponent> = {
   TaskCreate: TaskManagementVisualizer,
   TaskUpdate: TaskManagementVisualizer,
   TodoWrite: TodoWriteVisualizer,
-  CCVAskUserQuestion: CCVAskUserQuestionVisualizer,
+  LanternAskUserQuestion: AskUserQuestionVisualizer,
+  // Sessions recorded before the tool was renamed still carry the old name.
+  CCVAskUserQuestion: AskUserQuestionVisualizer,
 };
 
 export const getToolVisualizer = (toolName: string): ToolVisualizerComponent | undefined => {

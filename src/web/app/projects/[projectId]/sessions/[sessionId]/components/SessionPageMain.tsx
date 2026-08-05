@@ -377,7 +377,7 @@ const SessionPageMainContent: FC<
       })
       .join("\n");
 
-    const file = new File([jsonl], `ccv-jsonl-export-${safeSessionId}.jsonl`, {
+    const file = new File([jsonl], `lantern-jsonl-export-${safeSessionId}.jsonl`, {
       type: "application/x-ndjson",
     });
     const url = URL.createObjectURL(file);

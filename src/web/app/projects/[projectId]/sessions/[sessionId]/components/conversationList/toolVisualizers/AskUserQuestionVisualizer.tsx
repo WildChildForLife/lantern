@@ -69,7 +69,7 @@ const parseAnswers = (output: unknown): Record<string, string> => {
   return {};
 };
 
-export const CCVAskUserQuestionVisualizer: FC<ToolVisualizerProps> = ({ input, output }) => {
+export const AskUserQuestionVisualizer: FC<ToolVisualizerProps> = ({ input, output }) => {
   const answers = useMemo(() => parseAnswers(output), [output]);
   const parsedInput = inputSchema.safeParse(input);
   if (!parsedInput.success) return null;

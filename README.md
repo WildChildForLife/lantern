@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/WildChildForLife/lantern/actions/workflows/ci.yml/badge.svg)](https://github.com/WildChildForLife/lantern/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/WildChildForLife/lantern/actions/workflows/codeql.yml/badge.svg)](https://github.com/WildChildForLife/lantern/actions/workflows/codeql.yml)
-[![npm](https://img.shields.io/npm/v/lantern-ccv.svg)](https://www.npmjs.com/package/lantern-ccv)
+[![npm](https://img.shields.io/npm/v/lantern-viewer.svg)](https://www.npmjs.com/package/lantern-viewer)
 [![Container](https://img.shields.io/badge/ghcr.io-lantern-blue.svg)](https://github.com/WildChildForLife/lantern/pkgs/container/lantern)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D24-brightgreen.svg)](https://nodejs.org)
@@ -49,7 +49,7 @@ searchable list of everything, and a board view of the lot.
 docker run -d --name lantern \
   -p 127.0.0.1:3400:3400 \
   -v "$HOME/.claude:/root/.claude:ro" \
-  -v lantern_cache:/root/.claude-code-viewer \
+  -v lantern_cache:/root/.lantern \
   ghcr.io/wildchildforlife/lantern:latest
 ```
 
@@ -57,7 +57,7 @@ Or with Compose, which is the same thing plus a password:
 
 ```bash
 curl -O https://raw.githubusercontent.com/WildChildForLife/lantern/main/docker-compose.yml
-echo "CCV_PASSWORD=pick-something" > .env
+echo "LANTERN_PASSWORD=pick-something" > .env
 docker compose up -d
 ```
 
@@ -67,13 +67,13 @@ machine works the same way.
 ### npm
 
 ```bash
-npx lantern-ccv --port 3400
+npx lantern-viewer --port 3400
 ```
 
 Or install it properly:
 
 ```bash
-npm install -g lantern-ccv
+npm install -g lantern-viewer
 lantern --port 3400
 ```
 
@@ -98,19 +98,24 @@ Then open <http://localhost:3400>.
 node dist/main.js [options]
 ```
 
-| Option                      | Environment    | Description                                               | Default     |
-| --------------------------- | -------------- | --------------------------------------------------------- | ----------- |
-| `-p, --port <port>`         | `PORT`         | Port to listen on                                         | `3000`      |
-| `-h, --hostname <hostname>` | `HOSTNAME`     | Hostname to bind                                          | `localhost` |
-| `-P, --password <password>` | `CCV_PASSWORD` | Require a password. **Set this if you bind to `0.0.0.0`** | (none)      |
-| `--claude-dir <path>`       | —              | Path to the Claude directory to read                      | `~/.claude` |
-| `-e, --executable <path>`   | —              | Path to the `claude` executable                           | auto        |
-| `--terminal-disabled`       | —              | Turn off the in-app terminal                              | enabled     |
-| `--api-only`                | —              | Serve the API without the web UI                          | off         |
+| Option                      | Environment                 | Description                                               | Default     |
+| --------------------------- | --------------------------- | --------------------------------------------------------- | ----------- |
+| `-p, --port <port>`         | `PORT`                      | Port to listen on                                         | `3000`      |
+| `-h, --hostname <hostname>` | `HOSTNAME`                  | Hostname to bind                                          | `localhost` |
+| `-P, --password <password>` | `LANTERN_PASSWORD`          | Require a password. **Set this if you bind to `0.0.0.0`** | (none)      |
+| `--claude-dir <path>`       | `LANTERN_CLAUDE_DIR`        | Path to the Claude directory to read                      | `~/.claude` |
+| `-e, --executable <path>`   | `LANTERN_CLAUDE_EXECUTABLE` | Path to the `claude` executable                           | auto        |
+| `--terminal-disabled`       | `LANTERN_TERMINAL_DISABLED` | Turn off the in-app terminal                              | enabled     |
+| `--terminal-shell <path>`   | `LANTERN_TERMINAL_SHELL`    | Shell used by terminal sessions                           | login shell |
+| `--api-only`                | `LANTERN_API_ONLY`          | Serve the API without the web UI                          | off         |
+| `-v, --verbose`             | `LANTERN_VERBOSE`           | Verbose debug logging                                     | off         |
 
 > **Security:** Lantern ships an in-app terminal. Binding to anything other than `localhost` without
 > `--password` hands a remote shell to whoever finds the port. Use `--terminal-disabled` and a
 > password, or keep it behind a VPN such as Tailscale.
+
+Lantern keeps its cache, push keys and schedules in `~/.lantern/`. Deleting that directory costs
+nothing but a rebuild on the next start.
 
 ### Reading logs from more than one machine
 

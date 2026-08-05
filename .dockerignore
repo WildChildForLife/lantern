@@ -13,8 +13,8 @@ build
 .cache
 
 # Test fixtures and docs not needed in image
-e2e
-mock-global-claude-dir
+
+fixtures/claude-home
 docs
 coverage
 

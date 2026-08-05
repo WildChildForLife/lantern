@@ -4,9 +4,10 @@ on:
   push:
     branches:
       - main
+  # Every pull request, not only the ones targeting main: a stacked pull
+  # request is based on the branch below it, and branch protection requires
+  # this check on all of them.
   pull_request:
-    branches:
-      - main
   schedule:
     # Weekly, so a newly published advisory still gets caught on a quiet repo.
     - cron: "0 6 * * 1"
