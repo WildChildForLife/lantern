@@ -287,7 +287,7 @@ const makeAdapter = (): SourceAdapter => {
       } satisfies SourceDetection;
     });
 
-  const watchRoots = () => projectsDirPath.pipe(Effect.map((rootPath) => [rootPath]));
+  const roots = () => projectsDirPath.pipe(Effect.map((rootPath) => [rootPath]));
 
   const classifyChange = (absolutePath: string, roots: readonly string[]): SourceChange | null => {
     const root = roots.find((candidate) => absolutePath.startsWith(`${candidate}/`));
@@ -331,7 +331,7 @@ const makeAdapter = (): SourceAdapter => {
     readSession,
     resolveSessionRef,
     shouldForceResync,
-    watchRoots,
+    roots,
     classifyChange,
   };
 };

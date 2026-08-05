@@ -106,6 +106,7 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
           }),
           homeDirectory: Effect.succeed(testDir),
           platform: process.platform,
+          sourceRoot: () => Effect.succeed(undefined),
         }),
       );
 
@@ -186,6 +187,7 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
           }),
           homeDirectory: Effect.succeed(testDir),
           platform: process.platform,
+          sourceRoot: () => Effect.succeed(undefined),
         }),
       );
 
@@ -255,6 +257,7 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
           }),
           homeDirectory: Effect.succeed(testDir),
           platform: process.platform,
+          sourceRoot: () => Effect.succeed(undefined),
         }),
       );
 
@@ -310,6 +313,7 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
           }),
           homeDirectory: Effect.succeed(testDir),
           platform: process.platform,
+          sourceRoot: () => Effect.succeed(undefined),
         }),
       );
 
@@ -368,6 +372,7 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
           }),
           homeDirectory: Effect.succeed(testDir),
           platform: process.platform,
+          sourceRoot: () => Effect.succeed(undefined),
         }),
       );
 
@@ -433,6 +438,7 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
           }),
           homeDirectory: Effect.succeed(testDir),
           platform: process.platform,
+          sourceRoot: () => Effect.succeed(undefined),
         }),
       );
 
@@ -534,6 +540,7 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
           }),
           homeDirectory: Effect.succeed(testDir),
           platform: process.platform,
+          sourceRoot: () => Effect.succeed(undefined),
         }),
       );
 

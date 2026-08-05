@@ -1,0 +1,8 @@
+{"timestamp": "2026-07-29T08:30:00.000Z", "type": "session_meta", "payload": {"id": "0199a2e5-4d88-7b11-a2c3-5e7f1b9d0642", "timestamp": "2026-07-29T08:30:00.000Z", "cwd": "/home/demo/Notes", "cli_version": "0.141.0"}}
+{"timestamp": "2026-07-29T08:30:01.000Z", "type": "turn_context", "payload": {"model": "gpt-5-codex-mini"}}
+{"timestamp": "2026-07-29T08:30:02.000Z", "type": "response_item", "payload": {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "Summarise yesterday's deploy notes"}]}}
+{"timestamp": "2026-07-29T08:30:04.000Z", "type": "response_item", "payload": {"type": "reasoning", "summary": [{"type": "summary_text", "text": "Reading the notes directory first."}]}}
+{"timestamp": "2026-07-29T08:30:05.000Z", "type": "response_item", "payload": {"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": "Two rollbacks, both on the queue worker."}]}}
+{"timestamp": "2026-07-29T08:30:06.000Z", "type": "turn_context", "payload": {"model": "gpt-5-codex"}}
+{"timestamp": "2026-07-29T08:30:08.000Z", "type": "response_item", "payload": {"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": "Switched model for the follow-up."}]}}
+{"timestamp": "2026-07-29T08:30:09.000Z", "type": "response_item", "payload": {"type": "web_search_call", "id": "ws_01", "status": "completed"}}

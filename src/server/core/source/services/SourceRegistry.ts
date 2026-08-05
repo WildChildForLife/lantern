@@ -1,5 +1,6 @@
 import { Context, Effect, Layer } from "effect";
 import { claudeCodeSourceAdapter } from "../adapters/claude-code/ClaudeCodeSourceAdapter.ts";
+import { codexSourceAdapter } from "../adapters/codex/CodexSourceAdapter.ts";
 import type { SourceAdapter } from "../models/SourceAdapter.ts";
 import type { SourceId } from "../models/SourceId.ts";
 import { SourceConfigService } from "./SourceConfigService.ts";
@@ -17,7 +18,10 @@ export type ISourceRegistry = {
   readonly enabled: () => Effect.Effect<readonly SourceAdapter[]>;
 };
 
-export const ALL_SOURCE_ADAPTERS: readonly SourceAdapter[] = [claudeCodeSourceAdapter];
+export const ALL_SOURCE_ADAPTERS: readonly SourceAdapter[] = [
+  claudeCodeSourceAdapter,
+  codexSourceAdapter,
+];
 
 const makeRegistry = (
   adapters: readonly SourceAdapter[],

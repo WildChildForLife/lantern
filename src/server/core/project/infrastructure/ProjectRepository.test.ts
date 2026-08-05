@@ -10,6 +10,7 @@ import { testPlatformLayer } from "../../../../testing/layers/testPlatformLayer.
 import { testProjectMetaServiceLayer } from "../../../../testing/layers/testProjectMetaServiceLayer.ts";
 import type { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects } from "../../../lib/db/schema.ts";
+import { ALL_SOURCE_ADAPTERS, SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import type { ProjectMeta } from "../../types.ts";
 import { ProjectRepository } from "./ProjectRepository.ts";
 
@@ -73,6 +74,7 @@ describe("ProjectRepository", () => {
         });
       }).pipe(
         Effect.provide(ProjectRepository.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(
           testProjectMetaServiceLayer({
             meta: mockMeta,
@@ -115,6 +117,7 @@ describe("ProjectRepository", () => {
         expect(String(error)).toContain("Project not found");
       }).pipe(
         Effect.provide(ProjectRepository.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(
           testProjectMetaServiceLayer({
             meta: mockMeta,
@@ -146,6 +149,7 @@ describe("ProjectRepository", () => {
         expect(result.projects).toEqual([]);
       }).pipe(
         Effect.provide(ProjectRepository.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(
           testProjectMetaServiceLayer({
             meta: mockMeta,
@@ -202,6 +206,7 @@ describe("ProjectRepository", () => {
         expect(result.projects.at(2)?.lastModifiedAt).toEqual(date1);
       }).pipe(
         Effect.provide(ProjectRepository.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(testProjectMetaServiceLayer({ meta: mockMeta })),
         Effect.provide(makeDrizzleServiceWithData({ projectRows })),
         Effect.provide(testFileSystemLayer({})),
@@ -227,6 +232,7 @@ describe("ProjectRepository", () => {
         expect(result.projects.at(0)?.claudeProjectPath).toBe("/test/project");
       }).pipe(
         Effect.provide(ProjectRepository.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(testProjectMetaServiceLayer({ meta: mockMeta })),
         Effect.provide(makeDrizzleServiceWithData({ projectRows })),
         Effect.provide(testFileSystemLayer({})),
@@ -254,6 +260,7 @@ describe("ProjectRepository", () => {
         expect(result.projects.at(0)?.claudeProjectPath).toBe(projectPath);
       }).pipe(
         Effect.provide(ProjectRepository.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(testProjectMetaServiceLayer({ meta: mockMeta })),
         Effect.provide(makeDrizzleServiceWithData({ projectRows })),
         Effect.provide(testFileSystemLayer({})),
