@@ -5,6 +5,7 @@ import {
   rightPanelOpenAtom,
   rightPanelOpenPreferenceAtom,
 } from "@/lib/atoms/rightPanel";
+import { resolveRightPanelOpenSync, resolveRightPanelTabSync } from "./resolveRightPanelSync.ts";
 
 /**
  * Integration tests for useSyncRightPanelWithSearchParams hook.
@@ -217,36 +218,36 @@ describe("useSyncRightPanelWithSearchParams", () => {
     });
 
     it("should apply device-specific default only before a right panel preference exists", () => {
+      // Drives the same decision the hook's mount effect makes, rather than
+      // restating its branches, so the two cannot drift apart.
+      const applyOpenSync = () => {
+        const sync = resolveRightPanelOpenSync(
+          undefined,
+          store.get(rightPanelOpenPreferenceAtom).status === "set",
+          false,
+        );
+        if (sync.action === "set") {
+          store.set(rightPanelOpenAtom, sync.value);
+        }
+      };
+
       // On PC, a URL without rightPanel should default to open when no preference exists
       vi.stubGlobal("window", { innerWidth: 1024 });
-      const urlRightPanel = undefined;
-      const isMobile = false;
-      const openPreference = store.get(rightPanelOpenPreferenceAtom);
-      if (urlRightPanel !== undefined) {
-        store.set(rightPanelOpenAtom, urlRightPanel);
-      } else if (openPreference.status === "unset") {
-        store.set(rightPanelOpenAtom, !isMobile);
-      }
+      applyOpenSync();
       expect(store.get(rightPanelOpenAtom)).toBe(true);
 
       // After the user closes the panel, another URL without rightPanel should preserve it
       store.set(rightPanelOpenAtom, false);
-      const nextUrlRightPanel = undefined;
-      const nextOpenPreference = store.get(rightPanelOpenPreferenceAtom);
-      if (nextUrlRightPanel !== undefined) {
-        store.set(rightPanelOpenAtom, nextUrlRightPanel);
-      } else if (nextOpenPreference.status === "unset") {
-        store.set(rightPanelOpenAtom, !isMobile);
-      }
+      applyOpenSync();
       expect(store.get(rightPanelOpenAtom)).toBe(false);
     });
 
     it("should preserve active tab preference when navigating to URL without rightPanelTab param", () => {
       store.set(rightPanelActiveTabAtom, "git");
 
-      const nextUrlRightPanelTab = undefined;
-      if (nextUrlRightPanelTab !== undefined) {
-        store.set(rightPanelActiveTabAtom, nextUrlRightPanelTab);
+      const sync = resolveRightPanelTabSync(undefined);
+      if (sync.action === "set") {
+        store.set(rightPanelActiveTabAtom, sync.value);
       }
 
       expect(store.get(rightPanelActiveTabAtom)).toBe("git");

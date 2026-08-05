@@ -19,13 +19,32 @@ overrides:
   # version has to be forced onto whatever pulled them in.
   shell-quote: ">=1.9.0"
   # Two majors of this are in the tree and their APIs differ, so each is raised
-  # to its own patched release rather than both to the newest.
-  brace-expansion: ">=2.1.2 <3 || >=5.0.7"
-  fast-uri: ">=3.1.4"
+  # to its own patched release rather than both to the newest. A single union
+  # range does not do that — pnpm resolves it to the newest satisfying version,
+  # which drags the 2.x consumer onto 5.x, whose CommonJS build exports a
+  # namespace object instead of the bare function minimatch 5 calls. Keying the
+  # override per major keeps each line on its own patched release.
+  "brace-expansion@2": ">=2.1.2 <3"
+  "brace-expansion@5": ">=5.0.7"
+  # Bounded below 4: both advisories are fixed in 3.1.4, and ajv — the only thing
+  # that pulls this in — declares a 3.x range, so an unbounded floor would force
+  # a major it does not support.
+  fast-uri: ">=3.1.4 <4"
   postcss: ">=8.5.18"
   ip-address: ">=10.3.1"
+  qs: ">=6.15.2"
+  body-parser: ">=2.3.0"
+  valibot: ">=1.4.2"
+  # Held below 8 on purpose: the advisory is fixed in the 7.x line, and the
+  # plugins that pull this in still declare a 7.x peer.
+  "@babel/core": ">=7.29.6 <8"
+  # There is no patched 1.x of the server, so the only fix is the 2.x line. The
+  # MCP SDK is raised alongside it because 1.29 accepts 1.x only, while 1.30
+  # widened its range to "^1.19.9 || ^2.0.5" and so can take the patched major.
+  "@modelcontextprotocol/sdk": ">=1.30.0"
+  "@hono/node-server": ">=2.0.5"
   # Also direct dependencies. Raising those alone left the copies that other
   # packages pull in on the vulnerable version, which is the one the advisory is
   # about — the tree has to be raised as a whole.
   ws: ">=8.21.0"
-  hono: ">=4.12.25"
+  hono: ">=4.12.34"
