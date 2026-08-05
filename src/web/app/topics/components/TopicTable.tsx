@@ -1,13 +1,19 @@
+import { useLingui } from "@lingui/react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { MessageSquareIcon } from "lucide-react";
-import type { FC } from "react";
+import { CheckCheckIcon, MessageSquareIcon } from "lucide-react";
+import { type FC, useEffect, useRef } from "react";
+import { useConversationSelection } from "@/lib/atoms/conversationSelection";
 import { useDoneConversations } from "@/lib/atoms/doneConversations";
 import { formatLocaleDate } from "@/lib/date/formatLocaleDate";
+import { MAX_CLASSIFY_PER_PASS } from "@/lib/topics/classifyLimits";
+import { ConversationSelectionBar } from "@/web/components/conversations/ConversationSelectionBar";
 import { CopySessionIdButton } from "@/web/components/CopySessionIdButton";
 import { TopicIcon } from "@/web/components/TopicIcon";
+import { Button } from "@/web/components/ui/button";
 import { Checkbox } from "@/web/components/ui/checkbox";
 import { conversationListQuery, conversationTopicsQuery } from "@/web/lib/api/queries";
+import { useClassifyTopics } from "@/web/lib/api/useClassifyTopics";
 import { topicColorClass } from "@/web/lib/topicColor";
 import { cn } from "@/web/utils";
 import { useConfig } from "../../hooks/useConfig";
@@ -29,8 +35,25 @@ type Props = {
  * without opening a category first.
  */
 export const TopicTable: FC<Props> = ({ query, hideDone }) => {
-  const { isDone, setDone } = useDoneConversations();
+  const { isDone, setDone, setManyDone } = useDoneConversations();
   const { config } = useConfig();
+  const { i18n } = useLingui();
+  const {
+    isSelected,
+    setSelected,
+    selectRange,
+    selectAll,
+    clearSelection,
+    selectedInOrder,
+    selectedCount,
+  } = useConversationSelection();
+  const { classify, isClassifying } = useClassifyTopics();
+
+  /** See ConversationList: Radix reports the new state, not the event. */
+  const rangeIntent = useRef(false);
+
+  useEffect(() => clearSelection, [clearSelection]);
+
   const topicsResult = useQuery(conversationTopicsQuery);
   const conversationsResult = useQuery(conversationListQuery({ query: "", limit: MAX_ROWS }));
 
@@ -70,6 +93,7 @@ export const TopicTable: FC<Props> = ({ query, hideDone }) => {
         .map((conversation) => ({
           ...conversation,
           done: isDone(conversation.sessionId),
+          selected: isSelected(conversation.sessionId),
           title: toConciseTitle(
             resolveSessionTitle(
               conversation.title,
@@ -94,8 +118,37 @@ export const TopicTable: FC<Props> = ({ query, hideDone }) => {
     );
   }
 
+  // Select-all spans every column, but a shift-range is measured inside the
+  // column it was started in: a range across columns means nothing here.
+  const orderedIds = columns.flatMap(({ rows }) => rows.map((row) => row.sessionId));
+  const selectedIds = selectedInOrder(orderedIds);
+
+  /** What the buttons would act on — see ConversationList for why this differs. */
+  const actionableCount = selectedIds.length;
+  const sortableIds = selectedIds.slice(0, MAX_CLASSIFY_PER_PASS);
+
+  const markSelectedDone = (done: boolean) => {
+    setManyDone(selectedIds, done);
+    clearSelection();
+  };
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-2">
+      {selectedCount > 0 && (
+        <ConversationSelectionBar
+          selectedCount={actionableCount}
+          visibleCount={orderedIds.length}
+          allVisibleSelected={actionableCount === orderedIds.length}
+          isClassifying={isClassifying}
+          exceedsPassCap={actionableCount > MAX_CLASSIFY_PER_PASS}
+          onSelectAllVisible={() => selectAll(orderedIds)}
+          onClear={clearSelection}
+          onMarkDone={() => markSelectedDone(true)}
+          onMarkNotDone={() => markSelectedDone(false)}
+          onSortSelected={() => classify({ kind: "selection", sessionIds: sortableIds })}
+        />
+      )}
+
       {total > conversations.length && (
         <p className="text-xs text-muted-foreground">
           Showing the {conversations.length} most recent conversations of {total}.
@@ -136,16 +189,37 @@ export const TopicTable: FC<Props> = ({ query, hideDone }) => {
                 rows.map((row) => (
                   <div
                     key={row.sessionId}
+                    onPointerDownCapture={(event) => {
+                      rangeIntent.current = event.shiftKey;
+                    }}
+                    onKeyDownCapture={(event) => {
+                      rangeIntent.current = event.shiftKey;
+                    }}
                     className={cn(
                       "flex items-start gap-2 px-3 py-2 transition-colors hover:bg-muted/60",
                       row.done && "opacity-50",
+                      row.selected && "bg-muted/40",
                     )}
                   >
                     <Checkbox
-                      checked={row.done}
-                      onCheckedChange={(checked) => setDone(row.sessionId, checked === true)}
-                      aria-label={row.done ? "Mark as not done" : "Mark as done"}
-                      title={row.done ? "Mark as not done" : "Mark as done"}
+                      checked={row.selected}
+                      onCheckedChange={(checked) => {
+                        const range = rangeIntent.current && checked === true;
+                        rangeIntent.current = false;
+
+                        if (range) {
+                          selectRange(
+                            rows.map((sibling) => sibling.sessionId),
+                            row.sessionId,
+                          );
+                          return;
+                        }
+                        setSelected(row.sessionId, checked === true);
+                      }}
+                      aria-label={i18n._({
+                        id: "conversations.row.select",
+                        message: "Select conversation",
+                      })}
                       className="mt-0.5 shrink-0"
                     />
                     <Link
@@ -170,6 +244,31 @@ export const TopicTable: FC<Props> = ({ query, hideDone }) => {
                         <span className="truncate tabular-nums">{row.modifiedLabel}</span>
                       </span>
                     </Link>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 shrink-0"
+                      aria-pressed={row.done}
+                      aria-label={
+                        row.done
+                          ? i18n._({
+                              id: "conversations.selection.mark_not_done",
+                              message: "Mark as not done",
+                            })
+                          : i18n._({
+                              id: "conversations.selection.mark_done",
+                              message: "Mark as done",
+                            })
+                      }
+                      onClick={() => setDone(row.sessionId, !row.done)}
+                    >
+                      <CheckCheckIcon
+                        className={cn(
+                          "h-3 w-3",
+                          row.done ? "text-primary" : "text-muted-foreground",
+                        )}
+                      />
+                    </Button>
                     <CopySessionIdButton sessionId={row.sessionId} className="h-6 w-6" />
                   </div>
                 ))

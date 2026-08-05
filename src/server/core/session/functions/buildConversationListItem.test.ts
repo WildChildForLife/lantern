@@ -7,6 +7,7 @@ import {
   firstUserMessageText,
   isInternalSession,
   matchesConversationQuery,
+  userMessageText,
 } from "./buildConversationListItem.ts";
 
 const item = (overrides: Partial<ConversationListItem> = {}): ConversationListItem => ({
@@ -61,6 +62,16 @@ test("reads the first user message whatever shape it was logged in", () => {
     firstUserMessageText(item({ firstUserMessage: { kind: "local-command", stdout: "done" } })),
   ).toBe("done");
   expect(firstUserMessageText(item({ firstUserMessage: null }))).toBe("");
+});
+
+test("reads a bare user message without a list item around it", () => {
+  expect(userMessageText({ kind: "text", content: "hello" })).toBe("hello");
+  expect(userMessageText({ kind: "command", commandName: "/init", commandArgs: "--force" })).toBe(
+    "/init --force",
+  );
+  expect(userMessageText({ kind: "command", commandName: "/init" })).toBe("/init ");
+  expect(userMessageText({ kind: "local-command", stdout: "done" })).toBe("done");
+  expect(userMessageText(null)).toBe("");
 });
 
 test("matches a conversation on its title, project or first message", () => {

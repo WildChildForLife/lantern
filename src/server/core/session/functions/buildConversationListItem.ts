@@ -1,4 +1,7 @@
-import { parsedUserMessageSchema } from "../../claude-code/functions/parseUserMessage.ts";
+import {
+  type ParsedUserMessage,
+  parsedUserMessageSchema,
+} from "../../claude-code/functions/parseUserMessage.ts";
 import type { ConversationListItem } from "../../types.ts";
 import { CLASSIFIER_MARKER, LEGACY_CLASSIFIER_MARKERS } from "./buildClassificationPrompt.ts";
 
@@ -55,9 +58,12 @@ export const isInternalSession = (item: ConversationListItem): boolean => {
   );
 };
 
-/** Plain text of the first user message, whatever shape it was logged in. */
-export const firstUserMessageText = (item: ConversationListItem): string => {
-  const message = item.firstUserMessage;
+/**
+ * Plain text of a user message, whatever shape it was logged in. Split out from
+ * `firstUserMessageText` so callers that only have the raw row - the topic
+ * classifier - can reuse it without building a whole list item.
+ */
+export const userMessageText = (message: ParsedUserMessage | null): string => {
   if (message === null) return "";
   switch (message.kind) {
     case "command":
@@ -71,6 +77,10 @@ export const firstUserMessageText = (item: ConversationListItem): string => {
       return "";
   }
 };
+
+/** Plain text of the first user message, whatever shape it was logged in. */
+export const firstUserMessageText = (item: ConversationListItem): string =>
+  userMessageText(item.firstUserMessage);
 
 /**
  * Text a conversation is matched against when the user filters the list.
