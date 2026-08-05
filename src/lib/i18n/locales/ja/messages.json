@@ -4675,7 +4675,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        100
+        102
       ]
     ],
     "translation": "読み取り専用"
@@ -4754,7 +4754,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        89
+        91
       ]
     ],
     "translation": "{projectCount} 個のプロジェクトにまたがる {sessionCount} 件の会話"
@@ -4766,7 +4766,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        78
+        80
       ]
     ],
     "translation": "利用可能"
@@ -4778,7 +4778,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        83
+        85
       ]
     ],
     "translation": "利用不可"
