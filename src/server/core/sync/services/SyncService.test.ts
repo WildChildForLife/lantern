@@ -7,7 +7,7 @@ import { testPlatformLayer } from "../../../../testing/layers/testPlatformLayer.
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessions } from "../../../lib/db/schema.ts";
 import { decodeProjectId } from "../../project/functions/id.ts";
-import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
+import { ALL_SOURCE_ADAPTERS, SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import { SyncService } from "./SyncService.ts";
 
 /**
@@ -31,7 +31,7 @@ const testLayer = Layer.mergeAll(
   makeDrizzleTestServiceLayer(),
   testPlatformLayer(),
   NodeFileSystem.layer,
-  SourceRegistry.Live,
+  SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS),
 );
 
 describe("SyncService.fullSync", () => {
@@ -119,6 +119,43 @@ describe("SyncService.fullSync", () => {
       );
 
       expect(total).toBeGreaterThan(0);
+    }).pipe(Effect.provide(SyncService.Live), Effect.provide(testLayer)),
+  );
+
+  it.live("forgets one source's rows without touching another's", () =>
+    Effect.gen(function* () {
+      const syncService = yield* SyncService;
+      const { db, rawDb } = yield* DrizzleService;
+
+      yield* syncService.fullSync();
+
+      const before = db.select().from(sessions).all().length;
+      expect(before).toBeGreaterThan(0);
+
+      yield* syncService.purgeSource("claude-code");
+
+      expect(db.select().from(sessions).all().length).toBe(0);
+      expect(db.select().from(projects).all().length).toBe(0);
+      // The search index is a virtual table with no foreign keys, so nothing
+      // deletes its rows for us.
+      expect(
+        Number(rawDb.prepare("SELECT COUNT(*) AS c FROM session_messages_fts").get()?.c ?? -1),
+      ).toBe(0);
+    }).pipe(Effect.provide(SyncService.Live), Effect.provide(testLayer)),
+  );
+
+  it.live("re-reads a purged source on the next sync", () =>
+    Effect.gen(function* () {
+      const syncService = yield* SyncService;
+      const { db } = yield* DrizzleService;
+
+      yield* syncService.fullSync();
+      const before = db.select().from(sessions).all().length;
+
+      yield* syncService.purgeSource("claude-code");
+      yield* syncService.fullSync(["claude-code"]);
+
+      expect(db.select().from(sessions).all().length).toBe(before);
     }).pipe(Effect.provide(SyncService.Live), Effect.provide(testLayer)),
   );
 });

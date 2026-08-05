@@ -54,7 +54,7 @@ export const encodeProjectIdFromSessionFilePath = (sessionFilePath: string) => {
  * Whether a decoded project path lies inside one of the directories Lantern is
  * allowed to read, so a crafted projectId cannot walk out of them.
  *
- * The roots come from the enabled source adapters — server state, never a
+ * The roots come from the registered source adapters — server state, never a
  * request — and a path only has to be inside one of them.
  */
 export const validateProjectPath = (

@@ -4,6 +4,7 @@ import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
 import { testPlatformLayer } from "../../../../testing/layers/testPlatformLayer.ts";
+import { ALL_SOURCE_ADAPTERS, SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import type { InternalEventDeclaration } from "../types/InternalEventDeclaration.ts";
 import { EventBus } from "./EventBus.ts";
 import { FileWatcherService } from "./fileWatcher.ts";
@@ -21,6 +22,7 @@ describe("FileWatcherService", () => {
         expect(true).toBe(true);
       }).pipe(
         Effect.provide(FileWatcherService.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(testPlatformLayer()),
         Effect.provide(Path.layer),
         Effect.provide(NodeContext.layer),
@@ -40,6 +42,7 @@ describe("FileWatcherService", () => {
         expect(true).toBe(true);
       }).pipe(
         Effect.provide(FileWatcherService.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(testPlatformLayer()),
         Effect.provide(Path.layer),
         Effect.provide(NodeContext.layer),
@@ -59,6 +62,7 @@ describe("FileWatcherService", () => {
         expect(true).toBe(true);
       }).pipe(
         Effect.provide(FileWatcherService.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(testPlatformLayer()),
         Effect.provide(Path.layer),
         Effect.provide(NodeContext.layer),
@@ -84,6 +88,7 @@ describe("FileWatcherService", () => {
         expect(true).toBe(true);
       }).pipe(
         Effect.provide(FileWatcherService.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(testPlatformLayer()),
         Effect.provide(Path.layer),
         Effect.provide(NodeContext.layer),
@@ -122,6 +127,7 @@ describe("FileWatcherService", () => {
         expect(true).toBe(true);
       }).pipe(
         Effect.provide(FileWatcherService.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(testPlatformLayer()),
         Effect.provide(Path.layer),
         Effect.provide(NodeContext.layer),
@@ -143,6 +149,7 @@ describe("FileWatcherService", () => {
         expect(true).toBe(true);
       }).pipe(
         Effect.provide(FileWatcherService.Live),
+        Effect.provide(SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS)),
         Effect.provide(testPlatformLayer()),
         Effect.provide(Path.layer),
         Effect.provide(NodeContext.layer),

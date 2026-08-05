@@ -4,6 +4,7 @@ import { PlusIcon, XIcon } from "lucide-react";
 import { type FC, Suspense, useEffect, useMemo, useState } from "react";
 import { NotificationSettings } from "@/web/components/NotificationSettings";
 import { SettingsControls } from "@/web/components/SettingsControls";
+import { SourcesSettings } from "@/web/components/SourcesSettings";
 import { SystemInfoCard } from "@/web/components/SystemInfoCard";
 import { Button } from "@/web/components/ui/button";
 import {
@@ -141,6 +142,13 @@ export const MobileSidebar: FC<MobileSidebarProps> = ({
               }
             >
               <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                <div className="space-y-4">
+                  <h3 className="font-medium text-sm text-sidebar-foreground">
+                    <Trans id="settings.section.sources" message="Agent CLIs" />
+                  </h3>
+                  <SourcesSettings />
+                </div>
+
                 <div className="space-y-4">
                   <h3 className="font-medium text-sm text-sidebar-foreground">
                     <Trans id="settings.session.display" />

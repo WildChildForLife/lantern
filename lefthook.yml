@@ -2,7 +2,7 @@ pre-commit:
   parallel: true
   commands:
     gitleaks:
-      run: gitleaks protect --staged --no-banner
+      run: ./scripts/gitleaks-protect.sh
       skip:
         - merge
 

@@ -57,6 +57,9 @@ export type SSEEventDeclaration = {
 
   // oxlint-disable-next-line typescript/no-empty-object-type -- intentionally empty event payload
   schedulerJobsChanged: {};
+
+  // oxlint-disable-next-line typescript/no-empty-object-type -- the event carries no payload
+  sourcesChanged: {};
 };
 
 export type SSEEventMap = {
