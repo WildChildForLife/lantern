@@ -4,6 +4,7 @@ import type WebSocket from "ws";
 import type { InferEffect } from "../../lib/effect/types.ts";
 import { EnvService } from "../platform/services/EnvService.ts";
 import { LanternOptionsService } from "../platform/services/LanternOptionsService.ts";
+import { hasRusptyBinary } from "./hasRusptyBinary.ts";
 import { normalizePtyChunk } from "./normalizePtyChunk.ts";
 import {
   createRusptySession,
@@ -76,36 +77,34 @@ const LayerImpl = Effect.gen(function* () {
     };
   };
 
-  // @replit/ruspty publishes prebuilt binaries only for darwin (x64/arm64) and linux-x64.
-  // On Windows there is no native module to load, so short-circuit instead of triggering
-  // a noisy MODULE_NOT_FOUND on every startup — terminal support is simply disabled.
-  const loadRuspty: Effect.Effect<RusptyModule | null> =
-    process.platform === "win32"
-      ? Effect.sync(() => {
-          Effect.runFork(
-            Effect.logInfo("@replit/ruspty has no Windows build; terminal support is disabled."),
-          );
-          return null;
-        })
-      : Effect.tryPromise({
-          try: () => import("@replit/ruspty"),
-          catch: (error) => new Error(`Failed to load @replit/ruspty: ${String(error)}`),
-        }).pipe(
-          Effect.catchAll((error) =>
-            Effect.sync(() => {
-              Effect.runFork(Effect.logWarning(error.message));
-              return null;
-            }),
-          ),
-        );
+  // Where @replit/ruspty has no prebuilt binary there is nothing to import, so
+  // short-circuit instead of triggering a noisy MODULE_NOT_FOUND on every startup
+  // — terminal support is simply disabled. This covers Windows and the linux/arm64
+  // image, and leaves the import failure below to report genuine problems on the
+  // platforms that do ship one.
+  const binaryAvailable = hasRusptyBinary(process.platform, process.arch);
+  const noBinaryReason = `@replit/ruspty has no prebuilt binary for ${process.platform}-${process.arch}`;
+
+  const loadRuspty: Effect.Effect<RusptyModule | null> = !binaryAvailable
+    ? Effect.sync(() => {
+        Effect.runFork(Effect.logInfo(`${noBinaryReason}; terminal support is disabled.`));
+        return null;
+      })
+    : Effect.tryPromise({
+        try: () => import("@replit/ruspty"),
+        catch: (error) => new Error(`Failed to load @replit/ruspty: ${String(error)}`),
+      }).pipe(
+        Effect.catchAll((error) =>
+          Effect.sync(() => {
+            Effect.runFork(Effect.logWarning(error.message));
+            return null;
+          }),
+        ),
+      );
   const ruspty = yield* loadRuspty;
 
   if (!ruspty) {
-    return disabledService(
-      process.platform === "win32"
-        ? "@replit/ruspty has no Windows build"
-        : "@replit/ruspty failed to load",
-    );
+    return disabledService(binaryAvailable ? "@replit/ruspty failed to load" : noBinaryReason);
   }
 
   const trimBuffer = (session: TerminalSession) => {
