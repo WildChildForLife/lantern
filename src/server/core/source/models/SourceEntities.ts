@@ -89,10 +89,18 @@ export type SourceChange = {
   readonly agentId: string | null;
 };
 
+/**
+ * Why a source that is installed cannot be read.
+ *
+ * `unreadable` and `no-data` are the pair worth keeping apart: a history nobody
+ * has written yet is the user's own situation, while storage that will not open
+ * is a fault, and telling someone they have no conversations when the file is
+ * merely locked or corrupt sends them looking for the wrong thing.
+ */
 export type UnsupportedReason =
   | "not-installed"
   | "no-data"
-  | "sqlite-storage"
+  | "unreadable"
   | "unknown-shape"
   | "schema-changed";
 

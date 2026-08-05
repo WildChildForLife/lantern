@@ -14,6 +14,7 @@ import {
 } from "../../models/SourceEntities.ts";
 import { OPENCODE_SOURCE_ID } from "../../models/SourceId.ts";
 import { type MessageFile, parseMessages } from "./functions/parseMessages.ts";
+import { makeSqliteStorage } from "./functions/sqliteStorage.ts";
 
 /**
  * `<data>/opencode/storage`, laid out as one directory per kind:
@@ -54,17 +55,14 @@ const sessionInfoSchema = z.looseObject({
 /**
  * opencode.
  *
- * Read-only, and watched: its storage is a plain directory tree whose paths say
- * which session changed, so a pure function can classify a change.
+ * Read-only, and stored two ways. A current install keeps its sessions in
+ * `opencode.db`; older ones keep the same documents in the JSON tree above.
+ * Both are read, and the dialect is identical either way — only the storage
+ * moved, so both layouts end at the same parser.
  *
  * The one thing it does that no other source here does is write down what a
  * turn cost. Those numbers are taken as reported rather than recomputed —
  * opencode bills against providers Lantern has no price table for.
- *
- * Newer opencode versions keep the same data in a SQLite database beside this
- * tree. That is a separate storage mode rather than another dialect, and is not
- * read here: an installation that has moved to it reports as unsupported rather
- * than appearing empty.
  */
 const makeAdapter = (): SourceAdapter => {
   const rootPath = Effect.gen(function* () {
@@ -147,47 +145,97 @@ const makeAdapter = (): SourceAdapter => {
       return files;
     });
 
+  const sqlite = makeSqliteStorage(rootPath);
+
+  const treeHasProjects = Effect.gen(function* () {
+    const path = yield* Path.Path;
+    const storage = yield* storagePath;
+
+    return (yield* listJsonFiles(path.join(storage, PROJECT_DIR))).length > 0;
+  });
+
+  /**
+   * Which of opencode's two storage modes this install keeps its sessions in.
+   *
+   * The database wins whenever it holds any, because it is the layout opencode
+   * migrated *to*: the migration leaves the old directories in place, so a tree
+   * with projects still in it is a leftover on every install that upgraded
+   * rather than where new conversations go. Asking the tree first would pin
+   * those installs to a history frozen on the day they migrated — and report it
+   * as read successfully, which is the worst way to be wrong.
+   *
+   * The tree is read when there is no database, when the database holds no
+   * sessions (a fresh install that has not run yet), and when it cannot be
+   * opened at all — `detect` is what says why in that last case, having opened
+   * it itself.
+   */
+  const usesDatabase = Effect.gen(function* () {
+    if (!(yield* sqlite.exists)) return false;
+
+    // Nothing to prefer it over, so there is no need to open it to find out —
+    // including when it will not open at all, which `detect` then reports
+    // rather than calling this install empty.
+    if (!(yield* treeHasProjects)) return true;
+
+    // Both layouts on disk. The leftover tree only wins while the database has
+    // nothing in it, which is the one case where the migration has not run.
+    return yield* sqlite.holdsSessions.pipe(Effect.catchAll(() => Effect.succeed(false)));
+  });
+
+  /** The file layout's projects. Cannot fail: an absent tree is no projects. */
+  const listTreeProjects = Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    const storage = yield* storagePath;
+
+    const projectDirectory = path.join(storage, PROJECT_DIR);
+    const found: SourceProject[] = [];
+
+    for (const name of yield* listJsonFiles(projectDirectory)) {
+      const parsed = projectFileSchema.safeParse(
+        yield* readJson(path.join(projectDirectory, name)),
+      );
+      if (!parsed.success) continue;
+
+      // The sessions of a project live in a directory named for its id, and
+      // that directory is the project as far as Lantern is concerned.
+      const sessionDirectory = path.join(storage, SESSION_DIR, parsed.data.id);
+      const stat = yield* fs
+        .stat(sessionDirectory)
+        .pipe(Effect.catchAll(() => Effect.succeed(null)));
+      if (stat === null) continue;
+
+      found.push({
+        sourceId: OPENCODE_SOURCE_ID,
+        storagePath: sessionDirectory,
+        // A project with no worktree recorded is one opencode never ran in a
+        // directory; grouping it by a guess would be worse than not grouping.
+        cwd: parsed.data.worktree ?? null,
+        sourceProjectKey: parsed.data.id,
+        dirMtimeMs: Option.getOrElse(stat.mtime, () => new Date(0)).getTime(),
+      });
+    }
+
+    return found;
+  });
+
   const listProjects = () =>
     Effect.gen(function* () {
-      const fs = yield* FileSystem.FileSystem;
-      const path = yield* Path.Path;
-      const storage = yield* storagePath;
-
-      const projectDirectory = path.join(storage, PROJECT_DIR);
-      const found: SourceProject[] = [];
-
-      for (const name of yield* listJsonFiles(projectDirectory)) {
-        const parsed = projectFileSchema.safeParse(
-          yield* readJson(path.join(projectDirectory, name)),
-        );
-        if (!parsed.success) continue;
-
-        // The sessions of a project live in a directory named for its id, and
-        // that directory is the project as far as Lantern is concerned.
-        const sessionDirectory = path.join(storage, SESSION_DIR, parsed.data.id);
-        const stat = yield* fs
-          .stat(sessionDirectory)
-          .pipe(Effect.catchAll(() => Effect.succeed(null)));
-        if (stat === null) continue;
-
-        found.push({
-          sourceId: OPENCODE_SOURCE_ID,
-          storagePath: sessionDirectory,
-          // A project with no worktree recorded is one opencode never ran in a
-          // directory; grouping it by a guess would be worse than not grouping.
-          cwd: parsed.data.worktree ?? null,
-          sourceProjectKey: parsed.data.id,
-          dirMtimeMs: Option.getOrElse(stat.mtime, () => new Date(0)).getTime(),
-        });
+      if (yield* usesDatabase) {
+        return yield* sqlite.listProjects;
       }
 
-      return found;
+      return yield* listTreeProjects;
     });
 
   const resolveProjectCwd = (project: SourceProject) => Effect.succeed(project.cwd);
 
   const listSessions = (project: SourceProject) =>
     Effect.gen(function* () {
+      if (yield* usesDatabase) {
+        return yield* sqlite.listSessions(project);
+      }
+
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
 
@@ -212,6 +260,10 @@ const makeAdapter = (): SourceAdapter => {
 
   const readSession = (ref: SourceSessionRef) =>
     Effect.gen(function* () {
+      if (yield* usesDatabase) {
+        return yield* sqlite.readSession(ref);
+      }
+
       const path = yield* Path.Path;
       const storage = yield* storagePath;
 
@@ -285,6 +337,10 @@ const makeAdapter = (): SourceAdapter => {
 
   const resolveSessionRef = (projectStoragePath: string, sessionId: string) =>
     Effect.gen(function* () {
+      if (yield* usesDatabase) {
+        return yield* sqlite.resolveSessionRef(projectStoragePath, sessionId);
+      }
+
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
 
@@ -322,28 +378,16 @@ const makeAdapter = (): SourceAdapter => {
         } satisfies SourceDetection;
       }
 
-      // A database beside the storage tree means this install keeps its
-      // sessions in SQLite, which is a different storage mode rather than
-      // another dialect and is not read here. Saying so is the difference
-      // between a user checking their install and a user filing a bug: as of
-      // 1.18.13 — the current release — this is what a normal install looks
-      // like, and reporting "no data" would send them looking for the wrong
-      // problem entirely.
-      const database = yield* fs
-        .exists(path.join(root, "opencode.db"))
-        .pipe(Effect.catchAll(() => Effect.succeed(false)));
-
-      const projects = yield* listProjects();
-
-      if (database && projects.length === 0) {
-        return {
-          sourceId: OPENCODE_SOURCE_ID,
-          rootPath: root,
-          hasData: true,
-          supported: false,
-          unsupportedReason: "sqlite-storage",
-        } satisfies SourceDetection;
+      // As of 1.18.13 — the current release — a normal install keeps its
+      // sessions in SQLite rather than the tree, so this is the ordinary case
+      // and not a fallback. It answers for itself, including when it cannot be
+      // opened: only the database knows whether that is a moved schema or a
+      // file that is not one.
+      if (yield* usesDatabase) {
+        return yield* sqlite.detect(root);
       }
+
+      const projects = yield* listTreeProjects;
 
       if (projects.length === 0) {
         return {
@@ -399,6 +443,9 @@ const makeAdapter = (): SourceAdapter => {
    * Pure: a changed path under `session/<projectID>/<sessionID>.json` names the
    * session directly. A changed message re-syncs the session it belongs to,
    * which its own path also names.
+   *
+   * Only the file layout can be classified this way. A write to `opencode.db`
+   * names nothing — see `capabilities.watch`.
    */
   const classifyChange = (absolutePath: string, roots: readonly string[]) => {
     const root = roots.find((candidate) => absolutePath.startsWith(`${candidate}/`));
@@ -432,7 +479,15 @@ const makeAdapter = (): SourceAdapter => {
     id: OPENCODE_SOURCE_ID,
     displayName: "opencode",
     capabilities: {
-      watch: true,
+      // Which storage mode an install uses is only known by looking at it,
+      // while this is declared once for both — so the honest answer is the one
+      // that holds either way. A current install writes `opencode.db`, whose
+      // changed path names no session for `classifyChange` to return: the
+      // watcher would wake on every write to the write-ahead log and classify
+      // none of them, which is how a source looks live while doing nothing.
+      // Copilot CLI and Codex say the same for the same reason, and the
+      // interval sync covers all three.
+      watch: false,
       interactive: false,
       deletable: false,
       cost: "reported",

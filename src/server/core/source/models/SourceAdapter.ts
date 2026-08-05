@@ -69,11 +69,17 @@ export type SourceAdapter = {
   /**
    * Locate a session from the ids Lantern hands around, without a database.
    * Superseded by the cache-backed locator once sessions carry their source.
+   *
+   * The two failures mean opposite things and must not be conflated. Gone is an
+   * answer — the session is not there, and the cached row should go with it. A
+   * read error is the absence of one: a source whose storage is momentarily
+   * unreadable has said nothing about what it holds, and deleting on it throws
+   * away a row that is still there.
    */
   readonly resolveSessionRef: (
     projectStoragePath: string,
     sessionId: string,
-  ) => Effect.Effect<SourceSessionRef, SourceSessionGoneError, SourceEnv>;
+  ) => Effect.Effect<SourceSessionRef, SourceSessionGoneError | SourceReadError, SourceEnv>;
 
   /**
    * Whether an unchanged file should be re-read anyway — Claude Code appends a

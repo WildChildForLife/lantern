@@ -12,7 +12,7 @@ type SourceId = Parameters<typeof honoClient.api.sources.$put>[0]["json"]["enabl
 type UnsupportedReason =
   | "not-installed"
   | "no-data"
-  | "sqlite-storage"
+  | "unreadable"
   | "unknown-shape"
   | "schema-changed";
 
@@ -30,9 +30,9 @@ const useUnsupportedLabel = () => {
         message: "not found on this machine",
       }),
       "no-data": i18n._({ id: "sources.reason.no_data", message: "no sessions recorded yet" }),
-      "sqlite-storage": i18n._({
-        id: "sources.reason.sqlite_storage",
-        message: "stores sessions in a database Lantern cannot read yet",
+      unreadable: i18n._({
+        id: "sources.reason.unreadable",
+        message: "its history is there but could not be read",
       }),
       "schema-changed": i18n._({
         id: "sources.reason.schema_changed",
