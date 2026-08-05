@@ -1,28 +1,27 @@
 # Scaffolded CLIs
 
-Lantern cannot read these yet. Each has a Dockerfile and a config recipe so
-that PR-8 and PR-9 begin from a container that runs, rather than from a guess
-about a format — which is the mistake this whole harness exists to stop repeating.
+Lantern cannot read this one yet. It has a Dockerfile and a config recipe so
+that PR-9 begins from a container that runs, rather than from a guess about a
+format — which is the mistake this whole harness exists to stop repeating.
 
 To bring one live: add a service to `../../compose.yaml` copying the shape of
 `opencode`, mount its history directory as a named volume, mount that same
 volume into `lantern`, and add the source id to the `sources.json` seed in
 `../../run.sh`.
 
-| CLI         | Points at Ollama via                                                           | Writes history to                                               |
-| ----------- | ------------------------------------------------------------------------------ | --------------------------------------------------------------- |
-| Copilot CLI | `COPILOT_PROVIDER_TYPE=openai` + `COPILOT_PROVIDER_BASE_URL` + `COPILOT_MODEL` | `~/.copilot/session-state/<id>/events.jsonl`                    |
-| goose       | `GOOSE_PROVIDER=ollama` + `OLLAMA_HOST` + `GOOSE_MODEL`                        | `~/.local/share/goose/sessions/sessions.db` (SQLite since 1.10) |
+| CLI   | Points at Ollama via                                    | Writes history to                                               |
+| ----- | ------------------------------------------------------- | --------------------------------------------------------------- |
+| goose | `GOOSE_PROVIDER=ollama` + `OLLAMA_HOST` + `GOOSE_MODEL` | `~/.local/share/goose/sessions/sessions.db` (SQLite since 1.10) |
 
-Both of those paths are still **descriptions, not observations**. Qwen Code's
-was too, and it was wrong: this table used to claim `~/.qwen/tmp/<hash>/`, and
-the CLI actually writes `~/.qwen/projects/<encoded-cwd>/chats/<uuid>.jsonl`.
-Drive them before believing them.
+That path is still a **description, not an observation**. Two of these have now
+been driven and both descriptions were wrong: Qwen Code's said
+`~/.qwen/tmp/<hash>/` when the CLI writes
+`~/.qwen/projects/<encoded-cwd>/chats/<uuid>.jsonl`, and Copilot CLI's named
+only `events.jsonl` when the CLI also keeps a SQLite index beside it. Drive it
+before believing it.
 
-Two things to establish before building on any of them:
+One thing to establish before building on goose:
 
-- **Copilot CLI** may still require a GitHub subscription to launch even in BYOK
-  mode. Untested. If it does, PR-8 cannot be verified this way.
 - **goose** stores sessions in SQLite, so it needs the read-only SQLite backend
   from PR-9 before Lantern can read it at all. Its `GOOSE_TOOLSHIM=1` converts
   tool definitions to text prompts and parses the replies back, which is the

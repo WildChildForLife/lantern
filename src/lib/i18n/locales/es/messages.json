@@ -4891,7 +4891,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        102
+        103
       ]
     ],
     "translation": "solo lectura"
@@ -4970,7 +4970,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        91
+        92
       ]
     ],
     "translation": "{sessionCount} conversaciones en {projectCount} proyectos"
@@ -4982,7 +4982,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        80
+        81
       ]
     ],
     "translation": "Listo"
@@ -4994,7 +4994,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        85
+        86
       ]
     ],
     "translation": "No disponible"

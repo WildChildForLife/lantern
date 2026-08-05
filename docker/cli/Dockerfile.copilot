@@ -1,0 +1,23 @@
+# GitHub Copilot CLI, pointed at the gateway's OpenAI-compatible route.
+#
+# The open question this container exists to settle: BYOK shipped in April 2026
+# and documents local models, but whether a paid Copilot subscription is still
+# required to *launch* the CLI at all is unverified. If it is, PR-8 cannot be
+# verified this way and no adapter should be written from a guess.
+#
+# Pinned, like every CLI here: a floating tag would silently change what is
+# being tested, and the on-disk shape is exactly what is under test.
+FROM node:24-slim
+
+ARG COPILOT_VERSION=1.0.78
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git ca-certificates gosu \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd -m -u 1001 -s /bin/bash agent \
+  && npm install -g "@github/copilot@${COPILOT_VERSION}"
+
+COPY bootstrap.sh /usr/local/bin/bootstrap
+COPY entrypoint-copilot.sh /usr/local/bin/run-harness
+RUN chmod +x /usr/local/bin/run-harness /usr/local/bin/bootstrap
+
+ENTRYPOINT ["/usr/local/bin/run-harness"]

@@ -131,6 +131,30 @@ services:
       - ./prompts:/prompts:ro
     restart: "no"
 
+  # A probe as much as a driver: it is not yet established that Copilot CLI
+  # starts without a paid subscription, even in BYOK mode. What it writes — or
+  # fails to write — is what PR-8 gets decided on.
+  copilot:
+    build:
+      context: ./cli
+      dockerfile: Dockerfile.copilot
+    profiles: ["drive"]
+    depends_on:
+      ollama-pull: { condition: service_completed_successfully }
+    environment:
+      HARNESS_OWNED_DIRS: /home/agent/.copilot
+      COPILOT_PROVIDER_TYPE: openai
+      COPILOT_PROVIDER_BASE_URL: http://ollama:11434/v1
+      # Required by the client, ignored by Ollama. Not a credential.
+      COPILOT_PROVIDER_API_KEY: ollama
+      COPILOT_MODEL: "${OLLAMA_MODEL:-qwen3:0.6b}"
+      PROMPTS: /prompts
+    volumes:
+      - copilot_home:/home/agent/.copilot
+      - ./workspace:/workspace-src:ro
+      - ./prompts:/prompts:ro
+    restart: "no"
+
   # --------------------------------------------------------------------------
   # Lantern, reading all of them
   # --------------------------------------------------------------------------
@@ -164,6 +188,7 @@ services:
       - codex_home:/root/.codex
       - opencode_home:/root/.local/share
       - qwen_home:/root/.qwen
+      - copilot_home:/root/.copilot
       - lantern_state:/root/.lantern
     restart: unless-stopped
     init: true
@@ -174,4 +199,5 @@ volumes:
   codex_home:
   opencode_home:
   qwen_home:
+  copilot_home:
   lantern_state:
