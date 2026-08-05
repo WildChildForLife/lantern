@@ -14,10 +14,12 @@ ARG CLAUDE_CODE_VERSION=2.1.221
 ARG CODEX_VERSION=0.146.0
 ARG OPENCODE_VERSION=1.18.13
 ARG QWEN_CODE_VERSION=0.21.6
+ARG COPILOT_VERSION=1.0.78
 
 RUN npm install -g \
       "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
       "@openai/codex@${CODEX_VERSION}" \
       "opencode-ai@${OPENCODE_VERSION}" \
       "@qwen-code/qwen-code@${QWEN_CODE_VERSION}" \
+      "@github/copilot@${COPILOT_VERSION}" \
   && npm cache clean --force

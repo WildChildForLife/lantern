@@ -28,6 +28,15 @@ import { parseChat, readCwd } from "./functions/parseChat.ts";
  * session under a workspace it never ran in. The real path is read from the
  * transcript instead, where Qwen Code stamps it on every record.
  */
+/**
+ * How many sessions `detect` will read before giving up.
+ *
+ * More than one, because an aborted session leaves a transcript with no
+ * conversation in it and reading only the first would report a healthy install
+ * as broken. Bounded, because the failing case must not cost a full scan.
+ */
+const DETECT_SAMPLE = 5;
+
 const PROJECTS_DIR = "projects";
 const CHATS_DIR = "chats";
 
@@ -250,8 +259,18 @@ const makeAdapter = (): SourceAdapter => {
       // schema that expects a field the format no longer has parses every
       // record happily and yields an empty conversation, which is precisely how
       // a whole history renders blank while looking like it worked.
+      //
+      // Bounded on purpose. This runs on every settings render, and reading
+      // every transcript in every project on an install whose format has moved
+      // is the one case where the cost would be unbounded.
+      let sampled = 0;
       for (const project of projects) {
+        if (sampled >= DETECT_SAMPLE) break;
+
         for (const name of yield* listChatFiles(project.storagePath)) {
+          if (sampled >= DETECT_SAMPLE) break;
+          sampled += 1;
+
           const lines = yield* readLines(path.join(project.storagePath, name));
           if (lines === null) continue;
 

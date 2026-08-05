@@ -4,6 +4,7 @@ import { z } from "zod";
 import { ApplicationContext } from "../../../platform/services/ApplicationContext.ts";
 import { canonicalizeProjectPath } from "../../functions/canonicalizeProjectPath.ts";
 import { resolveOnPath } from "../../functions/resolveOnPath.ts";
+import { virtualProjectPath } from "../../functions/virtualProjectPath.ts";
 import type { HeadlessAnswer, SourceAdapter } from "../../models/SourceAdapter.ts";
 import {
   type SourceDetection,
@@ -15,7 +16,7 @@ import {
 } from "../../models/SourceEntities.ts";
 import { CODEX_SOURCE_ID } from "../../models/SourceId.ts";
 import { parseRollout, type RolloutSessionMeta } from "./functions/parseRollout.ts";
-import { rolloutSessionId, virtualProjectPath } from "./functions/rolloutPaths.ts";
+import { rolloutSessionId } from "./functions/rolloutPaths.ts";
 
 const codexEventSchema = z.looseObject({
   type: z.string(),
