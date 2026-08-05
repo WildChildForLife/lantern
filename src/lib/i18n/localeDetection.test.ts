@@ -22,6 +22,15 @@ describe("localeDetection", () => {
     it("returns undefined when header is missing", () => {
       expect(detectLocaleFromAcceptLanguage(undefined)).toBeUndefined();
     });
+
+    it("maps a regional variant onto the locale Lantern ships", () => {
+      // One catalogue per language, not per region — so es-419, fr-CA and
+      // pt-PT have to land on their language rather than falling through to
+      // English, which is what a browser in Lisbon or Montreal actually sends.
+      expect(detectLocaleFromAcceptLanguage("es-419,es;q=0.9")).toBe<SupportedLocale>("es");
+      expect(detectLocaleFromAcceptLanguage("fr-CA,fr;q=0.9")).toBe<SupportedLocale>("fr");
+      expect(detectLocaleFromAcceptLanguage("pt-PT,pt;q=0.9")).toBe<SupportedLocale>("pt");
+    });
   });
 
   describe("detectLocaleFromNavigator", () => {
@@ -60,7 +69,11 @@ describe("localeDetection", () => {
     it("falls back to navigator or default locale", () => {
       expect(
         resolvePreferredLocale({
-          acceptLanguageHeader: "es-MX,fr-FR;q=0.7",
+          // Neither is a locale Lantern ships, so the header has nothing to
+          // offer and the navigator decides. (This read `es-MX,fr-FR` until
+          // Spanish and French were added, at which point the header stopped
+          // being the unsupported case the test needs.)
+          acceptLanguageHeader: "de-DE,it-IT;q=0.7",
           navigator: {
             languages: ["zh-TW", "en-GB"],
             language: "en-GB",

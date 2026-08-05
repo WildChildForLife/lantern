@@ -227,7 +227,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        76
+        85
       ]
     ],
     "translation": "选择主题"
@@ -1936,6 +1936,42 @@
       ]
     ],
     "translation": "切换右侧面板"
+  },
+  "list.hide_done": {
+    "message": "Hide done ({doneCount})",
+    "placeholders": {
+      "doneCount": [
+        "doneCount"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        114
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        91
+      ]
+    ],
+    "translation": "隐藏已完成 ({doneCount})"
+  },
+  "list.showing_open_only": {
+    "message": "Showing open only",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        112
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        89
+      ]
+    ],
+    "translation": "仅显示未完成"
   },
   "mcp.error.load_failed": {
     "placeholders": {
@@ -3731,7 +3767,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        63
+        72
       ]
     ],
     "translation": "选择您偏好的语言"
@@ -3747,6 +3783,30 @@
     ],
     "translation": "英语"
   },
+  "settings.locale.es": {
+    "message": "Spanish",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/AppearanceSettings.tsx",
+        60
+      ]
+    ],
+    "translation": "西班牙语"
+  },
+  "settings.locale.fr": {
+    "message": "French",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/AppearanceSettings.tsx",
+        63
+      ]
+    ],
+    "translation": "法语"
+  },
   "settings.locale.ja": {
     "placeholders": {},
     "comments": [],
@@ -3757,6 +3817,18 @@
       ]
     ],
     "translation": "日语"
+  },
+  "settings.locale.pt": {
+    "message": "Portuguese",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/AppearanceSettings.tsx",
+        66
+      ]
+    ],
+    "translation": "葡萄牙语"
   },
   "settings.locale.zh_CN": {
     "placeholders": {},
@@ -4247,7 +4319,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        71
+        80
       ]
     ],
     "translation": "主题"
@@ -4258,7 +4330,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        83
+        92
       ]
     ],
     "translation": "深色"
@@ -4269,7 +4341,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        92
+        101
       ]
     ],
     "translation": "选择您偏好的颜色主题"
@@ -4280,7 +4352,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        80
+        89
       ]
     ],
     "translation": "浅色"
@@ -4291,7 +4363,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        86
+        95
       ]
     ],
     "translation": "跟随系统"
@@ -4999,6 +5071,70 @@
       ]
     ],
     "translation": "Lantern"
+  },
+  "topics.classify.hint": {
+    "message": "Ask Claude to file the new conversations under a topic",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
+        64
+      ]
+    ],
+    "translation": "请 Claude 将新对话归入主题"
+  },
+  "topics.classify.pending": {
+    "message": "Sort {pending} new",
+    "placeholders": {
+      "pending": [
+        "pending"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
+        77
+      ]
+    ],
+    "translation": "归类 {pending} 条新对话"
+  },
+  "topics.classify.redo": {
+    "message": "Redo all",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
+        91
+      ]
+    ],
+    "translation": "全部重做"
+  },
+  "topics.classify.redo_hint": {
+    "message": "Throw away every topic and classify all conversations again",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
+        86
+      ]
+    ],
+    "translation": "丢弃所有主题并重新归类全部对话"
+  },
+  "topics.classify.sorted": {
+    "message": "Topics sorted",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
+        75
+      ]
+    ],
+    "translation": "主题已归类"
   },
   "topics.filter.placeholder": {
     "message": "Filter topics...",

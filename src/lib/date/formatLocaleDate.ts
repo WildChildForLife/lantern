@@ -1,6 +1,9 @@
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale/en-US";
+import { es } from "date-fns/locale/es";
+import { fr } from "date-fns/locale/fr";
 import { ja } from "date-fns/locale/ja";
+import { pt } from "date-fns/locale/pt";
 import { zhCN } from "date-fns/locale/zh-CN";
 import type { SupportedLocale } from "../i18n/schema.ts";
 
@@ -12,6 +15,12 @@ export const convertDateFnsLocale = (locale: SupportedLocale) => {
       return enUS;
     case "zh_CN":
       return zhCN;
+    case "es":
+      return es;
+    case "fr":
+      return fr;
+    case "pt":
+      return pt;
     default:
       locale satisfies never;
       return enUS;

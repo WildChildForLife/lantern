@@ -95,6 +95,8 @@ yet.
 - **Honest costs.** A CLI that records what a turn cost is believed; one that does not is estimated
   and marked `~`; a model with no price table reads `—` rather than `$0.00`.
 - **Three layouts.** Rows, cards, or a full-width board with one column per topic, newest first.
+- **Six languages.** English, Spanish, French, Portuguese, Japanese and Simplified Chinese. Picked up
+  from your browser on first load, and changeable in settings.
 - **Pick up where you left off.** Copy a conversation id to resume it from a terminal, or tick
   conversations off as done once you have dealt with them.
 - **A full session viewer.** Live conversation log viewing, search, cost and token breakdowns, git
