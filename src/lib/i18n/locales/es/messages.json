@@ -4954,7 +4954,7 @@
         33
       ]
     ],
-    "translation": ""
+    "translation": "su historial está ahí pero no se pudo leer"
   },
   "sources.stats": {
     "message": "{sessionCount} conversations across {projectCount} projects",

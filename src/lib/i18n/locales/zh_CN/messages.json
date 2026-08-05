@@ -4954,7 +4954,7 @@
         33
       ]
     ],
-    "translation": ""
+    "translation": "历史记录存在，但无法读取"
   },
   "sources.stats": {
     "message": "{sessionCount} conversations across {projectCount} projects",

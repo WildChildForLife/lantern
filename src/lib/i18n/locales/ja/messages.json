@@ -4954,7 +4954,7 @@
         33
       ]
     ],
-    "translation": ""
+    "translation": "履歴はありますが、読み取れませんでした"
   },
   "sources.stats": {
     "message": "{sessionCount} conversations across {projectCount} projects",
