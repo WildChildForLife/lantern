@@ -1,0 +1,49 @@
+{
+  "id": "msg_003",
+  "type": "assistant",
+  "agent": "build",
+  "model": {
+    "providerID": "anthropic",
+    "modelID": "claude-sonnet-4-5"
+  },
+  "cost": 0.0412,
+  "tokens": {
+    "input": 5120,
+    "output": 240,
+    "reasoning": 0,
+    "cache": {
+      "read": 4096,
+      "write": 0
+    }
+  },
+  "time": {
+    "created": 1785100001000,
+    "completed": 1785100009000
+  },
+  "content": [
+    {
+      "type": "reasoning",
+      "id": "rsn_1",
+      "text": "Check the handler before reading the tests."
+    },
+    {
+      "type": "tool",
+      "id": "tool_1",
+      "name": "grep",
+      "state": {
+        "status": "completed",
+        "input": {
+          "pattern": "def create_order"
+        },
+        "output": "app/orders.py:42:def create_order(cart):",
+        "structured": {},
+        "content": []
+      }
+    },
+    {
+      "type": "text",
+      "id": "txt_1",
+      "text": "`create_order` divides by `len(cart.items)` without guarding the empty case."
+    }
+  ]
+}

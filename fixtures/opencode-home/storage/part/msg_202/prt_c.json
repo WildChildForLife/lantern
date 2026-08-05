@@ -1,0 +1,10 @@
+{
+  "id": "prt_c",
+  "sessionID": "ses_03",
+  "messageID": "msg_202",
+  "type": "reasoning",
+  "text": "Check the engines field.",
+  "time": {
+    "start": 1784100001000
+  }
+}

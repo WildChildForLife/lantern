@@ -1,0 +1,9 @@
+{
+  "id": "prj_orders",
+  "vcs": "git",
+  "worktree": "/home/demo/orders-api",
+  "time": {
+    "created": 1785000000000,
+    "initialized": 1785000000000
+  }
+}

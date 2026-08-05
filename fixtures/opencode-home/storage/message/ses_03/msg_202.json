@@ -1,0 +1,24 @@
+{
+  "id": "msg_202",
+  "sessionID": "ses_03",
+  "role": "assistant",
+  "modelID": "claude-sonnet-4-5",
+  "providerID": "anthropic",
+  "cost": 0.02,
+  "tokens": {
+    "input": 400,
+    "output": 60,
+    "reasoning": 0,
+    "cache": {
+      "read": 0,
+      "write": 0
+    }
+  },
+  "path": {
+    "cwd": "/home/demo/legacy-app",
+    "root": "/home/demo/legacy-app"
+  },
+  "time": {
+    "created": 1784100001000
+  }
+}

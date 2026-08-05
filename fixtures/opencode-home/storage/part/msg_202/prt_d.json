@@ -1,0 +1,21 @@
+{
+  "id": "prt_d",
+  "sessionID": "ses_03",
+  "messageID": "msg_202",
+  "type": "tool",
+  "callID": "call_legacy",
+  "tool": "read",
+  "state": {
+    "status": "completed",
+    "input": {
+      "path": "package.json"
+    },
+    "output": "\"engines\": {\"node\": \">=20\"}",
+    "title": "read",
+    "metadata": {},
+    "time": {
+      "start": 1,
+      "end": 2
+    }
+  }
+}

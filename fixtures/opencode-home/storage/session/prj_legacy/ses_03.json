@@ -1,0 +1,19 @@
+{
+  "id": "ses_03",
+  "projectID": "prj_legacy",
+  "title": "Old storage layout",
+  "cost": 0.02,
+  "tokens": {
+    "input": 400,
+    "output": 60,
+    "reasoning": 0,
+    "cache": {
+      "read": 0,
+      "write": 0
+    }
+  },
+  "time": {
+    "created": 1784100000000,
+    "updated": 1784100100000
+  }
+}

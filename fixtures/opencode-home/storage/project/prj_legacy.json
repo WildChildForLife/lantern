@@ -1,0 +1,9 @@
+{
+  "id": "prj_legacy",
+  "vcs": "git",
+  "worktree": "/home/demo/legacy-app",
+  "time": {
+    "created": 1784000000000,
+    "initialized": 1784000000000
+  }
+}

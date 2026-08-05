@@ -1,0 +1,10 @@
+{
+  "id": "msg_101",
+  "type": "user",
+  "text": "Why did the nightly deploy stall?",
+  "files": [],
+  "agents": [],
+  "time": {
+    "created": 1785200000000
+  }
+}
