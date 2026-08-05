@@ -1,6 +1,7 @@
 import { Command } from "@effect/platform";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
 import { Context, Effect, Layer } from "effect";
+import { MAX_CLASSIFY_PER_PASS } from "../../../../lib/topics/classifyLimits.ts";
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessionTopics, sessions } from "../../../lib/db/schema.ts";
 import type { InferEffect } from "../../../lib/effect/types.ts";
@@ -8,24 +9,30 @@ import { UserConfigService } from "../../platform/services/UserConfigService.ts"
 import { CLAUDE_CODE_SOURCE_ID, sourceIdSchema } from "../../source/models/SourceId.ts";
 import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import {
-  buildClassificationPrompt,
   type ClassificationCandidate,
   parseClassificationResponse,
 } from "../functions/buildClassificationPrompt.ts";
 import {
-  buildConversationListItem,
-  firstUserMessageText,
-  isInternalSession,
-} from "../functions/buildConversationListItem.ts";
+  type ClassificationCandidateRow,
+  selectPassCandidates,
+  toClassificationCandidate,
+} from "../functions/classificationCandidates.ts";
+import type { ClassifyScope } from "../functions/classifyScope.ts";
 import { normalizeTopicIcon } from "../functions/groupConversationsByTopic.ts";
+import { runClassificationBatches } from "../functions/runClassificationBatches.ts";
+import type { ClassifyResult } from "../schema.ts";
 
 /**
  * Files conversations under a topic by asking an agent CLI itself, headlessly.
  *
  * It runs whichever CLI the user chose, using the login they already have, so
  * there is no API key to configure and no separate bill. Results are cached per
- * session in the `session_topics` table: a conversation is classified once, and
- * again only if its title changes, which keeps repeat passes nearly free.
+ * session in the `session_topics` table.
+ *
+ * A conversation is classified once and then left alone. Re-classifying one is
+ * something the user asks for — by selecting it, or by redoing everything —
+ * because it costs a CLI call, and a pass that quietly re-bills conversations
+ * it has already filed is a pass nobody can predict the price of.
  *
  * A CLI with no headless mode, or one that is not installed, leaves the local
  * keyword grouping in place rather than failing the request — naming topics is
@@ -34,9 +41,6 @@ import { normalizeTopicIcon } from "../functions/groupConversationsByTopic.ts";
 
 /** Conversations per CLI call. Large enough to be cheap, small enough to stay accurate. */
 const BATCH_SIZE = 40;
-
-/** Batches per pass, so one run cannot spend the afternoon classifying. */
-const MAX_BATCHES_PER_RUN = 6;
 
 /**
  * Only Claude Code takes a model flag here. The others are driven by whatever
@@ -49,61 +53,60 @@ const CLI_TIMEOUT_MS = 180_000;
 /** Topics offered back to the classifier for reuse, most used first. */
 const EXISTING_TOPIC_LIMIT = 40;
 
-export type ClassifyResult = {
-  classified: number;
-  remaining: number;
-  batches: number;
-  /** What this pass drew from the signed-in Claude Code account, in USD. */
-  costUsd: number;
-  failed: boolean;
-};
-
 const LayerImpl = Effect.gen(function* () {
   const { db } = yield* DrizzleService;
   const registry = yield* SourceRegistry;
   const userConfigService = yield* UserConfigService;
 
-  /** Conversations with no topic yet, or whose title changed since they got one. */
-  const pendingCandidates = (limit: number): ClassificationCandidate[] => {
-    const rows = db
-      .select({
-        sessionId: sessions.id,
-        projectId: sessions.projectId,
-        source: sessions.source,
-        projectName: projects.name,
-        projectPath: projects.path,
-        customTitle: sessions.customTitle,
-        firstUserMessageJson: sessions.firstUserMessageJson,
-        messageCount: sessions.messageCount,
-        lastModifiedAt: sessions.lastModifiedAt,
-        modelName: sessions.modelName,
-        totalCostUsd: sessions.totalCostUsd,
-        costConfidence: sessions.costConfidence,
-        classifiedText: sessionTopics.sourceText,
-      })
+  /**
+   * The four columns a candidate needs. Selecting a whole list-item row and
+   * rebuilding a `ConversationListItem` per session is what made counting
+   * candidates cost more as the log grew.
+   */
+  const candidateColumns = {
+    sessionId: sessions.id,
+    projectPath: projects.path,
+    customTitle: sessions.customTitle,
+    firstUserMessageJson: sessions.firstUserMessageJson,
+  };
+
+  /** Something to classify at all. Neither column set means no text either way. */
+  const hasText = () =>
+    or(isNotNull(sessions.customTitle), isNotNull(sessions.firstUserMessageJson));
+
+  /** Conversations with no topic row. Newest first, so a capped pass takes those. */
+  const unclassifiedRows = (): ClassificationCandidateRow[] =>
+    db
+      .select(candidateColumns)
       .from(sessions)
       .innerJoin(projects, eq(sessions.projectId, projects.id))
       .leftJoin(sessionTopics, eq(sessionTopics.sessionId, sessions.id))
+      .where(and(hasText(), isNull(sessionTopics.sessionId)))
       .orderBy(desc(sessions.lastModifiedAt))
       .all();
 
-    return rows
-      .filter((row) => !isInternalSession(buildConversationListItem(row)))
-      .map((row) => {
-        const item = buildConversationListItem(row);
-        const text = item.title ?? firstUserMessageText(item).slice(0, 160);
-        return {
-          sessionId: item.sessionId,
-          text: text.trim(),
-          projectPath: item.projectPath,
-          classifiedText: row.classifiedText,
-        };
-      })
-      .filter((candidate) => candidate.text !== "")
-      .filter((candidate) => candidate.classifiedText !== candidate.text)
-      .slice(0, limit)
-      .map(({ sessionId, text, projectPath }) => ({ sessionId, text, projectPath }));
-  };
+  /**
+   * Exactly the conversations asked for, topic or no topic: re-classifying one
+   * that is already filed is the point of picking it out by hand.
+   */
+  const rowsForSessionIds = (sessionIds: readonly string[]): ClassificationCandidateRow[] =>
+    db
+      .select(candidateColumns)
+      .from(sessions)
+      .innerJoin(projects, eq(sessions.projectId, projects.id))
+      .where(and(hasText(), inArray(sessions.id, [...sessionIds])))
+      .orderBy(desc(sessions.lastModifiedAt))
+      .all();
+
+  /**
+   * The narrowing SQL cannot do the whole job: telling the classifier's own runs
+   * apart needs the logged message parsed, and a second definition of that in
+   * SQL would drift from the one the conversation list uses. So SQL narrows to
+   * the rows that could possibly qualify — in steady state, almost none — and
+   * the pure predicate finishes over those.
+   */
+  const countUnclassifiedNow = (): number =>
+    unclassifiedRows().filter((row) => toClassificationCandidate(row) !== null).length;
 
   const existingTopics = (): string[] =>
     db
@@ -192,72 +195,63 @@ const LayerImpl = Effect.gen(function* () {
   };
 
   /**
-   * Classifies everything still pending, in batches. Batches run one after the
-   * other on purpose: they share a topic vocabulary, so a later batch can reuse
-   * the names an earlier one settled on.
+   * The rows a scope resolves to. `all` throws the cached topics away first,
+   * which is what you want after changing how topics are named, and leaves
+   * every conversation unclassified for the query that follows.
    */
-  const classifyPending = (options?: { maxBatches?: number; force?: boolean }) =>
-    Effect.gen(function* () {
-      const maxBatches = options?.maxBatches ?? MAX_BATCHES_PER_RUN;
-
-      // A forced pass throws the cached topics away, which is what you want
-      // after changing how topics are named.
-      if (options?.force === true) {
+  const rowsForScope = (scope: ClassifyScope): ClassificationCandidateRow[] => {
+    switch (scope.kind) {
+      case "all":
         db.delete(sessionTopics).run();
-      }
+        return unclassifiedRows();
+      case "unclassified":
+        return unclassifiedRows();
+      case "selection":
+        return rowsForSessionIds(scope.sessionIds);
+      default:
+        scope satisfies never;
+        return [];
+    }
+  };
 
-      let classified = 0;
-      let batches = 0;
-      let costUsd = 0;
-      let failed = false;
+  /**
+   * Classifies what the scope resolves to, in batches, capped per pass. What the
+   * cap left over is reported rather than dropped, so a big selection reads as
+   * deferred instead of as finished.
+   */
+  const classify = (options: { scope: ClassifyScope; maxCandidates?: number }) =>
+    Effect.gen(function* () {
+      const max = options.maxCandidates ?? MAX_CLASSIFY_PER_PASS;
+      const { queued, requested } = selectPassCandidates(rowsForScope(options.scope), max);
 
-      // Candidates are read once and sliced into batches. Re-querying between
-      // batches looked cleaner but spun: a conversation still being written to
-      // never stops being pending, so every round re-picked it and burned a
-      // call on the same title.
-      const candidates = pendingCandidates(BATCH_SIZE * maxBatches);
-
-      for (let offset = 0; offset < candidates.length; offset += BATCH_SIZE) {
-        const batch = candidates.slice(offset, offset + BATCH_SIZE);
-        if (batch.length === 0) break;
-
-        const prompt = buildClassificationPrompt(batch, existingTopics());
-        const response = yield* runClassifier(prompt).pipe(
-          Effect.catchAll((error) =>
-            Effect.logError(`[TopicClassifier] CLI failed: ${String(error)}`).pipe(Effect.as(null)),
+      const outcome = yield* runClassificationBatches(queued, BATCH_SIZE, {
+        existingTopics,
+        ask: (prompt) =>
+          runClassifier(prompt).pipe(
+            Effect.catchAll((error) =>
+              Effect.logError(`[TopicClassifier] CLI failed: ${String(error)}`).pipe(
+                Effect.as(null),
+              ),
+            ),
           ),
-        );
-
-        if (response === null) {
-          failed = true;
-          break;
-        }
-
-        const stored = storeBatch(batch, response.text, Date.now());
-        batches += 1;
-        classified += stored;
-        costUsd += response.costUsd;
-
-        // An unusable answer means the next batch would likely fail the same
-        // way; stopping keeps a broken run cheap.
-        if (stored === 0) {
-          failed = true;
-          break;
-        }
-      }
+        store: (batch, answer) => storeBatch(batch, answer, Date.now()),
+      });
 
       return {
-        classified,
-        remaining: pendingCandidates(Number.MAX_SAFE_INTEGER).length,
-        batches,
-        costUsd,
-        failed,
+        classified: outcome.classified,
+        remaining: countUnclassifiedNow(),
+        batches: outcome.batches,
+        costUsd: outcome.costUsd,
+        requested,
+        queued: queued.length,
+        failed: outcome.failed,
       } satisfies ClassifyResult;
     });
 
-  const countPending = () => Effect.sync(() => pendingCandidates(Number.MAX_SAFE_INTEGER).length);
+  /** How many conversations have no topic at all. Backs the header button. */
+  const countUnclassified = () => Effect.sync(countUnclassifiedNow);
 
-  return { classifyPending, countPending };
+  return { classify, countUnclassified };
 });
 
 export type ITopicClassifierService = InferEffect<typeof LayerImpl>;

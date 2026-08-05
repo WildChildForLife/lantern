@@ -42,6 +42,22 @@ export const conversationListEntrySchema = conversationListItemSchema.extend({
   topic: topicRefSchema,
 });
 
+export const classifyResultSchema = z.object({
+  classified: z.number(),
+  /** Conversations that still have no topic at all, after this pass. */
+  remaining: z.number(),
+  batches: z.number(),
+  /** What this pass drew from the signed-in CLI account, in USD. */
+  costUsd: z.number(),
+  /** Conversations the scope resolved to, before the per-pass cap. */
+  requested: z.number(),
+  /** Conversations this pass queued. `requested - queued` were left for later. */
+  queued: z.number(),
+  failed: z.boolean(),
+});
+
+export type ClassifyResult = z.infer<typeof classifyResultSchema>;
+
 export const sessionMetaSchema = z.object({
   messageCount: z.number(),
   firstUserMessage: parsedUserMessageSchema.nullable(),

@@ -1381,10 +1381,138 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        99
+        101
       ]
     ],
     "translation": "Filtrer par titre, premier message ou projet..."
+  },
+  "conversations.row.select": {
+    "message": "Select conversation",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/components/ConversationList.tsx",
+        160
+      ],
+      [
+        "src/web/app/topics/components/TopicTable.tsx",
+        210
+      ]
+    ],
+    "translation": "Sélectionner la conversation"
+  },
+  "conversations.selection.cap_warning": {
+    "message": "Only the {max} most recent will be sorted this pass",
+    "placeholders": {
+      "max": [
+        "MAX_CLASSIFY_PER_PASS"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        77
+      ]
+    ],
+    "translation": "Seules les {max} plus récentes seront classées lors de ce passage"
+  },
+  "conversations.selection.clear": {
+    "message": "Clear selection",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        71
+      ]
+    ],
+    "translation": "Effacer la sélection"
+  },
+  "conversations.selection.count": {
+    "message": "{count} selected",
+    "placeholders": {
+      "count": [
+        "selectedCount"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        47
+      ]
+    ],
+    "translation": "{count} sélectionnées"
+  },
+  "conversations.selection.mark_done": {
+    "message": "Mark as done",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/components/ConversationList.tsx",
+        170
+      ],
+      [
+        "src/web/app/topics/components/TopicTable.tsx",
+        249
+      ],
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        87
+      ]
+    ],
+    "translation": "Marquer comme terminée"
+  },
+  "conversations.selection.mark_not_done": {
+    "message": "Mark as not done",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/components/ConversationList.tsx",
+        169
+      ],
+      [
+        "src/web/app/topics/components/TopicTable.tsx",
+        245
+      ],
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        91
+      ]
+    ],
+    "translation": "Marquer comme non terminée"
+  },
+  "conversations.selection.select_all": {
+    "message": "Select all {count}",
+    "placeholders": {
+      "count": [
+        "visibleCount"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        56
+      ]
+    ],
+    "translation": "Tout sélectionner ({count})"
+  },
+  "conversations.selection.sort_selected": {
+    "message": "Sort selected into topics",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        106
+      ]
+    ],
+    "translation": "Classer la sélection par sujet"
   },
   "cron_builder.cron_expression": {
     "placeholders": {},
@@ -1937,6 +2065,22 @@
     ],
     "translation": "Activer/désactiver le panneau droit"
   },
+  "list.clear_done": {
+    "message": "Clear done",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        125
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        102
+      ]
+    ],
+    "translation": "Effacer les terminées"
+  },
   "list.hide_done": {
     "message": "Hide done ({doneCount})",
     "placeholders": {
@@ -1948,11 +2092,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        114
+        116
       ],
       [
         "src/web/app/topics/page.tsx",
-        91
+        93
       ]
     ],
     "translation": "Masquer les terminées ({doneCount})"
@@ -1964,11 +2108,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        112
+        114
       ],
       [
         "src/web/app/topics/page.tsx",
-        89
+        91
       ]
     ],
     "translation": "Affichage des ouvertes uniquement"
@@ -2021,7 +2165,7 @@
       ],
       [
         "src/web/app/topics/page.tsx",
-        38
+        39
       ]
     ],
     "translation": "Toutes les conversations"
@@ -2033,11 +2177,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        53
+        54
       ],
       [
         "src/web/app/topics/page.tsx",
-        47
+        48
       ]
     ],
     "translation": "Projets"
@@ -2049,7 +2193,7 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        44
+        45
       ],
       [
         "src/web/app/projects/page.tsx",
@@ -5072,69 +5216,163 @@
     ],
     "translation": "Lantern"
   },
-  "topics.classify.hint": {
-    "message": "Ask Claude to file the new conversations under a topic",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
-        64
-      ]
-    ],
-    "translation": "Demander à Claude de classer les nouvelles conversations dans un sujet"
-  },
-  "topics.classify.pending": {
-    "message": "Sort {pending} new",
-    "placeholders": {
-      "pending": [
-        "pending"
-      ]
-    },
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
-        77
-      ]
-    ],
-    "translation": "Classer {pending} nouvelles"
-  },
-  "topics.classify.redo": {
-    "message": "Redo all",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
-        91
-      ]
-    ],
-    "translation": "Tout refaire"
-  },
-  "topics.classify.redo_hint": {
-    "message": "Throw away every topic and classify all conversations again",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
-        86
-      ]
-    ],
-    "translation": "Supprimer tous les sujets et reclasser toutes les conversations"
-  },
-  "topics.classify.sorted": {
+  "topics.classify.all_sorted": {
     "message": "Topics sorted",
     "placeholders": {},
     "comments": [],
     "origin": [
       [
-        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
-        75
+        "src/web/components/topics/SortUnsortedTopicsButton.tsx",
+        41
       ]
     ],
     "translation": "Sujets classés"
+  },
+  "topics.classify.redo_all": {
+    "message": "Redo all",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/topics/RedoAllTopicsButton.tsx",
+        29
+      ]
+    ],
+    "translation": "Tout refaire"
+  },
+  "topics.classify.redo_all_tooltip": {
+    "message": "Throw away every topic and classify all conversations again",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/topics/RedoAllTopicsButton.tsx",
+        24
+      ]
+    ],
+    "translation": "Supprimer tous les sujets et reclasser toutes les conversations"
+  },
+  "topics.classify.sort_unsorted": {
+    "message": "Sort {count} unsorted",
+    "placeholders": {
+      "count": [
+        "unsorted"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/topics/SortUnsortedTopicsButton.tsx",
+        42
+      ]
+    ],
+    "translation": "Classer {count} non classées"
+  },
+  "topics.classify.toast.failed": {
+    "message": "Classification failed",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        78
+      ]
+    ],
+    "translation": "La classification a échoué"
+  },
+  "topics.classify.toast.left_over": {
+    "message": "{count} were left for the next pass",
+    "placeholders": {
+      "count": [
+        "outcome.leftOver"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        66
+      ]
+    ],
+    "translation": "{count} ont été gardées pour le prochain passage"
+  },
+  "topics.classify.toast.none": {
+    "message": "Every conversation already has a topic",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        42
+      ]
+    ],
+    "translation": "Toutes les conversations ont déjà un sujet"
+  },
+  "topics.classify.toast.sorted": {
+    "message": "Sorted {count} conversations into topics",
+    "placeholders": {
+      "count": [
+        "outcome.classified"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        57
+      ]
+    ],
+    "translation": "{count} conversations classées par sujet"
+  },
+  "topics.classify.toast.sorted_with_cost": {
+    "message": "Sorted {count} conversations into topics ({cost} USD of usage)",
+    "placeholders": {
+      "count": [
+        "outcome.classified"
+      ],
+      "cost": [
+        "outcome.costUsd.toFixed(3)"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        52
+      ]
+    ],
+    "translation": "{count} conversations classées par sujet ({cost} USD d'utilisation)"
+  },
+  "topics.classify.toast.stopped_early": {
+    "message": "Sorted {count}, then stopped early. {remaining} still have no topic.",
+    "placeholders": {
+      "count": [
+        "outcome.classified"
+      ],
+      "remaining": [
+        "outcome.remaining"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        31
+      ]
+    ],
+    "translation": "{count} classées, puis arrêt prématuré. {remaining} sont encore sans sujet."
+  },
+  "topics.classify.tooltip": {
+    "message": "Ask the agent CLI to file conversations that have no topic yet",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/topics/SortUnsortedTopicsButton.tsx",
+        30
+      ]
+    ],
+    "translation": "Demander à la CLI de l'agent de classer les conversations qui n'ont pas encore de sujet"
   },
   "topics.filter.placeholder": {
     "message": "Filter topics...",
@@ -5143,7 +5381,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        79
+        81
       ]
     ],
     "translation": "Filtrer les sujets..."
@@ -5155,7 +5393,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        68
+        70
       ]
     ],
     "translation": "Conversations regroupées par sujet, pas par le dossier dans lequel elles ont été démarrées."
@@ -5167,7 +5405,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        65
+        67
       ]
     ],
     "translation": "Sujets"

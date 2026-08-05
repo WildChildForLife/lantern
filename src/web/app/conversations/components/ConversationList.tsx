@@ -1,16 +1,21 @@
+import { useLingui } from "@lingui/react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { MessageSquareIcon } from "lucide-react";
-import type { FC } from "react";
+import { CheckCheckIcon, MessageSquareIcon } from "lucide-react";
+import { type FC, useEffect, useRef } from "react";
+import { useConversationSelection } from "@/lib/atoms/conversationSelection";
 import { useDoneConversations } from "@/lib/atoms/doneConversations";
 import { useViewMode } from "@/lib/atoms/viewMode";
 import { formatLocaleDate } from "@/lib/date/formatLocaleDate";
+import { MAX_CLASSIFY_PER_PASS } from "@/lib/topics/classifyLimits";
+import { ConversationSelectionBar } from "@/web/components/conversations/ConversationSelectionBar";
 import { CopySessionIdButton } from "@/web/components/CopySessionIdButton";
 import { TopicIcon } from "@/web/components/TopicIcon";
 import { Button } from "@/web/components/ui/button";
 import { Card, CardContent } from "@/web/components/ui/card";
 import { Checkbox } from "@/web/components/ui/checkbox";
 import { conversationListQuery } from "@/web/lib/api/queries";
+import { useClassifyTopics } from "@/web/lib/api/useClassifyTopics";
 import { topicTextColorClass } from "@/web/lib/topicColor";
 import { cn } from "@/web/utils";
 import { useConfig } from "../../hooks/useConfig";
@@ -30,7 +35,28 @@ type Props = {
 export const ConversationList: FC<Props> = ({ query, topic, limit, hideDone, onLoadMore }) => {
   const { viewMode } = useViewMode();
   const { config } = useConfig();
-  const { isDone, setDone } = useDoneConversations();
+  const { i18n } = useLingui();
+  const { isDone, setDone, setManyDone } = useDoneConversations();
+  const {
+    isSelected,
+    setSelected,
+    selectRange,
+    selectAll,
+    clearSelection,
+    selectedInOrder,
+    selectedCount,
+  } = useConversationSelection();
+  const classify = useClassifyTopics();
+
+  /**
+   * Radix's checkbox reports a new checked state, not the event that caused it,
+   * so the modifier has to be captured on the way down. Capturing it beats
+   * intercepting the click: it also covers shift+space from the keyboard.
+   */
+  const rangeIntent = useRef(false);
+
+  // A selection is the scope of an action on this list. Leaving the list ends it.
+  useEffect(() => clearSelection, [clearSelection]);
 
   const { data, isPending, isError } = useQuery({
     ...conversationListQuery({ query, limit, topic }),
@@ -51,6 +77,7 @@ export const ConversationList: FC<Props> = ({ query, topic, limit, hideDone, onL
     .map((conversation) => ({
       ...conversation,
       done: isDone(conversation.sessionId),
+      selected: isSelected(conversation.sessionId),
       title: toConciseTitle(
         resolveSessionTitle(
           conversation.title,
@@ -74,13 +101,51 @@ export const ConversationList: FC<Props> = ({ query, topic, limit, hideDone, onL
     );
   }
 
+  /** Visible order. A bulk action never touches a row the filters hid. */
+  const orderedIds = rows.map((row) => row.sessionId);
+  const selectedIds = selectedInOrder(orderedIds);
+
+  const onRowCheckedChange = (sessionId: string, checked: boolean) => {
+    if (rangeIntent.current && checked) {
+      selectRange(orderedIds, sessionId);
+      return;
+    }
+    setSelected(sessionId, checked);
+  };
+
+  const markSelectedDone = (done: boolean) => {
+    setManyDone(selectedIds, done);
+    clearSelection();
+  };
+
   return (
     <div className="space-y-4">
+      {selectedCount > 0 && (
+        <ConversationSelectionBar
+          selectedCount={selectedCount}
+          visibleCount={rows.length}
+          allVisibleSelected={selectedIds.length === rows.length}
+          isClassifying={classify.isPending}
+          exceedsPassCap={selectedIds.length > MAX_CLASSIFY_PER_PASS}
+          onSelectAllVisible={() => selectAll(orderedIds)}
+          onClear={clearSelection}
+          onMarkDone={() => markSelectedDone(true)}
+          onMarkNotDone={() => markSelectedDone(false)}
+          onSortSelected={() => classify.mutate({ kind: "selection", sessionIds: selectedIds })}
+        />
+      )}
+
       <p className="text-xs text-muted-foreground">
         {rows.length} of {total} conversations
       </p>
 
       <div
+        onPointerDownCapture={(event) => {
+          rangeIntent.current = event.shiftKey;
+        }}
+        onKeyDownCapture={(event) => {
+          rangeIntent.current = event.shiftKey;
+        }}
         className={cn(
           viewMode === "grid"
             ? "grid gap-4 md:grid-cols-2 lg:grid-cols-3"
@@ -88,25 +153,51 @@ export const ConversationList: FC<Props> = ({ query, topic, limit, hideDone, onL
         )}
       >
         {rows.map((row) => {
-          const doneCheckbox = (
+          const selectCheckbox = (
             <Checkbox
-              checked={row.done}
-              onCheckedChange={(checked) => setDone(row.sessionId, checked === true)}
-              aria-label={row.done ? "Mark as not done" : "Mark as done"}
-              title={row.done ? "Mark as not done" : "Mark as done"}
+              checked={row.selected}
+              onCheckedChange={(checked) => onRowCheckedChange(row.sessionId, checked === true)}
+              aria-label={i18n._({
+                id: "conversations.row.select",
+                message: "Select conversation",
+              })}
               className="shrink-0"
             />
+          );
+
+          const doneLabel = row.done
+            ? i18n._({ id: "conversations.selection.mark_not_done", message: "Mark as not done" })
+            : i18n._({ id: "conversations.selection.mark_done", message: "Mark as done" });
+
+          const doneToggle = (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 shrink-0"
+              aria-pressed={row.done}
+              aria-label={doneLabel}
+              title={doneLabel}
+              onClick={() => setDone(row.sessionId, !row.done)}
+            >
+              <CheckCheckIcon
+                className={cn("h-3.5 w-3.5", row.done ? "text-primary" : "text-muted-foreground")}
+              />
+            </Button>
           );
 
           if (viewMode === "grid") {
             return (
               <Card
                 key={row.sessionId}
-                className={cn("h-full transition-shadow hover:shadow-md", row.done && "opacity-50")}
+                className={cn(
+                  "h-full transition-shadow hover:shadow-md",
+                  row.done && "opacity-50",
+                  row.selected && "ring-1 ring-primary",
+                )}
               >
                 <CardContent className="flex h-full flex-col gap-2 py-4">
                   <div className="flex items-start gap-2">
-                    {doneCheckbox}
+                    {selectCheckbox}
                     <Link
                       to="/projects/$projectId/session"
                       params={{ projectId: row.projectId }}
@@ -122,6 +213,7 @@ export const ConversationList: FC<Props> = ({ query, topic, limit, hideDone, onL
                         {row.title}
                       </p>
                     </Link>
+                    {doneToggle}
                     <CopySessionIdButton sessionId={row.sessionId} />
                   </div>
                   <p className="flex items-center gap-1.5 truncate text-xs text-muted-foreground">
@@ -153,9 +245,10 @@ export const ConversationList: FC<Props> = ({ query, topic, limit, hideDone, onL
               className={cn(
                 "flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/60",
                 row.done && "opacity-50",
+                row.selected && "bg-muted/40",
               )}
             >
-              {doneCheckbox}
+              {selectCheckbox}
               <Link
                 to="/projects/$projectId/session"
                 params={{ projectId: row.projectId }}
@@ -184,6 +277,7 @@ export const ConversationList: FC<Props> = ({ query, topic, limit, hideDone, onL
               <span className="hidden shrink-0 text-xs text-muted-foreground tabular-nums sm:inline">
                 {row.modifiedLabel}
               </span>
+              {doneToggle}
               <CopySessionIdButton sessionId={row.sessionId} />
             </div>
           );

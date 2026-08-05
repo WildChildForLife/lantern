@@ -3,7 +3,27 @@ import { atomWithStorage } from "jotai/utils";
 import { useCallback, useMemo } from "react";
 import { storageKey } from "./storageKey";
 
-type DoneConversationStore = Record<string, true>;
+export type DoneConversationStore = Record<string, true>;
+
+/**
+ * Ticks a batch of conversations off, or un-ticks them. Pure so the bulk and
+ * single-row paths cannot drift apart.
+ */
+export const updateDoneConversationStore = (
+  store: DoneConversationStore,
+  sessionIds: readonly string[],
+  done: boolean,
+): DoneConversationStore => {
+  const next = { ...store };
+  for (const sessionId of sessionIds) {
+    if (done) {
+      next[sessionId] = true;
+    } else {
+      delete next[sessionId];
+    }
+  }
+  return next;
+};
 
 /**
  * Conversations the user has ticked off in the "All conversations" list.
@@ -22,15 +42,15 @@ export const useDoneConversations = () => {
 
   const setDone = useCallback(
     (sessionId: string, done: boolean) => {
-      setStore((previous) => {
-        const next = { ...previous };
-        if (done) {
-          next[sessionId] = true;
-        } else {
-          delete next[sessionId];
-        }
-        return next;
-      });
+      setStore((previous) => updateDoneConversationStore(previous, [sessionId], done));
+    },
+    [setStore],
+  );
+
+  /** The bulk action behind the selection bar. */
+  const setManyDone = useCallback(
+    (sessionIds: readonly string[], done: boolean) => {
+      setStore((previous) => updateDoneConversationStore(previous, sessionIds, done));
     },
     [setStore],
   );
@@ -39,5 +59,5 @@ export const useDoneConversations = () => {
 
   const doneCount = useMemo(() => Object.keys(store).length, [store]);
 
-  return { isDone, setDone, clearDone, doneCount };
+  return { isDone, setDone, setManyDone, clearDone, doneCount };
 };
