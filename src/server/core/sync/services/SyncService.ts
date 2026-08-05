@@ -1,6 +1,6 @@
 import { FileSystem, Path } from "@effect/platform";
 import { count, eq } from "drizzle-orm";
-import { Context, Effect, Layer, Option } from "effect";
+import { Context, Effect, Either, Layer, Option } from "effect";
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessions } from "../../../lib/db/schema.ts";
 import { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
@@ -461,16 +461,29 @@ const LayerImpl = Effect.gen(function* () {
       }
 
       const storagePath = decodeProjectId(projectId);
-      const ref = yield* withEnv(adapter.resolveSessionRef(storagePath, sessionId)).pipe(
-        Effect.catchAll(() => Effect.succeed(null)),
+      const located = yield* withEnv(adapter.resolveSessionRef(storagePath, sessionId)).pipe(
+        Effect.either,
       );
 
-      if (ref === null) {
+      if (Either.isLeft(located)) {
+        // Only "gone" is an answer about the session. A source that could not
+        // be read has said nothing about what it holds, so deleting the row on
+        // that would lose a conversation to a locked file or a directory that
+        // is not mounted yet.
+        if (located.left._tag === "SourceReadError") {
+          yield* Effect.logWarning(
+            `Could not locate ${adapter.id} session ${sessionId}: ${located.left.reason}`,
+          );
+          return;
+        }
+
         db.delete(sessions).where(eq(sessions.id, sessionId)).run();
         rawDb.prepare("DELETE FROM session_messages_fts WHERE session_id = ?").run(sessionId);
         updateProjectSessionCount(projectId);
         return;
       }
+
+      const ref = located.right;
 
       const cached = db
         .select({ fileMtimeMs: sessions.fileMtimeMs, customTitle: sessions.customTitle })

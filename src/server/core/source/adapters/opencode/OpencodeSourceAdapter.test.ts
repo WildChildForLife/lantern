@@ -322,27 +322,83 @@ describe("opencodeSourceAdapter", () => {
     }).pipe(Effect.provide(adapterLayer)),
   );
 
-  it.live("reports a SQLite install as such rather than as empty", () =>
-    Effect.gen(function* () {
-      const detection = yield* opencodeSourceAdapter.detect();
+  describe("a SQLite install", () => {
+    // What a current opencode install actually looks like: a database and no
+    // storage tree. The fixture is the database a real 1.18.13 wrote in
+    // `docker/`, checkpointed into a single file.
+    const sqliteLayer = Layer.mergeAll(
+      testPlatformLayer({
+        sourceRoots: { opencode: `${process.cwd()}/fixtures/opencode-sqlite` },
+        env: { HOME: "/home/demo" },
+      }),
+      NodeContext.layer,
+    );
 
-      // What a current opencode install actually looks like: a database and no
-      // storage tree. Calling that "no data" would send someone looking for a
-      // missing history rather than at a storage mode Lantern does not read.
-      expect(detection.hasData).toBe(true);
-      expect(detection.supported).toBe(false);
-      expect(detection.unsupportedReason).toBe("sqlite-storage");
-    }).pipe(
-      Effect.provide(
-        Layer.mergeAll(
-          testPlatformLayer({
-            sourceRoots: { opencode: `${process.cwd()}/fixtures/opencode-sqlite` },
-          }),
-          NodeContext.layer,
-        ),
-      ),
-    ),
-  );
+    it.live("is read, not reported as an unsupported storage mode", () =>
+      Effect.gen(function* () {
+        const detection = yield* opencodeSourceAdapter.detect();
+
+        expect(detection.hasData).toBe(true);
+        expect(detection.supported).toBe(true);
+        expect(detection.unsupportedReason).toBeNull();
+      }).pipe(Effect.provide(sqliteLayer)),
+    );
+
+    it.live("groups its sessions by the directory each ran in", () =>
+      Effect.gen(function* () {
+        const found = yield* opencodeSourceAdapter.listProjects();
+
+        expect(found).toHaveLength(1);
+        expect(found[0]?.cwd).toBe("/work");
+        // No project directory exists on disk, so the id is minted.
+        expect(found[0]?.storagePath).toContain("#projects/");
+      }).pipe(Effect.provide(sqliteLayer)),
+    );
+
+    it.live("reads a conversation out of the database", () =>
+      Effect.gen(function* () {
+        const project = (yield* opencodeSourceAdapter.listProjects()).at(0);
+        if (project === undefined) throw new Error("fixture workspace missing");
+
+        const refs = yield* opencodeSourceAdapter.listSessions(project);
+        expect(refs).toHaveLength(3);
+
+        const ref = refs.at(0);
+        if (ref === undefined) throw new Error("fixture session missing");
+
+        const read = yield* opencodeSourceAdapter.readSession(ref);
+        expect(read.parseStats.unparsed).toBe(0);
+        expect(read.entries.length).toBeGreaterThan(0);
+        // The session row totals its own usage, so nothing is re-derived.
+        expect(read.reportedUsage?.inputTokens).toBeGreaterThan(0);
+        expect(read.usageTexts).toStrictEqual([]);
+      }).pipe(Effect.provide(sqliteLayer)),
+    );
+
+    it.live("refuses a session asked for under the wrong workspace", () =>
+      Effect.gen(function* () {
+        const project = (yield* opencodeSourceAdapter.listProjects()).at(0);
+        if (project === undefined) throw new Error("fixture workspace missing");
+
+        const ref = (yield* opencodeSourceAdapter.listSessions(project)).at(0);
+        if (ref === undefined) throw new Error("fixture session missing");
+
+        const resolved = yield* opencodeSourceAdapter.resolveSessionRef(
+          project.storagePath,
+          ref.sessionId,
+        );
+        expect(resolved.sourceSessionKey).toBe(ref.sessionId);
+
+        const wrong = yield* opencodeSourceAdapter
+          .resolveSessionRef(
+            `${process.cwd()}/fixtures/opencode-sqlite/#projects/dead`,
+            ref.sessionId,
+          )
+          .pipe(Effect.flip);
+        expect(wrong._tag).toBe("SourceSessionGoneError");
+      }).pipe(Effect.provide(sqliteLayer)),
+    );
+  });
 
   it.live("refuses to claim support when a session reads back empty", () =>
     Effect.gen(function* () {

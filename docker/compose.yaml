@@ -155,6 +155,29 @@ services:
       - ./prompts:/prompts:ro
     restart: "no"
 
+  # goose keeps its sessions in SQLite, like current opencode. It is here to
+  # check the read-only SQLite backend against a second CLI's database rather
+  # than one shaped only like opencode's.
+  goose:
+    build:
+      context: ./cli
+      dockerfile: Dockerfile.goose
+    profiles: ["drive"]
+    depends_on:
+      ollama-pull: { condition: service_completed_successfully }
+    environment:
+      XDG_DATA_HOME: /home/agent/.local/share
+      HARNESS_OWNED_DIRS: /home/agent/.local/share
+      GOOSE_PROVIDER: ollama
+      OLLAMA_HOST: http://ollama:11434
+      GOOSE_MODEL: "${OLLAMA_MODEL:-qwen3:0.6b}"
+      PROMPTS: /prompts
+    volumes:
+      - goose_home:/home/agent/.local/share
+      - ./workspace:/workspace-src:ro
+      - ./prompts:/prompts:ro
+    restart: "no"
+
   # --------------------------------------------------------------------------
   # Lantern, reading all of them
   # --------------------------------------------------------------------------
@@ -200,4 +223,5 @@ volumes:
   opencode_home:
   qwen_home:
   copilot_home:
+  goose_home:
   lantern_state:
