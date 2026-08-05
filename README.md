@@ -26,7 +26,8 @@ searchable list of everything, and a board view of the lot.
 ## Contents
 
 - [What it does](#what-it-does)
-- [Install](#install) · [Docker](#docker) · [npm](#npm) · [From source](#from-source)
+- [Install](#install) · [macOS](#macos) · [Linux](#linux) · [Windows](#windows) · [Docker](#docker) ·
+  [From source](#from-source) · [Platform support](#platform-support)
 - [Usage](#usage) · [Options](#options) · [Security](#security)
 - [Reading other agent CLIs](#reading-other-agent-clis)
 - [Reading logs from more than one machine](#reading-logs-from-more-than-one-machine)
@@ -60,13 +61,80 @@ searchable list of everything, and a board view of the lot.
 
 ## Install
 
+Lantern needs **Node.js 24 or newer** for the npm and source installs; Docker needs neither. Claude
+Code itself must be installed and signed in for the optional AI topic naming — everything else works
+without it.
+
+Pick your platform below, or jump to [Docker](#docker), which is the same on all three.
+
+### macOS
+
+Node 24 via Homebrew, then run it:
+
+```bash
+brew install node          # or: brew install fnm && fnm install 24
+npx lantern-viewer --port 3400
+```
+
+Sessions are read from `~/.claude/projects`. Everything works here, the in-app terminal included, on
+both Intel and Apple Silicon.
+
+### Linux
+
+Node 24 from your distribution or a version manager — most distro repositories still ship something
+older, so check `node --version` before filing a bug:
+
+```bash
+# Debian/Ubuntu, via NodeSource
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - && sudo apt-get install -y nodejs
+# Fedora
+sudo dnf install nodejs
+# Arch
+sudo pacman -S nodejs npm
+
+npx lantern-viewer --port 3400
+```
+
+Sessions are read from `~/.claude/projects`. On `x86_64` everything works. On `aarch64` the in-app
+terminal is unavailable — see [Platform support](#platform-support).
+
+### Windows
+
+Node 24 via winget, then run it from PowerShell:
+
+```powershell
+winget install OpenJS.NodeJS
+npx lantern-viewer --port 3400
+```
+
+Sessions are read from `%USERPROFILE%\.claude\projects`, and Lantern's own cache from
+`%USERPROFILE%\.lantern`. The `claude` executable is found on `PATH` with `where`, so if
+`where claude` finds nothing, pass `--executable` with the full path.
+
+The in-app terminal is unavailable on Windows — see [Platform support](#platform-support). If you want
+it, run Lantern inside **WSL2** instead and treat it as a Linux install; sessions written by a Windows
+Claude Code are then reachable at `/mnt/c/Users/<you>/.claude`, which you can point at with
+`--claude-dir`.
+
 ### Docker
+
+Identical on macOS, Linux and Windows apart from the volume syntax.
 
 ```bash
 docker run -d --name lantern \
   -p 127.0.0.1:3400:3400 \
   -v "$HOME/.claude:/root/.claude:ro" \
   -v lantern_cache:/root/.lantern \
+  ghcr.io/wildchildforlife/lantern:latest
+```
+
+On Windows PowerShell, swap `$HOME` for `$env:USERPROFILE` and the line continuations for backticks:
+
+```powershell
+docker run -d --name lantern `
+  -p 127.0.0.1:3400:3400 `
+  -v "${env:USERPROFILE}\.claude:/root/.claude:ro" `
+  -v lantern_cache:/root/.lantern `
   ghcr.io/wildchildforlife/lantern:latest
 ```
 
@@ -82,24 +150,11 @@ That mounts Claude Code's logs only. To read Codex or opencode as well, see
 [Reading other agent CLIs](#reading-other-agent-clis).
 
 Images are published for `linux/amd64` and `linux/arm64`, so a Raspberry Pi or an Apple Silicon
-machine works the same way — with one exception: the in-app terminal is unavailable on the `arm64`
-image, because the PTY library it uses publishes no `linux/arm64` build. Everything else is identical,
-and Lantern says so in its startup log rather than failing.
-
-### npm
-
-```bash
-npx lantern-viewer --port 3400
-```
-
-Or install it properly:
-
-```bash
-npm install -g lantern-viewer
-lantern --port 3400
-```
+machine works the same way — except the in-app terminal, which is unavailable on the `arm64` image.
 
 ### From source
+
+Any platform, once Node 24 and pnpm are present:
 
 ```bash
 git clone https://github.com/WildChildForLife/lantern.git
@@ -111,8 +166,21 @@ node dist/main.js --port 3400
 
 Then open <http://localhost:3400>.
 
-> **Requirements:** Node.js 24 or newer for the npm and source installs. Claude Code itself must be
-> installed and signed in for the optional AI topic naming; everything else works without it.
+### Platform support
+
+Everything works everywhere except the in-app terminal, which needs a prebuilt PTY binary that
+`@replit/ruspty` does not publish for every target. Where it is missing, Lantern disables the terminal
+and says so in its startup log; nothing else is affected.
+
+| Platform                       | Supported | In-app terminal |
+| ------------------------------ | --------- | --------------- |
+| macOS (Apple Silicon or Intel) | yes       | yes             |
+| Linux `x86_64`                 | yes       | yes             |
+| Linux `aarch64`                | yes       | no              |
+| Windows                        | yes       | no — use WSL2   |
+
+CI runs on Linux only, so macOS and Windows are verified by hand rather than on every commit. Reports
+from either are welcome.
 
 ## Usage
 
@@ -154,8 +222,8 @@ in [SECURITY.md](SECURITY.md). Please use
 [GitHub Security Advisories](https://github.com/WildChildForLife/lantern/security/advisories/new)
 rather than a public issue.
 
-Lantern keeps its cache, push keys and schedules in `~/.lantern/`. Deleting that directory costs
-nothing but a rebuild on the next start.
+Lantern keeps its cache, push keys and schedules in `~/.lantern/` (`%USERPROFILE%\.lantern` on
+Windows). Deleting that directory costs nothing but a rebuild on the next start.
 
 ## Reading other agent CLIs
 
@@ -167,6 +235,8 @@ at them is the same gesture as pointing the CLI at them:
 | `claude-code` | `~/.claude`               | `--claude-dir` / `LANTERN_CLAUDE_DIR` |
 | `codex`       | `~/.codex`                | `CODEX_HOME`                          |
 | `opencode`    | `~/.local/share/opencode` | `XDG_DATA_HOME`                       |
+
+`~` here is `$HOME`, or `%USERPROFILE%` on Windows shells that do not set `HOME`.
 
 Enable the ones you want in settings, or scope a single run with `--source`.
 
