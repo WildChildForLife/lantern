@@ -30,13 +30,12 @@ if [ "$skip_drive" = false ]; then
   echo "==> starting the model gateway (first run downloads the model)"
   "${COMPOSE[@]}" up -d ollama
   "${COMPOSE[@]}" up ollama-pull
-  "${COMPOSE[@]}" up -d litellm
 
   echo
   echo "==> driving the CLIs"
-  # Sequentially, not in parallel: they share one small local model, and three
+  # Sequentially, not in parallel: they share one small local model, and several
   # agents contending for it makes every one of them slow and flaky.
-  for cli in claude-code codex opencode; do
+  for cli in claude-code codex opencode qwen-code; do
     echo
     echo "--- $cli ---"
     # A CLI that fails should not stop the others — a partial history still
@@ -52,11 +51,11 @@ if [ "$drive_only" = true ]; then
 fi
 
 echo
-echo "==> enabling all three sources"
+echo "==> enabling every source"
 # Seeded rather than passed as LANTERN_SOURCES, which would lock the settings
 # UI for the whole run and defeat the point of testing it.
 "${COMPOSE[@]}" run --rm --no-deps --entrypoint /bin/sh lantern -c \
-  'mkdir -p /root/.lantern/sources && printf "{\"enabled\":[\"claude-code\",\"codex\",\"opencode\"]}\n" > /root/.lantern/sources/sources.json' \
+  'mkdir -p /root/.lantern/sources && printf "{\"enabled\":[\"claude-code\",\"codex\",\"opencode\",\"qwen-code\"]}\n" > /root/.lantern/sources/sources.json' \
   >/dev/null
 
 # The release image first, then the harness image that adds the CLIs on top of
