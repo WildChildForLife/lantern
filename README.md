@@ -26,8 +26,9 @@ searchable list of everything, and a board view of the lot.
 ## Contents
 
 - [What it does](#what-it-does)
-- [Install](#install) · [macOS](#macos) · [Linux](#linux) · [Windows](#windows) · [Docker](#docker) ·
-  [From source](#from-source) · [Platform support](#platform-support)
+- [Install](#install) · [macOS](#macos) · [Linux](#linux) · [Windows](#windows) ·
+  [npm](#npm-any-platform) · [Docker](#docker) · [From source](#from-source) ·
+  [Platform support](#platform-support)
 - [Usage](#usage) · [Options](#options) · [Security](#security)
 - [Reading other agent CLIs](#reading-other-agent-clis)
 - [Reading logs from more than one machine](#reading-logs-from-more-than-one-machine)
@@ -61,19 +62,15 @@ searchable list of everything, and a board view of the lot.
 
 ## Install
 
-Lantern needs **Node.js 24 or newer** for the npm and source installs; Docker needs neither. Claude
+Every package below pulls Node in as a dependency, so there is no runtime to install first. Claude
 Code itself must be installed and signed in for the optional AI topic naming — everything else works
 without it.
 
-Pick your platform below, or jump to [Docker](#docker), which is the same on all three.
-
 ### macOS
 
-Node 24 via Homebrew, then run it:
-
 ```bash
-brew install node          # or: brew install fnm && fnm install 24
-npx lantern-viewer --port 3400
+brew install wildchildforlife/tap/lantern
+lantern --port 3400
 ```
 
 Sessions are read from `~/.claude/projects`. Everything works here, the in-app terminal included, on
@@ -81,31 +78,45 @@ both Intel and Apple Silicon.
 
 ### Linux
 
-Node 24 from your distribution or a version manager — most distro repositories still ship something
-older, so check `node --version` before filing a bug:
+Debian and Ubuntu, from the `.deb` on the [latest release](https://github.com/WildChildForLife/lantern/releases/latest):
 
 ```bash
-# Debian/Ubuntu, via NodeSource
-curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - && sudo apt-get install -y nodejs
-# Fedora
-sudo dnf install nodejs
-# Arch
-sudo pacman -S nodejs npm
+curl -fsSLO https://github.com/WildChildForLife/lantern/releases/latest/download/lantern_0.1.0_amd64.deb
+sudo apt install ./lantern_0.1.0_amd64.deb    # swap amd64 for arm64 on a Pi
+lantern --port 3400
+```
 
-npx lantern-viewer --port 3400
+Fedora and RHEL, from the `.rpm`. Check `node --version` first — Fedora 41 still
+ships Node 22, and Lantern needs 24:
+
+```bash
+curl -fsSL https://rpm.nodesource.com/setup_24.x | sudo bash -   # only if node is older than 24
+sudo dnf install https://github.com/WildChildForLife/lantern/releases/latest/download/lantern-0.1.0-1.x86_64.rpm
+lantern --port 3400
+```
+
+Arch, from the AUR — the recipe lives in
+[`packaging/aur`](packaging/aur/PKGBUILD) and is not on the AUR itself yet:
+
+```bash
+paru -S lantern      # or: yay -S lantern
 ```
 
 Sessions are read from `~/.claude/projects`. On `x86_64` everything works. On `aarch64` the in-app
 terminal is unavailable — see [Platform support](#platform-support).
 
-### Windows
+If your distribution is not listed, or you would rather not add a package, use
+[npm](#npm-any-platform) or [Docker](#docker).
 
-Node 24 via winget, then run it from PowerShell:
+### Windows
 
 ```powershell
 winget install OpenJS.NodeJS
 npx lantern-viewer --port 3400
 ```
+
+There is no native Windows package yet, so this is the one platform that still needs Node installed
+first — [Docker](#docker) avoids that.
 
 Sessions are read from `%USERPROFILE%\.claude\projects`, and Lantern's own cache from
 `%USERPROFILE%\.lantern`. The `claude` executable is found on `PATH` with `where`, so if
@@ -115,6 +126,14 @@ The in-app terminal is unavailable on Windows — see [Platform support](#platfo
 it, run Lantern inside **WSL2** instead and treat it as a Linux install; sessions written by a Windows
 Claude Code are then reachable at `/mnt/c/Users/<you>/.claude`, which you can point at with
 `--claude-dir`.
+
+### npm (any platform)
+
+Needs Node.js 24 or newer already present:
+
+```bash
+npx lantern-viewer --port 3400
+```
 
 ### Docker
 

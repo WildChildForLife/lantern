@@ -70,3 +70,7 @@ docs/tmp
 # The harness copies this into each container and runs `git init` there; a repo
 # inside the repo would confuse both.
 docker/workspace/.git/
+
+# Build output from scripts/build-packages.sh
+packaging/staging/
+packaging/dist/
