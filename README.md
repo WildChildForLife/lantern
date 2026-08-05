@@ -15,9 +15,9 @@ writes to `~/.claude/projects/` — and, optionally, Codex CLI's rollouts in `~/
 opencode's storage in `~/.local/share/opencode/` — then groups every conversation by **what it is
 about**, not by which folder it happened to start in.
 
-If you run a lot of Claude Code sessions across a lot of projects and machines, the folder view stops
-helping: one directory ends up holding thirty unrelated conversations. Lantern gives you topics, a
-searchable list of everything, and a board view of the lot.
+If you run a lot of agent sessions across a lot of projects and machines — and across more than one
+CLI — the folder view stops helping: one directory ends up holding thirty unrelated conversations.
+Lantern gives you topics, a searchable list of everything, and a board view of the lot.
 
 <p align="center">
   <img src="docs/screenshots/topics.jpg" alt="Topics grouped by subject, each with an icon and a conversation count" width="100%">
@@ -291,16 +291,19 @@ up on restart rather than live.
 
 ## How grouping works
 
-**By default, locally.** Lantern takes the title Claude wrote for each conversation, drops the words
-that say nothing (`fix`, `add`, `error`, `the`), and repeatedly carves off the largest group of
-conversations sharing a word. Leftovers fall back to the folder they were started in, then to any topic
-they mention, and anything still homeless lands in _Uncategorized_. It costs nothing and re-runs on
-every request, so new conversations are grouped as they appear.
+**By default, locally.** Lantern takes the title the agent wrote for each conversation, whichever CLI it
+came from, drops the words that say nothing (`fix`, `add`, `error`, `the`), and repeatedly carves off the
+largest group of conversations sharing a word. Leftovers fall back to the folder they were started in,
+then to any topic they mention, and anything still homeless lands in _Uncategorized_. It costs nothing
+and re-runs on every request, so new conversations are grouped as they appear.
 
-**Optionally, with Claude.** Keyword clustering names topics after words, which is sometimes clumsy.
-Press **Sort N new** and Lantern batches the titles through `claude -p` and stores the answer per
-session. It reuses your existing Claude Code login — there is no API key to configure and no separate
-bill — and only classifies conversations it has not seen before. Nothing runs automatically.
+**Optionally, with Claude Code.** Keyword clustering names topics after words, which is sometimes
+clumsy. Press **Sort N new** and Lantern batches the titles through `claude -p` and stores the answer
+per session. It reuses your existing Claude Code login — there is no API key to configure and no
+separate bill — and only classifies conversations it has not seen before. Nothing runs automatically.
+
+This pass is the one Claude Code-specific feature, because `claude` is the CLI Lantern shells out to.
+It names topics for conversations from every source, not only Claude Code's own.
 
 ## Development
 

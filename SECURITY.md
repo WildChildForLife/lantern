@@ -13,11 +13,12 @@ first response within a week.
 
 Lantern is a local-first tool, and the threat model follows from that.
 
-- **It reads your Claude Code session logs**, which contain everything you and Claude said, including
-  anything sensitive that ended up in a prompt. Treat a running instance as equivalent to read access
-  to those logs.
-- **It ships an in-app terminal and can start Claude Code sessions.** Anyone who can reach the port can
-  run commands as the user running Lantern.
+- **It reads your agent CLI session logs** — Claude Code, Codex CLI and opencode, whichever you enable
+  — which contain everything you and the agent said, including anything sensitive that ended up in a
+  prompt. Treat a running instance as equivalent to read access to those logs.
+- **It ships an in-app terminal and can start agent sessions.** Anyone who can reach the port can run
+  commands as the user running Lantern. Only Claude Code is driven interactively; the other sources are
+  read-only, which limits what they add to this but not what they expose.
 - **It binds to `localhost` by default.** That default is the security boundary.
 
 If you expose it beyond localhost:

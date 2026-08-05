@@ -17,11 +17,11 @@ body:
     validations:
       required: true
   - type: input
-    id: claude-code-version
+    id: agent-cli-version
     attributes:
-      label: Claude Code version
-      description: "Run `claude --version` to check."
-      placeholder: "e.g., 1.0.20"
+      label: Agent CLI and version
+      description: "Which CLI wrote the session, and its version — `claude --version`, `codex --version` or `opencode --version`."
+      placeholder: "e.g., claude-code 2.1.220"
     validations:
       required: true
   - type: input
