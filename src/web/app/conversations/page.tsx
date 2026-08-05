@@ -76,7 +76,7 @@ export const ConversationsPage: FC<Props> = ({ topic }) => {
             </h1>
             <p className="text-muted-foreground text-sm">
               {topic === undefined
-                ? "Every Claude Code session across every project, newest first."
+                ? "Every agent session across every project, newest first."
                 : "Conversations in this topic, newest first."}
             </p>
             {topic !== undefined && (
