@@ -322,6 +322,28 @@ describe("opencodeSourceAdapter", () => {
     }).pipe(Effect.provide(adapterLayer)),
   );
 
+  it.live("reports a SQLite install as such rather than as empty", () =>
+    Effect.gen(function* () {
+      const detection = yield* opencodeSourceAdapter.detect();
+
+      // What a current opencode install actually looks like: a database and no
+      // storage tree. Calling that "no data" would send someone looking for a
+      // missing history rather than at a storage mode Lantern does not read.
+      expect(detection.hasData).toBe(true);
+      expect(detection.supported).toBe(false);
+      expect(detection.unsupportedReason).toBe("sqlite-storage");
+    }).pipe(
+      Effect.provide(
+        Layer.mergeAll(
+          testPlatformLayer({
+            sourceRoots: { opencode: `${process.cwd()}/fixtures/opencode-sqlite` },
+          }),
+          NodeContext.layer,
+        ),
+      ),
+    ),
+  );
+
   it.live("refuses to claim support when a session reads back empty", () =>
     Effect.gen(function* () {
       const detection = yield* opencodeSourceAdapter.detect();

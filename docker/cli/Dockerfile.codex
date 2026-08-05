@@ -1,0 +1,21 @@
+# Codex CLI, pointed at the gateway's OpenAI-compatible route.
+#
+# Codex has built-in provider ids (`openai`, `ollama`, `lmstudio`) which cannot
+# be overridden, so the harness registers its own id instead.
+#
+# `wire_api = "chat"` is required: the `responses` API is OpenAI-only and 404s
+# against anything else.
+FROM node:24-slim
+
+ARG CODEX_VERSION=0.146.0
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git ca-certificates gosu \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd -m -u 1001 -s /bin/bash agent \
+  && npm install -g "@openai/codex@${CODEX_VERSION}"
+
+COPY bootstrap.sh /usr/local/bin/bootstrap
+COPY entrypoint-codex.sh /usr/local/bin/run-harness
+RUN chmod +x /usr/local/bin/run-harness /usr/local/bin/bootstrap
+
+ENTRYPOINT ["/usr/local/bin/run-harness"]

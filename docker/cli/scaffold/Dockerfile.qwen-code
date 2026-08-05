@@ -1,0 +1,21 @@
+# Qwen Code — scaffold for PR-7. Not wired into compose.yaml yet.
+#
+# A Gemini CLI fork that, unlike Gemini CLI, accepts any OpenAI-compatible
+# endpoint. It stands in for Gemini CLI in this harness because it writes the
+# same on-disk shape and can actually be pointed at a local model.
+FROM node:24-slim
+
+ARG QWEN_CODE_VERSION=0.21.5
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git ca-certificates \
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install -g "@qwen-code/qwen-code@${QWEN_CODE_VERSION}"
+
+# OPENAI_BASE_URL=http://ollama:11434/v1
+# OPENAI_API_KEY=ollama          (required by the client, ignored by Ollama)
+# OPENAI_MODEL=qwen3:0.6b
+#
+# History lands in ~/.qwen/tmp/<project-hash>/. No env var relocates it, so
+# mount a volume at $HOME/.qwen. `qwen sessions list --json` reports a
+# `filePath` per session, which is the reliable hook for the adapter.
+ENTRYPOINT ["qwen"]

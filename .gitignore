@@ -66,3 +66,7 @@ docs/tmp
 
 # direnv
 .direnv
+
+# The harness copies this into each container and runs `git init` there; a repo
+# inside the repo would confuse both.
+docker/workspace/.git/
