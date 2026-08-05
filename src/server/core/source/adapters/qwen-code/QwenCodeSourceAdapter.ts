@@ -12,7 +12,7 @@ import {
   type SourceSessionRef,
 } from "../../models/SourceEntities.ts";
 import { QWEN_CODE_SOURCE_ID } from "../../models/SourceId.ts";
-import { parseChat } from "./functions/parseChat.ts";
+import { parseChat, readCwd } from "./functions/parseChat.ts";
 
 /**
  * `~/.qwen`, laid out as:
@@ -133,10 +133,8 @@ const makeAdapter = (): SourceAdapter => {
         const lines = yield* readLines(path.join(project.storagePath, name));
         if (lines === null) continue;
 
-        const parsed = parseChat(lines, { sessionKey: name.replace(/\.jsonl$/, ""), cwd: "" });
-        if (parsed.cwd !== null && parsed.cwd !== "") {
-          return parsed.cwd;
-        }
+        const cwd = readCwd(lines);
+        if (cwd !== null) return cwd;
       }
 
       return null;

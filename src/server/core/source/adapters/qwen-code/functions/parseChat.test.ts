@@ -2,7 +2,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { ConversationSchema } from "../../../../../../lib/conversation-schema/index.ts";
-import { parseChat } from "./parseChat.ts";
+import { parseChat, readCwd } from "./parseChat.ts";
 
 /**
  * The fixtures are a real Qwen Code 0.21.6 run, captured from `docker/` and
@@ -76,6 +76,20 @@ describe("parseChat", () => {
     // The project directory is `-work`, which cannot be decoded back to `/work`
     // unambiguously. Every record stamps the real path.
     expect(parse(SIMPLE).cwd).toBe("/work");
+  });
+
+  describe("readCwd", () => {
+    it("finds the same directory a full parse does, without doing one", () => {
+      expect(readCwd(fixture(SIMPLE))).toBe(parse(SIMPLE).cwd);
+    });
+
+    it("skips lines that carry no directory, and gives up rather than guessing", () => {
+      expect(readCwd(["", "not json", '{"type":"user"}', '{"type":"user","cwd":"/repo"}'])).toBe(
+        "/repo",
+      );
+      expect(readCwd(['{"type":"user","cwd":""}'])).toBeNull();
+      expect(readCwd([])).toBeNull();
+    });
   });
 
   it("separates the model's reasoning from what it said", () => {

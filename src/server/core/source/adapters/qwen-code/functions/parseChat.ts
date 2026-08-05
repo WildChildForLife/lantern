@@ -147,7 +147,35 @@ const isErrorResponse = (response: unknown): boolean =>
   typeof response === "object" &&
   response !== null &&
   "error" in response &&
-  (response as Record<string, unknown>)["error"] !== undefined;
+  Reflect.get(response, "error") !== undefined;
+
+/**
+ * The working directory a transcript was recorded in, from the first record
+ * that names one.
+ *
+ * Separate from `parseChat` because resolving a project's directory should not
+ * cost a full parse of a transcript that may be very long — every record
+ * carries `cwd`, so the answer is almost always on the first line.
+ */
+export const readCwd = (lines: readonly string[]): string | null => {
+  for (const line of lines) {
+    if (line.trim() === "") continue;
+
+    let json: unknown;
+    try {
+      json = JSON.parse(line);
+    } catch {
+      continue;
+    }
+
+    const record = recordSchema.safeParse(json);
+    if (record.success && record.data.cwd !== undefined && record.data.cwd !== "") {
+      return record.data.cwd;
+    }
+  }
+
+  return null;
+};
 
 export const parseChat = (
   lines: readonly string[],
