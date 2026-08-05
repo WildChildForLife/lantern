@@ -1,0 +1,13 @@
+{
+  "id": "msg_x",
+  "type": "assistant",
+  "model": {
+    "providerID": "p",
+    "modelID": "m"
+  },
+  "cost": 0.9,
+  "time": {
+    "created": 1
+  },
+  "content": []
+}

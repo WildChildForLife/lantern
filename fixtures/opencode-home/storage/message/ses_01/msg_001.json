@@ -1,0 +1,10 @@
+{
+  "id": "msg_001",
+  "type": "user",
+  "text": "The orders endpoint 500s on empty carts",
+  "files": [],
+  "agents": [],
+  "time": {
+    "created": 1785100000000
+  }
+}

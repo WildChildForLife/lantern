@@ -592,10 +592,14 @@ const SessionPageMainContent: FC<
                                   { fractionDigits: 3 },
                                 )}
                               </Badge>
-                              {/* Per-token dollars alongside real token counts read as
-                                  measured, not absent, so an unpriced session shows
-                                  the counts without pretending to know their cost. */}
-                              {sessionData.session.meta.cost.confidence !== "unknown" && (
+                              {/* Only an estimate has a per-category breakdown — it is
+                                  computed one category at a time. A source that
+                                  reported a total did not break it down, so showing
+                                  these rows would put four $0.000 line items under a
+                                  real total; an unpriced session has no dollars at
+                                  all. Both show their token counts below instead,
+                                  without pretending to know what they cost. */}
+                              {sessionData.session.meta.cost.confidence === "estimated" && (
                                 <div className="text-xs space-y-1 pl-2">
                                   <div className="flex justify-between gap-4">
                                     <span className="text-muted-foreground">
