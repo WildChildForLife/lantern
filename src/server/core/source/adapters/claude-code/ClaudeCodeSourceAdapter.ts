@@ -2,9 +2,14 @@ import { FileSystem, Path } from "@effect/platform";
 import { Effect, Option } from "effect";
 import type { ExtendedConversation } from "../../../../../types/conversation.ts";
 import { parseJsonl } from "../../../claude-code/functions/parseJsonl.ts";
+import { resolveClaudeCodePath } from "../../../claude-code/models/ClaudeCode.ts";
 import { ApplicationContext } from "../../../platform/services/ApplicationContext.ts";
 import { encodeSessionId } from "../../../session/functions/id.ts";
-import type { SourceAdapter } from "../../models/SourceAdapter.ts";
+import {
+  type HeadlessAnswer,
+  HeadlessUnavailableError,
+  type SourceAdapter,
+} from "../../models/SourceAdapter.ts";
 import {
   type SourceChange,
   type SourceDetection,
@@ -73,6 +78,29 @@ const readAgentTranscripts = (projectDirPath: string, content: string) =>
  * This adapter is the reference implementation of the seam — it is the only one
  * that is interactive, and the only one whose files Lantern may delete.
  */
+
+/**
+ * Claude Code answers a `-p` prompt with a JSON envelope carrying the reply and
+ * what the call cost. Older builds, or a crash mid-stream, print the reply on
+ * its own — hence the fallback rather than a hard parse.
+ */
+const claudeEnvelope = (stdout: string): HeadlessAnswer => {
+  try {
+    const parsed: unknown = JSON.parse(stdout);
+    if (typeof parsed === "object" && parsed !== null && "result" in parsed) {
+      const result: unknown = Reflect.get(parsed, "result");
+      const cost: unknown = Reflect.get(parsed, "total_cost_usd");
+      return {
+        text: typeof result === "string" ? result : stdout,
+        costUsd: typeof cost === "number" ? cost : 0,
+      };
+    }
+  } catch {
+    // Not an envelope. The reply is the output.
+  }
+  return { text: stdout, costUsd: 0 };
+};
+
 const makeAdapter = (): SourceAdapter => {
   const projectsDirPath = Effect.gen(function* () {
     const context = yield* ApplicationContext;
@@ -333,6 +361,22 @@ const makeAdapter = (): SourceAdapter => {
     shouldForceResync,
     roots,
     classifyChange,
+    headless: {
+      // The path the rest of the app already resolves, so `--executable` and
+      // LANTERN_CLAUDE_EXECUTABLE keep working here too.
+      executable: () =>
+        resolveClaudeCodePath.pipe(
+          Effect.mapError(
+            (cause) =>
+              new HeadlessUnavailableError({
+                sourceId: CLAUDE_CODE_SOURCE_ID,
+                reason: cause.message,
+              }),
+          ),
+        ),
+      args: (prompt) => ["-p", prompt, "--output-format", "json"],
+      parse: claudeEnvelope,
+    },
   };
 };
 

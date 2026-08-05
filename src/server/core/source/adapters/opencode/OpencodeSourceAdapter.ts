@@ -2,6 +2,7 @@ import { FileSystem, Path } from "@effect/platform";
 import { Effect, Option } from "effect";
 import { z } from "zod";
 import { ApplicationContext } from "../../../platform/services/ApplicationContext.ts";
+import { resolveOnPath } from "../../functions/resolveOnPath.ts";
 import type { SourceAdapter } from "../../models/SourceAdapter.ts";
 import {
   type SourceDetection,
@@ -444,6 +445,12 @@ const makeAdapter = (): SourceAdapter => {
     resolveSessionRef,
     roots: () => rootPath.pipe(Effect.map((root) => [root])),
     classifyChange,
+    headless: {
+      executable: () => resolveOnPath(OPENCODE_SOURCE_ID, "opencode"),
+      args: (prompt) => ["run", prompt],
+      // opencode prints the reply as prose and reports no cost on this path.
+      parse: (stdout) => ({ text: stdout, costUsd: 0 }),
+    },
   };
 };
 

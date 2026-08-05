@@ -1,8 +1,10 @@
 import { FileSystem, Path } from "@effect/platform";
 import { Effect, Option } from "effect";
+import { z } from "zod";
 import { ApplicationContext } from "../../../platform/services/ApplicationContext.ts";
 import { canonicalizeProjectPath } from "../../functions/canonicalizeProjectPath.ts";
-import type { SourceAdapter } from "../../models/SourceAdapter.ts";
+import { resolveOnPath } from "../../functions/resolveOnPath.ts";
+import type { HeadlessAnswer, SourceAdapter } from "../../models/SourceAdapter.ts";
 import {
   type SourceDetection,
   type SourceProject,
@@ -14,6 +16,11 @@ import {
 import { CODEX_SOURCE_ID } from "../../models/SourceId.ts";
 import { parseRollout, type RolloutSessionMeta } from "./functions/parseRollout.ts";
 import { rolloutSessionId, virtualProjectPath } from "./functions/rolloutPaths.ts";
+
+const codexEventSchema = z.looseObject({
+  type: z.string(),
+  item: z.looseObject({ type: z.string(), text: z.string().optional() }).optional(),
+});
 
 const SESSION_DIRS = ["sessions", "archived_sessions"] as const;
 
@@ -73,6 +80,40 @@ type ScannedRollout = RolloutFile & {
  * been verified against a real installation, and a listing built on a guessed
  * format fails by *omitting* sessions, which looks exactly like having none.
  */
+
+/**
+ * Codex `exec --json` emits one event per line. The answer is the last
+ * `agent_message`; everything else is the banner, the model's reasoning and a
+ * usage summary, which would otherwise be handed back as though it were the
+ * reply.
+ */
+const parseCodexEvents = (stdout: string): HeadlessAnswer => {
+  let text = "";
+
+  for (const line of stdout.split("\n")) {
+    if (line.trim() === "") continue;
+
+    const parsed = codexEventSchema.safeParse(
+      ((): unknown => {
+        try {
+          return JSON.parse(line);
+        } catch {
+          return undefined;
+        }
+      })(),
+    );
+    if (!parsed.success) continue;
+
+    if (parsed.data.item?.type === "agent_message" && parsed.data.item.text !== undefined) {
+      text = parsed.data.item.text;
+    }
+  }
+
+  // Codex reports tokens rather than money, and pricing them would mean
+  // knowing a rate for a model the user chose. Nothing is invented.
+  return { text, costUsd: 0 };
+};
+
 const makeAdapter = (): SourceAdapter => {
   const rootPath = Effect.gen(function* () {
     const path = yield* Path.Path;
@@ -488,6 +529,16 @@ const makeAdapter = (): SourceAdapter => {
     // is validated against before it is opened.
     roots: () => rootPath.pipe(Effect.map((root) => [root])),
     classifyChange: () => null,
+    headless: {
+      executable: () => resolveOnPath(CODEX_SOURCE_ID, "codex"),
+      // `exec` is the non-interactive mode. The repo check is skipped because
+      // Lantern asks about conversations, not about the directory it runs in,
+      // and a prompt would block forever with no terminal attached. `--json`
+      // because the plain output interleaves a banner, the model's reasoning
+      // and a token count with the answer, and no caller can separate them.
+      args: (prompt) => ["exec", "--json", "--skip-git-repo-check", prompt],
+      parse: parseCodexEvents,
+    },
   };
 };
 

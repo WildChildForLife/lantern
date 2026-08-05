@@ -182,8 +182,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        290
+        "src/web/components/settings/InputSettings.tsx",
+        82
       ]
     ],
     "translation": "Select Enter key behavior"
@@ -193,8 +193,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        348
+        "src/web/components/settings/InputSettings.tsx",
+        137
       ]
     ],
     "translation": "Select Find Hotkey"
@@ -204,8 +204,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        434
+        "src/web/components/settings/AppearanceSettings.tsx",
+        47
       ]
     ],
     "translation": "Select Language"
@@ -215,8 +215,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        322
+        "src/web/components/settings/InputSettings.tsx",
+        111
       ]
     ],
     "translation": "Select Search Hotkey"
@@ -226,8 +226,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        463
+        "src/web/components/settings/AppearanceSettings.tsx",
+        76
       ]
     ],
     "translation": "Select Theme"
@@ -1374,6 +1374,18 @@
     ],
     "translation": "Failed to parse this conversation entry. This may be due to format changes or parsing issues."
   },
+  "conversations.filter.placeholder": {
+    "message": "Filter by title, first message or project...",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        99
+      ]
+    ],
+    "translation": "Filter by title, first message or project..."
+  },
   "cron_builder.cron_expression": {
     "placeholders": {},
     "comments": [],
@@ -1961,6 +1973,54 @@
       ]
     ],
     "translation": "MCP Servers"
+  },
+  "nav.all_conversations": {
+    "message": "All conversations",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/page.tsx",
+        85
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        38
+      ]
+    ],
+    "translation": "All conversations"
+  },
+  "nav.projects": {
+    "message": "Projects",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        53
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        47
+      ]
+    ],
+    "translation": "Projects"
+  },
+  "nav.topics": {
+    "message": "Topics",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        44
+      ],
+      [
+        "src/web/app/projects/page.tsx",
+        76
+      ]
+    ],
+    "translation": "Topics"
   },
   "notfound.button.go_home": {
     "placeholders": {},
@@ -2590,7 +2650,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        57
+        59
       ]
     ],
     "translation": "View Claude Code conversation history and project operations"
@@ -2601,7 +2661,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        90
+        96
       ]
     ],
     "translation": "Loading projects..."
@@ -2612,7 +2672,7 @@
     "origin": [
       [
         "src/web/app/projects/page.tsx",
-        65
+        67
       ]
     ],
     "translation": "Projects"
@@ -3414,6 +3474,54 @@
     ],
     "translation": "Display and behavior settings"
   },
+  "settings.dialog.description": {
+    "message": "Which agent CLIs Lantern reads, and how it behaves.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        42
+      ]
+    ],
+    "translation": "Which agent CLIs Lantern reads, and how it behaves."
+  },
+  "settings.dialog.sources": {
+    "message": "Agent CLIs to read",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        51
+      ]
+    ],
+    "translation": "Agent CLIs to read"
+  },
+  "settings.dialog.sources.description": {
+    "message": "Turning one off forgets its conversations; it never touches the files.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        53
+      ]
+    ],
+    "translation": "Turning one off forgets its conversations; it never touches the files."
+  },
+  "settings.dialog.title": {
+    "message": "Settings",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsButton.tsx",
+        39
+      ]
+    ],
+    "translation": "Settings"
+  },
   "settings.disallowedTools.label": {
     "placeholders": {},
     "comments": [],
@@ -3453,8 +3561,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        282
+        "src/web/components/settings/InputSettings.tsx",
+        74
       ]
     ],
     "translation": "Enter Key Behavior"
@@ -3464,8 +3572,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        300
+        "src/web/components/settings/InputSettings.tsx",
+        92
       ]
     ],
     "translation": "Send with Command+Enter"
@@ -3475,8 +3583,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        306
+        "src/web/components/settings/InputSettings.tsx",
+        98
       ]
     ],
     "translation": "Select Enter key behavior for message input"
@@ -3486,8 +3594,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        297
+        "src/web/components/settings/InputSettings.tsx",
+        89
       ]
     ],
     "translation": "Send with Enter"
@@ -3497,8 +3605,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        294
+        "src/web/components/settings/InputSettings.tsx",
+        86
       ]
     ],
     "translation": "Send with Shift+Enter (Default)"
@@ -3508,8 +3616,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        343
+        "src/web/components/settings/InputSettings.tsx",
+        132
       ]
     ],
     "translation": "Find Hotkey"
@@ -3519,8 +3627,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        355
+        "src/web/components/settings/InputSettings.tsx",
+        144
       ]
     ],
     "translation": "Command+F"
@@ -3530,8 +3638,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        352
+        "src/web/components/settings/InputSettings.tsx",
+        141
       ]
     ],
     "translation": "Ctrl+F"
@@ -3541,8 +3649,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        361
+        "src/web/components/settings/InputSettings.tsx",
+        150
       ]
     ],
     "translation": "Select the hotkey to open in-page find"
@@ -3552,8 +3660,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        314
+        "src/web/components/settings/InputSettings.tsx",
+        106
       ]
     ],
     "translation": "Search Hotkey"
@@ -3563,8 +3671,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        329
+        "src/web/components/settings/InputSettings.tsx",
+        118
       ]
     ],
     "translation": "Command+K"
@@ -3574,8 +3682,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        326
+        "src/web/components/settings/InputSettings.tsx",
+        115
       ]
     ],
     "translation": "Ctrl+K"
@@ -3585,8 +3693,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        335
+        "src/web/components/settings/InputSettings.tsx",
+        124
       ]
     ],
     "translation": "Select the hotkey to open search dialog"
@@ -3611,8 +3719,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        429
+        "src/web/components/settings/AppearanceSettings.tsx",
+        42
       ]
     ],
     "translation": "Language"
@@ -3622,8 +3730,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        450
+        "src/web/components/settings/AppearanceSettings.tsx",
+        63
       ]
     ],
     "translation": "Select your preferred language"
@@ -3633,8 +3741,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        441
+        "src/web/components/settings/AppearanceSettings.tsx",
+        54
       ]
     ],
     "translation": "English"
@@ -3644,8 +3752,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        438
+        "src/web/components/settings/AppearanceSettings.tsx",
+        51
       ]
     ],
     "translation": "Japanese"
@@ -3655,8 +3763,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        444
+        "src/web/components/settings/AppearanceSettings.tsx",
+        57
       ]
     ],
     "translation": "Chinese (Simplified)"
@@ -3703,8 +3811,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        418
+        "src/web/components/settings/InputSettings.tsx",
+        207
       ]
     ],
     "translation": "Configure the model options available in the session toolbar"
@@ -3715,8 +3823,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        369
+        "src/web/components/settings/InputSettings.tsx",
+        158
       ]
     ],
     "translation": "Model Choices"
@@ -3727,8 +3835,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        399
+        "src/web/components/settings/InputSettings.tsx",
+        188
       ]
     ],
     "translation": "Add model choice..."
@@ -3743,6 +3851,54 @@
       ]
     ],
     "translation": "Notifications"
+  },
+  "settings.primary_source": {
+    "message": "Agent CLI",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        113
+      ]
+    ],
+    "translation": "Agent CLI"
+  },
+  "settings.primary_source.description": {
+    "message": "The CLI Lantern centres on, and the one asked to name topics. Other enabled CLIs stay readable.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/PrimarySourceSelect.tsx",
+        78
+      ]
+    ],
+    "translation": "The CLI Lantern centres on, and the one asked to name topics. Other enabled CLIs stay readable."
+  },
+  "settings.primary_source.none": {
+    "message": "No agent CLI is switched on above, so there is nothing to work with.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/PrimarySourceSelect.tsx",
+        46
+      ]
+    ],
+    "translation": "No agent CLI is switched on above, so there is nothing to work with."
+  },
+  "settings.primary_source.select": {
+    "message": "Select an agent CLI",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/PrimarySourceSelect.tsx",
+        63
+      ]
+    ],
+    "translation": "Select an agent CLI"
   },
   "settings.sandbox.allowUnsandboxedCommands": {
     "message": "Allow unsandboxed commands",
@@ -3816,6 +3972,114 @@
     ],
     "translation": "Network Settings"
   },
+  "settings.section.agent_cli": {
+    "message": "Agent CLI",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        102
+      ]
+    ],
+    "translation": "Agent CLI"
+  },
+  "settings.section.agent_cli.description": {
+    "message": "Which CLI Lantern works with, and how it is paid for.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        104
+      ]
+    ],
+    "translation": "Which CLI Lantern works with, and how it is paid for."
+  },
+  "settings.section.appearance": {
+    "message": "Appearance",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        250
+      ]
+    ],
+    "translation": "Appearance"
+  },
+  "settings.section.automation": {
+    "message": "Automation",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        208
+      ]
+    ],
+    "translation": "Automation"
+  },
+  "settings.section.automation.description": {
+    "message": "What Lantern does on its own.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        210
+      ]
+    ],
+    "translation": "What Lantern does on its own."
+  },
+  "settings.section.conversations": {
+    "message": "Conversations",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        155
+      ]
+    ],
+    "translation": "Conversations"
+  },
+  "settings.section.conversations.description": {
+    "message": "What appears in the lists.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        157
+      ]
+    ],
+    "translation": "What appears in the lists."
+  },
+  "settings.section.input": {
+    "message": "Keyboard & models",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        239
+      ]
+    ],
+    "translation": "Keyboard & models"
+  },
+  "settings.section.input.description": {
+    "message": "Shortcuts, and the models offered in the session toolbar.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        241
+      ]
+    ],
+    "translation": "Shortcuts, and the models offered in the session toolbar."
+  },
   "settings.section.notifications": {
     "placeholders": {},
     "comments": [],
@@ -3871,7 +4135,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        267
+        225
       ]
     ],
     "translation": "Auto-schedule Continue on Rate Limit"
@@ -3882,7 +4146,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        273
+        231
       ]
     ],
     "translation": "Automatically schedule a continue message when Claude hits rate limits"
@@ -3904,7 +4168,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        223
+        172
       ]
     ],
     "translation": "Hide Sessions Without User Messages"
@@ -3915,7 +4179,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        229
+        178
       ]
     ],
     "translation": "Show only sessions that contain user commands or messages"
@@ -3926,7 +4190,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        244
+        192
       ]
     ],
     "translation": "Unify Sessions with Same Title"
@@ -3937,7 +4201,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        250
+        198
       ]
     ],
     "translation": "When multiple sessions have the same title, show only the latest session"
@@ -3982,8 +4246,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        458
+        "src/web/components/settings/AppearanceSettings.tsx",
+        71
       ]
     ],
     "translation": "Theme"
@@ -3993,8 +4257,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        470
+        "src/web/components/settings/AppearanceSettings.tsx",
+        83
       ]
     ],
     "translation": "Dark"
@@ -4004,8 +4268,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        479
+        "src/web/components/settings/AppearanceSettings.tsx",
+        92
       ]
     ],
     "translation": "Select your preferred color theme"
@@ -4015,8 +4279,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        467
+        "src/web/components/settings/AppearanceSettings.tsx",
+        80
       ]
     ],
     "translation": "Light"
@@ -4026,8 +4290,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SettingsControls.tsx",
-        473
+        "src/web/components/settings/AppearanceSettings.tsx",
+        86
       ]
     ],
     "translation": "System"
@@ -4055,7 +4319,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        178
+        123
       ]
     ],
     "translation": "Usage Mode"
@@ -4067,7 +4331,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        198
+        138
       ]
     ],
     "translation": "API"
@@ -4079,22 +4343,10 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        204
+        144
       ]
     ],
     "translation": "Select how you use Claude Code. Subscription mode restricts features that require the Agent SDK."
-  },
-  "settings.usage_mode.select": {
-    "message": "Select usage mode",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/components/SettingsControls.tsx",
-        184
-      ]
-    ],
-    "translation": "Select usage mode"
   },
   "settings.usage_mode.subscription": {
     "message": "Subscription (Max, Pro, etc.)",
@@ -4103,10 +4355,86 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        192
+        132
       ]
     ],
     "translation": "Subscription (Max, Pro, etc.)"
+  },
+  "setup.source.description": {
+    "message": "Lantern reads this CLI's conversations and asks it to name topics. You can change this later in settings.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        76
+      ]
+    ],
+    "translation": "Lantern reads this CLI's conversations and asks it to name topics. You can change this later in settings."
+  },
+  "setup.source.detected": {
+    "message": "Detected",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        103
+      ]
+    ],
+    "translation": "Detected"
+  },
+  "setup.source.detecting": {
+    "message": "Looking for installed CLIs…",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        86
+      ]
+    ],
+    "translation": "Looking for installed CLIs…"
+  },
+  "setup.source.session_count": {
+    "message": "{count} conversations found",
+    "placeholders": {
+      "count": [
+        "source.stats.sessions"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        109
+      ]
+    ],
+    "translation": "{count} conversations found"
+  },
+  "setup.source.title": {
+    "message": "Which agent CLI should Lantern use?",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        73
+      ]
+    ],
+    "translation": "Which agent CLI should Lantern use?"
+  },
+  "setup.source.unavailable": {
+    "message": "Not available on this machine",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/UsageModeDialog.tsx",
+        115
+      ]
+    ],
+    "translation": "Not available on this machine"
   },
   "sidebar.back.to.projects": {
     "placeholders": {},
@@ -4311,7 +4639,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        103
+        105
       ]
     ],
     "translation": "Which agent CLIs Lantern reads sessions from. Turning one off forgets its conversations; it never touches the files."
@@ -4323,7 +4651,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        94
+        96
       ]
     ],
     "translation": "Could not read the list of agent CLIs."
@@ -4335,7 +4663,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        86
+        88
       ]
     ],
     "translation": "Looking for agent CLIs…"
@@ -4346,8 +4674,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/components/SourcesSettings.tsx",
-        158
+        "src/web/components/settings/SourceTile.tsx",
+        99
       ]
     ],
     "translation": "read-only"
@@ -4359,7 +4687,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        31
+        32
       ]
     ],
     "translation": "no sessions recorded yet"
@@ -4371,7 +4699,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        27
+        28
       ]
     ],
     "translation": "not found on this machine"
@@ -4383,7 +4711,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        36
+        37
       ]
     ],
     "translation": "storage format changed in a newer release"
@@ -4395,7 +4723,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        32
+        33
       ]
     ],
     "translation": "stores sessions in a database Lantern cannot read yet"
@@ -4407,7 +4735,7 @@
     "origin": [
       [
         "src/web/components/SourcesSettings.tsx",
-        40
+        41
       ]
     ],
     "translation": "sessions are in a format Lantern does not recognise"
@@ -4416,20 +4744,44 @@
     "message": "{sessionCount} conversations across {projectCount} projects",
     "placeholders": {
       "sessionCount": [
-        "source.stats.sessions"
+        "sessions"
       ],
       "projectCount": [
-        "source.stats.projects"
+        "projects"
       ]
     },
     "comments": [],
     "origin": [
       [
-        "src/web/components/SourcesSettings.tsx",
-        144
+        "src/web/components/settings/SourceTile.tsx",
+        88
       ]
     ],
     "translation": "{sessionCount} conversations across {projectCount} projects"
+  },
+  "sources.status.ready": {
+    "message": "Ready",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/SourceTile.tsx",
+        77
+      ]
+    ],
+    "translation": "Ready"
+  },
+  "sources.status.unavailable": {
+    "message": "Unavailable",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/SourceTile.tsx",
+        82
+      ]
+    ],
+    "translation": "Unavailable"
   },
   "system_info.available_features": {
     "placeholders": {},
@@ -4648,6 +5000,42 @@
     ],
     "translation": "Lantern"
   },
+  "topics.filter.placeholder": {
+    "message": "Filter topics...",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        79
+      ]
+    ],
+    "translation": "Filter topics..."
+  },
+  "topics.subtitle": {
+    "message": "Conversations grouped by what they are about, not by the folder they were started in.",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        68
+      ]
+    ],
+    "translation": "Conversations grouped by what they are about, not by the folder they were started in."
+  },
+  "topics.title": {
+    "message": "Topics",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        65
+      ]
+    ],
+    "translation": "Topics"
+  },
   "usage_mode.api.description": {
     "message": "You use Claude Code with API keys. All features are available.",
     "placeholders": {},
@@ -4655,7 +5043,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        75
+        172
       ]
     ],
     "translation": "You use Claude Code with API keys. All features are available."
@@ -4667,7 +5055,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        71
+        168
       ]
     ],
     "translation": "API"
@@ -4679,7 +5067,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        36
+        133
       ]
     ],
     "translation": "Please select your usage mode. You can change this later in settings."
@@ -4691,7 +5079,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        33
+        130
       ]
     ],
     "translation": "How do you use Claude Code?"
@@ -4703,7 +5091,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        56
+        153
       ]
     ],
     "translation": "You use Claude Code with a subscription plan (Max, Pro, etc.). Some features that require the Agent SDK will be restricted."
@@ -4715,7 +5103,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        52
+        149
       ]
     ],
     "translation": "Subscription"

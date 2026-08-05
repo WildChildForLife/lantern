@@ -113,8 +113,14 @@ services:
   # --------------------------------------------------------------------------
   lantern:
     build:
-      context: ..
-      dockerfile: Dockerfile
+      # The release image, then the CLIs on top: on a real machine they share a
+      # host, and topic naming shells out to whichever one is selected. Without
+      # them here the "Sort N new" path cannot be exercised at all.
+      context: .
+      dockerfile: Dockerfile.lantern
+      args:
+        # Built by run.sh from the repo root before this one.
+        LANTERN_IMAGE: lantern-harness-app
     environment:
       LANTERN_ENV: production
       PORT: 3400

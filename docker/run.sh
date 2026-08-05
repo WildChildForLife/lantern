@@ -59,6 +59,12 @@ echo "==> enabling all three sources"
   'mkdir -p /root/.lantern/sources && printf "{\"enabled\":[\"claude-code\",\"codex\",\"opencode\"]}\n" > /root/.lantern/sources/sources.json' \
   >/dev/null
 
+# The release image first, then the harness image that adds the CLIs on top of
+# it. Two steps because topic naming shells out to the selected CLI, so Lantern
+# and the CLIs have to share a container the way they share a real machine.
+echo "==> building Lantern"
+docker build -q -t lantern-harness-app -f ../Dockerfile .. > /dev/null
+
 echo "==> starting Lantern"
 "${COMPOSE[@]}" up -d --build lantern
 

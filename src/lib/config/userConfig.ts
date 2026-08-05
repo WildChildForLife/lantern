@@ -15,6 +15,16 @@ export const userConfigSchema = z.object({
   autoScheduleContinueOnRateLimit: z.boolean().optional().default(false),
   modelChoices: z.array(z.string()).optional().default(["default", "haiku", "sonnet", "opus"]),
   usageMode: z.enum(["subscription", "api"]).optional(),
+  /**
+   * The agent CLI Lantern works with: whose history it centres on, and which
+   * one names topics. One at a time — these CLIs do not share a login, and
+   * asking two of them the same question would bill two accounts.
+   *
+   * Deliberately not the `SourceId` enum: this schema is shared with the
+   * browser bundle, and an id a future build no longer knows should read as
+   * unset rather than failing the whole config.
+   */
+  primarySource: z.string().optional(),
 });
 
 export const defaultUserConfig = userConfigSchema.parse({});
