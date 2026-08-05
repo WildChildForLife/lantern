@@ -24,6 +24,18 @@ const normalizeTag = (tag?: string): SupportedLocale | undefined => {
     return "en";
   }
 
+  if (normalized.startsWith("es")) {
+    return "es";
+  }
+
+  if (normalized.startsWith("fr")) {
+    return "fr";
+  }
+
+  if (normalized.startsWith("pt")) {
+    return "pt";
+  }
+
   return undefined;
 };
 

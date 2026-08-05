@@ -85,7 +85,15 @@ export const TopicsPage: FC = () => {
               onClick={() => setHideDone((current) => !current)}
             >
               <CheckCheckIcon className="w-4 h-4" />
-              {hideDone ? "Showing open only" : `Hide done (${doneCount})`}
+              {hideDone ? (
+                <Trans id="list.showing_open_only" message="Showing open only" />
+              ) : (
+                <Trans
+                  id="list.hide_done"
+                  message="Hide done ({doneCount})"
+                  values={{ doneCount }}
+                />
+              )}
             </Button>
             {doneCount > 0 && (
               <Button variant="ghost" size="sm" onClick={clearDone}>

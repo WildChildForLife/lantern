@@ -11,9 +11,8 @@
 > Find the conversation you forgot you started.
 
 Lantern is a self-hosted dashboard for your agent CLI sessions. It reads the logs Claude Code already
-writes to `~/.claude/projects/` — and, optionally, Codex CLI's rollouts in `~/.codex/sessions/` and
-opencode's storage in `~/.local/share/opencode/` — then groups every conversation by **what it is
-about**, not by which folder it happened to start in.
+writes to `~/.claude/projects/` — and, optionally, [three other agent CLIs](#supported-agents) —
+then groups every conversation by **what it is about**, not by which folder it happened to start in.
 
 If you run a lot of agent sessions across a lot of projects and machines — and across more than one
 CLI — the folder view stops helping: one directory ends up holding thirty unrelated conversations.
@@ -23,9 +22,53 @@ Lantern gives you topics, a searchable list of everything, and a board view of t
   <img src="docs/screenshots/topics.jpg" alt="Topics grouped by subject, each with an icon and a conversation count" width="100%">
 </p>
 
+## Supported agents
+
+<table>
+  <tr>
+    <td align="center" width="120">
+      <img src="docs/icons/claude-code.svg" width="30" height="30" alt=""><br>
+      <b>Claude Code</b>
+    </td>
+    <td align="center" width="120">
+      <img src="docs/icons/codex.svg" width="30" height="30" alt=""><br>
+      <b>Codex CLI</b>
+    </td>
+    <td align="center" width="120">
+      <img src="docs/icons/opencode.svg" width="30" height="30" alt=""><br>
+      <b>opencode</b>
+    </td>
+    <td align="center" width="120">
+      <img src="docs/icons/qwen-code.svg" width="30" height="30" alt=""><br>
+      <b>Qwen Code</b>
+    </td>
+  </tr>
+</table>
+
+| Agent CLI       | History Lantern reads      | Verified against | Mode                      |
+| --------------- | -------------------------- | ---------------- | ------------------------- |
+| **Claude Code** | `~/.claude/projects/`      | `2.1.221`        | Read **and** drive a turn |
+| **Codex CLI**   | `~/.codex/sessions/`       | `0.146.0`        | Read-only                 |
+| **opencode**    | `~/.local/share/opencode/` | `1.18.13`        | Read-only — see the note  |
+| **Qwen Code**   | `~/.qwen/projects/`        | `0.21.6`         | Read-only                 |
+
+Sessions from every enabled CLI sit in the same topics, the same searchable list and the same board,
+and are grouped into one workspace when they ran in the same repo. Pick which to read in settings.
+Claude Code stays the only interactive one — starting, resuming and approving a turn go through the
+Agent SDK, which the others have no equivalent for.
+
+> **opencode caveat.** `1.18.13` — the current release — keeps its sessions in a SQLite database
+> rather than the JSON tree Lantern reads, so a fresh install of it reports `sqlite-storage` and
+> shows no conversations. Older file-based installs read fine. Reading the database is planned.
+
+"Verified against" means that exact version was run and the history it wrote was read back, rather
+than inferred from a format description. [`docker/compatibility.md`](docker/compatibility.md) records
+how, and what each run turned up. Gemini CLI, GitHub Copilot CLI, goose and cursor-agent are not read
+yet.
+
 ## Contents
 
-- [What it does](#what-it-does)
+- [What it does](#what-it-does) · [Supported agents](#supported-agents)
 - [Install](#install) · [macOS](#macos) · [Linux](#linux) · [Windows](#windows) ·
   [npm](#npm-any-platform) · [Docker](#docker) · [From source](#from-source) ·
   [Platform support](#platform-support)
@@ -45,12 +88,15 @@ Lantern gives you topics, a searchable list of everything, and a board view of t
   are cached per session, nothing runs in the background, and each pass reports the usage it drew.
 - **Every session in one place.** A flat, filterable list across every project — and every machine, if
   you point Lantern at more than one log directory.
-- **More than one CLI.** Claude Code, Codex CLI and opencode sessions sit side by side, grouped into
-  the same workspace when they ran in the same repo. Pick which CLIs to read in settings. Claude Code
-  stays the interactive one; other sources are read-only.
+- **More than one CLI.** Claude Code, Codex CLI, opencode and Qwen Code sessions sit side by side,
+  grouped into the same workspace when they ran in the same repo. Pick which CLIs to read in settings.
+  Claude Code stays the interactive one; other sources are read-only. See
+  [Supported agents](#supported-agents).
 - **Honest costs.** A CLI that records what a turn cost is believed; one that does not is estimated
   and marked `~`; a model with no price table reads `—` rather than `$0.00`.
 - **Three layouts.** Rows, cards, or a full-width board with one column per topic, newest first.
+- **Six languages.** English, Spanish, French, Portuguese, Japanese and Simplified Chinese. Picked up
+  from your browser on first load, and changeable in settings.
 - **Pick up where you left off.** Copy a conversation id to resume it from a terminal, or tick
   conversations off as done once you have dealt with them.
 - **A full session viewer.** Live conversation log viewing, search, cost and token breakdowns, git
@@ -223,7 +269,7 @@ node dist/main.js [options]
 | `-v, --verbose`             | `LANTERN_VERBOSE`               | Verbose debug logging                                       | off         |
 | `--source <id>`             | `LANTERN_SOURCES`               | Agent CLI to read; repeat for more. Scopes one run          | stored      |
 
-Valid `--source` ids are `claude-code`, `codex` and `opencode`. Repeat the flag for more than one
+Valid `--source` ids are `claude-code`, `codex`, `opencode` and `qwen-code`. Repeat the flag for more than one
 (`--source claude-code --source codex`), or set `LANTERN_SOURCES` to a comma-separated list. Passing it
 scopes a single run without changing what is stored in settings.
 
@@ -246,16 +292,19 @@ Windows). Deleting that directory costs nothing but a rebuild on the next start.
 
 ## Reading other agent CLIs
 
-Codex and opencode are read from wherever those CLIs themselves keep their history, so pointing Lantern
-at them is the same gesture as pointing the CLI at them:
+Codex, opencode and Qwen Code are read from wherever those CLIs themselves keep their history, so
+pointing Lantern at them is the same gesture as pointing the CLI at them:
 
 | Source        | Default location          | Moved by                              |
 | ------------- | ------------------------- | ------------------------------------- |
 | `claude-code` | `~/.claude`               | `--claude-dir` / `LANTERN_CLAUDE_DIR` |
 | `codex`       | `~/.codex`                | `CODEX_HOME`                          |
 | `opencode`    | `~/.local/share/opencode` | `XDG_DATA_HOME`                       |
+| `qwen-code`   | `~/.qwen`                 | `HOME` only — see below               |
 
-`~` here is `$HOME`, or `%USERPROFILE%` on Windows shells that do not set `HOME`.
+`~` here is `$HOME`, or `%USERPROFILE%` on Windows shells that do not set `HOME`. Each row names the
+variable that CLI honours itself, so moving its history moves Lantern's view of it. Qwen Code has no
+such variable — it always writes under `$HOME/.qwen` — so in Docker it is the mount that moves it.
 
 Enable the ones you want in settings, or scope a single run with `--source`.
 
@@ -267,6 +316,7 @@ docker run -d --name lantern \
   -v "$HOME/.claude:/root/.claude:ro" \
   -v "$HOME/.codex:/root/.codex:ro" \
   -v "$HOME/.local/share/opencode:/root/.local/share/opencode:ro" \
+  -v "$HOME/.qwen:/root/.qwen:ro" \
   -v lantern_cache:/root/.lantern \
   ghcr.io/wildchildforlife/lantern:latest
 ```
@@ -346,3 +396,8 @@ See [PRIVACY.md](PRIVACY.md).
 ## Licence
 
 [MIT](LICENSE) — © 2026 Lantern contributors.
+
+The agent CLI marks in `docs/icons/` and in the settings panel belong to their respective owners and
+are reproduced only to identify which CLI a row or tile stands for. Lantern is not affiliated with,
+or endorsed by, any of them. Path data comes from [Simple Icons](https://simpleicons.org) (CC0),
+except Codex's, which is the OpenAI mark from Wikimedia Commons.

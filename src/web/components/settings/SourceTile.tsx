@@ -2,18 +2,20 @@ import { Trans } from "@lingui/react";
 import { CheckIcon, TriangleAlertIcon } from "lucide-react";
 import type { FC } from "react";
 import { StatusBadge } from "./SettingsSection";
+import { hasSourceIcon, SourceIcon } from "./SourceIcon";
 
 /**
- * A colour per CLI, so the tiles are told apart before they are read.
+ * The plate each mark sits on.
  *
- * A monogram rather than a vendor logo: shipping someone else's mark means
- * shipping their trademark, and a wrong or stale one is worse than none.
+ * Tinted towards the CLI's own colour so the tiles are told apart at a glance,
+ * and kept for a source Lantern has no mark for — that one falls back to a
+ * monogram, which still needs somewhere to sit.
  */
 const TILE_STYLES: Record<string, { readonly initial: string; readonly accent: string }> = {
-  "claude-code": { initial: "C", accent: "bg-orange-500/15 text-orange-500 border-orange-500/30" },
-  codex: { initial: "◇", accent: "bg-sky-500/15 text-sky-400 border-sky-500/30" },
-  opencode: { initial: "◈", accent: "bg-violet-500/15 text-violet-400 border-violet-500/30" },
-  "qwen-code": { initial: "◆", accent: "bg-teal-500/15 text-teal-400 border-teal-500/30" },
+  "claude-code": { initial: "C", accent: "bg-orange-500/10 text-orange-500 border-orange-500/25" },
+  codex: { initial: "◇", accent: "bg-foreground/5 text-foreground border-foreground/15" },
+  opencode: { initial: "◈", accent: "bg-foreground/5 text-foreground border-foreground/15" },
+  "qwen-code": { initial: "◆", accent: "bg-violet-500/10 text-violet-500 border-violet-500/25" },
 };
 
 const FALLBACK = { initial: "•", accent: "bg-muted text-muted-foreground border-border" };
@@ -67,7 +69,7 @@ export const SourceTile: FC<SourceTileProps> = ({
         className={`flex size-11 items-center justify-center rounded-md border text-lg font-semibold ${style.accent}`}
         aria-hidden="true"
       >
-        {style.initial}
+        {hasSourceIcon(id) ? <SourceIcon id={id} className="size-6" /> : style.initial}
       </span>
 
       <span className="text-sm font-medium leading-tight">{displayName}</span>
