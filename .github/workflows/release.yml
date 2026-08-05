@@ -85,6 +85,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
+    # Must match the environment name on npm's trusted publisher for
+    # lantern-viewer. npm checks the environment claim in the id-token, so if the
+    # two ever disagree the exchange fails and nothing publishes. Add protection
+    # rules to this environment in the repository settings — an environment with
+    # none only narrows the claim, it does not gate anything.
+    environment: release
+
     permissions:
       contents: read
       # Required for npm provenance.
@@ -99,12 +106,13 @@ jobs:
         with:
           registry-url: https://registry.npmjs.org
 
+      # Authenticates over OIDC against the trusted publisher configured for
+      # lantern-viewer on npm, so no token is stored here. pnpm exchanges the
+      # id-token granted above for a short-lived publish credential; there is
+      # deliberately no NODE_AUTH_TOKEN fallback, because a silent fallback is
+      # how a long-lived token quietly stays in use.
       - name: Publish
         run: pnpm publish --provenance --no-git-checks --access public
-        env:
-          # NPM_TOKEN is the conventional name; AUTH_TOKEN is accepted so an
-          # existing secret under that name keeps working.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.AUTH_TOKEN }}
 
   packages:
     name: linux packages
