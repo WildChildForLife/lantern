@@ -4,7 +4,7 @@ import { expect } from "vitest";
 import { testPlatformLayer } from "../../../testing/layers/testPlatformLayer.ts";
 import { TerminalService } from "./TerminalService.ts";
 
-it.live("disables terminal when CCV_TERMINAL_DISABLED is enabled", () =>
+it.live("disables terminal when LANTERN_TERMINAL_DISABLED is enabled", () =>
   Effect.gen(function* () {
     const terminalService = yield* TerminalService;
     const result = yield* Effect.either(terminalService.getOrCreateSession(undefined));
@@ -12,7 +12,7 @@ it.live("disables terminal when CCV_TERMINAL_DISABLED is enabled", () =>
     expect(Either.isLeft(result)).toBe(true);
   }).pipe(
     Effect.provide(TerminalService.Live),
-    Effect.provide(testPlatformLayer({ env: { CCV_TERMINAL_DISABLED: "1" } })),
+    Effect.provide(testPlatformLayer({ env: { LANTERN_TERMINAL_DISABLED: "1" } })),
     Effect.scoped,
   ),
 );
@@ -25,7 +25,7 @@ it.live("disables terminal when --terminal-disabled is enabled", () =>
     expect(Either.isLeft(result)).toBe(true);
   }).pipe(
     Effect.provide(TerminalService.Live),
-    Effect.provide(testPlatformLayer({ ccvOptions: { terminalDisabled: true } })),
+    Effect.provide(testPlatformLayer({ lanternOptions: { terminalDisabled: true } })),
     Effect.scoped,
   ),
 );

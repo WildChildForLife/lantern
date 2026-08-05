@@ -2,8 +2,8 @@ import { Context, Effect, Layer } from "effect";
 import { ulid } from "ulid";
 import type WebSocket from "ws";
 import type { InferEffect } from "../../lib/effect/types.ts";
-import { CcvOptionsService } from "../platform/services/CcvOptionsService.ts";
 import { EnvService } from "../platform/services/EnvService.ts";
+import { LanternOptionsService } from "../platform/services/LanternOptionsService.ts";
 import { normalizePtyChunk } from "./normalizePtyChunk.ts";
 import {
   createRusptySession,
@@ -59,7 +59,7 @@ const isFlagEnabled = (value: string | undefined) => {
 
 const LayerImpl = Effect.gen(function* () {
   const envService = yield* EnvService;
-  const ccvOptionsService = yield* CcvOptionsService;
+  const optionsService = yield* LanternOptionsService;
   const sessions = new Map<string, TerminalSession>();
 
   const disabledService = (reason: string) => {
@@ -236,21 +236,20 @@ const LayerImpl = Effect.gen(function* () {
 
   const getOrCreateSession = (sessionId: string | undefined, cwdOverride?: string) =>
     Effect.gen(function* () {
-      const terminalDisabledEnv = yield* envService.getEnv("CCV_TERMINAL_DISABLED");
-      const terminalDisabledOption = yield* ccvOptionsService.getCcvOptions("terminalDisabled");
+      const terminalDisabledEnv = yield* envService.getEnv("LANTERN_TERMINAL_DISABLED");
+      const terminalDisabledOption = yield* optionsService.getOption("terminalDisabled");
       const terminalDisabled = terminalDisabledOption ?? isFlagEnabled(terminalDisabledEnv);
       if (terminalDisabled) {
         return yield* Effect.fail(
-          new Error("Terminal support is unavailable (CCV_TERMINAL_DISABLED is enabled)."),
+          new Error("Terminal support is unavailable (LANTERN_TERMINAL_DISABLED is enabled)."),
         );
       }
       const cwd = cwdOverride ?? process.cwd();
-      const terminalShellOption = yield* ccvOptionsService.getCcvOptions("terminalShell");
-      const shell = terminalShellOption ?? (yield* envService.getEnv("CCV_TERMINAL_SHELL"));
+      const terminalShellOption = yield* optionsService.getOption("terminalShell");
+      const shell = terminalShellOption ?? (yield* envService.getEnv("LANTERN_TERMINAL_SHELL"));
       const fallbackShell = yield* envService.getEnv("SHELL");
-      const terminalUnrestrictedOption =
-        yield* ccvOptionsService.getCcvOptions("terminalUnrestricted");
-      const terminalUnrestrictedEnv = yield* envService.getEnv("CCV_TERMINAL_UNRESTRICTED");
+      const terminalUnrestrictedOption = yield* optionsService.getOption("terminalUnrestricted");
+      const terminalUnrestrictedEnv = yield* envService.getEnv("LANTERN_TERMINAL_UNRESTRICTED");
       const unrestrictedFlag = terminalUnrestrictedOption ?? isFlagEnabled(terminalUnrestrictedEnv);
       const env = yield* envService.getAllEnv();
       const existing = getSession(sessionId);

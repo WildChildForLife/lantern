@@ -10,24 +10,24 @@ import { AgentSessionMappingService } from "./AgentSessionMappingService.ts";
 const testLayer = Layer.mergeAll(testPlatformLayer(), NodeFileSystem.layer);
 
 describe("AgentSessionMappingService", () => {
-  const sampleProjectPath = resolve(
+  const demoProjectPath = resolve(
     process.cwd(),
-    "mock-global-claude-dir/projects/sample-project",
+    "fixtures/claude-home/projects/-home-demo-todo-app",
   );
-  const sampleProjectId = encodeProjectId(sampleProjectPath);
-  const sampleSessionId = "5c0375b4-57a5-4f26-b12d-d022ee4e51b7";
+  const demoProjectId = encodeProjectId(demoProjectPath);
+  const demoSessionId = "5c0375b4-57a5-4f26-b12d-d022ee4e51b7";
 
   describe("getAgentFilePath", () => {
     it.live("should return agent file path for matching sessionId and prompt", () =>
       Effect.gen(function* () {
         const service = yield* AgentSessionMappingService;
         const result = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "Run the test suite",
         );
 
-        expect(result).toBe(resolve(sampleProjectPath, "agent-test-hash-123.jsonl"));
+        expect(result).toBe(resolve(demoProjectPath, "agent-test-hash-123.jsonl"));
       }).pipe(Effect.provide(AgentSessionMappingService.Live), Effect.provide(testLayer)),
     );
 
@@ -35,8 +35,8 @@ describe("AgentSessionMappingService", () => {
       Effect.gen(function* () {
         const service = yield* AgentSessionMappingService;
         const result = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "Non-existing prompt",
         );
 
@@ -50,7 +50,7 @@ describe("AgentSessionMappingService", () => {
 
         const service = yield* AgentSessionMappingService;
         const result = yield* service.getAgentFilePath(
-          sampleProjectId,
+          demoProjectId,
           nonExistingSessionId,
           "Run the test suite",
         );
@@ -63,12 +63,12 @@ describe("AgentSessionMappingService", () => {
       Effect.gen(function* () {
         const service = yield* AgentSessionMappingService;
         const result = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "RUN   THE\n  TEST   SUITE",
         );
 
-        expect(result).toBe(resolve(sampleProjectPath, "agent-test-hash-123.jsonl"));
+        expect(result).toBe(resolve(demoProjectPath, "agent-test-hash-123.jsonl"));
       }).pipe(Effect.provide(AgentSessionMappingService.Live), Effect.provide(testLayer)),
     );
 
@@ -80,21 +80,21 @@ describe("AgentSessionMappingService", () => {
 
         // First call - should populate cache
         const result1 = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "Build the project",
         );
         callCount++;
 
         // Second call - should hit cache
         const result2 = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "Build the project",
         );
         callCount++;
 
-        const expectedPath = resolve(sampleProjectPath, "agent-test-hash-456.jsonl");
+        const expectedPath = resolve(demoProjectPath, "agent-test-hash-456.jsonl");
         expect(result1).toBe(expectedPath);
         expect(result2).toBe(expectedPath);
         expect(callCount).toBe(2);
@@ -105,18 +105,18 @@ describe("AgentSessionMappingService", () => {
       Effect.gen(function* () {
         const service = yield* AgentSessionMappingService;
         const result1 = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "Run the test suite",
         );
         const result2 = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "Build the project",
         );
 
-        expect(result1).toBe(resolve(sampleProjectPath, "agent-test-hash-123.jsonl"));
-        expect(result2).toBe(resolve(sampleProjectPath, "agent-test-hash-456.jsonl"));
+        expect(result1).toBe(resolve(demoProjectPath, "agent-test-hash-123.jsonl"));
+        expect(result2).toBe(resolve(demoProjectPath, "agent-test-hash-456.jsonl"));
       }).pipe(Effect.provide(AgentSessionMappingService.Live), Effect.provide(testLayer)),
     );
   });
@@ -128,22 +128,22 @@ describe("AgentSessionMappingService", () => {
 
         // First call - populate cache
         const result1 = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "Run the test suite",
         );
 
         // Invalidate
-        yield* service.invalidateSession(sampleSessionId);
+        yield* service.invalidateSession(demoSessionId);
 
         // Second call - cache should be cleared, should re-populate
         const result2 = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "Run the test suite",
         );
 
-        const expectedPath = resolve(sampleProjectPath, "agent-test-hash-123.jsonl");
+        const expectedPath = resolve(demoProjectPath, "agent-test-hash-123.jsonl");
         expect(result1).toBe(expectedPath);
         expect(result2).toBe(expectedPath);
       }).pipe(Effect.provide(AgentSessionMappingService.Live), Effect.provide(testLayer)),
@@ -157,8 +157,8 @@ describe("AgentSessionMappingService", () => {
 
         // First call - populate cache
         const result1 = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "Run the test suite",
         );
 
@@ -167,12 +167,12 @@ describe("AgentSessionMappingService", () => {
 
         // Second call - cache should be cleared, should re-populate
         const result2 = yield* service.getAgentFilePath(
-          sampleProjectId,
-          sampleSessionId,
+          demoProjectId,
+          demoSessionId,
           "Run the test suite",
         );
 
-        const expectedPath = resolve(sampleProjectPath, "agent-test-hash-123.jsonl");
+        const expectedPath = resolve(demoProjectPath, "agent-test-hash-123.jsonl");
         expect(result1).toBe(expectedPath);
         expect(result2).toBe(expectedPath);
       }).pipe(Effect.provide(AgentSessionMappingService.Live), Effect.provide(testLayer)),

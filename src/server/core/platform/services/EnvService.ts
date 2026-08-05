@@ -1,5 +1,6 @@
 import { Context, Effect, Layer, Ref } from "effect";
 import type { InferEffect } from "../../../lib/effect/types.ts";
+import { withLegacyEnvAliases } from "../legacyEnv.ts";
 import { type EnvSchema, envSchema } from "../schema.ts";
 
 const LayerImpl = Effect.gen(function* () {
@@ -8,7 +9,7 @@ const LayerImpl = Effect.gen(function* () {
   const parseEnv = () => {
     // biome-ignore lint/style/noProcessEnv: allow only here
     // oxlint-disable-next-line node/no-process-env -- configuration boundary
-    const parsed = envSchema.safeParse(process.env);
+    const parsed = envSchema.safeParse(withLegacyEnvAliases(process.env));
     if (!parsed.success) {
       throw new Error(`Invalid environment variables: ${parsed.error.message}`);
     }

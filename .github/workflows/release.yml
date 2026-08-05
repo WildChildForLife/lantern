@@ -96,6 +96,8 @@ jobs:
 
       - name: Setup Node & pnpm
         uses: ./.github/actions/setup-node
+        with:
+          registry-url: https://registry.npmjs.org
 
       - name: Publish
         run: pnpm publish --provenance --no-git-checks --access public

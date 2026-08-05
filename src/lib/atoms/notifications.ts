@@ -1,5 +1,6 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
+import { storageKey } from "./storageKey";
 
 /**
  * Available sound types for notifications
@@ -21,7 +22,7 @@ const defaultSettings: NotificationSettings = {
  * Atom for notification settings with localStorage persistence
  */
 export const notificationSettingsAtom = atomWithStorage<NotificationSettings>(
-  "claude-code-viewer-notification-settings",
+  storageKey("notification-settings"),
   defaultSettings,
 );
 

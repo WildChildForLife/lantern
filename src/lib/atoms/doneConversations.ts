@@ -1,6 +1,7 @@
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { useCallback, useMemo } from "react";
+import { storageKey } from "./storageKey";
 
 type DoneConversationStore = Record<string, true>;
 
@@ -10,7 +11,7 @@ type DoneConversationStore = Record<string, true>;
  * marker, not something derived from the Claude Code logs.
  */
 const doneConversationsAtom = atomWithStorage<DoneConversationStore>(
-  "claude-code-viewer-done-conversations",
+  storageKey("done-conversations"),
   {},
 );
 

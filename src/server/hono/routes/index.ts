@@ -5,10 +5,9 @@ import { createMiddleware } from "hono/factory";
 import prexit from "prexit";
 import packageJson from "../../../../package.json" with { type: "json" };
 import {
-  CcvOptionsService,
+  LanternOptionsService,
   type CliOptions,
-} from "../../core/platform/services/CcvOptionsService.ts";
-import { EnvService } from "../../core/platform/services/EnvService.ts";
+} from "../../core/platform/services/LanternOptionsService.ts";
 import { UserConfigService } from "../../core/platform/services/UserConfigService.ts";
 import { userConfigSchema } from "../../lib/config/config.ts";
 import type { HonoAppType, HonoContext } from "../app.ts";
@@ -55,26 +54,23 @@ const createApiOnlyMiddleware = (apiOnly: boolean) =>
 
 export const routes = (app: HonoAppType, options: CliOptions) =>
   Effect.gen(function* () {
-    const ccvOptionsService = yield* CcvOptionsService;
-    yield* ccvOptionsService.loadCliOptions(options);
+    const optionsService = yield* LanternOptionsService;
+    yield* optionsService.loadCliOptions(options);
 
-    const envService = yield* EnvService;
     const userConfigService = yield* UserConfigService;
     const initializeService = yield* InitializeService;
 
     const { authRequiredMiddleware } = yield* AuthMiddleware;
-    const apiOnly = (yield* ccvOptionsService.getCcvOptions("apiOnly")) === true;
+    const apiOnly = (yield* optionsService.getOption("apiOnly")) === true;
     const apiOnlyMiddleware = createApiOnlyMiddleware(apiOnly);
 
     const runtime = yield* getHonoRuntime;
 
-    if ((yield* envService.getEnv("NEXT_PHASE")) !== "phase-production-build") {
-      yield* initializeService.startInitialization();
+    yield* initializeService.startInitialization();
 
-      prexit(async () => {
-        await Runtime.runPromise(runtime)(initializeService.stopCleanup());
-      });
-    }
+    prexit(async () => {
+      await Runtime.runPromise(runtime)(initializeService.stopCleanup());
+    });
 
     return (
       app
@@ -116,7 +112,7 @@ export const routes = (app: HonoAppType, options: CliOptions) =>
         .put("/api/config", zValidator("json", userConfigSchema), (c) => {
           const { ...config } = c.req.valid("json");
 
-          setCookie(c, "ccv-config", JSON.stringify(config));
+          setCookie(c, "lantern-config", JSON.stringify(config));
 
           return c.json({
             config,

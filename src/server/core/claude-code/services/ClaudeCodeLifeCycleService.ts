@@ -5,8 +5,8 @@ import { Context, Effect, Layer, Runtime } from "effect";
 import { ulid } from "ulid";
 import type { InferEffect } from "../../../lib/effect/types.ts";
 import { EventBus } from "../../events/services/EventBus.ts";
-import type { CcvOptionsService } from "../../platform/services/CcvOptionsService.ts";
 import type { EnvService } from "../../platform/services/EnvService.ts";
+import type { LanternOptionsService } from "../../platform/services/LanternOptionsService.ts";
 import type { SessionMetaService } from "../../session/services/SessionMetaService.ts";
 import {
   createMessageGenerator,
@@ -15,7 +15,7 @@ import {
 import * as CCSessionProcess from "../models/CCSessionProcess.ts";
 import * as ClaudeCode from "../models/ClaudeCode.ts";
 import type * as CCTurn from "../models/ClaudeCodeTurn.ts";
-import { CCVAskUserQuestionService } from "./CCVAskUserQuestionService.ts";
+import { AskUserQuestionService } from "./AskUserQuestionService.ts";
 import { ClaudeCodePermissionService } from "./ClaudeCodePermissionService.ts";
 import { ClaudeCodeSessionProcessService } from "./ClaudeCodeSessionProcessService.ts";
 
@@ -25,7 +25,7 @@ const LayerImpl = Effect.gen(function* () {
   const eventBusService = yield* EventBus;
   const sessionProcessService = yield* ClaudeCodeSessionProcessService;
   const permissionService = yield* ClaudeCodePermissionService;
-  const ccvAskUserQuestionService = yield* CCVAskUserQuestionService;
+  const askUserQuestionService = yield* AskUserQuestionService;
 
   const runtime = yield* Effect.runtime<
     | FileSystem.FileSystem
@@ -34,7 +34,7 @@ const LayerImpl = Effect.gen(function* () {
     | SessionMetaService
     | ClaudeCodePermissionService
     | EnvService
-    | CcvOptionsService
+    | LanternOptionsService
   >();
 
   const continueSessionProcess = (options: {
@@ -201,7 +201,7 @@ const LayerImpl = Effect.gen(function* () {
               sessionId: task.def.type === "new" ? task.def.sessionId : task.def.baseSessionId,
             });
 
-            const ccvMcpServer = ccvAskUserQuestionService.createMcpServer({
+            const askUserQuestionMcpServer = askUserQuestionService.createMcpServer({
               turnId: task.def.turnId,
               projectId: sessionProcess.def.projectId,
               sessionId: task.def.type === "new" ? task.def.sessionId : task.def.baseSessionId,
@@ -213,7 +213,7 @@ const LayerImpl = Effect.gen(function* () {
               cwd: sessionProcess.def.cwd,
               abortController: sessionProcess.def.abortController,
               mcpServers: {
-                ccv: ccvMcpServer,
+                lantern: askUserQuestionMcpServer,
               },
             };
 
@@ -320,7 +320,7 @@ const LayerImpl = Effect.gen(function* () {
       const currentProcess = yield* sessionProcessService.getSessionProcess(sessionProcessId);
 
       yield* permissionService.cancelPendingRequests(currentProcess.sessionId);
-      yield* ccvAskUserQuestionService.cancelPendingRequests(currentProcess.sessionId);
+      yield* askUserQuestionService.cancelPendingRequests(currentProcess.sessionId);
 
       currentProcess.def.abortController.abort();
 
@@ -337,7 +337,7 @@ const LayerImpl = Effect.gen(function* () {
 
       for (const process of processes) {
         yield* permissionService.cancelPendingRequests(process.sessionId);
-        yield* ccvAskUserQuestionService.cancelPendingRequests(process.sessionId);
+        yield* askUserQuestionService.cancelPendingRequests(process.sessionId);
         process.def.abortController.abort();
 
         yield* sessionProcessService.toCompletedState({

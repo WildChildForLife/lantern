@@ -9,7 +9,7 @@ import { parseUserConfig } from "../../lib/config/parseUserConfig.ts";
 import type { HonoContext } from "../app.ts";
 
 export const configMiddleware = createMiddleware<HonoContext>(async (c, next) => {
-  const cookie = getCookie(c, "ccv-config");
+  const cookie = getCookie(c, "lantern-config");
   const parsed = parseUserConfig(cookie);
 
   if (cookie === undefined) {
@@ -18,7 +18,7 @@ export const configMiddleware = createMiddleware<HonoContext>(async (c, next) =>
 
     setCookie(
       c,
-      "ccv-config",
+      "lantern-config",
       JSON.stringify({
         ...defaultUserConfig,
         locale: preferredLocale,

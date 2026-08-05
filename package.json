@@ -1,5 +1,5 @@
 {
-  "name": "lantern-ccv",
+  "name": "lantern-viewer",
   "version": "0.1.0",
   "description": "Find the conversation you forgot you started. A self-hosted dashboard for Claude Code sessions, grouped by topic across every project and machine.",
   "homepage": "https://github.com/WildChildForLife/lantern",
@@ -18,7 +18,7 @@
   "scripts": {
     "dev": "run-p 'dev:*'",
     "dev:frontend": "vite",
-    "dev:backend": "CCV_ENV=development node --watch --env-file-if-exists=.env.local src/server/main.ts",
+    "dev:backend": "LANTERN_ENV=development node --watch --env-file-if-exists=.env.local src/server/main.ts",
     "start": "node dist/main.js",
     "build": "./scripts/build.sh",
     "build:frontend": "vite build",

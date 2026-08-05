@@ -1,6 +1,7 @@
 import { useAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
+import { storageKey } from "./storageKey";
 
 export const viewModeSchema = z.enum(["grid", "list", "table"]);
 
@@ -11,7 +12,7 @@ export type ViewMode = z.infer<typeof viewModeSchema>;
  * choice survives reloads, and shared by every listing so the app feels
  * consistent.
  */
-const viewModeAtom = atomWithStorage<ViewMode>("claude-code-viewer-view-mode", "list");
+const viewModeAtom = atomWithStorage<ViewMode>(storageKey("view-mode"), "list");
 
 export const useViewMode = () => {
   const [storedViewMode, setViewMode] = useAtom(viewModeAtom);

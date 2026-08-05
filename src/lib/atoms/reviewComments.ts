@@ -2,6 +2,7 @@ import { useAtom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { useCallback, useMemo } from "react";
 import { z } from "zod";
+import { storageKey } from "./storageKey";
 
 const lineTypeSchema = z.enum(["added", "deleted", "unchanged", "hunk", "context"]);
 
@@ -74,7 +75,7 @@ const reviewCommentStorage = {
 };
 
 const reviewCommentsAtom = atomWithStorage<ReviewCommentStore>(
-  "claude-code-viewer-review-comments",
+  storageKey("review-comments"),
   {},
   reviewCommentStorage,
 );
