@@ -37,6 +37,7 @@ import { SearchController } from "./core/search/presentation/SearchController.ts
 import { SearchService } from "./core/search/services/SearchService.ts";
 import { SessionRepository } from "./core/session/infrastructure/SessionRepository.ts";
 import { SessionController } from "./core/session/presentation/SessionController.ts";
+import { SessionLocatorService } from "./core/session/services/SessionLocatorService.ts";
 import { SessionMetaService } from "./core/session/services/SessionMetaService.ts";
 import { TopicClassifierService } from "./core/session/services/TopicClassifierService.ts";
 import { SourceRegistry } from "./core/source/services/SourceRegistry.ts";
@@ -148,6 +149,7 @@ const InfraBasics = Layer.mergeAll(
 const InfraRepos = Layer.mergeAll(
   ProjectRepository.Live,
   SessionRepository.Live,
+  SessionLocatorService.Live,
   TopicClassifierService.Live,
 ).pipe(Layer.provideMerge(InfraBasics));
 

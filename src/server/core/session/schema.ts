@@ -9,6 +9,8 @@ import { parsedUserMessageSchema } from "../claude-code/functions/parseUserMessa
 export const conversationListItemSchema = z.object({
   sessionId: z.string(),
   projectId: z.string(),
+  /** Which agent CLI recorded this conversation. */
+  source: z.string(),
   projectName: z.string().nullable(),
   projectPath: z.string().nullable(),
   title: z.string().nullable(),

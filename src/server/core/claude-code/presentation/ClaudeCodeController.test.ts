@@ -104,6 +104,8 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
             claudeAgentsDirPath: `${testDir}/agents`,
             claudeProjectsDirPath: `${testDir}/projects`,
           }),
+          homeDirectory: Effect.succeed(testDir),
+          platform: process.platform,
         }),
       );
 
@@ -182,6 +184,8 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
             claudeAgentsDirPath: `${testDir}/agents`,
             claudeProjectsDirPath: `${testDir}/projects`,
           }),
+          homeDirectory: Effect.succeed(testDir),
+          platform: process.platform,
         }),
       );
 
@@ -249,6 +253,8 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
             claudeAgentsDirPath: `${testDir}/agents`,
             claudeProjectsDirPath: `${testDir}/projects`,
           }),
+          homeDirectory: Effect.succeed(testDir),
+          platform: process.platform,
         }),
       );
 
@@ -302,6 +308,8 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
             claudeAgentsDirPath: `${testDir}/agents`,
             claudeProjectsDirPath: `${testDir}/projects`,
           }),
+          homeDirectory: Effect.succeed(testDir),
+          platform: process.platform,
         }),
       );
 
@@ -358,6 +366,8 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
             claudeAgentsDirPath: `${testDir}/agents`,
             claudeProjectsDirPath: `${testDir}/projects`,
           }),
+          homeDirectory: Effect.succeed(testDir),
+          platform: process.platform,
         }),
       );
 
@@ -421,6 +431,8 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
             claudeAgentsDirPath: `${testDir}/agents`,
             claudeProjectsDirPath: `${testDir}/projects`,
           }),
+          homeDirectory: Effect.succeed(testDir),
+          platform: process.platform,
         }),
       );
 
@@ -520,6 +532,8 @@ describe("ClaudeCodeController.getClaudeCommands", () => {
             claudeAgentsDirPath: `${testDir}/agents`,
             claudeProjectsDirPath: `${testDir}/projects`,
           }),
+          homeDirectory: Effect.succeed(testDir),
+          platform: process.platform,
         }),
       );
 
