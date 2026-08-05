@@ -176,11 +176,28 @@ re-derived from the parts.
 This closes the gap the first harness run opened. A current opencode install
 went from **reading nothing** to reading every session it has.
 
-### The file layout is still read, and asked first
+### The file layout is still read, but the database is asked first
 
-An install that migrated leaves the old directories behind, and one that never
-migrated has no database. Asking the tree first means a half-migrated directory
-reads whichever layout actually holds the sessions.
+An install that migrated leaves the old directories behind, so a `storage/` tree
+with projects in it is not evidence that the tree is where the sessions are —
+on every install that upgraded, it is a leftover. Asking it first would pin
+those installs to the history they had on the day they migrated, and report it
+as read successfully.
+
+So the database wins whenever it holds any session at all. The tree is read when
+there is no database, and when the database has nothing in it yet — which is
+what a fresh install that has not run looks like. Whether the database holds
+sessions is one `limit 1` query, and the answer is remembered once it is yes,
+because a database that has sessions does not stop having them.
+
+### A database that will not open is not an install with no history
+
+The two are opposite problems and only one of them is the user's. `detect`
+reports `unreadable` for a file that is not a database, `schema-changed` for one
+whose tables have moved, and keeps `no-data` for the install that genuinely has
+no sessions yet. Listing fails outright rather than returning nothing, because
+an empty listing is how the sync engine is told a source has been emptied — and
+it acts on that by deleting the cached rows.
 
 ### Opening a foreign database is lazy, and that mislabels a corrupt one
 

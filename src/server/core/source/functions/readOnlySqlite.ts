@@ -38,7 +38,6 @@ export type ForeignDatabase = {
     sql: string,
     ...parameters: readonly string[]
   ) => Effect.Effect<readonly Record<string, unknown>[], ForeignDatabaseError>;
-  readonly close: () => void;
 };
 
 /** The tables a query needs, checked before it is run. */
@@ -104,7 +103,6 @@ export const withReadOnlyDatabase = <A, E>(
                 detail: cause instanceof Error ? cause.message : String(cause),
               }),
           }),
-        close: () => sqlite.close(),
       }),
     (sqlite) =>
       Effect.sync(() => {

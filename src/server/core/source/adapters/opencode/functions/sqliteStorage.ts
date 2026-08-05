@@ -2,7 +2,12 @@ import { FileSystem, Path } from "@effect/platform";
 import { Effect } from "effect";
 import { ApplicationContext } from "../../../../platform/services/ApplicationContext.ts";
 import { canonicalizeProjectPath } from "../../../functions/canonicalizeProjectPath.ts";
-import { withReadOnlyDatabase } from "../../../functions/readOnlySqlite.ts";
+import {
+  type ForeignDatabase,
+  type ForeignDatabaseError,
+  hasTables,
+  withReadOnlyDatabase,
+} from "../../../functions/readOnlySqlite.ts";
 import { virtualProjectPath } from "../../../functions/virtualProjectPath.ts";
 import {
   type SourceDetection,
@@ -13,11 +18,14 @@ import {
   type SourceSessionRef,
 } from "../../../models/SourceEntities.ts";
 import { OPENCODE_SOURCE_ID } from "../../../models/SourceId.ts";
-import { type MessageFile, parseMessages } from "./parseMessages.ts";
+import { parseMessages } from "./parseMessages.ts";
 import {
+  hasSessions as hasSessionRows,
   type OpencodeSessionRow,
-  readMessages as readRows,
-  readSessions as readSessionRows,
+  readMessages,
+  readSessionById,
+  readSessions,
+  REQUIRED_TABLES,
 } from "./readSqlite.ts";
 
 /**
@@ -71,51 +79,91 @@ export const makeSqliteStorage = (rootPath: Effect.Effect<string, never, SqliteE
   });
 
   /**
-   * Every session in the database, with a workspace and a path minted for it.
+   * One open, for one piece of work.
+   *
+   * Everything that touches the database goes through here, so an operation
+   * costs a single open however many statements it runs — and no failure is
+   * turned into an empty result on the way out. A caller that swallows a read
+   * error reports "no sessions", which upstream cannot tell from "this install
+   * has none" and which `SyncService` acts on by deleting the cached rows.
+   */
+  const withDatabase = <A>(
+    use: (database: ForeignDatabase) => Effect.Effect<A, ForeignDatabaseError>,
+  ): Effect.Effect<A, ForeignDatabaseError, SqliteEnv> =>
+    databasePath.pipe(Effect.flatMap((file) => withReadOnlyDatabase(file, use)));
+
+  /**
+   * Whether this install keeps its sessions here rather than in the tree.
+   *
+   * Only the positive answer is remembered, and the set is only ever added to:
+   * a database that holds sessions does not stop holding them, while one that
+   * holds none may gain its first at any moment and has to keep being asked.
+   * Memoised at all because the storage mode is settled on every call into the
+   * adapter, and the answer costs an open. Keyed by root so that two configured
+   * roots — or two tests — cannot answer for each other.
+   */
+  const rootsHoldingSessions = new Set<string>();
+
+  const holdsSessions = Effect.gen(function* () {
+    const root = yield* rootPath;
+    if (rootsHoldingSessions.has(root)) return true;
+
+    const held = yield* withDatabase(hasSessionRows);
+    if (held) rootsHoldingSessions.add(root);
+
+    return held;
+  });
+
+  /**
+   * Session rows, with the workspace and the paths Lantern files them under.
    *
    * The database keeps no directory per project, so the project id is derived
    * from the working directory each session recorded — the same treatment Codex
    * and Copilot CLI get for the same reason.
    */
-  const sessions = Effect.gen(function* () {
-    const path = yield* Path.Path;
-    const root = yield* rootPath;
-    const options = yield* canonicalizeOptions;
+  const locate = (rows: readonly OpencodeSessionRow[]) =>
+    Effect.gen(function* () {
+      const path = yield* Path.Path;
+      const root = yield* rootPath;
+      const options = yield* canonicalizeOptions;
 
-    const rows = yield* withReadOnlyDatabase(yield* databasePath, readSessionRows).pipe(
-      Effect.catchAll(() => Effect.succeed<readonly OpencodeSessionRow[]>([])),
-    );
+      return rows.flatMap((row) => {
+        if (row.directory === null || row.directory === "") return [];
 
-    return rows.flatMap((row) => {
-      if (row.directory === null || row.directory === "") return [];
+        const canonical = canonicalizeProjectPath(row.directory, options);
+        if (canonical === null) return [];
 
-      const canonical = canonicalizeProjectPath(row.directory, options);
-      if (canonical === null) return [];
-
-      return [
-        {
-          row,
-          canonical,
-          storagePath: virtualProjectPath(path, root, canonical),
-          // Unique per session and under a root, which is all it has to be:
-          // nothing opens this path, because the rows live in the database.
-          filePath: path.join(root, "#sessions", row.id),
-        } satisfies LocatedSession,
-      ];
+        return [
+          {
+            row,
+            canonical,
+            storagePath: virtualProjectPath(path, root, canonical),
+            // Unique per session and under a root, which is all it has to be:
+            // nothing opens this path, because the rows live in the database.
+            filePath: path.join(root, "#sessions", row.id),
+          } satisfies LocatedSession,
+        ];
+      });
     });
-  });
 
-  const messagesFor = (sessionId: string) =>
-    databasePath.pipe(
-      Effect.flatMap((file) =>
-        withReadOnlyDatabase(file, (database) => readRows(database, sessionId)),
-      ),
-    );
+  /** Every session in the database, newest first. */
+  const sessions = withDatabase(readSessions).pipe(Effect.flatMap(locate));
+
+  /** A read failure is this source's failure, not an empty history. */
+  const asReadError = (cause: ForeignDatabaseError) =>
+    new SourceReadError({
+      sourceId: OPENCODE_SOURCE_ID,
+      path: cause.path,
+      reason: cause.detail,
+      cause,
+    });
 
   const listProjects = Effect.gen(function* () {
     const byCanonical = new Map<string, { cwd: string; storagePath: string; mtimeMs: number }>();
 
-    for (const { row, canonical, storagePath } of yield* sessions) {
+    for (const { row, canonical, storagePath } of yield* sessions.pipe(
+      Effect.mapError(asReadError),
+    )) {
       const existing = byCanonical.get(canonical);
       byCanonical.set(canonical, {
         cwd: existing?.cwd ?? row.directory ?? "",
@@ -137,6 +185,7 @@ export const makeSqliteStorage = (rootPath: Effect.Effect<string, never, SqliteE
 
   const listSessions = (project: SourceProject) =>
     sessions.pipe(
+      Effect.mapError(asReadError),
       Effect.map(
         (found) =>
           found
@@ -152,12 +201,27 @@ export const makeSqliteStorage = (rootPath: Effect.Effect<string, never, SqliteE
       ),
     );
 
+  /**
+   * One session and its messages, in one open.
+   *
+   * The row is fetched by id rather than found in a listing: a sync reads
+   * sessions one at a time, and scanning the whole table for each of them turns
+   * a history into quadratic work against the file it is stored in.
+   */
+  const readOneSession = (sessionId: string) =>
+    withDatabase((database) =>
+      Effect.gen(function* () {
+        const row = yield* readSessionById(database, sessionId);
+        if (row === null) return null;
+
+        return { row, files: yield* readMessages(database, sessionId) };
+      }),
+    );
+
   const readSession = (ref: SourceSessionRef) =>
     Effect.gen(function* () {
-      const found = (yield* sessions).find(
-        (candidate) => candidate.row.id === ref.sourceSessionKey,
-      );
-      if (found === undefined) {
+      const read = yield* readOneSession(ref.sourceSessionKey).pipe(Effect.mapError(asReadError));
+      if (read === null) {
         return yield* new SourceReadError({
           sourceId: OPENCODE_SOURCE_ID,
           path: ref.filePath,
@@ -165,23 +229,18 @@ export const makeSqliteStorage = (rootPath: Effect.Effect<string, never, SqliteE
         });
       }
 
-      const files = yield* messagesFor(found.row.id).pipe(
-        Effect.mapError(
-          (cause) =>
-            new SourceReadError({
-              sourceId: OPENCODE_SOURCE_ID,
-              path: cause.path,
-              reason: cause.detail,
-              cause,
-            }),
-        ),
-      );
-
+      const { row, files } = read;
       const parsed = parseMessages(files, {
-        sessionKey: found.row.id,
-        cwd: found.row.directory ?? "",
+        sessionKey: row.id,
+        cwd: row.directory ?? "",
         version: "unknown",
       });
+
+      if (parsed.parseStats.unparsed > 0) {
+        yield* Effect.logWarning(
+          `${parsed.parseStats.unparsed} unreadable messages in session ${row.id} of ${DATABASE_FILE}: ${parsed.unparsedFiles.join(" | ")}`,
+        );
+      }
 
       return {
         ref,
@@ -191,12 +250,12 @@ export const makeSqliteStorage = (rootPath: Effect.Effect<string, never, SqliteE
         // The session row totals its own usage, which beats re-summing the
         // per-message parts that produced it.
         reportedUsage: {
-          costUsd: found.row.costUsd,
-          inputTokens: found.row.inputTokens,
-          outputTokens: found.row.outputTokens,
-          cacheReadTokens: found.row.cacheReadTokens,
-          cacheCreationTokens: found.row.cacheWriteTokens,
-          modelName: found.row.modelName ?? parsed.modelName,
+          costUsd: row.costUsd,
+          inputTokens: row.inputTokens,
+          outputTokens: row.outputTokens,
+          cacheReadTokens: row.cacheReadTokens,
+          cacheCreationTokens: row.cacheWriteTokens,
+          modelName: row.modelName ?? parsed.modelName,
         },
         parseStats: parsed.parseStats,
       } satisfies SourceSession;
@@ -204,11 +263,15 @@ export const makeSqliteStorage = (rootPath: Effect.Effect<string, never, SqliteE
 
   const resolveSessionRef = (projectStoragePath: string, sessionId: string) =>
     Effect.gen(function* () {
-      const found = (yield* sessions).find(
-        (candidate) =>
-          candidate.row.id === sessionId && candidate.storagePath === projectStoragePath,
+      const row = yield* withDatabase((database) => readSessionById(database, sessionId)).pipe(
+        Effect.mapError(asReadError),
       );
-      if (found === undefined) {
+
+      // A session under the wrong workspace is as gone as one that never
+      // existed: the minted project path is what says which workspace it
+      // belongs to, and it must match the one being asked about.
+      const found = row === null ? undefined : (yield* locate([row])).at(0);
+      if (found === undefined || found.storagePath !== projectStoragePath) {
         return yield* new SourceSessionGoneError({ sourceId: OPENCODE_SOURCE_ID, sessionId });
       }
 
@@ -222,35 +285,48 @@ export const makeSqliteStorage = (rootPath: Effect.Effect<string, never, SqliteE
       } satisfies SourceSessionRef;
     });
 
-  const detect = (root: string) =>
+  /**
+   * A verdict on the database, in one open.
+   *
+   * `null` means "read a real session and it came back a conversation" — the
+   * only thing that earns `supported`. Anything else names the reason, so a
+   * database that cannot be opened is never reported as an install with no
+   * history: those are different problems and only one of them is the user's.
+   */
+  const probe = withDatabase((database) =>
     Effect.gen(function* () {
-      const found = yield* sessions;
-      if (found.length === 0) {
-        return {
-          sourceId: OPENCODE_SOURCE_ID,
-          rootPath: root,
-          hasData: false,
-          supported: false,
-          unsupportedReason: "no-data",
-        } satisfies SourceDetection;
-      }
+      if (!(yield* hasTables(database, REQUIRED_TABLES))) return "schema-changed";
+
+      const rows = yield* readSessions(database);
+      if (rows.length === 0) return "no-data";
 
       // Read real sessions rather than trusting the schema. "Queried without
       // complaint" is not the test: a statement that still runs against a table
       // whose documents changed yields empty conversations, which is how a
       // whole history renders blank while looking like it worked.
-      for (const candidate of found.slice(0, DETECT_SAMPLE)) {
-        const files = yield* messagesFor(candidate.row.id).pipe(
-          Effect.catchAll(() => Effect.succeed<readonly MessageFile[]>([])),
-        );
-
-        const parsed = parseMessages(files, {
-          sessionKey: candidate.row.id,
-          cwd: candidate.row.directory ?? "",
+      for (const row of rows.slice(0, DETECT_SAMPLE)) {
+        const parsed = parseMessages(yield* readMessages(database, row.id), {
+          sessionKey: row.id,
+          cwd: row.directory ?? "",
           version: "unknown",
         });
 
-        if (parsed.entries.length > 0 && parsed.parseStats.unparsed === 0) {
+        if (parsed.entries.length > 0 && parsed.parseStats.unparsed === 0) return null;
+      }
+
+      return "schema-changed";
+    }),
+  );
+
+  const detect = (root: string) =>
+    probe.pipe(
+      // The reader tells corruption apart from a schema that moved; throwing
+      // that away here would put both under "no sessions recorded yet" and send
+      // someone looking for a history that is in fact sitting in an unreadable
+      // file.
+      Effect.catchAll((cause) => Effect.succeed(cause.reason)),
+      Effect.map((reason) => {
+        if (reason === null) {
           return {
             sourceId: OPENCODE_SOURCE_ID,
             rootPath: root,
@@ -259,18 +335,28 @@ export const makeSqliteStorage = (rootPath: Effect.Effect<string, never, SqliteE
             unsupportedReason: null,
           } satisfies SourceDetection;
         }
-      }
 
-      return {
-        sourceId: OPENCODE_SOURCE_ID,
-        rootPath: root,
-        hasData: true,
-        supported: false,
-        unsupportedReason: "schema-changed",
-      } satisfies SourceDetection;
-    });
+        return {
+          sourceId: OPENCODE_SOURCE_ID,
+          rootPath: root,
+          // A database that will not open holds an unknown amount of history,
+          // and "no data" is the one answer that is certainly wrong.
+          hasData: reason !== "no-data",
+          supported: false,
+          unsupportedReason: reason,
+        } satisfies SourceDetection;
+      }),
+    );
 
-  return { exists, listProjects, listSessions, readSession, resolveSessionRef, detect };
+  return {
+    exists,
+    holdsSessions,
+    listProjects,
+    listSessions,
+    readSession,
+    resolveSessionRef,
+    detect,
+  };
 };
 
 export type SqliteEnv = FileSystem.FileSystem | Path.Path | ApplicationContext;

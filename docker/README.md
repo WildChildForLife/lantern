@@ -115,8 +115,9 @@ or has a recorded reason it cannot be.
 
 - **opencode `1.18.13` writes SQLite, not JSON files.** Found by this harness on
   its first run, contradicting every secondary description of the 1.x line.
-  Both layouts are read now; the tree is asked first, because a migrated install
-  leaves its old directories behind.
+  Both layouts are read now. The database is asked first, because a migrated
+  install leaves its old directories behind and the tree would otherwise pin it
+  to the history it had on the day it migrated.
 - **Codex reserves the provider ids `openai`, `ollama` and `lmstudio`.** A
   `config.toml` block using one of them is _silently discarded_ and Codex keeps
   talking to `localhost` — which inside a container is nothing. The harness uses
