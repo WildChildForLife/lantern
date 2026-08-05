@@ -1,6 +1,7 @@
-import type { FileSystem, Path } from "@effect/platform";
-import type { Effect } from "effect";
+import type { CommandExecutor, FileSystem, Path } from "@effect/platform";
+import { Data, type Effect } from "effect";
 import type { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
+import type { LanternOptionsService } from "../../platform/services/LanternOptionsService.ts";
 import type {
   SourceChange,
   SourceDetection,
@@ -101,4 +102,47 @@ export type SourceAdapter = {
    * the path is none of this source's business.
    */
   readonly classifyChange: (absolutePath: string, roots: readonly string[]) => SourceChange | null;
+
+  /**
+   * How to ask this CLI one question without a terminal.
+   *
+   * Topic naming runs through whichever CLI the user picked, using the login
+   * they already have — Lantern never holds a key of its own. Absent means the
+   * CLI offers no headless mode, and naming falls back to the local keyword
+   * grouping rather than failing.
+   */
+  readonly headless?: HeadlessRunner;
 };
+
+/**
+ * What resolving and running a CLI needs, on top of what reading files needs:
+ * a process to run `which`, and the options that can name an executable
+ * outright.
+ */
+export type HeadlessEnv = SourceEnv | CommandExecutor.CommandExecutor | LanternOptionsService;
+
+export type HeadlessAnswer = {
+  readonly text: string;
+  /** What the CLI said the call cost, when it says. Zero when it does not. */
+  readonly costUsd: number;
+};
+
+export type HeadlessRunner = {
+  /**
+   * Absolute path to the CLI. Wider than `SourceEnv` because finding a binary
+   * means running `which`, which reading a directory does not.
+   */
+  readonly executable: () => Effect.Effect<string, HeadlessUnavailableError, HeadlessEnv>;
+  /** Everything after the executable, for one non-interactive prompt. */
+  readonly args: (prompt: string) => readonly string[];
+  /**
+   * Pull the answer out of stdout. Each CLI frames it differently, and some
+   * only ever print prose — hence a per-source parse rather than one envelope.
+   */
+  readonly parse: (stdout: string) => HeadlessAnswer;
+};
+
+export class HeadlessUnavailableError extends Data.TaggedError("HeadlessUnavailableError")<{
+  readonly sourceId: SourceId;
+  readonly reason: string;
+}> {}

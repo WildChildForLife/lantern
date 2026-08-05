@@ -4,6 +4,7 @@ import { InfoIcon, LayoutGridIcon, MessagesSquareIcon, SearchIcon } from "lucide
 import { type FC, Suspense, useState } from "react";
 import { NotificationBell } from "@/web/app/components/NotificationBell";
 import { useSearch } from "@/web/components/SearchProvider";
+import { SettingsButton } from "@/web/components/SettingsButton";
 import { SystemInfoCard } from "@/web/components/SystemInfoCard";
 import { Dialog, DialogContent, DialogTitle } from "@/web/components/ui/dialog";
 import { ViewModeToggle } from "@/web/components/ViewModeToggle";
@@ -35,6 +36,7 @@ export const ProjectsPage: FC = () => {
           >
             <SearchIcon className="w-3.5 h-3.5" />
           </button>
+          <SettingsButton />
           <NotificationBell />
         </div>
       </header>
@@ -70,14 +72,18 @@ export const ProjectsPage: FC = () => {
                     className="flex items-center gap-1.5 h-8 px-3 rounded-md border border-border text-sm transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
                   >
                     <LayoutGridIcon className="w-4 h-4" />
-                    <span>Topics</span>
+                    <span>
+                      <Trans id="nav.topics" message="Topics" />
+                    </span>
                   </Link>
                   <Link
                     to="/conversations"
                     className="flex items-center gap-1.5 h-8 px-3 rounded-md border border-border text-sm transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
                   >
                     <MessagesSquareIcon className="w-4 h-4" />
-                    <span>All conversations</span>
+                    <span>
+                      <Trans id="nav.all_conversations" message="All conversations" />
+                    </span>
                   </Link>
                   <ViewModeToggle />
                   <SetupProjectDialog />

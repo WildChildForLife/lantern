@@ -126,3 +126,9 @@ They exist so PR-7…9 start from something that runs rather than from a guess.
   is why that window grows rather than being fixed.
 - **Small models are unreliable at tool calling.** If transcripts come out
   without tool calls, raise the model size before suspecting the adapters.
+- **"Sort N new" will not classify anything on the default model.** Topic naming
+  asks the CLI for a JSON array covering forty conversations at once, and a
+  0.6B model cannot hold that shape — it answers, but not in a form anything can
+  parse. The plumbing is still exercised: the CLI is resolved, run headlessly
+  and its structured output parsed. To see it actually name topics, set
+  `OLLAMA_MODEL` to something larger in `.env`.

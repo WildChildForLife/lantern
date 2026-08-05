@@ -358,3 +358,39 @@ describe("codexSourceAdapter", () => {
     }).pipe(Effect.provide(adapterLayer)),
   );
 });
+
+describe("codex headless output", () => {
+  it("takes the answer and leaves the reasoning and banner behind", () => {
+    const runner = codexSourceAdapter.headless;
+    if (runner === undefined) {
+      throw new Error("codex should offer a headless runner");
+    }
+
+    const stdout = [
+      '{"type":"thread.started","thread_id":"t1"}',
+      '{"type":"item.completed","item":{"id":"i0","type":"error","message":"Model metadata not found"}}',
+      '{"type":"item.completed","item":{"id":"i1","type":"reasoning","text":"Thinking about it."}}',
+      '{"type":"item.completed","item":{"id":"i2","type":"agent_message","text":"the answer"}}',
+      '{"type":"turn.completed","usage":{"input_tokens":10,"output_tokens":2}}',
+      "not json at all",
+    ].join("\n");
+
+    // Plain `codex exec` interleaves a banner, the model's reasoning and a
+    // token count with the reply. Handing all of that back as the answer is
+    // what made topic naming fail against a real Codex.
+    expect(runner.parse(stdout)).toStrictEqual({ text: "the answer", costUsd: 0 });
+  });
+
+  it("asks for the structured output it parses", () => {
+    const runner = codexSourceAdapter.headless;
+    if (runner === undefined) {
+      throw new Error("codex should offer a headless runner");
+    }
+
+    const args = runner.args("why is the sky blue");
+
+    expect(args).toContain("--json");
+    expect(args).toContain("exec");
+    expect(args.at(-1)).toBe("why is the sky blue");
+  });
+});

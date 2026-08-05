@@ -1,9 +1,11 @@
+import { Trans, useLingui } from "@lingui/react";
 import { Link } from "@tanstack/react-router";
 import { CheckCheckIcon, FolderIcon, MessagesSquareIcon } from "lucide-react";
 import { type FC, useState } from "react";
 import { useDoneConversations } from "@/lib/atoms/doneConversations";
 import { useViewMode } from "@/lib/atoms/viewMode";
 import { NotificationBell } from "@/web/app/components/NotificationBell";
+import { SettingsButton } from "@/web/components/SettingsButton";
 import { Button } from "@/web/components/ui/button";
 import { Input } from "@/web/components/ui/input";
 import { ViewModeToggle } from "@/web/components/ViewModeToggle";
@@ -13,6 +15,7 @@ import { TopicList } from "./components/TopicList";
 import { TopicTable } from "./components/TopicTable";
 
 export const TopicsPage: FC = () => {
+  const { i18n } = useLingui();
   const [query, setQuery] = useState("");
   const [hideDone, setHideDone] = useState(false);
   const { viewMode } = useViewMode();
@@ -31,16 +34,21 @@ export const TopicsPage: FC = () => {
             className="flex items-center gap-1.5 h-7 px-2 rounded transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
           >
             <MessagesSquareIcon className="w-3.5 h-3.5" />
-            <span>All conversations</span>
+            <span>
+              <Trans id="nav.all_conversations" message="All conversations" />
+            </span>
           </Link>
           <Link
             to="/projects"
             className="flex items-center gap-1.5 h-7 px-2 rounded transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
           >
             <FolderIcon className="w-3.5 h-3.5" />
-            <span>Projects</span>
+            <span>
+              <Trans id="nav.projects" message="Projects" />
+            </span>
           </Link>
           <ClassifyTopicsButton />
+          <SettingsButton />
           <NotificationBell />
         </div>
       </header>
@@ -53,9 +61,14 @@ export const TopicsPage: FC = () => {
           )}
         >
           <header className="mb-6">
-            <h1 className="text-xl font-semibold">Topics</h1>
+            <h1 className="text-xl font-semibold">
+              <Trans id="topics.title" message="Topics" />
+            </h1>
             <p className="text-muted-foreground text-sm">
-              Conversations grouped by what they are about, not by the folder they were started in.
+              <Trans
+                id="topics.subtitle"
+                message="Conversations grouped by what they are about, not by the folder they were started in."
+              />
             </p>
           </header>
 
@@ -63,7 +76,7 @@ export const TopicsPage: FC = () => {
             <Input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Filter topics..."
+              placeholder={i18n._({ id: "topics.filter.placeholder", message: "Filter topics..." })}
               className="max-w-md"
             />
             <Button

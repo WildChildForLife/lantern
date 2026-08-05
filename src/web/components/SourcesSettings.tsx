@@ -1,9 +1,10 @@
 import { Trans, useLingui } from "@lingui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FC, useState } from "react";
+import { useConfig } from "@/web/app/hooks/useConfig";
 import { honoClient } from "@/web/lib/api/client";
 import { sourcesQuery } from "@/web/lib/api/queries";
-import { Checkbox } from "./ui/checkbox";
+import { SourceTile } from "./settings/SourceTile";
 
 /** The ids the API accepts, taken from the request type so they cannot drift. */
 type SourceId = Parameters<typeof honoClient.api.sources.$put>[0]["json"]["enabled"][number];
@@ -51,6 +52,7 @@ export const SourcesSettings: FC<{ showDescriptions?: boolean }> = ({
   showDescriptions = true,
 }) => {
   const queryClient = useQueryClient();
+  const { config, updateConfig } = useConfig();
   const unsupportedLabel = useUnsupportedLabel();
   const { data, isPending, isError, isFetching } = useQuery(sourcesQuery);
   // The response to a change is computed before the purge and re-read finish,
@@ -107,60 +109,48 @@ export const SourcesSettings: FC<{ showDescriptions?: boolean }> = ({
         </p>
       )}
 
-      <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {sources.map((source) => {
           const enabled = isEnabled(source.id, source.enabled);
-          const selectable = source.supported || enabled;
-          const checkboxId = `source-${source.id}`;
 
           return (
-            <div key={source.id} className="flex items-start gap-2">
-              <Checkbox
-                id={checkboxId}
-                checked={enabled}
-                disabled={!selectable || isFetching || isMutating}
-                onCheckedChange={(checked) => {
-                  const next = sources
-                    .filter((candidate) =>
-                      candidate.id === source.id
-                        ? checked === true
-                        : isEnabled(candidate.id, candidate.enabled),
-                    )
-                    .map((candidate) => candidate.id);
+            <SourceTile
+              key={source.id}
+              id={source.id}
+              displayName={source.displayName}
+              enabled={enabled}
+              supported={source.supported}
+              interactive={source.capabilities.interactive}
+              sessions={source.stats.sessions}
+              projects={source.stats.projects}
+              unsupportedLabel={unsupportedLabel(source.unsupportedReason)}
+              disabled={isFetching || isMutating}
+              onToggle={(next: boolean) => {
+                const chosen = sources
+                  .filter((candidate) =>
+                    candidate.id === source.id ? next : isEnabled(candidate.id, candidate.enabled),
+                  )
+                  .map((candidate) => candidate.id);
 
-                  setSubmitted(next);
-                  setEnabled(next);
-                }}
-              />
-              <div className="min-w-0">
-                <label
-                  htmlFor={checkboxId}
-                  className="text-sm font-medium leading-none cursor-pointer"
-                >
-                  {source.displayName}
-                </label>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {source.supported ? (
-                    <Trans
-                      id="sources.stats"
-                      message="{sessionCount} conversations across {projectCount} projects"
-                      values={{
-                        sessionCount: source.stats.sessions,
-                        projectCount: source.stats.projects,
-                      }}
-                    />
-                  ) : (
-                    unsupportedLabel(source.unsupportedReason)
-                  )}
-                  {source.capabilities.interactive ? null : (
-                    <>
-                      {" · "}
-                      <Trans id="sources.read_only" message="read-only" />
-                    </>
-                  )}
-                </p>
-              </div>
-            </div>
+                setSubmitted(chosen);
+                setEnabled(chosen);
+
+                // The CLI in use has to be one Lantern is reading, so both
+                // directions are settled here rather than by an effect that
+                // watches config and writes to it — that loops.
+                if (next && source.supported) {
+                  // Switching one on is as good a statement as picking it.
+                  updateConfig({ ...config, primarySource: source.id });
+                } else if (!next && config?.primarySource === source.id) {
+                  // Switching off the one in use: fall back to whatever is
+                  // still on, rather than leaving a name that is no longer read.
+                  const replacement = sources.find(
+                    (candidate) => candidate.id !== source.id && chosen.includes(candidate.id),
+                  );
+                  updateConfig({ ...config, primarySource: replacement?.id });
+                }
+              }}
+            />
           );
         })}
       </div>
