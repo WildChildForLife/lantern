@@ -35,7 +35,7 @@ if [ "$skip_drive" = false ]; then
   echo "==> driving the CLIs"
   # Sequentially, not in parallel: they share one small local model, and several
   # agents contending for it makes every one of them slow and flaky.
-  for cli in claude-code codex opencode qwen-code; do
+  for cli in claude-code codex opencode qwen-code copilot; do
     echo
     echo "--- $cli ---"
     # A CLI that fails should not stop the others — a partial history still
@@ -55,7 +55,7 @@ echo "==> enabling every source"
 # Seeded rather than passed as LANTERN_SOURCES, which would lock the settings
 # UI for the whole run and defeat the point of testing it.
 "${COMPOSE[@]}" run --rm --no-deps --entrypoint /bin/sh lantern -c \
-  'mkdir -p /root/.lantern/sources && printf "{\"enabled\":[\"claude-code\",\"codex\",\"opencode\",\"qwen-code\"]}\n" > /root/.lantern/sources/sources.json' \
+  'mkdir -p /root/.lantern/sources && printf "{\"enabled\":[\"claude-code\",\"codex\",\"opencode\",\"qwen-code\",\"copilot\"]}\n" > /root/.lantern/sources/sources.json' \
   >/dev/null
 
 # The release image first, then the harness image that adds the CLIs on top of

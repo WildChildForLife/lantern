@@ -1,0 +1,10 @@
+id: 049410b4-c1df-44ee-87a5-caa1c349091e
+cwd: /work
+git_root: /work
+branch: master
+client_name: github/cli
+name: In src/orders.py make average_item_price return 0 when the cart has no items.
+user_named: false
+summary_count: 0
+created_at: 2026-08-05T20:40:13.482Z
+updated_at: 2026-08-05T20:40:13.644Z
