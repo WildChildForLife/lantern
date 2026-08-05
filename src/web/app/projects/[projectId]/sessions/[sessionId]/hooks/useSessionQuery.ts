@@ -9,6 +9,7 @@ import {
   removeVirtualMessage,
 } from "@/lib/virtual-messages/virtualMessageStore";
 import { sessionDetailQuery } from "@/web/lib/api/queries";
+import type { CostConfidence } from "@/web/lib/formatCost";
 
 const filterConversations = (
   conversations: ReadonlyArray<
@@ -40,6 +41,8 @@ export const useSessionQuery = (projectId: string, sessionId: string) => {
                 customTitle: null,
                 cost: {
                   totalUsd: 0,
+                  // A session that has not started has no model, so no price.
+                  confidence: "unknown" satisfies CostConfidence,
                   breakdown: {
                     inputTokensUsd: 0,
                     outputTokensUsd: 0,

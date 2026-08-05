@@ -69,6 +69,7 @@ describe("SessionController", () => {
             customTitle: null,
             cost: {
               totalUsd: 0,
+              confidence: "estimated",
               breakdown: {
                 inputTokensUsd: 0,
                 outputTokensUsd: 0,

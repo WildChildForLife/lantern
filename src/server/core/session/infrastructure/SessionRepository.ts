@@ -169,6 +169,7 @@ const LayerImpl = Effect.gen(function* () {
         lastModifiedAt: sessions.lastModifiedAt,
         modelName: sessions.modelName,
         totalCostUsd: sessions.totalCostUsd,
+        costConfidence: sessions.costConfidence,
       })
       .from(sessions)
       .innerJoin(projects, eq(sessions.projectId, projects.id))

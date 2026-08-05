@@ -32,6 +32,7 @@ import { useQuestionRequests } from "@/web/hooks/useQuestionRequests";
 import { useSchedulerJobs } from "@/web/hooks/useScheduler";
 import { useTaskNotifications } from "@/web/hooks/useTaskNotifications";
 import { honoClient } from "@/web/lib/api/client";
+import { formatCost } from "@/web/lib/formatCost";
 import { cn } from "@/web/utils";
 import { useProject } from "../../../hooks/useProject";
 import { resolveSessionTitle } from "../../../services/firstCommandToTitle";
@@ -584,67 +585,76 @@ const SessionPageMainContent: FC<
                                 variant="secondary"
                                 className="h-7 text-xs flex items-center w-fit font-semibold"
                               >
-                                <Trans id="session.cost.total" />: $
-                                {sessionData.session.meta.cost.totalUsd.toFixed(3)}
+                                <Trans id="session.cost.total" />:{" "}
+                                {formatCost(
+                                  sessionData.session.meta.cost.totalUsd,
+                                  sessionData.session.meta.cost.confidence,
+                                  { fractionDigits: 3 },
+                                )}
                               </Badge>
-                              <div className="text-xs space-y-1 pl-2">
-                                <div className="flex justify-between gap-4">
-                                  <span className="text-muted-foreground">
-                                    <Trans id="session.cost.input_tokens" />:
-                                  </span>
-                                  <span>
-                                    $
-                                    {sessionData.session.meta.cost.breakdown.inputTokensUsd.toFixed(
-                                      3,
-                                    )}{" "}
-                                    (
-                                    {sessionData.session.meta.cost.tokenUsage.inputTokens.toLocaleString()}
-                                    )
-                                  </span>
+                              {/* Per-token dollars alongside real token counts read as
+                                  measured, not absent, so an unpriced session shows
+                                  the counts without pretending to know their cost. */}
+                              {sessionData.session.meta.cost.confidence !== "unknown" && (
+                                <div className="text-xs space-y-1 pl-2">
+                                  <div className="flex justify-between gap-4">
+                                    <span className="text-muted-foreground">
+                                      <Trans id="session.cost.input_tokens" />:
+                                    </span>
+                                    <span>
+                                      $
+                                      {sessionData.session.meta.cost.breakdown.inputTokensUsd.toFixed(
+                                        3,
+                                      )}{" "}
+                                      (
+                                      {sessionData.session.meta.cost.tokenUsage.inputTokens.toLocaleString()}
+                                      )
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between gap-4">
+                                    <span className="text-muted-foreground">
+                                      <Trans id="session.cost.output_tokens" />:
+                                    </span>
+                                    <span>
+                                      $
+                                      {sessionData.session.meta.cost.breakdown.outputTokensUsd.toFixed(
+                                        3,
+                                      )}{" "}
+                                      (
+                                      {sessionData.session.meta.cost.tokenUsage.outputTokens.toLocaleString()}
+                                      )
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between gap-4">
+                                    <span className="text-muted-foreground">
+                                      <Trans id="session.cost.cache_creation" />:
+                                    </span>
+                                    <span>
+                                      $
+                                      {sessionData.session.meta.cost.breakdown.cacheCreationUsd.toFixed(
+                                        3,
+                                      )}{" "}
+                                      (
+                                      {sessionData.session.meta.cost.tokenUsage.cacheCreationTokens.toLocaleString()}
+                                      )
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between gap-4">
+                                    <span className="text-muted-foreground">
+                                      <Trans id="session.cost.cache_read" />:
+                                    </span>
+                                    <span>
+                                      $
+                                      {sessionData.session.meta.cost.breakdown.cacheReadUsd.toFixed(
+                                        3,
+                                      )}{" "}
+                                      (
+                                      {sessionData.session.meta.cost.tokenUsage.cacheReadTokens.toLocaleString()}
+                                      )
+                                    </span>
+                                  </div>
                                 </div>
-                                <div className="flex justify-between gap-4">
-                                  <span className="text-muted-foreground">
-                                    <Trans id="session.cost.output_tokens" />:
-                                  </span>
-                                  <span>
-                                    $
-                                    {sessionData.session.meta.cost.breakdown.outputTokensUsd.toFixed(
-                                      3,
-                                    )}{" "}
-                                    (
-                                    {sessionData.session.meta.cost.tokenUsage.outputTokens.toLocaleString()}
-                                    )
-                                  </span>
-                                </div>
-                                <div className="flex justify-between gap-4">
-                                  <span className="text-muted-foreground">
-                                    <Trans id="session.cost.cache_creation" />:
-                                  </span>
-                                  <span>
-                                    $
-                                    {sessionData.session.meta.cost.breakdown.cacheCreationUsd.toFixed(
-                                      3,
-                                    )}{" "}
-                                    (
-                                    {sessionData.session.meta.cost.tokenUsage.cacheCreationTokens.toLocaleString()}
-                                    )
-                                  </span>
-                                </div>
-                                <div className="flex justify-between gap-4">
-                                  <span className="text-muted-foreground">
-                                    <Trans id="session.cost.cache_read" />:
-                                  </span>
-                                  <span>
-                                    $
-                                    {sessionData.session.meta.cost.breakdown.cacheReadUsd.toFixed(
-                                      3,
-                                    )}{" "}
-                                    (
-                                    {sessionData.session.meta.cost.tokenUsage.cacheReadTokens.toLocaleString()}
-                                    )
-                                  </span>
-                                </div>
-                              </div>
+                              )}
                             </div>
                           </div>
                         )}

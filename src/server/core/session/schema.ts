@@ -19,6 +19,8 @@ export const conversationListItemSchema = z.object({
   lastModifiedAt: z.string(),
   modelName: z.string().nullable(),
   totalCostUsd: z.number(),
+  /** Never render totalCostUsd without it — see formatCost. */
+  costConfidence: z.string(),
 });
 
 /**
@@ -46,6 +48,8 @@ export const sessionMetaSchema = z.object({
   customTitle: z.string().nullable(),
   cost: z.object({
     totalUsd: z.number(),
+    /** Whether totalUsd is reported, estimated, or not knowable. */
+    confidence: z.enum(["reported", "estimated", "unknown"]),
     breakdown: z.object({
       inputTokensUsd: z.number(),
       outputTokensUsd: z.number(),
