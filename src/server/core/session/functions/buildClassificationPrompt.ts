@@ -6,13 +6,14 @@ import { TOPIC_ICON_NAMES } from "./groupConversationsByTopic.ts";
  * session under ~/.claude/projects, so without a marker the dashboard fills up
  * with the classifier talking to itself.
  */
-export const CLASSIFIER_MARKER = "[ccv-topic-classifier]";
+export const CLASSIFIER_MARKER = "[lantern-topic-classifier]";
 
 /**
  * Prompt openings used before the marker existed. Kept so the runs that already
  * landed in the log stay hidden instead of posing as conversations forever.
  */
 export const LEGACY_CLASSIFIER_MARKERS = [
+  "[ccv-topic-classifier]",
   "You are organising a personal dashboard of Claude Code conversations.",
 ];
 

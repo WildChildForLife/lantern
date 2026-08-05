@@ -15,7 +15,7 @@ You need Node.js 24 or newer and pnpm. `pnpm dev` exists but is not the recommen
 To work against fake data instead of your own conversations:
 
 ```bash
-node dist/main.js --port 4100 --claude-dir ./mock-global-claude-dir
+node dist/main.js --port 4100 --claude-dir ./fixtures/claude-home
 ```
 
 ## Before you open a pull request

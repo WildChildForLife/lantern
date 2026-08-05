@@ -22,7 +22,7 @@ export const useExportSession = () => {
     },
     onSuccess: (data, variables) => {
       const safeSessionId = variables.sessionId.replace(/[^a-zA-Z0-9._-]/g, "_") || "unknown";
-      const file = new File([data.html], `ccv-html-export-${safeSessionId}.html`, {
+      const file = new File([data.html], `lantern-html-export-${safeSessionId}.html`, {
         type: "text/html",
       });
       const url = URL.createObjectURL(file);

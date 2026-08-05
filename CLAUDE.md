@@ -173,7 +173,7 @@ Raw `fetch` and direct requests are prohibited.
 ### Data Layer
 
 - **Single Source of Truth**: `~/.claude/projects/*.jsonl`
-- **Cache**: `~/.claude-code-viewer/` (invalidated via SSE when source changes)
+- **Cache**: `~/.lantern/` (invalidated via SSE when source changes)
 - **Validation**: Strict Zod schemas ensure every field is captured
 
 ### Session Process Management
@@ -183,7 +183,7 @@ Claude Code processes remain alive in the background (unless aborted), allowing 
 ## Development Tips
 
 1. **Session Logs**: Examine `~/.claude/projects/` JSONL files to understand data structures
-2. **Mock Data**: `mock-global-claude-dir/` contains E2E test mocks (useful reference for schema examples)
+2. **Fixtures**: `fixtures/claude-home/` is a fake `~/.claude` directory — demo sessions plus one project per JSONL entry shape. Unit tests read it, and `--claude-dir ./fixtures/claude-home` runs the app against it.
 3. **Effect-TS Help**: https://effect.website/llms.txt
 
 ## References

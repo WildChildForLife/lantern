@@ -1,5 +1,10 @@
 name: "Setup Node & pnpm"
 description: "Install pnpm and setup Node.js with pnpm cache (fixed versions)"
+inputs:
+  registry-url:
+    description: "npm registry to authenticate against. Set it only in publishing jobs, so NODE_AUTH_TOKEN reaches the generated .npmrc."
+    required: false
+    default: ""
 runs:
   using: "composite"
   steps:
@@ -7,6 +12,7 @@ runs:
       uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
       with:
         node-version-file: ".node-version"
+        registry-url: ${{ inputs.registry-url }}
 
     - name: Setup pnpm
       shell: bash

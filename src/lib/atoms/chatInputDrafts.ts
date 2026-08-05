@@ -2,6 +2,7 @@ import { useAtom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import { type SetStateAction, useCallback } from "react";
 import { z } from "zod";
+import { storageKey } from "./storageKey";
 
 const chatInputDraftStoreSchema = z.record(z.string(), z.string());
 
@@ -46,7 +47,7 @@ const chatInputDraftStorage = {
 };
 
 const chatInputDraftsAtom = atomWithStorage<ChatInputDraftStore>(
-  "claude-code-viewer-chat-input-drafts",
+  storageKey("chat-input-drafts"),
   {},
   chatInputDraftStorage,
 );

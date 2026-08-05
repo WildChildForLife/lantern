@@ -116,8 +116,8 @@ const LayerImpl = Effect.gen(function* () {
         .max(4),
     };
 
-    const ccvAskUserQuestionTool = tool(
-      "CCVAskUserQuestion",
+    const askUserQuestionTool = tool(
+      "LanternAskUserQuestion",
       "Ask the user questions through the Lantern web interface. This tool replaces AskUserQuestion for web-based sessions. Use this to:\n1. Gather user preferences or requirements\n2. Clarify ambiguous instructions\n3. Get decisions on implementation choices\n4. Offer choices about what direction to take.\n\nUsers can select from provided options or type custom input. Use multiSelect: true to allow multiple answers.",
       questionInputSchema,
       async (args) => {
@@ -153,8 +153,8 @@ const LayerImpl = Effect.gen(function* () {
     );
 
     return createSdkMcpServer({
-      name: "ccv-ask-user-question",
-      tools: [ccvAskUserQuestionTool],
+      name: "lantern-ask-user-question",
+      tools: [askUserQuestionTool],
     });
   };
 
@@ -212,11 +212,11 @@ const LayerImpl = Effect.gen(function* () {
   };
 });
 
-export type ICCVAskUserQuestionService = InferEffect<typeof LayerImpl>;
+export type IAskUserQuestionService = InferEffect<typeof LayerImpl>;
 
-export class CCVAskUserQuestionService extends Context.Tag("CCVAskUserQuestionService")<
-  CCVAskUserQuestionService,
-  ICCVAskUserQuestionService
+export class AskUserQuestionService extends Context.Tag("AskUserQuestionService")<
+  AskUserQuestionService,
+  IAskUserQuestionService
 >() {
   static Live = Layer.effect(this, LayerImpl);
 }

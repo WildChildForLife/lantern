@@ -1,8 +1,8 @@
 import { Path } from "@effect/platform";
 import { Effect, Context as EffectContext, Layer } from "effect";
 import type { InferEffect } from "../../../lib/effect/types.ts";
-import { CcvOptionsService } from "./CcvOptionsService.ts";
 import { EnvService } from "./EnvService.ts";
+import { LanternOptionsService } from "./LanternOptionsService.ts";
 
 export type ClaudeCodePaths = {
   globalClaudeDirectoryPath: string;
@@ -14,11 +14,11 @@ export type ClaudeCodePaths = {
 
 const LayerImpl = Effect.gen(function* () {
   const path = yield* Path.Path;
-  const ccvOptionsService = yield* CcvOptionsService;
+  const optionsService = yield* LanternOptionsService;
   const envService = yield* EnvService;
 
   const claudeCodePaths = Effect.gen(function* () {
-    const cliClaudeDir = yield* ccvOptionsService.getCcvOptions("claudeDir");
+    const cliClaudeDir = yield* optionsService.getOption("claudeDir");
     const homeDirectory = yield* envService.getEnv("HOME");
     const globalClaudeDirectoryPath =
       cliClaudeDir === undefined

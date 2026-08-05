@@ -50,6 +50,6 @@ This starts the server and captures screenshots via Playwright for snapshot comp
 
 ## Tips
 
-- **Mock data**: `mock-global-claude-dir/` contains test fixtures (useful schema examples)
-- **Cache**: Stored in `~/.claude-code-viewer/`. Clear it if behavior seems stale
+- **Fixtures**: `fixtures/claude-home/` is a fake `~/.claude` directory covering every JSONL entry shape
+- **Cache**: Stored in `~/.lantern/`. Clear it if behavior seems stale
 - **JSONL parsing**: When adding new schema entries, verify Zod validation passes

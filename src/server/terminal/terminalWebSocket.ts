@@ -76,7 +76,7 @@ export const setupTerminalWebSocket = (server: ServerType) =>
 
       if (authEnabled) {
         const cookies = parseCookies(req.headers.cookie);
-        if (cookies["ccv-session"] !== validSessionToken) {
+        if (cookies["lantern-session"] !== validSessionToken) {
           socket.write("HTTP/1.1 401 Unauthorized\r\n\r\n");
           socket.destroy();
           return;

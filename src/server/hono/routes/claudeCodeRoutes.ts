@@ -3,7 +3,7 @@ import { Effect } from "effect";
 import { Hono } from "hono";
 import { z } from "zod";
 import type { UserMessageInput } from "../../core/claude-code/functions/createMessageGenerator.ts";
-import { CCVAskUserQuestionController } from "../../core/claude-code/presentation/CCVAskUserQuestionController.ts";
+import { AskUserQuestionController } from "../../core/claude-code/presentation/AskUserQuestionController.ts";
 import { ClaudeCodeController } from "../../core/claude-code/presentation/ClaudeCodeController.ts";
 import { ClaudeCodePermissionController } from "../../core/claude-code/presentation/ClaudeCodePermissionController.ts";
 import { ClaudeCodeSessionProcessController } from "../../core/claude-code/presentation/ClaudeCodeSessionProcessController.ts";
@@ -35,7 +35,7 @@ const normalizeUserMessageInput = (
 const claudeCodeRoutes = Effect.gen(function* () {
   const claudeCodeController = yield* ClaudeCodeController;
   const claudeCodeSessionProcessController = yield* ClaudeCodeSessionProcessController;
-  const ccvAskUserQuestionController = yield* CCVAskUserQuestionController;
+  const askUserQuestionController = yield* AskUserQuestionController;
   const claudeCodePermissionController = yield* ClaudeCodePermissionController;
   const claudeCodeLifeCycleService = yield* ClaudeCodeLifeCycleService;
   const runtime = yield* getHonoRuntime;
@@ -132,7 +132,7 @@ const claudeCodeRoutes = Effect.gen(function* () {
     .get("/pending-question-requests", async (c) => {
       const response = await effectToResponse(
         c,
-        ccvAskUserQuestionController.getPendingQuestionRequests(),
+        askUserQuestionController.getPendingQuestionRequests(),
       );
       return response;
     })
@@ -176,7 +176,7 @@ const claudeCodeRoutes = Effect.gen(function* () {
       async (c) => {
         const response = await effectToResponse(
           c,
-          ccvAskUserQuestionController.questionResponse({
+          askUserQuestionController.questionResponse({
             questionResponse: c.req.valid("json"),
           }),
         );

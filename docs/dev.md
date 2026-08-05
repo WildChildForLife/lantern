@@ -26,7 +26,7 @@ This document provides technical details for developers contributing to Lantern.
 - **Single Source of Truth (SSoT)**: Claude Code's standard session logs (`~/.claude/projects/`)
   - No separate database; reads directly from JSONL files
   - Strict validation via Zod schemas ensures conversation data integrity
-- **Caching Mechanism**: For performance optimization, metadata is cached in `~/.claude-code-viewer/`
+- **Caching Mechanism**: For performance optimization, metadata is cached in `~/.lantern/`
   - Frequently accessed data like session lists and project information
   - Cache is automatically invalidated via SSE events
 
@@ -227,7 +227,7 @@ src/
 1. **Learning Effect-TS**: The backend is built with Effect-TS. Refer to the [official documentation](https://effect.website/)
 2. **Debugging SSE**: Check the Network tab in browser developer tools to inspect SSE connections
 3. **Log Inspection**: Directly reference JSONL files under `~/.claude/projects/` to understand data structures
-4. **Mock Data**: Mock data for E2E tests in `mock-global-claude-dir/` is useful for development reference
+4. **Fixtures**: `fixtures/claude-home/` is a fake `~/.claude` directory used by the unit tests and by `--claude-dir` runs
 
 ## Contributing
 
