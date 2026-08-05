@@ -7,7 +7,7 @@ import {
 } from "@/lib/atoms/rightPanel";
 import { Route } from "@/web/routes/projects/$projectId/session";
 import { getIsMobileSync } from "./getIsMobileSync";
-import { resolveRightPanelOpen } from "./resolveRightPanelOpen";
+import { resolveRightPanelOpenSync, resolveRightPanelTabSync } from "./resolveRightPanelSync.ts";
 import { useIsMobile } from "./useIsMobile";
 
 /**
@@ -41,14 +41,18 @@ export const useSyncRightPanelWithSearchParams = () => {
     // For subsequent updates (e.g., browser back/forward), use current isMobile value
     const effectiveIsMobile = hasInitializedRef.current ? isMobile : getIsMobileSync();
 
-    if (search.rightPanel !== undefined) {
-      store.set(rightPanelOpenAtom, search.rightPanel);
-    } else if (store.get(rightPanelOpenPreferenceAtom).status === "unset") {
-      store.set(rightPanelOpenAtom, resolveRightPanelOpen(undefined, effectiveIsMobile));
+    const openSync = resolveRightPanelOpenSync(
+      search.rightPanel,
+      store.get(rightPanelOpenPreferenceAtom).status === "set",
+      effectiveIsMobile,
+    );
+    if (openSync.action === "set") {
+      store.set(rightPanelOpenAtom, openSync.value);
     }
 
-    if (search.rightPanelTab !== undefined) {
-      store.set(rightPanelActiveTabAtom, search.rightPanelTab);
+    const tabSync = resolveRightPanelTabSync(search.rightPanelTab);
+    if (tabSync.action === "set") {
+      store.set(rightPanelActiveTabAtom, tabSync.value);
     }
 
     hasInitializedRef.current = true;
