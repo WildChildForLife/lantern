@@ -3,6 +3,8 @@ import { z } from "zod";
 export const envSchema = z.object({
   LANTERN_ENV: z.enum(["development", "production", "test"]).optional().default("development"),
   HOME: z.string().optional(),
+  /** Windows names the home directory here and leaves `HOME` unset. */
+  USERPROFILE: z.string().optional(),
   PATH: z.string().optional(),
   SHELL: z.string().optional(),
   LANTERN_TERMINAL_SHELL: z.string().optional(),
