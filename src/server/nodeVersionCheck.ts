@@ -12,7 +12,7 @@ export const checkNodeVersion = (): void => {
 
   if (major < 24) {
     process.stderr.write(
-      `Error: claude-code-viewer requires Node.js >=24.0.0, but you are running ${process.version}.\n` +
+      `Error: Lantern requires Node.js >=24.0.0, but you are running ${process.version}.\n` +
         `Please upgrade your Node.js version.\n`,
     );
     process.exit(1);
