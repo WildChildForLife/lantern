@@ -184,7 +184,15 @@ jobs:
     name: release assets
     # The release has to exist before anything can be attached to it, and the
     # packages have to be built. A failed npm publish must not strand them.
+    #
+    # always() is doing real work here and must stay. This job depends on
+    # github-release, which depends on npm, and GitHub skips a job when anything
+    # in its dependency chain failed — not just its direct needs. Without it, a
+    # failed npm publish silently skips this job and the release is published
+    # with no packages attached, which is exactly what happened to v0.1.0. The
+    # explicit result checks then re-impose the gating always() removes.
     needs: [packages, github-release]
+    if: always() && needs.packages.result == 'success' && needs.github-release.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
