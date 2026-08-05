@@ -7,6 +7,7 @@ import { useDoneConversations } from "@/lib/atoms/doneConversations";
 import { NotificationBell } from "@/web/app/components/NotificationBell";
 import { SettingsButton } from "@/web/components/SettingsButton";
 import { TopicIcon } from "@/web/components/TopicIcon";
+import { SortUnsortedTopicsButton } from "@/web/components/topics/SortUnsortedTopicsButton";
 import { Button } from "@/web/components/ui/button";
 import { Input } from "@/web/components/ui/input";
 import { ViewModeToggle } from "@/web/components/ViewModeToggle";
@@ -53,6 +54,7 @@ export const ConversationsPage: FC<Props> = ({ topic }) => {
               <Trans id="nav.projects" message="Projects" />
             </span>
           </Link>
+          <SortUnsortedTopicsButton />
           <SettingsButton />
           <NotificationBell />
         </div>
@@ -120,7 +122,7 @@ export const ConversationsPage: FC<Props> = ({ topic }) => {
             </Button>
             {doneCount > 0 && (
               <Button variant="ghost" size="sm" onClick={clearDone}>
-                Clear done
+                <Trans id="list.clear_done" message="Clear done" />
               </Button>
             )}
             <ViewModeToggle />

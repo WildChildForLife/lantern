@@ -348,9 +348,14 @@ then to any topic they mention, and anything still homeless lands in _Uncategori
 and re-runs on every request, so new conversations are grouped as they appear.
 
 **Optionally, with Claude Code.** Keyword clustering names topics after words, which is sometimes
-clumsy. Press **Sort N new** and Lantern batches the titles through `claude -p` and stores the answer
-per session. It reuses your existing Claude Code login — there is no API key to configure and no
-separate bill — and only classifies conversations it has not seen before. Nothing runs automatically.
+clumsy. Press **Sort N unsorted** and Lantern batches the titles through `claude -p` and stores the
+answer per session. It reuses your existing Claude Code login — there is no API key to configure and
+no separate bill. Nothing runs automatically.
+
+That pass only ever touches conversations with no topic at all, so it never pays to re-file one it has
+already filed — not even when the title changes later. To redo specific conversations, tick them in
+the list and press **Sort selected into topics**; the same selection also marks conversations done in
+bulk. **Redo all** on the topics page throws every topic away and starts over.
 
 This pass is the one Claude Code-specific feature, because `claude` is the CLI Lantern shells out to.
 It names topics for conversations from every source, not only Claude Code's own.

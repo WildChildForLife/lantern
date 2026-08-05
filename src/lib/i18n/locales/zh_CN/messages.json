@@ -1381,10 +1381,138 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        99
+        101
       ]
     ],
     "translation": "按标题、首条消息或项目筛选…"
+  },
+  "conversations.row.select": {
+    "message": "Select conversation",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/components/ConversationList.tsx",
+        174
+      ],
+      [
+        "src/web/app/topics/components/TopicTable.tsx",
+        219
+      ]
+    ],
+    "translation": "选择会话"
+  },
+  "conversations.selection.cap_warning": {
+    "message": "Only the {max} most recent will be sorted this pass",
+    "placeholders": {
+      "max": [
+        "MAX_CLASSIFY_PER_PASS"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        77
+      ]
+    ],
+    "translation": "本次仅归类最新的 {max} 项"
+  },
+  "conversations.selection.clear": {
+    "message": "Clear selection",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        71
+      ]
+    ],
+    "translation": "清除选择"
+  },
+  "conversations.selection.count": {
+    "message": "{count} selected",
+    "placeholders": {
+      "count": [
+        "selectedCount"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        47
+      ]
+    ],
+    "translation": "已选择 {count} 项"
+  },
+  "conversations.selection.mark_done": {
+    "message": "Mark as done",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/components/ConversationList.tsx",
+        184
+      ],
+      [
+        "src/web/app/topics/components/TopicTable.tsx",
+        258
+      ],
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        87
+      ]
+    ],
+    "translation": "标记为已完成"
+  },
+  "conversations.selection.mark_not_done": {
+    "message": "Mark as not done",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/components/ConversationList.tsx",
+        183
+      ],
+      [
+        "src/web/app/topics/components/TopicTable.tsx",
+        254
+      ],
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        91
+      ]
+    ],
+    "translation": "标记为未完成"
+  },
+  "conversations.selection.select_all": {
+    "message": "Select all {count}",
+    "placeholders": {
+      "count": [
+        "visibleCount"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        56
+      ]
+    ],
+    "translation": "全选 {count} 项"
+  },
+  "conversations.selection.sort_selected": {
+    "message": "Sort selected into topics",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/conversations/ConversationSelectionBar.tsx",
+        108
+      ]
+    ],
+    "translation": "将所选会话归入主题"
   },
   "cron_builder.cron_expression": {
     "placeholders": {},
@@ -1937,6 +2065,22 @@
     ],
     "translation": "切换右侧面板"
   },
+  "list.clear_done": {
+    "message": "Clear done",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        125
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        102
+      ]
+    ],
+    "translation": "清除完成标记"
+  },
   "list.hide_done": {
     "message": "Hide done ({doneCount})",
     "placeholders": {
@@ -1948,11 +2092,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        114
+        116
       ],
       [
         "src/web/app/topics/page.tsx",
-        91
+        93
       ]
     ],
     "translation": "隐藏已完成 ({doneCount})"
@@ -1964,11 +2108,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        112
+        114
       ],
       [
         "src/web/app/topics/page.tsx",
-        89
+        91
       ]
     ],
     "translation": "仅显示未完成"
@@ -2021,7 +2165,7 @@
       ],
       [
         "src/web/app/topics/page.tsx",
-        38
+        39
       ]
     ],
     "translation": "所有会话"
@@ -2033,11 +2177,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        53
+        54
       ],
       [
         "src/web/app/topics/page.tsx",
-        47
+        48
       ]
     ],
     "translation": "项目"
@@ -2049,7 +2193,7 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        44
+        45
       ],
       [
         "src/web/app/projects/page.tsx",
@@ -5072,69 +5216,191 @@
     ],
     "translation": "Lantern"
   },
-  "topics.classify.hint": {
-    "message": "Ask Claude to file the new conversations under a topic",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
-        64
-      ]
-    ],
-    "translation": "请 Claude 将新对话归入主题"
-  },
-  "topics.classify.pending": {
-    "message": "Sort {pending} new",
-    "placeholders": {
-      "pending": [
-        "pending"
-      ]
-    },
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
-        77
-      ]
-    ],
-    "translation": "归类 {pending} 条新对话"
-  },
-  "topics.classify.redo": {
-    "message": "Redo all",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
-        91
-      ]
-    ],
-    "translation": "全部重做"
-  },
-  "topics.classify.redo_hint": {
-    "message": "Throw away every topic and classify all conversations again",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
-        86
-      ]
-    ],
-    "translation": "丢弃所有主题并重新归类全部对话"
-  },
-  "topics.classify.sorted": {
+  "topics.classify.all_sorted": {
     "message": "Topics sorted",
     "placeholders": {},
     "comments": [],
     "origin": [
       [
-        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
-        75
+        "src/web/components/topics/SortUnsortedTopicsButton.tsx",
+        41
       ]
     ],
     "translation": "主题已归类"
+  },
+  "topics.classify.redo_all": {
+    "message": "Redo all",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/topics/RedoAllTopicsButton.tsx",
+        29
+      ]
+    ],
+    "translation": "全部重新归类"
+  },
+  "topics.classify.redo_all_tooltip": {
+    "message": "Throw away every topic and classify all conversations again",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/topics/RedoAllTopicsButton.tsx",
+        24
+      ]
+    ],
+    "translation": "丢弃所有主题并重新归类全部会话"
+  },
+  "topics.classify.sort_unsorted": {
+    "message": "Sort {count} unsorted",
+    "placeholders": {
+      "count": [
+        "unsorted"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/topics/SortUnsortedTopicsButton.tsx",
+        42
+      ]
+    ],
+    "translation": "归类 {count} 条未分类"
+  },
+  "topics.classify.toast.failed": {
+    "message": "Classification failed",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        114
+      ]
+    ],
+    "translation": "归类失败"
+  },
+  "topics.classify.toast.failed_status": {
+    "message": "Classification failed ({status})",
+    "placeholders": {
+      "status": [
+        "error.status"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        109
+      ]
+    ],
+    "translation": "归类失败（{status}）"
+  },
+  "topics.classify.toast.left_over": {
+    "message": "{count} were left for the next pass",
+    "placeholders": {
+      "count": [
+        "outcome.leftOver"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        98
+      ]
+    ],
+    "translation": "有 {count} 条留到下次归类"
+  },
+  "topics.classify.toast.none": {
+    "message": "Every conversation already has a topic",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        62
+      ]
+    ],
+    "translation": "所有会话都已有主题"
+  },
+  "topics.classify.toast.nothing_matched": {
+    "message": "None of the selected conversations could be sorted",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        72
+      ]
+    ],
+    "translation": "所选会话均无法归类"
+  },
+  "topics.classify.toast.sorted": {
+    "message": "Sorted {count} conversations into topics",
+    "placeholders": {
+      "count": [
+        "outcome.classified"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        87
+      ]
+    ],
+    "translation": "已将 {count} 条会话归入主题"
+  },
+  "topics.classify.toast.sorted_with_cost": {
+    "message": "Sorted {count} conversations into topics ({cost} USD of usage)",
+    "placeholders": {
+      "count": [
+        "outcome.classified"
+      ],
+      "cost": [
+        "outcome.costUsd.toFixed(3)"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        82
+      ]
+    ],
+    "translation": "已将 {count} 条会话归入主题（用量 {cost} 美元）"
+  },
+  "topics.classify.toast.stopped_early": {
+    "message": "Sorted {count}, then stopped early. {remaining} still have no topic.",
+    "placeholders": {
+      "count": [
+        "outcome.classified"
+      ],
+      "remaining": [
+        "outcome.remaining"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/lib/api/useClassifyTopics.ts",
+        51
+      ]
+    ],
+    "translation": "已归类 {count} 条后提前停止，仍有 {remaining} 条没有主题。"
+  },
+  "topics.classify.tooltip": {
+    "message": "Ask the agent CLI to file conversations that have no topic yet",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/topics/SortUnsortedTopicsButton.tsx",
+        30
+      ]
+    ],
+    "translation": "让代理 CLI 归类尚无主题的会话"
   },
   "topics.filter.placeholder": {
     "message": "Filter topics...",
@@ -5143,7 +5409,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        79
+        81
       ]
     ],
     "translation": "筛选主题…"
@@ -5155,7 +5421,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        68
+        70
       ]
     ],
     "translation": "会话按内容分组，而不是按最初启动的文件夹。"
@@ -5167,7 +5433,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        65
+        67
       ]
     ],
     "translation": "主题"

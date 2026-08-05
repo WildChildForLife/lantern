@@ -6,11 +6,12 @@ import { useDoneConversations } from "@/lib/atoms/doneConversations";
 import { useViewMode } from "@/lib/atoms/viewMode";
 import { NotificationBell } from "@/web/app/components/NotificationBell";
 import { SettingsButton } from "@/web/components/SettingsButton";
+import { RedoAllTopicsButton } from "@/web/components/topics/RedoAllTopicsButton";
+import { SortUnsortedTopicsButton } from "@/web/components/topics/SortUnsortedTopicsButton";
 import { Button } from "@/web/components/ui/button";
 import { Input } from "@/web/components/ui/input";
 import { ViewModeToggle } from "@/web/components/ViewModeToggle";
 import { cn } from "@/web/utils";
-import { ClassifyTopicsButton } from "./components/ClassifyTopicsButton";
 import { TopicList } from "./components/TopicList";
 import { TopicTable } from "./components/TopicTable";
 
@@ -47,7 +48,8 @@ export const TopicsPage: FC = () => {
               <Trans id="nav.projects" message="Projects" />
             </span>
           </Link>
-          <ClassifyTopicsButton />
+          <SortUnsortedTopicsButton />
+          <RedoAllTopicsButton />
           <SettingsButton />
           <NotificationBell />
         </div>
@@ -97,7 +99,7 @@ export const TopicsPage: FC = () => {
             </Button>
             {doneCount > 0 && (
               <Button variant="ghost" size="sm" onClick={clearDone}>
-                Clear done
+                <Trans id="list.clear_done" message="Clear done" />
               </Button>
             )}
             <ViewModeToggle modes={["list", "grid", "table"]} />
