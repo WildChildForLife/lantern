@@ -1,0 +1,22 @@
+# GitHub Copilot CLI — scaffold for PR-8. Not wired into compose.yaml yet.
+#
+# BYOK shipped in April 2026 and explicitly supports local models. UNVERIFIED
+# whether a paid Copilot subscription is still required to launch the CLI at
+# all when BYOK is set; establish that before building an adapter against it.
+FROM node:24-slim
+
+ARG COPILOT_VERSION=1.0.78
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git ca-certificates \
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install -g "@github/copilot@${COPILOT_VERSION}"
+
+# COPILOT_PROVIDER_TYPE=openai
+# COPILOT_PROVIDER_BASE_URL=http://ollama:11434/v1
+# COPILOT_MODEL=qwen3:0.6b
+#
+# Setting the base URL replaces all GitHub model routing. The model must
+# support tool calling and streaming; the Responses API is not supported in
+# BYOK mode. History: ~/.copilot/session-state/<id>/events.jsonl, with a legacy
+# ~/.copilot/history-session-state/. No relocation env var — mount $HOME/.copilot.
+ENTRYPOINT ["copilot"]

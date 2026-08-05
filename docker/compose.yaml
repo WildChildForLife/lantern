@@ -1,0 +1,144 @@
+# A harness for testing Lantern against agent CLIs that really run.
+#
+# This is NOT the deployment compose — that is ../docker-compose.yml. This one
+# exists because every source adapter in Lantern was written against
+# hand-authored fixtures, and twice that meant shipping a format that does not
+# exist. Here the CLIs execute for real and write their own histories, and
+# Lantern reads what they wrote.
+#
+#   ./run.sh          build, drive every CLI, then serve Lantern
+#
+# No API keys and no network: one local model serves all of it. Ollama speaks
+# both wire formats the CLIs need — OpenAI's /v1/chat/completions and
+# Anthropic's /v1/messages — so no translating gateway is involved.
+
+name: lantern-harness
+
+services:
+  # --------------------------------------------------------------------------
+  # The model
+  # --------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    restart: unless-stopped
+
+  # Pulls the model once, then exits. Separate from the server so that "healthy"
+  # means ready rather than still downloading.
+  ollama-pull:
+    image: ollama/ollama:latest
+    depends_on:
+      ollama: { condition: service_healthy }
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-qwen3:0.6b}"
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "pulling $${OLLAMA_MODEL} (first run only; cached in a volume)"
+        ollama pull "$${OLLAMA_MODEL}"
+    restart: "no"
+
+  # --------------------------------------------------------------------------
+  # The CLIs under test. Each writes into a named volume that Lantern mounts.
+  # --------------------------------------------------------------------------
+  claude-code:
+    build:
+      context: ./cli
+      dockerfile: Dockerfile.claude-code
+    profiles: ["drive"]
+    depends_on:
+      ollama-pull: { condition: service_completed_successfully }
+    environment:
+      # No /v1 suffix — Claude Code appends it itself.
+      ANTHROPIC_BASE_URL: http://ollama:11434
+      # Required by the client, ignored by Ollama. Not a credential.
+      ANTHROPIC_AUTH_TOKEN: ollama
+      ANTHROPIC_MODEL: "${OLLAMA_MODEL:-qwen3:0.6b}"
+      HARNESS_OWNED_DIRS: /home/agent/.claude
+      PROMPTS: /prompts
+    volumes:
+      - claude_home:/home/agent/.claude
+      - ./workspace:/workspace-src:ro
+      - ./prompts:/prompts:ro
+    restart: "no"
+
+  codex:
+    build:
+      context: ./cli
+      dockerfile: Dockerfile.codex
+    profiles: ["drive"]
+    depends_on:
+      ollama-pull: { condition: service_completed_successfully }
+    environment:
+      CODEX_HOME: /home/agent/.codex
+      HARNESS_OWNED_DIRS: /home/agent/.codex
+      OLLAMA_BASE_URL: http://ollama:11434/v1
+      CODEX_MODEL: "${OLLAMA_MODEL:-qwen3:0.6b}"
+      PROMPTS: /prompts
+    volumes:
+      - codex_home:/home/agent/.codex
+      - ./workspace:/workspace-src:ro
+      - ./prompts:/prompts:ro
+    restart: "no"
+
+  opencode:
+    build:
+      context: ./cli
+      dockerfile: Dockerfile.opencode
+    profiles: ["drive"]
+    depends_on:
+      ollama-pull: { condition: service_completed_successfully }
+    environment:
+      XDG_DATA_HOME: /home/agent/.local/share
+      HARNESS_OWNED_DIRS: /home/agent/.local/share
+      OLLAMA_BASE_URL: http://ollama:11434/v1
+      OPENCODE_MODEL: "${OLLAMA_MODEL:-qwen3:0.6b}"
+      PROMPTS: /prompts
+    volumes:
+      - opencode_home:/home/agent/.local/share
+      - ./workspace:/workspace-src:ro
+      - ./prompts:/prompts:ro
+    restart: "no"
+
+  # --------------------------------------------------------------------------
+  # Lantern, reading all three
+  # --------------------------------------------------------------------------
+  lantern:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    environment:
+      LANTERN_ENV: production
+      PORT: 3400
+      # Claude's directory stays at the default $HOME/.claude on purpose: the
+      # cache DB path is derived from the parent of the Claude directory while
+      # the rest of the state uses $HOME, and they only agree there.
+      CODEX_HOME: /root/.codex
+      XDG_DATA_HOME: /root/.local/share
+      # LANTERN_SOURCES is deliberately NOT set — it locks the settings UI
+      # against changes. run.sh seeds sources.json instead, which leaves the
+      # toggles working.
+    ports:
+      - "${LANTERN_PORT:-3410}:3400"
+    volumes:
+      - claude_home:/root/.claude
+      - codex_home:/root/.codex
+      - opencode_home:/root/.local/share
+      - lantern_state:/root/.lantern
+    restart: unless-stopped
+    init: true
+
+volumes:
+  ollama_models:
+  claude_home:
+  codex_home:
+  opencode_home:
+  lantern_state:
