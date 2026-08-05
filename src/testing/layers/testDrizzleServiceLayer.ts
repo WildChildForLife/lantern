@@ -6,27 +6,17 @@ import { drizzle } from "drizzle-orm/node-sqlite";
 import { migrate } from "drizzle-orm/node-sqlite/migrator";
 import { Layer } from "effect";
 import { type DrizzleDb, DrizzleService } from "../../server/lib/db/DrizzleService";
+import { SESSION_MESSAGES_FTS_DDL } from "../../server/lib/db/ftsDdl";
 import * as schema from "../../server/lib/db/schema";
 
 const migrationsFolder = fileURLToPath(new URL("../../server/lib/db/migrations", import.meta.url));
-
-const FTS5_DDL = `
-  CREATE VIRTUAL TABLE IF NOT EXISTS session_messages_fts USING fts5(
-    session_id UNINDEXED,
-    project_id UNINDEXED,
-    role UNINDEXED,
-    content,
-    conversation_index UNINDEXED,
-    tokenize='trigram'
-  )
-`;
 
 export const createInMemoryDrizzle = () => {
   const sqlite = new DatabaseSync(":memory:");
   sqlite.exec("PRAGMA foreign_keys = ON");
   const db = drizzle({ client: sqlite, schema });
   migrate(db, { migrationsFolder });
-  sqlite.exec(FTS5_DDL);
+  sqlite.exec(SESSION_MESSAGES_FTS_DDL);
 
   return { db, rawDb: sqlite };
 };

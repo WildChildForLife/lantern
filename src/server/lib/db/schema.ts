@@ -4,14 +4,26 @@ import { index, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core
 // projects
 // ---------------------------------------------------------------------------
 
-export const projects = sqliteTable("projects", {
-  id: text("id").primaryKey(),
-  name: text("name"),
-  path: text("path"),
-  sessionCount: integer("session_count").notNull().default(0),
-  dirMtimeMs: integer("dir_mtime_ms").notNull(),
-  syncedAt: integer("synced_at").notNull(),
-});
+export const projects = sqliteTable(
+  "projects",
+  {
+    id: text("id").primaryKey(),
+    name: text("name"),
+    path: text("path"),
+    // Which agent CLI these sessions came from. Rows written before Lantern
+    // read anything else are Claude Code's by definition.
+    source: text("source").notNull().default("claude-code"),
+    // The source's own identifier for the project — a directory name, a hash.
+    sourceProjectKey: text("source_project_key"),
+    // `path` normalised, so one repo recorded by two CLIs (or by one CLI before
+    // and after a move) groups into a single workspace.
+    canonicalPath: text("canonical_path"),
+    sessionCount: integer("session_count").notNull().default(0),
+    dirMtimeMs: integer("dir_mtime_ms").notNull(),
+    syncedAt: integer("synced_at").notNull(),
+  },
+  (table) => [index("idx_projects_canonical_path").on(table.canonicalPath)],
+);
 
 // ---------------------------------------------------------------------------
 // sessions
@@ -37,10 +49,28 @@ export const sessions = sqliteTable(
     lastModifiedAt: text("last_modified_at").notNull(),
     syncedAt: integer("synced_at").notNull(),
     permissionAllowlistJson: text("permission_allowlist_json"),
+    // Deliberately not narrowed to `SourceId`: a row outlives the adapter that
+    // wrote it, so a downgrade or a removed adapter must read back as data
+    // rather than as a type error. `SessionLocatorService` is where an id
+    // without an adapter is turned into a refusal.
+    source: text("source").notNull().default("claude-code"),
+    // The source's own identifier — a filename, a row id, a thread id.
+    sourceSessionKey: text("source_session_key"),
+    // Cost the source itself reported, where it reports one. Preferred over
+    // anything derived from token counts.
+    nativeCostUsd: real("native_cost_usd"),
+    // Whether `total_cost_usd` was reported by the source, derived from a known
+    // price table, or is not knowable. Unknown must never render as $0.00.
+    // A closed set, unlike `source`: it is Lantern's own judgement about a row,
+    // so it can never hold a value this build does not understand.
+    costConfidence: text("cost_confidence", { enum: ["reported", "estimated", "unknown"] })
+      .notNull()
+      .default("estimated"),
   },
   (table) => [
     index("idx_sessions_project_id").on(table.projectId),
     index("idx_sessions_file_mtime").on(table.fileMtimeMs),
+    index("idx_sessions_source").on(table.source),
   ],
 );
 
