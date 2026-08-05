@@ -5,10 +5,11 @@ import { z } from "zod";
  * a registered adapter, and ids are persisted on `projects`/`sessions` rows, so
  * removing one is a migration rather than an edit.
  */
-export const sourceIdSchema = z.enum(["claude-code", "codex", "opencode"]);
+export const sourceIdSchema = z.enum(["claude-code", "codex", "opencode", "qwen-code"]);
 
 export type SourceId = z.infer<typeof sourceIdSchema>;
 
 export const CLAUDE_CODE_SOURCE_ID: SourceId = "claude-code";
 export const CODEX_SOURCE_ID: SourceId = "codex";
 export const OPENCODE_SOURCE_ID: SourceId = "opencode";
+export const QWEN_CODE_SOURCE_ID: SourceId = "qwen-code";

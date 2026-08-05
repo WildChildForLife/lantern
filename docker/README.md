@@ -97,19 +97,19 @@ verified, and what the first run found.
 
 ## Status per CLI
 
-| CLI          | State            | Notes                                                                                                                |
-| ------------ | ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Claude Code  | live             | Lantern reads it                                                                                                     |
-| Codex        | live             | Lantern reads it                                                                                                     |
-| opencode     | driven, not read | Runs and writes history, but `1.18.13` stores it in SQLite, which Lantern does not read yet — see `compatibility.md` |
-| Qwen Code    | scaffold         | `cli/scaffold/`, for PR-7. Supports any OpenAI-compatible endpoint                                                   |
-| Copilot CLI  | scaffold         | `cli/scaffold/`, for PR-8. BYOK mode may still require a GitHub subscription to launch — untested                    |
-| goose        | scaffold         | `cli/scaffold/`, for PR-9. Native Ollama provider, and a tool-shim for weak local models                             |
-| cursor-agent | not scaffolded   | Whether the CLI (as opposed to the IDE) can use a local model is unverified                                          |
-| Gemini CLI   | not scaffolded   | Cannot be pointed at a non-Google model at all. Qwen Code is the stand-in, being a fork with the same on-disk shape  |
+| CLI          | State            | Notes                                                                                                                               |
+| ------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code  | live             | Lantern reads it                                                                                                                    |
+| Codex        | live             | Lantern reads it                                                                                                                    |
+| opencode     | driven, not read | Runs and writes history, but `1.18.13` stores it in SQLite, which Lantern does not read yet — see `compatibility.md`                |
+| Qwen Code    | live             | Lantern reads it. Takes any OpenAI-compatible endpoint, which is why it can be driven here at all                                   |
+| Copilot CLI  | scaffold         | `cli/scaffold/`, for PR-8. BYOK mode may still require a GitHub subscription to launch — untested                                   |
+| goose        | scaffold         | `cli/scaffold/`, for PR-9. Native Ollama provider, and a tool-shim for weak local models                                            |
+| cursor-agent | not scaffolded   | Whether the CLI (as opposed to the IDE) can use a local model is unverified                                                         |
+| Gemini CLI   | not scaffolded   | Cannot be pointed at a non-Google model at all, so it cannot be driven here. Not Qwen Code's format either — see `compatibility.md` |
 
 Scaffolded CLIs have a Dockerfile and an entrypoint but no compose service.
-They exist so PR-7…9 start from something that runs rather than from a guess.
+They exist so PR-8 and PR-9 start from something that runs rather than a guess.
 
 ## Known sharp edges
 
