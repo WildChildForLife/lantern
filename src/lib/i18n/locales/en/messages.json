@@ -227,7 +227,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        76
+        85
       ]
     ],
     "translation": "Select Theme"
@@ -1936,6 +1936,42 @@
       ]
     ],
     "translation": "Toggle right panel"
+  },
+  "list.hide_done": {
+    "message": "Hide done ({doneCount})",
+    "placeholders": {
+      "doneCount": [
+        "doneCount"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        114
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        91
+      ]
+    ],
+    "translation": "Hide done ({doneCount})"
+  },
+  "list.showing_open_only": {
+    "message": "Showing open only",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/conversations/page.tsx",
+        112
+      ],
+      [
+        "src/web/app/topics/page.tsx",
+        89
+      ]
+    ],
+    "translation": "Showing open only"
   },
   "mcp.error.load_failed": {
     "placeholders": {
@@ -3731,7 +3767,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        63
+        72
       ]
     ],
     "translation": "Select your preferred language"
@@ -3747,6 +3783,30 @@
     ],
     "translation": "English"
   },
+  "settings.locale.es": {
+    "message": "Spanish",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/AppearanceSettings.tsx",
+        60
+      ]
+    ],
+    "translation": "Spanish"
+  },
+  "settings.locale.fr": {
+    "message": "French",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/AppearanceSettings.tsx",
+        63
+      ]
+    ],
+    "translation": "French"
+  },
   "settings.locale.ja": {
     "placeholders": {},
     "comments": [],
@@ -3757,6 +3817,18 @@
       ]
     ],
     "translation": "Japanese"
+  },
+  "settings.locale.pt": {
+    "message": "Portuguese",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/settings/AppearanceSettings.tsx",
+        66
+      ]
+    ],
+    "translation": "Portuguese"
   },
   "settings.locale.zh_CN": {
     "placeholders": {},
@@ -4247,7 +4319,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        71
+        80
       ]
     ],
     "translation": "Theme"
@@ -4258,7 +4330,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        83
+        92
       ]
     ],
     "translation": "Dark"
@@ -4269,7 +4341,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        92
+        101
       ]
     ],
     "translation": "Select your preferred color theme"
@@ -4280,7 +4352,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        80
+        89
       ]
     ],
     "translation": "Light"
@@ -4291,7 +4363,7 @@
     "origin": [
       [
         "src/web/components/settings/AppearanceSettings.tsx",
-        86
+        95
       ]
     ],
     "translation": "System"
@@ -4675,7 +4747,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        100
+        102
       ]
     ],
     "translation": "read-only"
@@ -4754,7 +4826,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        89
+        91
       ]
     ],
     "translation": "{sessionCount} conversations across {projectCount} projects"
@@ -4766,7 +4838,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        78
+        80
       ]
     ],
     "translation": "Ready"
@@ -4778,7 +4850,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        83
+        85
       ]
     ],
     "translation": "Unavailable"
@@ -4999,6 +5071,70 @@
       ]
     ],
     "translation": "Lantern"
+  },
+  "topics.classify.hint": {
+    "message": "Ask Claude to file the new conversations under a topic",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
+        64
+      ]
+    ],
+    "translation": "Ask Claude to file the new conversations under a topic"
+  },
+  "topics.classify.pending": {
+    "message": "Sort {pending} new",
+    "placeholders": {
+      "pending": [
+        "pending"
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
+        77
+      ]
+    ],
+    "translation": "Sort {pending} new"
+  },
+  "topics.classify.redo": {
+    "message": "Redo all",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
+        91
+      ]
+    ],
+    "translation": "Redo all"
+  },
+  "topics.classify.redo_hint": {
+    "message": "Throw away every topic and classify all conversations again",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
+        86
+      ]
+    ],
+    "translation": "Throw away every topic and classify all conversations again"
+  },
+  "topics.classify.sorted": {
+    "message": "Topics sorted",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/components/ClassifyTopicsButton.tsx",
+        75
+      ]
+    ],
+    "translation": "Topics sorted"
   },
   "topics.filter.placeholder": {
     "message": "Filter topics...",
