@@ -11,5 +11,21 @@ minimumReleaseAge: 2880
 overrides:
   "@anthropic-ai/sdk": 0.95.1
   seroval: 1.5.4
-  tar: 7.5.11
+  # Was pinned at 7.5.11, which is below the fix for two advisories against it —
+  # the pin was holding the vulnerable version in place.
+  tar: ">=7.5.19"
   yaml: 2.8.4
+  # Advisories against packages nothing here depends on directly, so the patched
+  # version has to be forced onto whatever pulled them in.
+  shell-quote: ">=1.9.0"
+  # Two majors of this are in the tree and their APIs differ, so each is raised
+  # to its own patched release rather than both to the newest.
+  brace-expansion: ">=2.1.2 <3 || >=5.0.7"
+  fast-uri: ">=3.1.4"
+  postcss: ">=8.5.18"
+  ip-address: ">=10.3.1"
+  # Also direct dependencies. Raising those alone left the copies that other
+  # packages pull in on the vulnerable version, which is the one the advisory is
+  # about — the tree has to be raised as a whole.
+  ws: ">=8.21.0"
+  hono: ">=4.12.25"
