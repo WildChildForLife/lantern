@@ -285,6 +285,23 @@ export const featureFlagsQuery = {
   },
 } as const;
 
+export const sourcesQuery = {
+  queryKey: ["sources"],
+  // Detection stats project directories and parses a transcript per source, and
+  // the settings panel mounts in two places. The SSE handler invalidates this
+  // whenever the answer actually changes.
+  staleTime: 60_000,
+  queryFn: async () => {
+    const response = await honoClient.api.sources.$get();
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch sources: ${response.statusText}`);
+    }
+
+    return await response.json();
+  },
+} as const;
+
 export const agentSessionListQuery = (projectId: string, sessionId: string) =>
   ({
     queryKey: ["projects", projectId, "sessions", sessionId, "agent-sessions"],

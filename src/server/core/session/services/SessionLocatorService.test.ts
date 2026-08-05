@@ -7,7 +7,7 @@ import { testPlatformLayer } from "../../../../testing/layers/testPlatformLayer.
 import type { DrizzleDb } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessions } from "../../../lib/db/schema.ts";
 import { encodeProjectId } from "../../project/functions/id.ts";
-import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
+import { ALL_SOURCE_ADAPTERS, SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import { SessionLocatorService } from "./SessionLocatorService.ts";
 
 const FIXTURE_PROJECT = `${process.cwd()}/fixtures/claude-home/projects/-home-demo-orders-api`;
@@ -34,7 +34,7 @@ const layerFor = (seed: (db: DrizzleDb) => void) =>
     makeDrizzleTestServiceLayer(seed),
     testPlatformLayer(),
     NodeFileSystem.layer,
-    SourceRegistry.Live,
+    SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS),
   );
 
 describe("SessionLocatorService", () => {

@@ -1,5 +1,6 @@
 import { Context, Effect, Layer, Ref } from "effect";
 import type { InferEffect } from "../../../lib/effect/types.ts";
+import { type SourceId, sourceIdSchema } from "../../source/models/SourceId.ts";
 import { withLegacyEnvAliases } from "../legacyEnv.ts";
 
 export type CliOptions = {
@@ -13,6 +14,7 @@ export type CliOptions = {
   terminalShell?: string | undefined;
   terminalUnrestricted?: boolean | undefined;
   apiOnly?: boolean | undefined;
+  source?: string[] | undefined;
 };
 
 export type LanternOptions = {
@@ -26,12 +28,30 @@ export type LanternOptions = {
   terminalShell?: string | undefined;
   terminalUnrestricted?: boolean | undefined;
   apiOnly?: boolean | undefined;
+  /** Sources named on the command line, overriding the stored selection. */
+  sources?: SourceId[] | undefined;
 };
 
 const getOptionalEnv = (key: string): string | undefined => {
   // biome-ignore lint/style/noProcessEnv: allow only here
   // oxlint-disable-next-line node/no-process-env -- configuration boundary
   return withLegacyEnvAliases(process.env)[key] ?? undefined;
+};
+
+const splitList = (value: string | undefined): string[] | undefined =>
+  value === undefined || value === "" ? undefined : value.split(",");
+
+/** Unknown ids are dropped with a warning rather than refusing to boot. */
+const parseSources = (values: string[] | undefined): SourceId[] | undefined => {
+  if (values === undefined) {
+    return undefined;
+  }
+
+  const parsed = values
+    .map((value) => sourceIdSchema.safeParse(value.trim()))
+    .flatMap((result) => (result.success ? [result.data] : []));
+
+  return parsed.length === 0 ? undefined : [...new Set(parsed)];
 };
 
 const isFlagEnabled = (value: string | undefined) => {
@@ -58,6 +78,7 @@ const toLanternOptions = (cliOptions?: CliOptions): LanternOptions => {
       (isFlagEnabled(getOptionalEnv("LANTERN_TERMINAL_UNRESTRICTED")) ? true : undefined),
     apiOnly:
       cliOptions?.apiOnly ?? (isFlagEnabled(getOptionalEnv("LANTERN_API_ONLY")) ? true : undefined),
+    sources: parseSources(cliOptions?.source ?? splitList(getOptionalEnv("LANTERN_SOURCES"))),
   };
 };
 

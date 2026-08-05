@@ -60,11 +60,12 @@ const LayerImpl = Effect.gen(function* () {
     Layer.succeed(ApplicationContext, applicationContext),
   );
 
-  // Roots are fixed for the life of the process — they come from the Claude
-  // directory the server was started with — so they are resolved once here
-  // rather than on every lookup.
+  // Roots come from the directory the server was started with, so they are
+  // fixed for the process and resolved once. Every known adapter is included,
+  // not only the enabled ones: disabling a source purges its rows, so a row
+  // that still exists must still be checkable.
   const rootsBySource = new Map<SourceId, readonly string[]>();
-  for (const adapter of yield* registry.enabled()) {
+  for (const adapter of registry.all) {
     rootsBySource.set(adapter.id, yield* adapter.watchRoots().pipe(Effect.provide(sourceEnv)));
   }
 
@@ -92,7 +93,7 @@ const LayerImpl = Effect.gen(function* () {
       const adapter = parsedSource.success ? registry.get(parsedSource.data) : undefined;
       const roots = adapter === undefined ? undefined : rootsBySource.get(adapter.id);
 
-      // A row whose source has no enabled adapter names no directory Lantern
+      // A row whose source has no registered adapter names no directory Lantern
       // reads, so there is nothing to validate its path against and no way to
       // serve the file. Refusing beats handing back an unchecked path.
       if (adapter === undefined || roots === undefined) {
