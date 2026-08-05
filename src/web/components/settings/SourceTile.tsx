@@ -16,6 +16,7 @@ const TILE_STYLES: Record<string, { readonly initial: string; readonly accent: s
   codex: { initial: "◇", accent: "bg-foreground/5 text-foreground border-foreground/15" },
   opencode: { initial: "◈", accent: "bg-foreground/5 text-foreground border-foreground/15" },
   "qwen-code": { initial: "◆", accent: "bg-violet-500/10 text-violet-500 border-violet-500/25" },
+  copilot: { initial: "●", accent: "bg-foreground/5 text-foreground border-foreground/15" },
 };
 
 const FALLBACK = { initial: "•", accent: "bg-muted text-muted-foreground border-border" };
