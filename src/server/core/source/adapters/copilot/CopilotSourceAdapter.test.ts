@@ -160,27 +160,25 @@ describe("copilotSourceAdapter", () => {
     }).pipe(Effect.provide(adapterLayer)),
   );
 
-  it.live("maps a changed event log to the session it names, without reading it", () =>
+  it.live("declines to classify a change, and says so in its capabilities", () =>
     Effect.gen(function* () {
       const roots = yield* copilotSourceAdapter.roots();
-      const root = roots.at(0);
-      if (root === undefined) {
-        throw new Error("adapter declared no roots");
-      }
 
-      const change = copilotSourceAdapter.classifyChange(
-        `${root}/session-state/abc/events.jsonl`,
-        roots,
-      );
-      expect(change?.sessionId).toBe("abc");
-
-      // A path outside the tree is none of this source's business, and neither
-      // is the SQLite index or a session's own checkpoint database.
-      expect(copilotSourceAdapter.classifyChange("/etc/passwd", roots)).toBeNull();
-      expect(copilotSourceAdapter.classifyChange(`${root}/session-store.db`, roots)).toBeNull();
+      // A changed path cannot name its project: sessions are flat and the
+      // workspace lives inside the log. The watcher turns whatever comes back
+      // straight into a project id, so answering with the session's own
+      // directory would mint an id no project has — live updates that look
+      // like they work and silently do nothing.
       expect(
-        copilotSourceAdapter.classifyChange(`${root}/session-state/abc/session.db`, roots),
+        copilotSourceAdapter.classifyChange(
+          `${roots.at(0) ?? ""}/session-state/abc/events.jsonl`,
+          roots,
+        ),
       ).toBeNull();
+
+      // And the capability has to agree, or the watcher spends fibers on a
+      // source that can never report a usable change.
+      expect(copilotSourceAdapter.capabilities.watch).toBe(false);
     }).pipe(Effect.provide(adapterLayer)),
   );
 

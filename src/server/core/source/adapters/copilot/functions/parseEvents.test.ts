@@ -165,6 +165,52 @@ describe("parseEvents", () => {
     expect(usage.modelName).toBe("qwen3:0.6b");
   });
 
+  it("drops a tool call that never returned, rather than faking an empty result", () => {
+    // A session interrupted mid-call logs the request and never writes the
+    // completion. Rendering the reserved slot anyway would show a tool that
+    // never returned as one that returned nothing, and successfully.
+    const log = [
+      JSON.stringify({
+        type: "session.start",
+        data: { sessionId: "s", copilotVersion: "1.0.78", context: { cwd: "/w" } },
+      }),
+      JSON.stringify({ type: "user.message", data: { content: "hi" } }),
+      JSON.stringify({
+        type: "assistant.message",
+        data: {
+          model: "m",
+          content: "",
+          toolRequests: [{ toolCallId: "c1", name: "view", arguments: {} }],
+        },
+      }),
+    ].join("\n");
+
+    const parsed = parseEvents(log, "s");
+
+    expect(blocksOfType(parsed.entries, "tool_use")).toHaveLength(1);
+    expect(blocksOfType(parsed.entries, "tool_result")).toHaveLength(0);
+    // The unpaired call still renders — an interrupted turn is a real turn.
+    expect(parsed.entries).toHaveLength(2);
+  });
+
+  it("reports no usage for a session that was killed before it shut down", () => {
+    // Tokens are written once, at session.shutdown. A session that never got
+    // there has none, and inventing zeroes would read as a free session.
+    const log = [
+      JSON.stringify({
+        type: "session.start",
+        data: { sessionId: "s", copilotVersion: "1.0.78", context: { cwd: "/w" } },
+      }),
+      JSON.stringify({ type: "user.message", data: { content: "hi" } }),
+    ].join("\n");
+
+    const usage = parseEvents(log, "s").usage;
+
+    expect(usage.inputTokens).toBe(0);
+    expect(usage.outputTokens).toBe(0);
+    expect(usage.costUsd).toBeNull();
+  });
+
   it("counts an unreadable line instead of dropping it", () => {
     const parsed = parseEvents('{ not json\n{"type":"nonsense.event","data":{}}', "s");
 

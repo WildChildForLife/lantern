@@ -201,6 +201,8 @@ export const parseEvents = (content: string, sessionKey: string): ParsedEvents =
    */
   const awaitingResult = new Map<string, number>();
   const resolvedResults = new Map<number, { text: string; error: boolean }>();
+  /** Reserved result slots no `tool.execution_complete` ever filled. */
+  const unresolvedSlots = new Set<number>();
 
   const recordUnparsed = (lineNumber: number) => {
     unparsed += 1;
@@ -325,9 +327,14 @@ export const parseEvents = (content: string, sessionKey: string): ParsedEvents =
           ]);
 
           // Reserve the slot the result will fill, so a call and its outcome
-          // stay next to each other however far apart they were logged.
+          // stay next to each other however far apart they were logged. A slot
+          // nothing ever resolves is dropped rather than rendered: a session
+          // interrupted mid-call leaves the call logged and the completion
+          // never written, and an empty result block would present a tool that
+          // never returned as one that returned nothing.
           const slot = pending.length;
           awaitingResult.set(request.toolCallId, slot);
+          unresolvedSlots.add(slot);
           const toolCallId = request.toolCallId;
           pending.push((uuid) => {
             const resolved = resolvedResults.get(slot);
@@ -369,6 +376,7 @@ export const parseEvents = (content: string, sessionKey: string): ParsedEvents =
         }
 
         const failed = complete.data.success === false;
+        unresolvedSlots.delete(slot);
         resolvedResults.set(slot, {
           text: failed
             ? (complete.data.error?.message ?? "")
@@ -415,7 +423,12 @@ export const parseEvents = (content: string, sessionKey: string): ParsedEvents =
   }
 
   const entries = linkParents(
-    pending.map((build, index) => build(syntheticEntryUuid(COPILOT_SOURCE_ID, sessionKey, index))),
+    pending
+      .filter((_, slot) => !unresolvedSlots.has(slot))
+      // Indexed after the drop, so the ids depend only on what is rendered —
+      // re-reading a session that has since gained its missing results changes
+      // them, but a session that is merely re-read does not.
+      .map((build, index) => build(syntheticEntryUuid(COPILOT_SOURCE_ID, sessionKey, index))),
   );
 
   return {

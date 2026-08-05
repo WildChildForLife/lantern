@@ -30,6 +30,15 @@ import { type CopilotMeta, parseEvents, parseMeta } from "./functions/parseEvent
 const SESSION_DIR = "session-state";
 const EVENTS_FILE = "events.jsonl";
 
+/**
+ * How many sessions `detect` will read before giving up.
+ *
+ * More than one, because an aborted session leaves a log with no conversation
+ * in it and reading only the first would report a healthy install as broken.
+ * Bounded, because the failing case must not cost a full scan of the history.
+ */
+const DETECT_SAMPLE = 5;
+
 /** `session.start` is the first line and a few hundred bytes. */
 const HEAD_BYTES = 8 * 1024;
 
@@ -84,6 +93,19 @@ const makeAdapter = (): SourceAdapter => {
 
       return new TextDecoder().decode(buffer.subarray(0, Number(read)));
     }).pipe(Effect.scoped);
+
+  /** Session directory names, newest first. Costs one directory read. */
+  const listSessionIds = Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem;
+    const path = yield* Path.Path;
+    const root = yield* rootPath;
+
+    const names = yield* fs
+      .readDirectory(path.join(root, SESSION_DIR))
+      .pipe(Effect.catchAll(() => Effect.succeed<string[]>([])));
+
+    return names.sort();
+  });
 
   /**
    * Every session on disk with the identity from its opening event.
@@ -267,8 +289,14 @@ const makeAdapter = (): SourceAdapter => {
         } satisfies SourceDetection;
       }
 
-      const scanned = yield* scan;
-      if (scanned.length === 0) {
+      const path = yield* Path.Path;
+
+      // Deliberately not `scan`: that opens and reads the head of every session
+      // on disk, and this runs on every settings render. A directory listing
+      // answers "is there anything here", and the sample below answers "can it
+      // still be read".
+      const ids = yield* listSessionIds;
+      if (ids.length === 0) {
         return {
           sourceId: COPILOT_SOURCE_ID,
           rootPath: root,
@@ -284,12 +312,12 @@ const makeAdapter = (): SourceAdapter => {
       // happily and yields an empty conversation, which is precisely how a
       // whole history renders blank while looking like it worked.
       //
-      // Bounded on purpose. This runs on every settings render, and scanning
+      // Bounded on purpose. This runs on every settings render, and reading
       // every transcript on an install whose format has moved is the one case
       // where the cost would be unbounded.
-      for (const { filePath, id } of scanned.slice(0, DETECT_SAMPLE)) {
+      for (const id of ids.slice(0, DETECT_SAMPLE)) {
         const content = yield* fs
-          .readFileString(filePath)
+          .readFileString(path.join(root, SESSION_DIR, id, EVENTS_FILE))
           .pipe(Effect.catchAll(() => Effect.succeed(null)));
         if (content === null) continue;
 
@@ -315,35 +343,27 @@ const makeAdapter = (): SourceAdapter => {
     });
 
   /**
-   * Pure: a changed path under `session-state/<sessionID>/events.jsonl` names
-   * the session, but not the workspace it belongs to — that is inside the file.
-   * The generic sync resolves the project, so the session id is enough.
+   * Always null: a changed path cannot say which project it belongs to.
+   *
+   * Copilot files every session flat under `session-state/`, and the workspace
+   * is recorded inside the log rather than in the path. The watcher turns this
+   * result straight into a project id, so returning the session's own directory
+   * would mint an id no project has and emit updates nobody is listening for —
+   * which looks like working live updates while silently doing nothing.
+   *
+   * Codex has the same flat store and makes the same call. Both are refreshed
+   * by the interval sync instead, which is what `capabilities.watch: false`
+   * declares.
    */
-  const classifyChange = (absolutePath: string, roots: readonly string[]) => {
-    const root = roots.find((candidate) => absolutePath.startsWith(`${candidate}/`));
-    if (root === undefined) return null;
-
-    const relative = absolutePath.slice(root.length + 1).split("/");
-    if (relative.length !== 3) return null;
-
-    const [sessions, sessionId, fileName] = relative;
-    if (sessions !== SESSION_DIR || sessionId === undefined || fileName !== EVENTS_FILE) {
-      return null;
-    }
-
-    return {
-      sourceId: COPILOT_SOURCE_ID,
-      projectStoragePath: `${root}/${SESSION_DIR}/${sessionId}`,
-      sessionId,
-      agentId: null,
-    };
-  };
+  const classifyChange = () => null;
 
   return {
     id: COPILOT_SOURCE_ID,
     displayName: "GitHub Copilot CLI",
     capabilities: {
-      watch: true,
+      // A flat session store gives a changed path no way to name its project,
+      // so there is nothing useful to watch for — see `classifyChange`.
+      watch: false,
       interactive: false,
       deletable: false,
       // Tokens are recorded, prices are not — see the note on the adapter.
@@ -367,14 +387,5 @@ const makeAdapter = (): SourceAdapter => {
     },
   };
 };
-
-/**
- * How many sessions `detect` will read before giving up.
- *
- * More than one, because an aborted session leaves a log with no conversation
- * in it and reading only the first would report a healthy install as broken.
- * Bounded, because the failing case must not cost a full scan of the history.
- */
-const DETECT_SAMPLE = 5;
 
 export const copilotSourceAdapter = makeAdapter();
