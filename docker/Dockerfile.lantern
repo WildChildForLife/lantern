@@ -1,0 +1,21 @@
+# Lantern with the agent CLIs installed alongside it.
+#
+# On a real machine the CLI and Lantern share a host — that is how topic naming
+# works at all, since Lantern shells out to whichever CLI the user picked. The
+# driver containers deliberately keep them apart, so this image puts them back
+# together and is the only place the "Sort N new" path can actually be tested.
+#
+# Built from the repo root, on top of the release image, so it tests the real
+# artifact rather than a second build of it.
+ARG LANTERN_IMAGE=lantern-harness-lantern
+FROM ${LANTERN_IMAGE}
+
+ARG CLAUDE_CODE_VERSION=2.1.221
+ARG CODEX_VERSION=0.146.0
+ARG OPENCODE_VERSION=1.18.13
+
+RUN npm install -g \
+      "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
+      "@openai/codex@${CODEX_VERSION}" \
+      "opencode-ai@${OPENCODE_VERSION}" \
+  && npm cache clean --force

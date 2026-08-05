@@ -4,11 +4,12 @@ import { Context, Effect, Layer } from "effect";
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessionTopics, sessions } from "../../../lib/db/schema.ts";
 import type { InferEffect } from "../../../lib/effect/types.ts";
-import { resolveClaudeCodePath } from "../../claude-code/models/ClaudeCode.ts";
+import { UserConfigService } from "../../platform/services/UserConfigService.ts";
+import { CLAUDE_CODE_SOURCE_ID, sourceIdSchema } from "../../source/models/SourceId.ts";
+import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import {
   buildClassificationPrompt,
   type ClassificationCandidate,
-  cliEnvelopeSchema,
   parseClassificationResponse,
 } from "../functions/buildClassificationPrompt.ts";
 import {
@@ -19,12 +20,16 @@ import {
 import { normalizeTopicIcon } from "../functions/groupConversationsByTopic.ts";
 
 /**
- * Files conversations under a topic by asking Claude Code itself, headlessly.
+ * Files conversations under a topic by asking an agent CLI itself, headlessly.
  *
- * It runs the same CLI the user already signed in to (`claude -p`), so there is
- * no API key to configure and no separate bill. Results are cached per session
- * in the `session_topics` table: a conversation is classified once, and again
- * only if its title changes, which keeps repeat passes nearly free.
+ * It runs whichever CLI the user chose, using the login they already have, so
+ * there is no API key to configure and no separate bill. Results are cached per
+ * session in the `session_topics` table: a conversation is classified once, and
+ * again only if its title changes, which keeps repeat passes nearly free.
+ *
+ * A CLI with no headless mode, or one that is not installed, leaves the local
+ * keyword grouping in place rather than failing the request — naming topics is
+ * an improvement on that grouping, never a precondition for it.
  */
 
 /** Conversations per CLI call. Large enough to be cheap, small enough to stay accurate. */
@@ -33,7 +38,11 @@ const BATCH_SIZE = 40;
 /** Batches per pass, so one run cannot spend the afternoon classifying. */
 const MAX_BATCHES_PER_RUN = 6;
 
-const CLASSIFIER_MODEL = "claude-haiku-4-5-20251001";
+/**
+ * Only Claude Code takes a model flag here. The others are driven by whatever
+ * the user configured them with, which is theirs to decide, not Lantern's.
+ */
+const CLAUDE_CLASSIFIER_MODEL = "claude-haiku-4-5-20251001";
 
 const CLI_TIMEOUT_MS = 180_000;
 
@@ -51,6 +60,8 @@ export type ClassifyResult = {
 
 const LayerImpl = Effect.gen(function* () {
   const { db } = yield* DrizzleService;
+  const registry = yield* SourceRegistry;
+  const userConfigService = yield* UserConfigService;
 
   /** Conversations with no topic yet, or whose title changed since they got one. */
   const pendingCandidates = (limit: number): ClassificationCandidate[] => {
@@ -104,27 +115,43 @@ const LayerImpl = Effect.gen(function* () {
       .slice(0, EXISTING_TOPIC_LIMIT)
       .map((row) => row.label);
 
+  /** The CLI the user picked, or Claude Code when they have not picked one. */
+  const classifierAdapter = Effect.gen(function* () {
+    const config = yield* userConfigService.getUserConfig();
+    const parsed = sourceIdSchema.safeParse(config.primarySource);
+    const sourceId = parsed.success ? parsed.data : CLAUDE_CODE_SOURCE_ID;
+
+    return registry.get(sourceId);
+  });
+
   const runClassifier = (prompt: string) =>
     Effect.gen(function* () {
-      const claudePath = yield* resolveClaudeCodePath;
+      const adapter = yield* classifierAdapter;
+      const runner = adapter?.headless;
+      if (adapter === undefined || runner === undefined) {
+        return yield* Effect.fail(
+          new Error("The selected agent CLI cannot be asked to name topics"),
+        );
+      }
 
-      const output = yield* Command.string(
-        Command.make(
-          claudePath,
-          "-p",
-          prompt,
-          "--model",
-          CLASSIFIER_MODEL,
-          "--output-format",
-          "json",
-        ),
-      ).pipe(Effect.timeout(CLI_TIMEOUT_MS));
+      const executable = yield* runner.executable();
 
-      // Older CLIs, or a crash mid-stream, can answer without the envelope.
-      const envelope = cliEnvelopeSchema.safeParse(JSON.parse(output));
-      return envelope.success
-        ? { text: envelope.data.result, costUsd: envelope.data.total_cost_usd ?? 0 }
-        : { text: output, costUsd: 0 };
+      // Which CLI answered is the first thing anyone asks when a topic name
+      // looks wrong, and it is not otherwise recoverable from the result.
+      yield* Effect.logInfo(`[TopicClassifier] asking ${adapter.id} via ${executable}`);
+
+      // Claude Code is pinned to a cheap model for this; the others run on
+      // whatever the user configured, which is not Lantern's to override.
+      const args =
+        adapter.id === CLAUDE_CODE_SOURCE_ID
+          ? [...runner.args(prompt), "--model", CLAUDE_CLASSIFIER_MODEL]
+          : [...runner.args(prompt)];
+
+      const output = yield* Command.string(Command.make(executable, ...args)).pipe(
+        Effect.timeout(CLI_TIMEOUT_MS),
+      );
+
+      return runner.parse(output);
     });
 
   const storeBatch = (
