@@ -108,8 +108,31 @@ services:
       - ./prompts:/prompts:ro
     restart: "no"
 
+  # Stands in for Gemini CLI, which cannot be pointed at a local model at all.
+  # No adapter reads this yet — it runs so that PR-7 is written against the
+  # files it produces rather than against a description of them.
+  qwen-code:
+    build:
+      context: ./cli
+      dockerfile: Dockerfile.qwen-code
+    profiles: ["drive"]
+    depends_on:
+      ollama-pull: { condition: service_completed_successfully }
+    environment:
+      HARNESS_OWNED_DIRS: /home/agent/.qwen
+      OPENAI_BASE_URL: http://ollama:11434/v1
+      # Required by the client, ignored by Ollama. Not a credential.
+      OPENAI_API_KEY: ollama
+      OPENAI_MODEL: "${OLLAMA_MODEL:-qwen3:0.6b}"
+      PROMPTS: /prompts
+    volumes:
+      - qwen_home:/home/agent/.qwen
+      - ./workspace:/workspace-src:ro
+      - ./prompts:/prompts:ro
+    restart: "no"
+
   # --------------------------------------------------------------------------
-  # Lantern, reading all three
+  # Lantern, reading all of them
   # --------------------------------------------------------------------------
   lantern:
     build:
@@ -129,6 +152,8 @@ services:
       # the rest of the state uses $HOME, and they only agree there.
       CODEX_HOME: /root/.codex
       XDG_DATA_HOME: /root/.local/share
+      # Qwen Code has no env var for its home, so the volume is mounted at the
+      # default $HOME/.qwen and the adapter finds it there.
       # LANTERN_SOURCES is deliberately NOT set — it locks the settings UI
       # against changes. run.sh seeds sources.json instead, which leaves the
       # toggles working.
@@ -138,6 +163,7 @@ services:
       - claude_home:/root/.claude
       - codex_home:/root/.codex
       - opencode_home:/root/.local/share
+      - qwen_home:/root/.qwen
       - lantern_state:/root/.lantern
     restart: unless-stopped
     init: true
@@ -147,4 +173,5 @@ volumes:
   claude_home:
   codex_home:
   opencode_home:
+  qwen_home:
   lantern_state:

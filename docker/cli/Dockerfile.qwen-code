@@ -1,0 +1,24 @@
+# Qwen Code, pointed at the gateway's OpenAI-compatible route.
+#
+# It is here as the stand-in for Gemini CLI. Qwen Code is a fork of it, and
+# unlike its parent it accepts any OpenAI-compatible endpoint — Gemini CLI has
+# no base-url setting and no OpenAI-compatible auth type, so it cannot be
+# driven against a local model at all. The fork writes its history through the
+# code it inherited, which is what makes it evidence about both.
+#
+# Pinned, like every CLI here: a floating tag would silently change what is
+# being tested, and the on-disk shape is exactly what is under test.
+FROM node:24-slim
+
+ARG QWEN_CODE_VERSION=0.21.6
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git ca-certificates gosu \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd -m -u 1001 -s /bin/bash agent \
+  && npm install -g "@qwen-code/qwen-code@${QWEN_CODE_VERSION}"
+
+COPY bootstrap.sh /usr/local/bin/bootstrap
+COPY entrypoint-qwen-code.sh /usr/local/bin/run-harness
+RUN chmod +x /usr/local/bin/run-harness /usr/local/bin/bootstrap
+
+ENTRYPOINT ["/usr/local/bin/run-harness"]

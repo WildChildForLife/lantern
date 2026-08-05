@@ -2,6 +2,7 @@ import { Context, Effect, Layer } from "effect";
 import { claudeCodeSourceAdapter } from "../adapters/claude-code/ClaudeCodeSourceAdapter.ts";
 import { codexSourceAdapter } from "../adapters/codex/CodexSourceAdapter.ts";
 import { opencodeSourceAdapter } from "../adapters/opencode/OpencodeSourceAdapter.ts";
+import { qwenCodeSourceAdapter } from "../adapters/qwen-code/QwenCodeSourceAdapter.ts";
 import type { SourceAdapter } from "../models/SourceAdapter.ts";
 import type { SourceId } from "../models/SourceId.ts";
 import { SourceConfigService } from "./SourceConfigService.ts";
@@ -23,6 +24,7 @@ export const ALL_SOURCE_ADAPTERS: readonly SourceAdapter[] = [
   claudeCodeSourceAdapter,
   codexSourceAdapter,
   opencodeSourceAdapter,
+  qwenCodeSourceAdapter,
 ];
 
 const makeRegistry = (

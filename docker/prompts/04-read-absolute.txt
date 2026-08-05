@@ -1,0 +1,1 @@
+Read the file /work/src/orders.py using an absolute path and reply with its first line only.
