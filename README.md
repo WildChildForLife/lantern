@@ -86,9 +86,11 @@ sudo apt install ./lantern_0.1.0_amd64.deb    # swap amd64 for arm64 on a Pi
 lantern --port 3400
 ```
 
-Fedora, RHEL and openSUSE, from the `.rpm`:
+Fedora and RHEL, from the `.rpm`. Check `node --version` first — Fedora 41 still
+ships Node 22, and Lantern needs 24:
 
 ```bash
+curl -fsSL https://rpm.nodesource.com/setup_24.x | sudo bash -   # only if node is older than 24
 sudo dnf install https://github.com/WildChildForLife/lantern/releases/latest/download/lantern-0.1.0-1.x86_64.rpm
 lantern --port 3400
 ```

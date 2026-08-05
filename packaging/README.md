@@ -10,14 +10,14 @@ Lantern never installs a runtime by hand — their package manager already did.
 
 The release workflow runs on a `v*` tag and needs nothing but the tag.
 
-| Channel              | Artifact                                   | Automated |
-| -------------------- | ------------------------------------------ | --------- |
-| Container (ghcr.io)  | `linux/amd64`, `linux/arm64` images        | yes       |
-| npm                  | `lantern-viewer`                           | yes¹      |
-| Debian / Ubuntu      | `lantern_<version>_{amd64,arm64}.deb`      | yes       |
-| Fedora / RHEL / SUSE | `lantern-<version>-1.{x86_64,aarch64}.rpm` | yes       |
-| Homebrew             | formula in `WildChildForLife/homebrew-tap` | no²       |
-| Arch (AUR)           | `PKGBUILD`                                 | no²       |
+| Channel             | Artifact                                   | Automated |
+| ------------------- | ------------------------------------------ | --------- |
+| Container (ghcr.io) | `linux/amd64`, `linux/arm64` images        | yes       |
+| npm                 | `lantern-viewer`                           | yes¹      |
+| Debian / Ubuntu     | `lantern_<version>_{amd64,arm64}.deb`      | yes       |
+| Fedora / RHEL       | `lantern-<version>-1.{x86_64,aarch64}.rpm` | yes       |
+| Homebrew            | formula in `WildChildForLife/homebrew-tap` | no²       |
+| Arch (AUR)          | `PKGBUILD`                                 | no²       |
 
 ¹ Needs an `NPM_TOKEN` (or `AUTH_TOKEN`) repository secret. Without it that one
 job fails and the rest of the release still completes.

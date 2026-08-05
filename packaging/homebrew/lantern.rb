@@ -1,3 +1,6 @@
+# typed: true
+# frozen_string_literal: true
+
 # Formula for the Homebrew tap at WildChildForLife/homebrew-tap.
 #
 # This copy is the source of truth; scripts/bump-tap.sh rewrites the version and

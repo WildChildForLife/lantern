@@ -128,14 +128,25 @@ jobs:
 
       - name: Install nfpm
         run: |
-          curl -fsSL "https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}/nfpm_${NFPM_VERSION}_Linux_x86_64.tar.gz" \
-            | tar -xz -C /usr/local/bin nfpm
+          curl -fsSL -o nfpm.tar.gz \
+            "https://github.com/goreleaser/nfpm/releases/download/v${NFPM_VERSION}/nfpm_${NFPM_VERSION}_Linux_x86_64.tar.gz"
+          echo "${NFPM_SHA256}  nfpm.tar.gz" | sha256sum -c -
+          tar -xzf nfpm.tar.gz -C /usr/local/bin nfpm
+          rm nfpm.tar.gz
           nfpm --version
         env:
           NFPM_VERSION: "2.43.0"
+          NFPM_SHA256: "a80d5f724ed70b192ffa8a2bde469c013cef559c8afa3441eb51dd9a918beb6b"
 
       - name: Build deb and rpm
         run: scripts/build-packages.sh "${GITHUB_REF_NAME#v}" "${{ matrix.arch }}"
+
+      # Building a package proves very little; installing it is what catches a
+      # missing dependency or a tree staged wrongly. amd64 only, because the
+      # runner cannot execute an arm64 binary without emulation.
+      - name: Smoke test the deb
+        if: matrix.arch == 'amd64'
+        run: scripts/smoke-test-packages.sh "${GITHUB_REF_NAME#v}"
 
       - name: Upload
         uses: actions/upload-artifact@v4
@@ -174,7 +185,6 @@ jobs:
     # The release has to exist before anything can be attached to it, and the
     # packages have to be built. A failed npm publish must not strand them.
     needs: [packages, github-release]
-    if: always() && needs.packages.result == 'success' && needs.github-release.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 

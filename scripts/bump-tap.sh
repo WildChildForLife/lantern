@@ -26,7 +26,12 @@ if ! curl -fsIL "$TARBALL" >/dev/null 2>&1; then
   exit 1
 fi
 
-SHA=$(curl -fsSL "$TARBALL" | shasum -a 256 | cut -d' ' -f1)
+# sha256sum on Linux, shasum where it is absent (macOS ships only the latter).
+if command -v sha256sum >/dev/null 2>&1; then
+  SHA=$(curl -fsSL "$TARBALL" | sha256sum | cut -d' ' -f1)
+else
+  SHA=$(curl -fsSL "$TARBALL" | shasum -a 256 | cut -d' ' -f1)
+fi
 echo "sha256 $SHA"
 
 FORMULA="$REPO_ROOT/packaging/homebrew/lantern.rb"
@@ -57,6 +62,23 @@ const next = fs
   .replace(/^sha256sums=\('.*'\)$/m, `sha256sums=('${sha}')`);
 fs.writeFileSync(file, next);
 NODE
+
+# A regex that stopped matching would leave the placeholder in place and still
+# exit cleanly, which is how a formula with an unusable checksum reaches a tap.
+for file in "$FORMULA" "$PKGBUILD"; do
+  if grep -q 'REPLACE_WITH_TARBALL_SHA256' "$file"; then
+    echo "bump-tap.sh: $file still holds the placeholder checksum — the rewrite did not match." >&2
+    exit 1
+  fi
+  if ! grep -q "$SHA" "$file"; then
+    echo "bump-tap.sh: $file does not contain the checksum that was just computed." >&2
+    exit 1
+  fi
+  if ! grep -q "$VERSION" "$file"; then
+    echo "bump-tap.sh: $file was not updated to $VERSION." >&2
+    exit 1
+  fi
+done
 
 echo "updated:"
 grep -nE 'url |sha256 ' "$FORMULA"

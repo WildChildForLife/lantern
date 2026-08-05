@@ -28,12 +28,21 @@ contents:
     file_info:
       mode: 0755
 
+scripts:
+  # Warns when the node on PATH is older than the application needs. The declared
+  # dependency is not enough on its own — see the comment in postinstall.sh.
+  postinstall: ./postinstall.sh
+
 overrides:
   deb:
     depends:
-      # Debian and Ubuntu both name it nodejs. The floor matches the engines
-      # field in package.json.
+      # Debian and Ubuntu both name it nodejs, and apt does enforce this floor.
+      # It matches the engines field in package.json.
       - nodejs (>= 24)
   rpm:
     depends:
-      - nodejs >= 24
+      # Unversioned on purpose. `nodejs >= 24` reads as a stronger guarantee than
+      # it is: dnf installed this package unchallenged on Fedora 41, which ships
+      # Node 22. Requiring nodejs at all still pulls one in when none is present,
+      # and postinstall.sh reports the version that actually got resolved.
+      - nodejs
