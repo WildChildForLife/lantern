@@ -1,0 +1,21 @@
+# opencode, pointed at the gateway's OpenAI-compatible route.
+#
+# The version is pinned deliberately. opencode has shipped two storage
+# layouts — JSON files on the 1.x line, SQLite on dev/beta — and Lantern only
+# reads the JSON one. Pinning is what makes it knowable which of the two this
+# harness is actually producing, which is one of the questions the harness
+# exists to answer.
+FROM node:24-slim
+
+ARG OPENCODE_VERSION=1.18.13
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git ca-certificates gosu \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd -m -u 1001 -s /bin/bash agent \
+  && npm install -g "opencode-ai@${OPENCODE_VERSION}"
+
+COPY bootstrap.sh /usr/local/bin/bootstrap
+COPY entrypoint-opencode.sh /usr/local/bin/run-harness
+RUN chmod +x /usr/local/bin/run-harness /usr/local/bin/bootstrap
+
+ENTRYPOINT ["/usr/local/bin/run-harness"]

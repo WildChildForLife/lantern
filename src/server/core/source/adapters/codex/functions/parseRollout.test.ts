@@ -129,3 +129,45 @@ describe("parseRollout", () => {
     expect(JSON.stringify(first.entries)).toBe(JSON.stringify(second.entries));
   });
 });
+
+describe("injected context", () => {
+  it("drops the environment block Codex writes as a user turn", () => {
+    const parsed = parseRollout(
+      fixture(
+        "sessions/2026/07/28/rollout-2026-07-28T09-14-02-0199a1c4-9e2f-7bd1-a4c6-1f5b2d8e3a70.jsonl",
+      ),
+      "0199a1c4-9e2f-7bd1-a4c6-1f5b2d8e3a70",
+    );
+
+    const userTexts = parsed.entries.flatMap((entry) =>
+      entry.type === "user" && typeof entry.message.content === "string"
+        ? [entry.message.content]
+        : [],
+    );
+
+    // Codex opens every session with the cwd, shell and sandbox policy as a
+    // `user` turn. It is the first user message, which is what the conversation
+    // list uses as a title — so leaving it in titles every Codex session with a
+    // block of XML.
+    expect(userTexts.some((text) => text.includes("<environment_context>"))).toBe(false);
+    expect(userTexts.at(0)).toBe("The orders endpoint 500s on empty carts");
+  });
+
+  it("keeps a message that merely mentions the block", () => {
+    const line = JSON.stringify({
+      timestamp: "2026-07-28T09:20:00.000Z",
+      type: "response_item",
+      payload: {
+        type: "message",
+        role: "user",
+        content: [{ type: "input_text", text: "why is <environment_context> injected?" }],
+      },
+    });
+
+    const parsed = parseRollout(line, "session-key");
+
+    // Only a turn that is entirely the block is scaffolding. Asking about one
+    // is conversation.
+    expect(parsed.entries).toHaveLength(1);
+  });
+});

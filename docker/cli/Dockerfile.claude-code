@@ -1,0 +1,23 @@
+# Claude Code, pointed at the local gateway.
+#
+# It speaks only the Anthropic wire format, which is why the harness runs
+# LiteLLM rather than letting the CLIs talk to Ollama directly.
+#
+# ANTHROPIC_BASE_URL + ANTHROPIC_AUTH_TOKEN is Anthropic's own documented way
+# to route Claude Code through a gateway. No subscription credential is
+# involved: those are licensed for Claude Code talking to Anthropic, and
+# reusing them elsewhere is not permitted.
+FROM node:24-slim
+
+ARG CLAUDE_CODE_VERSION=2.1.221
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git ca-certificates gosu \
+  && rm -rf /var/lib/apt/lists/* \
+  && useradd -m -u 1001 -s /bin/bash agent \
+  && npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+
+COPY bootstrap.sh /usr/local/bin/bootstrap
+COPY entrypoint-claude-code.sh /usr/local/bin/run-harness
+RUN chmod +x /usr/local/bin/run-harness /usr/local/bin/bootstrap
+
+ENTRYPOINT ["/usr/local/bin/run-harness"]

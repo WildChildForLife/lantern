@@ -1,0 +1,1 @@
+In src/orders.py make average_item_price return 0 when the cart has no items.

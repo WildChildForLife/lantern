@@ -110,6 +110,21 @@ export type ParsedRollout = {
   readonly unparsedLines: readonly string[];
 };
 
+/**
+ * Wrappers Codex injects as `user` turns: session scaffolding rather than
+ * anything a person typed.
+ */
+const INJECTED_CONTEXT_TAGS = ["environment_context", "user_instructions"];
+
+const isInjectedContext = (text: string): boolean => {
+  const trimmed = text.trim();
+  // The whole turn has to be the block. A message that merely mentions one —
+  // asking about it, quoting it — is conversation and must survive.
+  return INJECTED_CONTEXT_TAGS.some(
+    (tag) => trimmed.startsWith(`<${tag}>`) && trimmed.endsWith(`</${tag}>`),
+  );
+};
+
 const textOf = (content: readonly z.infer<typeof contentPartSchema>[]): string =>
   content
     .map((part) => ("text" in part && typeof part.text === "string" ? part.text : ""))
@@ -235,6 +250,16 @@ export const parseRollout = (content: string, sessionKey: string): ParsedRollout
       // Codex records the harness's own instructions as `developer`/`system`
       // turns. They are not conversation.
       if (role !== "user" && role !== "assistant") {
+        ignored += 1;
+        continue;
+      }
+
+      // Codex opens every session by injecting the working directory, shell and
+      // sandbox policy as a `user` turn. Nobody typed it. Left in, it becomes
+      // the first user message — which is what the conversation list shows as
+      // the session's title, so every Codex session would be titled with a
+      // block of XML instead of what was asked.
+      if (role === "user" && isInjectedContext(text)) {
         ignored += 1;
         continue;
       }

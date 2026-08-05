@@ -12,11 +12,16 @@ build
 .turbo
 .cache
 
-# Test fixtures and docs not needed in image
-
-fixtures/claude-home
+# Test fixtures and docs not needed in image.
+# All of fixtures/, not just the Claude tree — the others were being copied
+# into every build context for nothing.
+fixtures
 docs
 coverage
+
+# The CLI test harness. It builds this image, so copying itself in would put a
+# stale copy of the harness inside every release image.
+docker
 
 # Editor and OS files
 .DS_Store
