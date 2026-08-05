@@ -10,6 +10,7 @@ export const createMockSessionMeta = (overrides: Partial<SessionMeta> = {}): Ses
     customTitle: null,
     cost: {
       totalUsd: 0,
+      confidence: "estimated",
       breakdown: {
         inputTokensUsd: 0,
         outputTokensUsd: 0,

@@ -129,6 +129,7 @@ const LayerImpl = Effect.gen(function* () {
         costBreakdownJson: JSON.stringify(totalCost.breakdown),
         tokenUsageJson: JSON.stringify(totalCost.tokenUsage),
         modelName,
+        costConfidence: totalCost.confidence,
         prLinksJson: prLinks.length > 0 ? JSON.stringify(prLinks) : null,
         fileMtimeMs: ref.fileMtimeMs,
         lastModifiedAt: new Date(ref.fileMtimeMs).toISOString(),

@@ -16,6 +16,7 @@ export type ConversationListRow = {
   lastModifiedAt: string;
   modelName: string | null;
   totalCostUsd: number;
+  costConfidence: string;
 };
 
 /**
@@ -39,6 +40,7 @@ export const buildConversationListItem = (row: ConversationListRow): Conversatio
   lastModifiedAt: row.lastModifiedAt,
   modelName: row.modelName,
   totalCostUsd: row.totalCostUsd,
+  costConfidence: row.costConfidence,
 });
 
 /**

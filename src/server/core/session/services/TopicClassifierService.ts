@@ -67,6 +67,7 @@ const LayerImpl = Effect.gen(function* () {
         lastModifiedAt: sessions.lastModifiedAt,
         modelName: sessions.modelName,
         totalCostUsd: sessions.totalCostUsd,
+        costConfidence: sessions.costConfidence,
         classifiedText: sessionTopics.sourceText,
       })
       .from(sessions)
