@@ -1,6 +1,7 @@
 import { FileSystem, Path } from "@effect/platform";
 import { Context, Data, Effect, Layer } from "effect";
 import { stateDirPath } from "../../lib/config/stateDir.ts";
+import { resolveHomeDirectory } from "../platform/resolveHomeDirectory.ts";
 import { EnvService } from "../platform/services/EnvService.ts";
 import { type SchedulerConfig, schedulerConfigSchema } from "./schema.ts";
 
@@ -26,7 +27,10 @@ export class SchedulerConfigBaseDir extends Context.Tag("SchedulerConfigBaseDir"
     Effect.gen(function* () {
       const envService = yield* EnvService;
       const path = yield* Path.Path;
-      const homeDirectory = yield* envService.getEnv("HOME");
+      const homeDirectory = resolveHomeDirectory(
+        yield* envService.getEnv("HOME"),
+        yield* envService.getEnv("USERPROFILE"),
+      );
       return stateDirPath(path, homeDirectory ?? "/");
     }),
   );
