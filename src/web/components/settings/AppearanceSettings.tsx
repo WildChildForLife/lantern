@@ -56,6 +56,15 @@ export const AppearanceSettings: FC<{ showLabels?: boolean; showDescriptions?: b
             <SelectItem value="zh_CN">
               <Trans id="settings.locale.zh_CN" />
             </SelectItem>
+            <SelectItem value="es">
+              <Trans id="settings.locale.es" message="Spanish" />
+            </SelectItem>
+            <SelectItem value="fr">
+              <Trans id="settings.locale.fr" message="French" />
+            </SelectItem>
+            <SelectItem value="pt">
+              <Trans id="settings.locale.pt" message="Portuguese" />
+            </SelectItem>
           </SelectContent>
         </Select>
         {showDescriptions && (

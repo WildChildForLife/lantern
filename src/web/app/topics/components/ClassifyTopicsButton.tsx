@@ -1,3 +1,4 @@
+import { Trans, useLingui } from "@lingui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2Icon, SparklesIcon } from "lucide-react";
 import type { FC } from "react";
@@ -12,6 +13,7 @@ import { conversationTopicsPendingQuery } from "@/web/lib/api/queries";
  * rather than seconds - hence the explicit button and the running state.
  */
 export const ClassifyTopicsButton: FC = () => {
+  const { i18n } = useLingui();
   const queryClient = useQueryClient();
   const { data } = useQuery(conversationTopicsPendingQuery);
   const pending = data?.pending ?? 0;
@@ -59,14 +61,21 @@ export const ClassifyTopicsButton: FC = () => {
         className="h-7 px-2 text-xs"
         disabled={classify.isPending || pending === 0}
         onClick={() => classify.mutate(false)}
-        title="Ask Claude to file the new conversations under a topic"
+        title={i18n._({
+          id: "topics.classify.hint",
+          message: "Ask Claude to file the new conversations under a topic",
+        })}
       >
         {classify.isPending ? (
           <Loader2Icon className="w-4 h-4 animate-spin" />
         ) : (
           <SparklesIcon className="w-4 h-4" />
         )}
-        {pending === 0 ? "Topics sorted" : `Sort ${pending} new`}
+        {pending === 0 ? (
+          <Trans id="topics.classify.sorted" message="Topics sorted" />
+        ) : (
+          <Trans id="topics.classify.pending" message="Sort {pending} new" values={{ pending }} />
+        )}
       </Button>
       <Button
         variant="ghost"
@@ -74,9 +83,12 @@ export const ClassifyTopicsButton: FC = () => {
         className="h-7 px-2 text-xs text-muted-foreground"
         disabled={classify.isPending}
         onClick={() => classify.mutate(true)}
-        title="Throw away every topic and classify all conversations again"
+        title={i18n._({
+          id: "topics.classify.redo_hint",
+          message: "Throw away every topic and classify all conversations again",
+        })}
       >
-        Redo all
+        <Trans id="topics.classify.redo" message="Redo all" />
       </Button>
     </div>
   );

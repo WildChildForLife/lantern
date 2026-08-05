@@ -8,7 +8,7 @@
         204
       ]
     ],
-    "translation": "利用可能なコマンド"
+    "translation": "Commandes disponibles"
   },
   "Available files and directories": {
     "placeholders": {},
@@ -19,7 +19,7 @@
         254
       ]
     ],
-    "translation": "利用可能なファイルとディレクトリ"
+    "translation": "Fichiers et répertoires disponibles"
   },
   "Close sidebar": {
     "placeholders": {},
@@ -30,7 +30,7 @@
         235
       ]
     ],
-    "translation": "サイドバーを閉じる"
+    "translation": "Fermer la barre latérale"
   },
   "Compare from": {
     "placeholders": {},
@@ -45,7 +45,7 @@
         376
       ]
     ],
-    "translation": "比較元"
+    "translation": "Comparer à partir de"
   },
   "Compare to": {
     "placeholders": {},
@@ -60,7 +60,7 @@
         382
       ]
     ],
-    "translation": "比較先"
+    "translation": "Comparer avec"
   },
   "Custom tool name...": {
     "placeholders": {},
@@ -71,7 +71,7 @@
         205
       ]
     ],
-    "translation": "カスタムツール名..."
+    "translation": "Nom d'outil personnalisé"
   },
   "Failed to commit": {
     "placeholders": {},
@@ -86,7 +86,7 @@
         293
       ]
     ],
-    "translation": "コミットに失敗しました"
+    "translation": "Échec de la validation"
   },
   "Failed to commit and push": {
     "placeholders": {},
@@ -101,7 +101,7 @@
         361
       ]
     ],
-    "translation": "コミットとプッシュに失敗しました"
+    "translation": "Échec de la validation et de l'envoi"
   },
   "Failed to push": {
     "placeholders": {},
@@ -116,7 +116,7 @@
         311
       ]
     ],
-    "translation": "プッシュに失敗しました"
+    "translation": "Échec de l'envoi"
   },
   "Key": {
     "placeholders": {},
@@ -127,7 +127,7 @@
         97
       ]
     ],
-    "translation": "キー"
+    "translation": "Nom de clé"
   },
   "Message input with completion support": {
     "placeholders": {},
@@ -138,7 +138,7 @@
         487
       ]
     ],
-    "translation": "補完機能付きメッセージ入力"
+    "translation": "Entrée de message avec support d'autocomplétion"
   },
   "New chat": {
     "placeholders": {},
@@ -149,7 +149,7 @@
         224
       ]
     ],
-    "translation": "新規チャット"
+    "translation": "Nouvelle conversation"
   },
   "Reload MCP servers": {
     "placeholders": {},
@@ -160,7 +160,7 @@
         46
       ]
     ],
-    "translation": "MCPサーバーを再読み込み"
+    "translation": "Recharger les serveurs MCP"
   },
   "Retry Push": {
     "placeholders": {},
@@ -175,7 +175,7 @@
         346
       ]
     ],
-    "translation": "プッシュを再試行"
+    "translation": "Réessayer l'envoi"
   },
   "Select enter key behavior": {
     "placeholders": {},
@@ -186,7 +186,7 @@
         82
       ]
     ],
-    "translation": "Enterキーの動作を選択"
+    "translation": "Sélectionner le comportement de la touche Entrée"
   },
   "Select find hotkey": {
     "placeholders": {},
@@ -197,7 +197,7 @@
         137
       ]
     ],
-    "translation": "ページ内検索ホットキーを選択"
+    "translation": "Sélectionner le raccourci de recherche"
   },
   "Select language": {
     "placeholders": {},
@@ -208,7 +208,7 @@
         47
       ]
     ],
-    "translation": "言語を選択"
+    "translation": "Sélectionner la langue"
   },
   "Select search hotkey": {
     "placeholders": {},
@@ -219,7 +219,7 @@
         111
       ]
     ],
-    "translation": "検索ホットキーを選択"
+    "translation": "Sélectionner le raccourci de recherche"
   },
   "Select theme": {
     "placeholders": {},
@@ -230,7 +230,7 @@
         85
       ]
     ],
-    "translation": "テーマを選択"
+    "translation": "Sélectionner le thème"
   },
   "Uncommitted changes": {
     "placeholders": {},
@@ -245,7 +245,7 @@
         177
       ]
     ],
-    "translation": "未コミットの変更"
+    "translation": "Modifications non validées"
   },
   "Value": {
     "placeholders": {},
@@ -256,7 +256,7 @@
         105
       ]
     ],
-    "translation": "値"
+    "translation": "Champ de valeur"
   },
   "assistant.thinking": {
     "placeholders": {},
@@ -267,7 +267,7 @@
         273
       ]
     ],
-    "translation": "思考中"
+    "translation": "Réflexion"
   },
   "assistant.tool.binary_file": {
     "placeholders": {},
@@ -282,7 +282,7 @@
         161
       ]
     ],
-    "translation": "バイナリファイルは表示できません"
+    "translation": "Le fichier binaire ne peut pas être affiché"
   },
   "assistant.tool.error_loading_file": {
     "placeholders": {},
@@ -297,7 +297,7 @@
         100
       ]
     ],
-    "translation": "ファイルの読み込みに失敗しました"
+    "translation": "Échec du chargement du fichier"
   },
   "assistant.tool.error_loading_task": {
     "placeholders": {},
@@ -312,7 +312,7 @@
         221
       ]
     ],
-    "translation": "タスクの読み込みに失敗しました"
+    "translation": "Échec du chargement de la tâche"
   },
   "assistant.tool.file_not_found": {
     "placeholders": {},
@@ -327,7 +327,7 @@
         160
       ]
     ],
-    "translation": "ファイルが見つかりません"
+    "translation": "Fichier non trouvé"
   },
   "assistant.tool.file_truncated": {
     "placeholders": {},
@@ -338,7 +338,7 @@
         193
       ]
     ],
-    "translation": "一部省略"
+    "translation": "Tronqué"
   },
   "assistant.tool.input_parameters": {
     "placeholders": {},
@@ -349,7 +349,7 @@
         168
       ]
     ],
-    "translation": "入力パラメータ"
+    "translation": "Paramètres d'entrée"
   },
   "assistant.tool.invalid_path": {
     "placeholders": {},
@@ -364,7 +364,7 @@
         162
       ]
     ],
-    "translation": "無効なファイルパスです"
+    "translation": "Chemin de fichier invalide"
   },
   "assistant.tool.loading_file": {
     "placeholders": {},
@@ -375,7 +375,7 @@
         313
       ]
     ],
-    "translation": "ファイルを読み込み中..."
+    "translation": "Chargement du fichier..."
   },
   "assistant.tool.loading_task": {
     "placeholders": {},
@@ -390,7 +390,7 @@
         213
       ]
     ],
-    "translation": "タスクを読み込み中..."
+    "translation": "Chargement de la tâche..."
   },
   "assistant.tool.message_count": {
     "placeholders": {
@@ -409,7 +409,7 @@
         199
       ]
     ],
-    "translation": "{count}件のメッセージ"
+    "translation": "{count} messages"
   },
   "assistant.tool.no_task_data": {
     "placeholders": {},
@@ -424,7 +424,7 @@
         237
       ]
     ],
-    "translation": "タスクデータがありません"
+    "translation": "Pas de données de tâche"
   },
   "assistant.tool.no_task_data_description": {
     "placeholders": {},
@@ -435,7 +435,7 @@
         240
       ]
     ],
-    "translation": "このタスクのデータは利用できません"
+    "translation": "Aucune donnée n'est disponible pour cette tâche"
   },
   "assistant.tool.read_error": {
     "placeholders": {},
@@ -450,7 +450,7 @@
         163
       ]
     ],
-    "translation": "ファイルの読み取りエラー"
+    "translation": "Erreur lors de la lecture du fichier"
   },
   "assistant.tool.result": {
     "placeholders": {},
@@ -461,7 +461,7 @@
         182
       ]
     ],
-    "translation": "ツール実行結果"
+    "translation": "Résultat de l'outil"
   },
   "assistant.tool.retry": {
     "placeholders": {},
@@ -484,7 +484,7 @@
         230
       ]
     ],
-    "translation": "再試行"
+    "translation": "Réessayer"
   },
   "assistant.tool.task_id": {
     "placeholders": {},
@@ -495,7 +495,7 @@
         190
       ]
     ],
-    "translation": "タスクID"
+    "translation": "ID de tâche"
   },
   "assistant.tool.view_file": {
     "placeholders": {},
@@ -506,7 +506,7 @@
         310
       ]
     ],
-    "translation": "ファイルを表示"
+    "translation": "Afficher le fichier"
   },
   "assistant.tool.view_task_details": {
     "placeholders": {},
@@ -517,7 +517,7 @@
         168
       ]
     ],
-    "translation": "タスクを確認"
+    "translation": "Afficher les détails de la tâche"
   },
   "assistant.turn_duration": {
     "placeholders": {},
@@ -528,7 +528,7 @@
         15
       ]
     ],
-    "translation": "応答時間"
+    "translation": "Durée du tour"
   },
   "chat.attach_file": {
     "placeholders": {},
@@ -539,7 +539,7 @@
         579
       ]
     ],
-    "translation": "添付"
+    "translation": "Joindre"
   },
   "chat.button.start": {
     "placeholders": {},
@@ -550,7 +550,7 @@
         61
       ]
     ],
-    "translation": "チャット開始"
+    "translation": "Démarrer la conversation"
   },
   "chat.copy_command.failed": {
     "message": "Failed to copy command",
@@ -562,7 +562,7 @@
         209
       ]
     ],
-    "translation": "コマンドのコピーに失敗しました"
+    "translation": "Échec de la copie de la commande"
   },
   "chat.copy_command.success": {
     "message": "Command copied to clipboard",
@@ -574,7 +574,7 @@
         202
       ]
     ],
-    "translation": "コマンドをクリップボードにコピーしました"
+    "translation": "Commande copiée dans le presse-papiers"
   },
   "chat.error.send_failed": {
     "placeholders": {},
@@ -585,7 +585,7 @@
         453
       ]
     ],
-    "translation": "メッセージの送信に失敗しました。もう一度お試しください。"
+    "translation": "Échec de l'envoi du message. Veuillez réessayer."
   },
   "chat.history.button": {
     "placeholders": {},
@@ -600,7 +600,7 @@
         108
       ]
     ],
-    "translation": "セッション履歴"
+    "translation": "historique"
   },
   "chat.history.title": {
     "placeholders": {},
@@ -615,7 +615,7 @@
         709
       ]
     ],
-    "translation": "最近のセッション"
+    "translation": "Sessions récentes"
   },
   "chat.modal.title": {
     "placeholders": {},
@@ -638,7 +638,7 @@
         125
       ]
     ],
-    "translation": "新しいチャットを開始"
+    "translation": "Démarrer une nouvelle conversation"
   },
   "chat.placeholder.continue.command_enter": {
     "message": "Type your message... (Start with / for commands, @ for files, Command+Enter to send)",
@@ -654,7 +654,7 @@
         41
       ]
     ],
-    "translation": "メッセージを入力... （/でコマンド、@でファイル、Command+Enterで送信）"
+    "translation": "Tapez votre message... (Commencez par / pour les commandes, @ pour les fichiers, Command+Entrée pour envoyer)"
   },
   "chat.placeholder.continue.enter": {
     "message": "Type your message... (Start with / for commands, @ for files, Enter to send)",
@@ -670,7 +670,7 @@
         35
       ]
     ],
-    "translation": "メッセージを入力... （/でコマンド、@でファイル、Enterで送信）"
+    "translation": "Tapez votre message... (Commencez par / pour les commandes, @ pour les fichiers, Entrée pour envoyer)"
   },
   "chat.placeholder.continue.shift_enter": {
     "message": "Type your message... (Start with / for commands, @ for files, Shift+Enter to send)",
@@ -686,7 +686,7 @@
         47
       ]
     ],
-    "translation": "メッセージを入力... （/でコマンド、@でファイル、Shift+Enterで送信）"
+    "translation": "Tapez votre message... (Commencez par / pour les commandes, @ pour les fichiers, Maj+Entrée pour envoyer)"
   },
   "chat.placeholder.resume.command_enter": {
     "message": "Type your message... (Start with / for commands, @ for files, Command+Enter to send)",
@@ -698,7 +698,7 @@
         46
       ]
     ],
-    "translation": "メッセージを入力... （/でコマンド、@でファイル、Command+Enterで送信）"
+    "translation": "Tapez votre message... (Commencez par / pour les commandes, @ pour les fichiers, Command+Entrée pour envoyer)"
   },
   "chat.placeholder.resume.enter": {
     "message": "Type your message... (Start with / for commands, @ for files, Enter to send)",
@@ -710,7 +710,7 @@
         40
       ]
     ],
-    "translation": "メッセージを入力... （/でコマンド、@でファイル、Enterで送信）"
+    "translation": "Tapez votre message... (Commencez par / pour les commandes, @ pour les fichiers, Entrée pour envoyer)"
   },
   "chat.placeholder.resume.shift_enter": {
     "message": "Type your message... (Start with / for commands, @ for files, Shift+Enter to send)",
@@ -722,7 +722,7 @@
         52
       ]
     ],
-    "translation": "メッセージを入力... （/でコマンド、@でファイル、Shift+Enterで送信）"
+    "translation": "Tapez votre message... (Commencez par / pour les commandes, @ pour les fichiers, Maj+Entrée pour envoyer)"
   },
   "chat.placeholder.running.command_enter": {
     "message": "Claude is running… type your next message and send when ready (Command+Enter to send)",
@@ -734,7 +734,7 @@
         56
       ]
     ],
-    "translation": "Claudeが実行中… 次のメッセージを入力して準備ができたら送信してください（Command+Enterで送信）"
+    "translation": "Claude est en cours d'exécution… tapez votre prochain message et envoyez-le quand vous êtes prêt (Command+Entrée pour envoyer)"
   },
   "chat.placeholder.running.enter": {
     "message": "Claude is running… type your next message and send when ready (Enter to send)",
@@ -746,7 +746,7 @@
         50
       ]
     ],
-    "translation": "Claudeが実行中… 次のメッセージを入力して準備ができたら送信してください（Enterで送信）"
+    "translation": "Claude est en cours d'exécution… tapez votre prochain message et envoyez-le quand vous êtes prêt (Entrée pour envoyer)"
   },
   "chat.placeholder.running.shift_enter": {
     "message": "Claude is running… type your next message and send when ready (Shift+Enter to send)",
@@ -758,7 +758,7 @@
         62
       ]
     ],
-    "translation": "Claudeが実行中… 次のメッセージを入力して準備ができたら送信してください（Shift+Enterで送信）"
+    "translation": "Claude est en cours d'exécution… tapez votre prochain message et envoyez-le quand vous êtes prêt (Maj+Entrée pour envoyer)"
   },
   "chat.resume": {
     "placeholders": {},
@@ -769,7 +769,7 @@
         58
       ]
     ],
-    "translation": "再開"
+    "translation": "Reprendre"
   },
   "chat.scheduled_send.failed": {
     "message": "Failed to schedule message",
@@ -781,7 +781,7 @@
         299
       ]
     ],
-    "translation": "メッセージの予約に失敗しました"
+    "translation": "Échec de la planification du message"
   },
   "chat.scheduled_send.success": {
     "message": "Message scheduled successfully",
@@ -793,7 +793,7 @@
         283
       ]
     ],
-    "translation": "メッセージを予約しました"
+    "translation": "Message planifié avec succès"
   },
   "chat.scheduled_send.success_description": {
     "message": "You can view and manage it in the Scheduler tab",
@@ -805,7 +805,7 @@
         288
       ]
     ],
-    "translation": "スケジューラタブで確認・管理できます"
+    "translation": "Vous pouvez l'afficher et le gérer dans l'onglet Planificateur"
   },
   "chat.send": {
     "placeholders": {},
@@ -816,7 +816,7 @@
         77
       ]
     ],
-    "translation": "送信"
+    "translation": "Envoyer"
   },
   "chat.send_mode.immediate": {
     "placeholders": {},
@@ -827,7 +827,7 @@
         532
       ]
     ],
-    "translation": "今すぐ送信"
+    "translation": "Envoyer maintenant"
   },
   "chat.send_mode.label": {
     "placeholders": {},
@@ -838,7 +838,7 @@
         517
       ]
     ],
-    "translation": "送信モード"
+    "translation": "Mode d'envoi"
   },
   "chat.send_mode.scheduled": {
     "placeholders": {},
@@ -853,7 +853,7 @@
         674
       ]
     ],
-    "translation": "予約送信"
+    "translation": "Planifier l'envoi"
   },
   "chat.send_mode.scheduled_time": {
     "placeholders": {},
@@ -864,7 +864,7 @@
         542
       ]
     ],
-    "translation": "送信予定時刻"
+    "translation": "Heure d'envoi planifiée"
   },
   "chat.toolbar.agent.none": {
     "message": "No Agent",
@@ -880,7 +880,7 @@
         270
       ]
     ],
-    "translation": "エージェントなし"
+    "translation": "Aucun agent"
   },
   "chat.toolbar.agent.tooltip": {
     "message": "Select agent",
@@ -892,7 +892,7 @@
         296
       ]
     ],
-    "translation": "エージェントを選択"
+    "translation": "Sélectionner l'agent"
   },
   "chat.toolbar.effort.tooltip": {
     "message": "Select reasoning effort",
@@ -904,7 +904,7 @@
         644
       ]
     ],
-    "translation": "Reasoning effort を選択"
+    "translation": "Sélectionner l'effort de raisonnement"
   },
   "chat.toolbar.model.tooltip": {
     "message": "Select model",
@@ -916,7 +916,7 @@
         612
       ]
     ],
-    "translation": "モデルを選択"
+    "translation": "Sélectionner le modèle"
   },
   "chat.toolbar.permission_mode.accept_edits": {
     "message": "Accept Edits",
@@ -928,7 +928,7 @@
         187
       ]
     ],
-    "translation": "編集許可"
+    "translation": "Accepter les modifications"
   },
   "chat.toolbar.permission_mode.bypass": {
     "message": "Bypass",
@@ -940,7 +940,7 @@
         193
       ]
     ],
-    "translation": "バイパス"
+    "translation": "Contourner"
   },
   "chat.toolbar.permission_mode.default": {
     "message": "Default",
@@ -952,7 +952,7 @@
         184
       ]
     ],
-    "translation": "デフォルト"
+    "translation": "Par défaut"
   },
   "chat.toolbar.permission_mode.plan": {
     "message": "Plan",
@@ -964,7 +964,7 @@
         196
       ]
     ],
-    "translation": "プラン"
+    "translation": "Planifier"
   },
   "chat.toolbar.permission_mode.tooltip": {
     "message": "Select permission mode",
@@ -976,7 +976,7 @@
         203
       ]
     ],
-    "translation": "権限モードを選択"
+    "translation": "Sélectionner le mode d'autorisation"
   },
   "chat.toolbar.system_prompt.tooltip": {
     "message": "Include default Claude Code prompt",
@@ -988,7 +988,7 @@
         238
       ]
     ],
-    "translation": "デフォルトの Claude Code プロンプトを含める"
+    "translation": "Inclure l'invite système Claude Code par défaut"
   },
   "chat.voice_input": {
     "message": "Voice input",
@@ -1000,7 +1000,7 @@
         714
       ]
     ],
-    "translation": "音声入力"
+    "translation": "Entrée vocale"
   },
   "codeBlock.copy": {
     "message": "Copy code",
@@ -1016,7 +1016,7 @@
         66
       ]
     ],
-    "translation": "コードをコピー"
+    "translation": "Copier le code"
   },
   "codeBlock.copy.failed": {
     "message": "Failed to copy code",
@@ -1028,7 +1028,7 @@
         43
       ]
     ],
-    "translation": "コードのコピーに失敗しました"
+    "translation": "Échec de la copie du code"
   },
   "codeBlock.copy.success": {
     "message": "Code copied",
@@ -1040,7 +1040,7 @@
         32
       ]
     ],
-    "translation": "コードをコピーしました"
+    "translation": "Code copié"
   },
   "common.action.cancel": {
     "placeholders": {},
@@ -1051,7 +1051,7 @@
         82
       ]
     ],
-    "translation": "キャンセル"
+    "translation": "Annuler"
   },
   "common.cancel": {
     "placeholders": {},
@@ -1070,7 +1070,7 @@
         321
       ]
     ],
-    "translation": "キャンセル"
+    "translation": "Annuler"
   },
   "common.create": {
     "placeholders": {},
@@ -1081,7 +1081,7 @@
         322
       ]
     ],
-    "translation": "作成"
+    "translation": "Créer"
   },
   "common.delete": {
     "placeholders": {},
@@ -1096,7 +1096,7 @@
         328
       ]
     ],
-    "translation": "削除"
+    "translation": "Supprimer"
   },
   "common.deleting": {
     "placeholders": {},
@@ -1111,7 +1111,7 @@
         328
       ]
     ],
-    "translation": "削除中..."
+    "translation": "Suppression..."
   },
   "common.error": {
     "placeholders": {},
@@ -1126,7 +1126,7 @@
         177
       ]
     ],
-    "translation": "エラー"
+    "translation": "Erreur"
   },
   "common.loading": {
     "placeholders": {},
@@ -1145,7 +1145,7 @@
         212
       ]
     ],
-    "translation": "読み込み中..."
+    "translation": "Chargement..."
   },
   "common.reload": {
     "message": "Reload",
@@ -1157,7 +1157,7 @@
         174
       ]
     ],
-    "translation": "再読み込み"
+    "translation": "Recharger"
   },
   "common.saving": {
     "placeholders": {},
@@ -1168,7 +1168,7 @@
         318
       ]
     ],
-    "translation": "保存中..."
+    "translation": "Enregistrement..."
   },
   "common.update": {
     "placeholders": {},
@@ -1179,7 +1179,7 @@
         320
       ]
     ],
-    "translation": "更新"
+    "translation": "Mettre à jour"
   },
   "control.branch": {
     "placeholders": {},
@@ -1190,7 +1190,7 @@
         541
       ]
     ],
-    "translation": "ブランチ"
+    "translation": "Branche"
   },
   "control.metadata": {
     "placeholders": {},
@@ -1201,7 +1201,7 @@
         522
       ]
     ],
-    "translation": "メタデータ"
+    "translation": "Métadonnées"
   },
   "control.model": {
     "placeholders": {},
@@ -1212,7 +1212,7 @@
         568
       ]
     ],
-    "translation": "モデル"
+    "translation": "Modèle"
   },
   "control.new": {
     "placeholders": {},
@@ -1223,7 +1223,7 @@
         97
       ]
     ],
-    "translation": "新規"
+    "translation": "Nouveau"
   },
   "control.new_chat": {
     "message": "New Chat",
@@ -1235,7 +1235,7 @@
         90
       ]
     ],
-    "translation": "新しいチャット"
+    "translation": "Nouvelle conversation"
   },
   "control.project_path": {
     "placeholders": {},
@@ -1246,7 +1246,7 @@
         528
       ]
     ],
-    "translation": "プロジェクトパス"
+    "translation": "Chemin du projet"
   },
   "control.scroll_to_bottom": {
     "message": "Scroll to Bottom",
@@ -1258,7 +1258,7 @@
         124
       ]
     ],
-    "translation": "ボトムにスクロール"
+    "translation": "Faire défiler vers le bas"
   },
   "control.scroll_to_top": {
     "message": "Scroll to Top",
@@ -1270,7 +1270,7 @@
         108
       ]
     ],
-    "translation": "トップにスクロール"
+    "translation": "Faire défiler vers le haut"
   },
   "control.session_id": {
     "placeholders": {},
@@ -1281,7 +1281,7 @@
         555
       ]
     ],
-    "translation": "セッションID"
+    "translation": "ID de session"
   },
   "conversation.copy": {
     "message": "Copy message",
@@ -1293,7 +1293,7 @@
         42
       ]
     ],
-    "translation": "メッセージをコピー"
+    "translation": "Copier le message"
   },
   "conversation.copy.failed": {
     "message": "Failed to copy message",
@@ -1305,7 +1305,7 @@
         34
       ]
     ],
-    "translation": "メッセージのコピーに失敗しました"
+    "translation": "Échec de la copie du message"
   },
   "conversation.copy.success": {
     "message": "Message copied",
@@ -1317,7 +1317,7 @@
         26
       ]
     ],
-    "translation": "メッセージをコピーしました"
+    "translation": "Message copié"
   },
   "conversation.error.raw_content": {
     "placeholders": {},
@@ -1328,7 +1328,7 @@
         213
       ]
     ],
-    "translation": "生データ："
+    "translation": "Données brutes : "
   },
   "conversation.error.report_issue": {
     "placeholders": {},
@@ -1339,7 +1339,7 @@
         206
       ]
     ],
-    "translation": "この問題を報告"
+    "translation": "Signaler ce problème"
   },
   "conversation.error.schema": {
     "placeholders": {},
@@ -1350,7 +1350,7 @@
         184
       ]
     ],
-    "translation": "スキーマエラー"
+    "translation": "Erreur de schéma"
   },
   "conversation.error.schema_validation": {
     "placeholders": {},
@@ -1361,7 +1361,7 @@
         196
       ]
     ],
-    "translation": "スキーマ検証エラー"
+    "translation": "Erreur de validation de schéma"
   },
   "conversation.error.schema_validation.description": {
     "placeholders": {},
@@ -1372,7 +1372,7 @@
         199
       ]
     ],
-    "translation": "この会話エントリの解析に失敗しました。フォーマットの変更または解析の問題が考えられます。"
+    "translation": "Impossible d'analyser cette entrée de conversation. Cela peut être dû à des modifications de format ou à des problèmes d'analyse."
   },
   "conversations.filter.placeholder": {
     "message": "Filter by title, first message or project...",
@@ -1384,7 +1384,7 @@
         99
       ]
     ],
-    "translation": "タイトル・最初のメッセージ・プロジェクトで絞り込む…"
+    "translation": "Filtrer par titre, premier message ou projet..."
   },
   "cron_builder.cron_expression": {
     "placeholders": {},
@@ -1395,7 +1395,7 @@
         346
       ]
     ],
-    "translation": "Cron式"
+    "translation": "Expression Cron"
   },
   "cron_builder.custom": {
     "placeholders": {},
@@ -1406,7 +1406,7 @@
         257
       ]
     ],
-    "translation": "カスタム"
+    "translation": "Personnalisé"
   },
   "cron_builder.daily": {
     "placeholders": {},
@@ -1417,7 +1417,7 @@
         251
       ]
     ],
-    "translation": "毎日"
+    "translation": "Quotidien"
   },
   "cron_builder.day_of_week": {
     "placeholders": {},
@@ -1428,7 +1428,7 @@
         296
       ]
     ],
-    "translation": "曜日"
+    "translation": "Jour de la semaine"
   },
   "cron_builder.expression": {
     "placeholders": {},
@@ -1439,7 +1439,7 @@
         368
       ]
     ],
-    "translation": "Cron式"
+    "translation": "Expression Cron"
   },
   "cron_builder.friday": {
     "placeholders": {},
@@ -1450,7 +1450,7 @@
         50
       ]
     ],
-    "translation": "金曜日"
+    "translation": "Vendredi"
   },
   "cron_builder.hour": {
     "placeholders": {},
@@ -1465,7 +1465,7 @@
         317
       ]
     ],
-    "translation": "時 (0-23)"
+    "translation": "Heure (0-23)"
   },
   "cron_builder.hourly": {
     "placeholders": {},
@@ -1476,7 +1476,7 @@
         248
       ]
     ],
-    "translation": "毎時"
+    "translation": "Toutes les heures"
   },
   "cron_builder.minute": {
     "placeholders": {},
@@ -1491,7 +1491,7 @@
         329
       ]
     ],
-    "translation": "分 (0-59)"
+    "translation": "Minute (0-59)"
   },
   "cron_builder.monday": {
     "placeholders": {},
@@ -1502,7 +1502,7 @@
         34
       ]
     ],
-    "translation": "月曜日"
+    "translation": "Lundi"
   },
   "cron_builder.preview": {
     "placeholders": {},
@@ -1513,7 +1513,7 @@
         358
       ]
     ],
-    "translation": "プレビュー"
+    "translation": "Aperçu"
   },
   "cron_builder.saturday": {
     "placeholders": {},
@@ -1524,7 +1524,7 @@
         54
       ]
     ],
-    "translation": "土曜日"
+    "translation": "Samedi"
   },
   "cron_builder.schedule_type": {
     "placeholders": {},
@@ -1535,7 +1535,7 @@
         240
       ]
     ],
-    "translation": "スケジュールタイプ"
+    "translation": "Type de calendrier"
   },
   "cron_builder.sunday": {
     "placeholders": {},
@@ -1546,7 +1546,7 @@
         30
       ]
     ],
-    "translation": "日曜日"
+    "translation": "Dimanche"
   },
   "cron_builder.thursday": {
     "placeholders": {},
@@ -1557,7 +1557,7 @@
         46
       ]
     ],
-    "translation": "木曜日"
+    "translation": "Jeudi"
   },
   "cron_builder.tuesday": {
     "placeholders": {},
@@ -1568,7 +1568,7 @@
         38
       ]
     ],
-    "translation": "火曜日"
+    "translation": "Mardi"
   },
   "cron_builder.wednesday": {
     "placeholders": {},
@@ -1579,7 +1579,7 @@
         42
       ]
     ],
-    "translation": "水曜日"
+    "translation": "Mercredi"
   },
   "cron_builder.weekly": {
     "placeholders": {},
@@ -1590,7 +1590,7 @@
         254
       ]
     ],
-    "translation": "毎週"
+    "translation": "Hebdomadaire"
   },
   "diff.commit": {
     "placeholders": {},
@@ -1605,7 +1605,7 @@
         533
       ]
     ],
-    "translation": "コミット"
+    "translation": "Valider"
   },
   "diff.commit.changes": {
     "placeholders": {},
@@ -1620,7 +1620,7 @@
         442
       ]
     ],
-    "translation": "変更をコミット"
+    "translation": "Valider les modifications"
   },
   "diff.commit.message": {
     "placeholders": {},
@@ -1635,7 +1635,7 @@
         505
       ]
     ],
-    "translation": "コミットメッセージ"
+    "translation": "Message de validation"
   },
   "diff.commit.push": {
     "placeholders": {},
@@ -1650,7 +1650,7 @@
         567
       ]
     ],
-    "translation": "コミット＆プッシュ"
+    "translation": "Valider et envoyer"
   },
   "diff.committing": {
     "placeholders": {},
@@ -1665,7 +1665,7 @@
         530
       ]
     ],
-    "translation": "コミット中..."
+    "translation": "Validation en cours..."
   },
   "diff.committing.pushing": {
     "placeholders": {},
@@ -1680,7 +1680,7 @@
         564
       ]
     ],
-    "translation": "コミット＆プッシュ中..."
+    "translation": "Validation et envoi en cours..."
   },
   "diff.deselect.all": {
     "placeholders": {},
@@ -1695,7 +1695,7 @@
         471
       ]
     ],
-    "translation": "すべて選択解除"
+    "translation": "Tout désélectionner"
   },
   "diff.enter.message": {
     "placeholders": {},
@@ -1706,7 +1706,7 @@
         577
       ]
     ],
-    "translation": "コミットメッセージを入力"
+    "translation": "Veuillez entrer un message de validation"
   },
   "diff.files": {
     "placeholders": {},
@@ -1717,7 +1717,7 @@
         48
       ]
     ],
-    "translation": "ファイル"
+    "translation": "Fichiers"
   },
   "diff.files.changed": {
     "placeholders": {},
@@ -1732,7 +1732,7 @@
         45
       ]
     ],
-    "translation": "ファイルが変更されました"
+    "translation": "fichiers modifiés"
   },
   "diff.loading": {
     "placeholders": {},
@@ -1747,7 +1747,7 @@
         613
       ]
     ],
-    "translation": "差分を読み込み中..."
+    "translation": "Chargement du diff..."
   },
   "diff.push": {
     "placeholders": {},
@@ -1762,7 +1762,7 @@
         550
       ]
     ],
-    "translation": "プッシュ"
+    "translation": "Envoyer"
   },
   "diff.pushing": {
     "placeholders": {},
@@ -1777,7 +1777,7 @@
         547
       ]
     ],
-    "translation": "プッシュ中..."
+    "translation": "Envoi en cours..."
   },
   "diff.select.all": {
     "placeholders": {},
@@ -1792,7 +1792,7 @@
         463
       ]
     ],
-    "translation": "すべて選択"
+    "translation": "Tout sélectionner"
   },
   "diff.select.file": {
     "placeholders": {},
@@ -1803,7 +1803,7 @@
         575
       ]
     ],
-    "translation": "少なくとも1つのファイルを選択してください"
+    "translation": "Veuillez sélectionner au moins un fichier"
   },
   "directory_picker.current": {
     "placeholders": {},
@@ -1814,7 +1814,7 @@
         39
       ]
     ],
-    "translation": "現在："
+    "translation": "Actuel : "
   },
   "directory_picker.loading": {
     "placeholders": {},
@@ -1825,7 +1825,7 @@
         56
       ]
     ],
-    "translation": "読み込み中..."
+    "translation": "Chargement..."
   },
   "directory_picker.no_directories": {
     "placeholders": {},
@@ -1836,7 +1836,7 @@
         81
       ]
     ],
-    "translation": "ディレクトリが見つかりません"
+    "translation": "Aucun répertoire trouvé"
   },
   "directory_picker.show_hidden": {
     "placeholders": {},
@@ -1847,7 +1847,7 @@
         50
       ]
     ],
-    "translation": "隠しファイルを表示"
+    "translation": "Afficher les fichiers cachés"
   },
   "e.g., 1.00": {
     "placeholders": {},
@@ -1858,7 +1858,7 @@
         536
       ]
     ],
-    "translation": "例: 1.00"
+    "translation": "Exemple : 1.00"
   },
   "e.g., 10": {
     "placeholders": {},
@@ -1869,7 +1869,7 @@
         492
       ]
     ],
-    "translation": "例: 10"
+    "translation": "Exemple : 10"
   },
   "e.g., 10000": {
     "placeholders": {},
@@ -1880,7 +1880,7 @@
         513
       ]
     ],
-    "translation": "例: 10000"
+    "translation": "Exemple : 10000"
   },
   "e.g., api.example.com, cdn.example.com": {
     "placeholders": {},
@@ -1891,7 +1891,7 @@
         424
       ]
     ],
-    "translation": "例: api.example.com, cdn.example.com"
+    "translation": "Exemple : api.example.com, cdn.example.com"
   },
   "layout.bottom_panel.title": {
     "placeholders": {},
@@ -1902,7 +1902,7 @@
         190
       ]
     ],
-    "translation": "ターミナル"
+    "translation": "Terminal"
   },
   "layout.toggle_bottom_panel": {
     "placeholders": {},
@@ -1913,7 +1913,7 @@
         133
       ]
     ],
-    "translation": "下パネルを切り替え"
+    "translation": "Activer/désactiver le panneau inférieur"
   },
   "layout.toggle_left_panel": {
     "placeholders": {},
@@ -1924,7 +1924,7 @@
         112
       ]
     ],
-    "translation": "左パネルを切り替え"
+    "translation": "Activer/désactiver le panneau gauche"
   },
   "layout.toggle_right_panel": {
     "placeholders": {},
@@ -1935,7 +1935,7 @@
         154
       ]
     ],
-    "translation": "右パネルを切り替え"
+    "translation": "Activer/désactiver le panneau droit"
   },
   "list.hide_done": {
     "message": "Hide done ({doneCount})",
@@ -1955,7 +1955,7 @@
         91
       ]
     ],
-    "translation": "完了を非表示 ({doneCount})"
+    "translation": "Masquer les terminées ({doneCount})"
   },
   "list.showing_open_only": {
     "message": "Showing open only",
@@ -1971,7 +1971,7 @@
         89
       ]
     ],
-    "translation": "未完了のみ表示中"
+    "translation": "Affichage des ouvertes uniquement"
   },
   "mcp.error.load_failed": {
     "placeholders": {
@@ -1986,7 +1986,7 @@
         64
       ]
     ],
-    "translation": "MCPサーバーの読み込みに失敗しました: {error}"
+    "translation": "Échec du chargement des serveurs MCP : {error}"
   },
   "mcp.no.servers": {
     "placeholders": {},
@@ -1997,7 +1997,7 @@
         70
       ]
     ],
-    "translation": "MCPサーバーが見つかりません"
+    "translation": "Aucun serveur MCP trouvé"
   },
   "mcp.title": {
     "placeholders": {},
@@ -2008,7 +2008,7 @@
         38
       ]
     ],
-    "translation": "MCPサーバー"
+    "translation": "Serveurs MCP"
   },
   "nav.all_conversations": {
     "message": "All conversations",
@@ -2024,7 +2024,7 @@
         38
       ]
     ],
-    "translation": "すべての会話"
+    "translation": "Toutes les conversations"
   },
   "nav.projects": {
     "message": "Projects",
@@ -2040,7 +2040,7 @@
         47
       ]
     ],
-    "translation": "プロジェクト"
+    "translation": "Projets"
   },
   "nav.topics": {
     "message": "Topics",
@@ -2056,7 +2056,7 @@
         76
       ]
     ],
-    "translation": "トピック"
+    "translation": "Sujets"
   },
   "notfound.button.go_home": {
     "placeholders": {},
@@ -2067,7 +2067,7 @@
         43
       ]
     ],
-    "translation": "ホームに戻る"
+    "translation": "Retour à l'accueil"
   },
   "notfound.default.description": {
     "placeholders": {},
@@ -2078,7 +2078,7 @@
         20
       ]
     ],
-    "translation": "お探しのページは存在しないか、移動されました。"
+    "translation": "La page que vous recherchez n'existe pas ou a été déplacée."
   },
   "notfound.default.title": {
     "placeholders": {},
@@ -2089,7 +2089,7 @@
         19
       ]
     ],
-    "translation": "ページが見つかりません"
+    "translation": "Page non trouvée"
   },
   "notfound.session.description": {
     "placeholders": {},
@@ -2100,7 +2100,7 @@
         36
       ]
     ],
-    "translation": "お探しのセッションは存在しません。"
+    "translation": "La session que vous recherchez n'existe pas."
   },
   "notfound.session.title": {
     "placeholders": {},
@@ -2111,7 +2111,7 @@
         35
       ]
     ],
-    "translation": "セッションが見つかりません"
+    "translation": "Session non trouvée"
   },
   "notification.beep": {
     "placeholders": {},
@@ -2122,7 +2122,7 @@
         95
       ]
     ],
-    "translation": "ビープ音"
+    "translation": "Bip"
   },
   "notification.chime": {
     "placeholders": {},
@@ -2133,7 +2133,7 @@
         96
       ]
     ],
-    "translation": "チャイム"
+    "translation": "Sonnerie"
   },
   "notification.description": {
     "placeholders": {},
@@ -2144,7 +2144,7 @@
         159
       ]
     ],
-    "translation": "Claude Code のタスクが完了した時に再生する音を選択してください"
+    "translation": "Sélectionnez le son à jouer lorsqu'une tâche Claude Code se termine"
   },
   "notification.empty": {
     "placeholders": {},
@@ -2155,7 +2155,7 @@
         116
       ]
     ],
-    "translation": "新しい通知はありません"
+    "translation": "Aucune nouvelle notification"
   },
   "notification.none": {
     "placeholders": {},
@@ -2166,7 +2166,7 @@
         94
       ]
     ],
-    "translation": "なし"
+    "translation": "Aucun"
   },
   "notification.permission_requested": {
     "placeholders": {},
@@ -2177,7 +2177,7 @@
         138
       ]
     ],
-    "translation": "権限の許可が必要です"
+    "translation": "Autorisation requise"
   },
   "notification.ping": {
     "placeholders": {},
@@ -2188,7 +2188,7 @@
         97
       ]
     ],
-    "translation": "ピン"
+    "translation": "Ping"
   },
   "notification.pop": {
     "placeholders": {},
@@ -2199,7 +2199,7 @@
         98
       ]
     ],
-    "translation": "ポップ"
+    "translation": "Pop"
   },
   "notification.push.denied": {
     "placeholders": {},
@@ -2210,7 +2210,7 @@
         110
       ]
     ],
-    "translation": "ブラウザで通知が拒否されています"
+    "translation": "Les notifications sont bloquées dans les paramètres du navigateur"
   },
   "notification.push.enable": {
     "placeholders": {},
@@ -2225,7 +2225,7 @@
         122
       ]
     ],
-    "translation": "Push 通知を有効にする"
+    "translation": "Activer les notifications push"
   },
   "notification.push.enabled": {
     "placeholders": {},
@@ -2236,7 +2236,7 @@
         92
       ]
     ],
-    "translation": "有効"
+    "translation": "Activé"
   },
   "notification.push.label": {
     "placeholders": {},
@@ -2247,7 +2247,7 @@
         82
       ]
     ],
-    "translation": "Push 通知"
+    "translation": "Notifications push"
   },
   "notification.question_asked": {
     "placeholders": {},
@@ -2258,7 +2258,7 @@
         140
       ]
     ],
-    "translation": "Claudeからの質問"
+    "translation": "Question de Claude"
   },
   "notification.session_completed": {
     "placeholders": {},
@@ -2269,7 +2269,7 @@
         136
       ]
     ],
-    "translation": "セッションが完了しました"
+    "translation": "Session terminée"
   },
   "notification.session_paused": {
     "placeholders": {},
@@ -2280,7 +2280,7 @@
         134
       ]
     ],
-    "translation": "セッションが一時停止しました"
+    "translation": "Session mise en pause"
   },
   "notification.test": {
     "placeholders": {},
@@ -2291,7 +2291,7 @@
         152
       ]
     ],
-    "translation": "テスト"
+    "translation": "Test"
   },
   "notification.title": {
     "placeholders": {},
@@ -2306,7 +2306,7 @@
         106
       ]
     ],
-    "translation": "通知"
+    "translation": "Notifications"
   },
   "panel.browser.empty.description": {
     "placeholders": {},
@@ -2317,7 +2317,7 @@
         327
       ]
     ],
-    "translation": "上のURLバーにURLを入力するか、会話中のリンクをクリックしてください"
+    "translation": "Entrez une URL dans la barre ci-dessus ou cliquez sur un lien dans la conversation"
   },
   "panel.browser.empty.title": {
     "placeholders": {},
@@ -2328,7 +2328,7 @@
         324
       ]
     ],
-    "translation": "ページが読み込まれていません"
+    "translation": "Aucune page chargée"
   },
   "panel.files.edited_section": {
     "placeholders": {},
@@ -2343,7 +2343,7 @@
         544
       ]
     ],
-    "translation": "編集されたファイル"
+    "translation": "Fichiers modifiés"
   },
   "panel.files.filter_tools": {
     "placeholders": {},
@@ -2354,7 +2354,7 @@
         611
       ]
     ],
-    "translation": "ツールでフィルター"
+    "translation": "Filtrer par outil"
   },
   "panel.files.loading_agents": {
     "placeholders": {},
@@ -2365,7 +2365,7 @@
         686
       ]
     ],
-    "translation": "Agent を読み込み中..."
+    "translation": "Chargement des agents..."
   },
   "panel.files.no_agents": {
     "placeholders": {},
@@ -2380,7 +2380,7 @@
         702
       ]
     ],
-    "translation": "Agent はまだありません"
+    "translation": "Aucun agent pour l'instant"
   },
   "panel.files.no_edited_files": {
     "placeholders": {},
@@ -2395,7 +2395,7 @@
         585
       ]
     ],
-    "translation": "編集されたファイルはまだありません"
+    "translation": "Aucun fichier modifié pour l'instant"
   },
   "panel.files.no_filtered_tool_calls": {
     "placeholders": {},
@@ -2406,7 +2406,7 @@
         667
       ]
     ],
-    "translation": "選択したフィルタに一致するツール呼び出しはありません"
+    "translation": "Aucun appel d'outil ne correspond aux filtres sélectionnés"
   },
   "panel.files.no_tool_calls": {
     "placeholders": {},
@@ -2421,7 +2421,7 @@
         669
       ]
     ],
-    "translation": "ツール呼び出しはまだありません"
+    "translation": "Aucun appel d'outil pour l'instant"
   },
   "panel.files.tool_calls_section": {
     "placeholders": {},
@@ -2436,7 +2436,7 @@
         592
       ]
     ],
-    "translation": "ツール呼び出し"
+    "translation": "Appels d'outils"
   },
   "panel.git.empty": {
     "placeholders": {},
@@ -2447,7 +2447,7 @@
         536
       ]
     ],
-    "translation": "Git変更がありません"
+    "translation": "Aucune modification Git"
   },
   "panel.git.pr_links": {
     "placeholders": {},
@@ -2458,7 +2458,7 @@
         754
       ]
     ],
-    "translation": "プルリクエスト"
+    "translation": "Demandes d'extraction"
   },
   "panel.git.view_content": {
     "placeholders": {},
@@ -2469,7 +2469,7 @@
         283
       ]
     ],
-    "translation": "コンテンツ"
+    "translation": "Contenu"
   },
   "panel.git.view_diff": {
     "placeholders": {},
@@ -2480,7 +2480,7 @@
         279
       ]
     ],
-    "translation": "差分"
+    "translation": "Diff"
   },
   "panel.review.empty": {
     "placeholders": {},
@@ -2491,7 +2491,7 @@
         308
       ]
     ],
-    "translation": "レビュー対象がありません"
+    "translation": "Aucun élément à examiner"
   },
   "panel.tab.browser": {
     "placeholders": {},
@@ -2502,7 +2502,7 @@
         58
       ]
     ],
-    "translation": "ブラウザ"
+    "translation": "Navigateur"
   },
   "panel.tab.explorer": {
     "placeholders": {},
@@ -2513,7 +2513,7 @@
         46
       ]
     ],
-    "translation": "エクスプローラー"
+    "translation": "Explorateur"
   },
   "panel.tab.git": {
     "placeholders": {},
@@ -2535,7 +2535,7 @@
         56
       ]
     ],
-    "translation": "レビュー"
+    "translation": "Examen"
   },
   "panel.todo.collapsed_title": {
     "placeholders": {},
@@ -2546,7 +2546,7 @@
         79
       ]
     ],
-    "translation": "Todo"
+    "translation": "À faire"
   },
   "project.new": {
     "placeholders": {},
@@ -2557,7 +2557,7 @@
         60
       ]
     ],
-    "translation": "新規プロジェクト"
+    "translation": "Nouveau projet"
   },
   "project.setup.action.setting_up": {
     "placeholders": {},
@@ -2568,7 +2568,7 @@
         93
       ]
     ],
-    "translation": "セットアップ中..."
+    "translation": "Configuration..."
   },
   "project.setup.action.setup": {
     "placeholders": {},
@@ -2579,7 +2579,7 @@
         96
       ]
     ],
-    "translation": "プロジェクトをセットアップ"
+    "translation": "Configurer le projet"
   },
   "project.setup.description": {
     "placeholders": {},
@@ -2590,7 +2590,7 @@
         69
       ]
     ],
-    "translation": "Claude Codeプロジェクトとしてセットアップするディレクトリまで移動してください。CLAUDE.mdが存在する場合はプロジェクトを説明し、存在しない場合は<0>/init</0>で初期化します。"
+    "translation": "Accédez au répertoire à configurer en tant que projet Claude Code. Si CLAUDE.md existe, il décrit le projet ; sinon, initialisez avec <0>/init</0>."
   },
   "project.setup.title": {
     "placeholders": {},
@@ -2601,7 +2601,7 @@
         66
       ]
     ],
-    "translation": "新規プロジェクトをセットアップ"
+    "translation": "Configurer un nouveau projet"
   },
   "project_list.last_modified": {
     "placeholders": {},
@@ -2612,7 +2612,7 @@
         93
       ]
     ],
-    "translation": "最終更新："
+    "translation": "Dernière modification : "
   },
   "project_list.messages": {
     "placeholders": {},
@@ -2623,7 +2623,7 @@
         102
       ]
     ],
-    "translation": "メッセージ："
+    "translation": "Messages : "
   },
   "project_list.no_projects.description": {
     "placeholders": {},
@@ -2634,7 +2634,7 @@
         33
       ]
     ],
-    "translation": "~/.claude/projectsディレクトリにClaude Codeプロジェクトが見つかりません。Claude Codeとの会話を開始して、最初のプロジェクトをセットアップしてください。"
+    "translation": "Aucun projet Claude Code trouvé dans votre répertoire ~/.claude/projects. Démarrez une conversation avec Claude Code pour configurer votre premier projet."
   },
   "project_list.no_projects.title": {
     "placeholders": {},
@@ -2645,7 +2645,7 @@
         30
       ]
     ],
-    "translation": "プロジェクトが見つかりません"
+    "translation": "Aucun projet trouvé"
   },
   "project_list.view_conversations": {
     "placeholders": {},
@@ -2656,7 +2656,7 @@
         108
       ]
     ],
-    "translation": "会話を表示"
+    "translation": "Afficher les conversations"
   },
   "project_switcher.no_project": {
     "placeholders": {},
@@ -2667,7 +2667,7 @@
         71
       ]
     ],
-    "translation": "プロジェクトがありません"
+    "translation": "Aucun projet sélectionné"
   },
   "project_switcher.no_results": {
     "placeholders": {},
@@ -2678,7 +2678,7 @@
         81
       ]
     ],
-    "translation": "該当するプロジェクトがありません"
+    "translation": "Aucun projet correspondant"
   },
   "projects.page.description": {
     "placeholders": {},
@@ -2689,7 +2689,7 @@
         59
       ]
     ],
-    "translation": "Claude Codeの会話履歴とプロジェクトの操作を閲覧"
+    "translation": "Afficher l'historique des conversations Claude Code et les opérations de projet"
   },
   "projects.page.loading": {
     "placeholders": {},
@@ -2700,7 +2700,7 @@
         96
       ]
     ],
-    "translation": "プロジェクトを読み込み中..."
+    "translation": "Chargement des projets..."
   },
   "projects.page.title": {
     "placeholders": {},
@@ -2711,7 +2711,7 @@
         67
       ]
     ],
-    "translation": "プロジェクト"
+    "translation": "Projets"
   },
   "review.action.insert": {
     "placeholders": {},
@@ -2722,7 +2722,7 @@
         345
       ]
     ],
-    "translation": "レビューを挿入"
+    "translation": "Insérer l'examen"
   },
   "review.action.insert.success": {
     "placeholders": {},
@@ -2733,7 +2733,7 @@
         232
       ]
     ],
-    "translation": "レビューをチャット入力に挿入しました"
+    "translation": "Examen inséré dans l'entrée de conversation"
   },
   "review.action.reset": {
     "placeholders": {},
@@ -2744,7 +2744,7 @@
         335
       ]
     ],
-    "translation": "リセット"
+    "translation": "Réinitialiser"
   },
   "review.action.reset.success": {
     "placeholders": {},
@@ -2755,7 +2755,7 @@
         226
       ]
     ],
-    "translation": "すべてのコメントをクリアしました"
+    "translation": "Tous les commentaires supprimés"
   },
   "review.comment.placeholder": {
     "placeholders": {},
@@ -2766,7 +2766,7 @@
         101
       ]
     ],
-    "translation": "コメントを追加..."
+    "translation": "Ajouter un commentaire..."
   },
   "review.comment.save": {
     "placeholders": {},
@@ -2777,7 +2777,7 @@
         122
       ]
     ],
-    "translation": "保存"
+    "translation": "Enregistrer"
   },
   "review.comments.count": {
     "placeholders": {
@@ -2792,7 +2792,7 @@
         322
       ]
     ],
-    "translation": "{count} 件のコメント"
+    "translation": "{count} commentaires"
   },
   "review.comments.empty": {
     "placeholders": {},
@@ -2803,7 +2803,7 @@
         321
       ]
     ],
-    "translation": "コメントなし"
+    "translation": "Aucun commentaire"
   },
   "scheduler.create_job": {
     "message": "Create Job",
@@ -2815,7 +2815,7 @@
         188
       ]
     ],
-    "translation": "ジョブを作成"
+    "translation": "Créer une tâche"
   },
   "scheduler.delete_dialog.description": {
     "placeholders": {},
@@ -2826,7 +2826,7 @@
         309
       ]
     ],
-    "translation": "このスケジューラジョブを削除してもよろしいですか？この操作は取り消せません。"
+    "translation": "Êtes-vous sûr de vouloir supprimer cette tâche planifiée ? Cette action ne peut pas être annulée."
   },
   "scheduler.delete_dialog.title": {
     "placeholders": {},
@@ -2837,7 +2837,7 @@
         306
       ]
     ],
-    "translation": "スケジューラジョブを削除"
+    "translation": "Supprimer la tâche du planificateur"
   },
   "scheduler.dialog.description": {
     "placeholders": {},
@@ -2848,7 +2848,7 @@
         158
       ]
     ],
-    "translation": "Claude Codeにメッセージを送信するスケジュールジョブを設定します"
+    "translation": "Configurez une tâche planifiée pour envoyer des messages à Claude Code"
   },
   "scheduler.dialog.title.create": {
     "placeholders": {},
@@ -2859,7 +2859,7 @@
         154
       ]
     ],
-    "translation": "スケジュールジョブを作成"
+    "translation": "Créer une tâche planifiée"
   },
   "scheduler.dialog.title.edit": {
     "placeholders": {},
@@ -2870,7 +2870,7 @@
         152
       ]
     ],
-    "translation": "スケジュールジョブを編集"
+    "translation": "Modifier la tâche planifiée"
   },
   "scheduler.error.load_failed": {
     "placeholders": {
@@ -2885,7 +2885,7 @@
         210
       ]
     ],
-    "translation": "スケジューラジョブの読み込みに失敗しました: {error}"
+    "translation": "Échec du chargement des tâches du planificateur : {error}"
   },
   "scheduler.form.concurrency_policy": {
     "placeholders": {},
@@ -2896,7 +2896,7 @@
         289
       ]
     ],
-    "translation": "同時実行ポリシー"
+    "translation": "Politique de concurrence"
   },
   "scheduler.form.concurrency_policy.run": {
     "placeholders": {},
@@ -2907,7 +2907,7 @@
         304
       ]
     ],
-    "translation": "実行中でも実行する"
+    "translation": "Exécuter même si déjà en cours d'exécution"
   },
   "scheduler.form.concurrency_policy.skip": {
     "placeholders": {},
@@ -2918,7 +2918,7 @@
         301
       ]
     ],
-    "translation": "実行中の場合はスキップ"
+    "translation": "Ignorer si déjà en cours d'exécution"
   },
   "scheduler.form.enabled": {
     "placeholders": {},
@@ -2929,7 +2929,7 @@
         167
       ]
     ],
-    "translation": "有効化"
+    "translation": "Activer"
   },
   "scheduler.form.enabled.description": {
     "placeholders": {},
@@ -2940,7 +2940,7 @@
         170
       ]
     ],
-    "translation": "このスケジュールジョブを有効または無効にします"
+    "translation": "Activer ou désactiver cette tâche planifiée"
   },
   "scheduler.form.message": {
     "placeholders": {},
@@ -2951,7 +2951,7 @@
         246
       ]
     ],
-    "translation": "メッセージ内容"
+    "translation": "Contenu du message"
   },
   "scheduler.form.message.aria_label": {
     "message": "Message input with completion support (/ for commands, @ for files)",
@@ -2963,7 +2963,7 @@
         262
       ]
     ],
-    "translation": "補完機能付きメッセージ入力 (/でコマンド、@でファイル)"
+    "translation": "Entrée de message avec support d'autocomplétion (/ pour les commandes, @ pour les fichiers)"
   },
   "scheduler.form.message.hint": {
     "placeholders": {},
@@ -2974,7 +2974,7 @@
         281
       ]
     ],
-    "translation": "/でコマンド補完、@でファイル補完"
+    "translation": "/ pour la complétion des commandes, @ pour la complétion des fichiers"
   },
   "scheduler.form.message.placeholder": {
     "message": "Type message to send to Claude Code... (/ for commands, @ for files)",
@@ -2986,7 +2986,7 @@
         255
       ]
     ],
-    "translation": "Claude Codeに送信するメッセージを入力... (/でコマンド補完、@でファイル補完)"
+    "translation": "Tapez le message à envoyer à Claude Code... (/ pour les commandes, @ pour les fichiers)"
   },
   "scheduler.form.name": {
     "placeholders": {},
@@ -2997,7 +2997,7 @@
         184
       ]
     ],
-    "translation": "ジョブ名"
+    "translation": "Nom de la tâche"
   },
   "scheduler.form.reserved_time": {
     "placeholders": {},
@@ -3008,7 +3008,7 @@
         228
       ]
     ],
-    "translation": "実行予定日時"
+    "translation": "Heure d'exécution planifiée"
   },
   "scheduler.form.reserved_time.hint": {
     "placeholders": {},
@@ -3019,7 +3019,7 @@
         238
       ]
     ],
-    "translation": "指定した日時に一度だけ実行されます。実行後は自動的に削除されます"
+    "translation": "Sera exécuté une seule fois à la date et l'heure spécifiées, puis automatiquement supprimé"
   },
   "scheduler.form.schedule_type": {
     "placeholders": {},
@@ -3030,7 +3030,7 @@
         201
       ]
     ],
-    "translation": "スケジュールタイプ"
+    "translation": "Type de calendrier"
   },
   "scheduler.form.schedule_type.cron": {
     "placeholders": {},
@@ -3041,7 +3041,7 @@
         213
       ]
     ],
-    "translation": "定期実行 (Cron)"
+    "translation": "Récurrent (Cron)"
   },
   "scheduler.form.schedule_type.reserved": {
     "placeholders": {},
@@ -3052,7 +3052,7 @@
         216
       ]
     ],
-    "translation": "予約実行"
+    "translation": "Exécution unique"
   },
   "scheduler.job.create_failed": {
     "message": "Failed to create job",
@@ -3064,7 +3064,7 @@
         57
       ]
     ],
-    "translation": "ジョブの作成に失敗しました"
+    "translation": "Échec de la création de la tâche"
   },
   "scheduler.job.created": {
     "message": "Job created successfully",
@@ -3076,7 +3076,7 @@
         48
       ]
     ],
-    "translation": "ジョブを作成しました"
+    "translation": "Tâche créée avec succès"
   },
   "scheduler.job.delete_failed": {
     "message": "Failed to delete job",
@@ -3088,7 +3088,7 @@
         119
       ]
     ],
-    "translation": "ジョブの削除に失敗しました"
+    "translation": "Échec de la suppression de la tâche"
   },
   "scheduler.job.deleted": {
     "message": "Job deleted successfully",
@@ -3100,7 +3100,7 @@
         109
       ]
     ],
-    "translation": "ジョブを削除しました"
+    "translation": "Tâche supprimée avec succès"
   },
   "scheduler.job.update_failed": {
     "message": "Failed to update job",
@@ -3112,7 +3112,7 @@
         90
       ]
     ],
-    "translation": "ジョブの更新に失敗しました"
+    "translation": "Échec de la mise à jour de la tâche"
   },
   "scheduler.job.updated": {
     "message": "Job updated successfully",
@@ -3124,7 +3124,7 @@
         80
       ]
     ],
-    "translation": "ジョブを更新しました"
+    "translation": "Tâche mise à jour avec succès"
   },
   "scheduler.last_run": {
     "placeholders": {},
@@ -3135,7 +3135,7 @@
         267
       ]
     ],
-    "translation": "最終実行"
+    "translation": "Dernière exécution"
   },
   "scheduler.no_jobs": {
     "placeholders": {},
@@ -3146,7 +3146,7 @@
         216
       ]
     ],
-    "translation": "スケジューラジョブがありません"
+    "translation": "Aucune tâche du planificateur"
   },
   "scheduler.status.disabled": {
     "placeholders": {},
@@ -3157,7 +3157,7 @@
         237
       ]
     ],
-    "translation": "無効"
+    "translation": "Désactivé"
   },
   "scheduler.status.enabled": {
     "placeholders": {},
@@ -3168,7 +3168,7 @@
         235
       ]
     ],
-    "translation": "有効"
+    "translation": "Activé"
   },
   "scheduler.title": {
     "placeholders": {},
@@ -3179,7 +3179,7 @@
         163
       ]
     ],
-    "translation": "スケジューラ"
+    "translation": "Planificateur"
   },
   "session.conversation.abort": {
     "placeholders": {},
@@ -3194,7 +3194,7 @@
         156
       ]
     ],
-    "translation": "中止"
+    "translation": "Abandonner"
   },
   "session.cost.cache_creation": {
     "placeholders": {},
@@ -3205,7 +3205,7 @@
         634
       ]
     ],
-    "translation": "キャッシュ作成"
+    "translation": "Création du cache"
   },
   "session.cost.cache_read": {
     "placeholders": {},
@@ -3216,7 +3216,7 @@
         648
       ]
     ],
-    "translation": "キャッシュ読込"
+    "translation": "Lecture du cache"
   },
   "session.cost.input_tokens": {
     "placeholders": {},
@@ -3227,7 +3227,7 @@
         606
       ]
     ],
-    "translation": "入力トークン"
+    "translation": "Jetons d'entrée"
   },
   "session.cost.label": {
     "placeholders": {},
@@ -3238,7 +3238,7 @@
         581
       ]
     ],
-    "translation": "セッションコスト"
+    "translation": "Coût de la session"
   },
   "session.cost.output_tokens": {
     "placeholders": {},
@@ -3249,7 +3249,7 @@
         620
       ]
     ],
-    "translation": "出力トークン"
+    "translation": "Jetons de sortie"
   },
   "session.cost.total": {
     "placeholders": {},
@@ -3260,7 +3260,7 @@
         588
       ]
     ],
-    "translation": "合計"
+    "translation": "Total"
   },
   "session.delete.failed": {
     "message": "Failed to delete session",
@@ -3272,7 +3272,7 @@
         51
       ]
     ],
-    "translation": "セッションの削除に失敗しました"
+    "translation": "Échec de la suppression de la session"
   },
   "session.delete.success": {
     "message": "Session deleted successfully",
@@ -3284,7 +3284,7 @@
         41
       ]
     ],
-    "translation": "セッションを削除しました"
+    "translation": "Session supprimée avec succès"
   },
   "session.delete_dialog.description": {
     "placeholders": {
@@ -3299,7 +3299,7 @@
         76
       ]
     ],
-    "translation": "セッション「{title}」を削除してもよろしいですか？この操作は取り消せません。"
+    "translation": "Êtes-vous sûr de vouloir supprimer la session \"{title}\" ? Cette action ne peut pas être annulée."
   },
   "session.delete_dialog.title": {
     "placeholders": {},
@@ -3314,7 +3314,7 @@
         73
       ]
     ],
-    "translation": "セッションを削除"
+    "translation": "Supprimer la session"
   },
   "session.empty_state.description": {
     "placeholders": {},
@@ -3329,7 +3329,7 @@
         700
       ]
     ],
-    "translation": "新しいチャットを開始して会話を始めましょう"
+    "translation": "Démarrez une nouvelle conversation pour commencer la conversation"
   },
   "session.menu.copy_session_path": {
     "placeholders": {},
@@ -3340,7 +3340,7 @@
         505
       ]
     ],
-    "translation": "セッションファイルのパスをコピー"
+    "translation": "Copier le chemin du fichier de session"
   },
   "session.menu.export_html": {
     "placeholders": {},
@@ -3351,7 +3351,7 @@
         483
       ]
     ],
-    "translation": "HTML をエクスポート"
+    "translation": "Exporter en HTML"
   },
   "session.menu.export_jsonl": {
     "placeholders": {},
@@ -3362,7 +3362,7 @@
         492
       ]
     ],
-    "translation": "JSONL をエクスポート"
+    "translation": "Exporter en JSONL"
   },
   "session.processing": {
     "placeholders": {},
@@ -3373,7 +3373,7 @@
         789
       ]
     ],
-    "translation": "Claude Codeが処理中..."
+    "translation": "Claude Code est en cours de traitement..."
   },
   "session.scheduled_messages.disabled": {
     "placeholders": {},
@@ -3384,7 +3384,7 @@
         56
       ]
     ],
-    "translation": "無効"
+    "translation": "Désactivé"
   },
   "session.scheduled_messages.message_label": {
     "placeholders": {},
@@ -3395,7 +3395,7 @@
         61
       ]
     ],
-    "translation": "メッセージ"
+    "translation": "Message"
   },
   "session.scheduled_messages.title": {
     "placeholders": {},
@@ -3406,7 +3406,7 @@
         27
       ]
     ],
-    "translation": "予約投稿"
+    "translation": "Messages planifiés"
   },
   "session.status.paused": {
     "placeholders": {},
@@ -3425,7 +3425,7 @@
         173
       ]
     ],
-    "translation": "一時停止"
+    "translation": "Mise en pause"
   },
   "session.status.running": {
     "placeholders": {},
@@ -3444,7 +3444,7 @@
         171
       ]
     ],
-    "translation": "実行中"
+    "translation": "En cours d'exécution"
   },
   "sessions.load.more": {
     "placeholders": {},
@@ -3459,7 +3459,7 @@
         214
       ]
     ],
-    "translation": "さらに読み込む"
+    "translation": "Charger plus"
   },
   "sessions.title": {
     "placeholders": {},
@@ -3470,7 +3470,7 @@
         99
       ]
     ],
-    "translation": "セッション"
+    "translation": "Sessions"
   },
   "sessions.total": {
     "placeholders": {},
@@ -3485,7 +3485,7 @@
         103
       ]
     ],
-    "translation": "合計"
+    "translation": "Total"
   },
   "settings.advanced": {
     "message": "Advanced Settings",
@@ -3497,7 +3497,7 @@
         440
       ]
     ],
-    "translation": "詳細設定"
+    "translation": "Paramètres avancés"
   },
   "settings.description": {
     "placeholders": {},
@@ -3508,7 +3508,7 @@
         74
       ]
     ],
-    "translation": "表示と動作の設定"
+    "translation": "Paramètres d'affichage et de comportement"
   },
   "settings.dialog.description": {
     "message": "Which agent CLIs Lantern reads, and how it behaves.",
@@ -3520,7 +3520,7 @@
         42
       ]
     ],
-    "translation": "Lantern が読み取るエージェント CLI と、その動作設定です。"
+    "translation": "Les CLI d'agents que Lantern lit et comment il se comporte."
   },
   "settings.dialog.sources": {
     "message": "Agent CLIs to read",
@@ -3532,7 +3532,7 @@
         51
       ]
     ],
-    "translation": "読み取るエージェント CLI"
+    "translation": "CLIs d'agents à lire"
   },
   "settings.dialog.sources.description": {
     "message": "Turning one off forgets its conversations; it never touches the files.",
@@ -3544,7 +3544,7 @@
         53
       ]
     ],
-    "translation": "オフにするとその会話は忘れられますが、ファイルには一切触れません。"
+    "translation": "En désactiver une oublie ses conversations ; cela ne touche jamais aux fichiers."
   },
   "settings.dialog.title": {
     "message": "Settings",
@@ -3556,7 +3556,7 @@
         39
       ]
     ],
-    "translation": "設定"
+    "translation": "Paramètres"
   },
   "settings.disallowedTools.label": {
     "placeholders": {},
@@ -3567,7 +3567,7 @@
         287
       ]
     ],
-    "translation": "無効化するツール"
+    "translation": "Outils désactivés"
   },
   "settings.env.add": {
     "placeholders": {},
@@ -3578,7 +3578,7 @@
         130
       ]
     ],
-    "translation": "環境変数を追加"
+    "translation": "Ajouter une variable d'environnement"
   },
   "settings.env.label": {
     "message": "Environment Variables",
@@ -3590,7 +3590,7 @@
         302
       ]
     ],
-    "translation": "環境変数"
+    "translation": "Variables d'environnement"
   },
   "settings.input.enter_key_behavior": {
     "placeholders": {},
@@ -3601,7 +3601,7 @@
         74
       ]
     ],
-    "translation": "Enterキーの動作"
+    "translation": "Comportement de la touche Entrée"
   },
   "settings.input.enter_key_behavior.command_enter": {
     "placeholders": {},
@@ -3612,7 +3612,7 @@
         92
       ]
     ],
-    "translation": "Command+Enterで送信"
+    "translation": "Envoyer avec Command+Entrée"
   },
   "settings.input.enter_key_behavior.description": {
     "placeholders": {},
@@ -3623,7 +3623,7 @@
         98
       ]
     ],
-    "translation": "メッセージ入力でのEnterキーの動作を選択"
+    "translation": "Sélectionnez le comportement de la touche Entrée pour l'entrée de message"
   },
   "settings.input.enter_key_behavior.enter": {
     "placeholders": {},
@@ -3634,7 +3634,7 @@
         89
       ]
     ],
-    "translation": "Enterで送信"
+    "translation": "Envoyer avec Entrée"
   },
   "settings.input.enter_key_behavior.shift_enter": {
     "placeholders": {},
@@ -3645,7 +3645,7 @@
         86
       ]
     ],
-    "translation": "Shift+Enterで送信（デフォルト）"
+    "translation": "Envoyer avec Maj+Entrée (Par défaut)"
   },
   "settings.input.find_hotkey": {
     "placeholders": {},
@@ -3656,7 +3656,7 @@
         132
       ]
     ],
-    "translation": "ページ内検索ホットキー"
+    "translation": "Raccourci de recherche"
   },
   "settings.input.find_hotkey.command_f": {
     "placeholders": {},
@@ -3689,7 +3689,7 @@
         150
       ]
     ],
-    "translation": "ページ内検索を開くホットキーを選択します"
+    "translation": "Sélectionnez le raccourci pour ouvrir la recherche dans la page"
   },
   "settings.input.search_hotkey": {
     "placeholders": {},
@@ -3700,7 +3700,7 @@
         106
       ]
     ],
-    "translation": "検索ホットキー"
+    "translation": "Raccourci de recherche"
   },
   "settings.input.search_hotkey.command_k": {
     "placeholders": {},
@@ -3733,7 +3733,7 @@
         124
       ]
     ],
-    "translation": "検索ダイアログを開くホットキーを選択します"
+    "translation": "Sélectionnez le raccourci pour ouvrir la boîte de dialogue de recherche"
   },
   "settings.loading": {
     "placeholders": {},
@@ -3748,7 +3748,7 @@
         82
       ]
     ],
-    "translation": "設定を読み込み中..."
+    "translation": "Chargement des paramètres..."
   },
   "settings.locale": {
     "placeholders": {},
@@ -3759,7 +3759,7 @@
         42
       ]
     ],
-    "translation": "言語"
+    "translation": "Langue"
   },
   "settings.locale.description": {
     "placeholders": {},
@@ -3770,7 +3770,7 @@
         72
       ]
     ],
-    "translation": "お好みの言語を選択"
+    "translation": "Sélectionnez votre langue préférée"
   },
   "settings.locale.en": {
     "placeholders": {},
@@ -3781,7 +3781,7 @@
         54
       ]
     ],
-    "translation": "English"
+    "translation": "Anglais"
   },
   "settings.locale.es": {
     "message": "Spanish",
@@ -3793,7 +3793,7 @@
         60
       ]
     ],
-    "translation": "スペイン語"
+    "translation": "Espagnol"
   },
   "settings.locale.fr": {
     "message": "French",
@@ -3805,7 +3805,7 @@
         63
       ]
     ],
-    "translation": "フランス語"
+    "translation": "Français"
   },
   "settings.locale.ja": {
     "placeholders": {},
@@ -3816,7 +3816,7 @@
         51
       ]
     ],
-    "translation": "日本語"
+    "translation": "Japonais"
   },
   "settings.locale.pt": {
     "message": "Portuguese",
@@ -3828,7 +3828,7 @@
         66
       ]
     ],
-    "translation": "ポルトガル語"
+    "translation": "Portugais"
   },
   "settings.locale.zh_CN": {
     "placeholders": {},
@@ -3839,7 +3839,7 @@
         57
       ]
     ],
-    "translation": "中国語（簡体字）"
+    "translation": "Chinois (Simplifié)"
   },
   "settings.maxBudgetUsd.label": {
     "message": "Max Budget (USD)",
@@ -3851,7 +3851,7 @@
         526
       ]
     ],
-    "translation": "最大予算 (USD)"
+    "translation": "Budget maximal (USD)"
   },
   "settings.maxThinkingTokens.label": {
     "message": "Max Thinking Tokens",
@@ -3863,7 +3863,7 @@
         504
       ]
     ],
-    "translation": "最大思考トークン数"
+    "translation": "Jetons de réflexion maximal"
   },
   "settings.maxTurns.label": {
     "message": "Max Turns",
@@ -3875,7 +3875,7 @@
         483
       ]
     ],
-    "translation": "最大ターン数"
+    "translation": "Tours maximal"
   },
   "settings.model_choices.description": {
     "message": "Configure the model options available in the session toolbar",
@@ -3887,7 +3887,7 @@
         207
       ]
     ],
-    "translation": "セッションツールバーで利用可能なモデル選択肢を設定します"
+    "translation": "Configurez les options de modèle disponibles dans la barre d'outils de session"
   },
   "settings.model_choices.label": {
     "message": "Model Choices",
@@ -3899,7 +3899,7 @@
         158
       ]
     ],
-    "translation": "モデル選択肢"
+    "translation": "Choix du modèle"
   },
   "settings.model_choices.placeholder": {
     "message": "Add model choice...",
@@ -3911,7 +3911,7 @@
         188
       ]
     ],
-    "translation": "モデル選択肢を追加..."
+    "translation": "Ajouter un choix de modèle..."
   },
   "settings.notifications": {
     "placeholders": {},
@@ -3922,7 +3922,7 @@
         161
       ]
     ],
-    "translation": "通知"
+    "translation": "Notifications"
   },
   "settings.primary_source": {
     "message": "Agent CLI",
@@ -3934,7 +3934,7 @@
         113
       ]
     ],
-    "translation": "エージェント CLI"
+    "translation": "CLI d'agent"
   },
   "settings.primary_source.description": {
     "message": "The CLI Lantern centres on, and the one asked to name topics. Other enabled CLIs stay readable.",
@@ -3946,7 +3946,7 @@
         78
       ]
     ],
-    "translation": "Lantern が中心に扱う CLI で、トピック名の生成を依頼する相手でもあります。有効にした他の CLI も引き続き閲覧できます。"
+    "translation": "Le CLI sur lequel Lantern se concentre et celui demandé pour nommer les sujets. D'autres CLIs activés restent lisibles."
   },
   "settings.primary_source.none": {
     "message": "No agent CLI is switched on above, so there is nothing to work with.",
@@ -3958,7 +3958,7 @@
         46
       ]
     ],
-    "translation": "上でエージェント CLI が有効になっていないため、対象がありません。"
+    "translation": "Aucun CLI d'agent n'est activé ci-dessus, il n'y a donc rien avec lequel travailler."
   },
   "settings.primary_source.select": {
     "message": "Select an agent CLI",
@@ -3970,7 +3970,7 @@
         63
       ]
     ],
-    "translation": "エージェント CLI を選択"
+    "translation": "Sélectionnez un CLI d'agent"
   },
   "settings.sandbox.allowUnsandboxedCommands": {
     "message": "Allow unsandboxed commands",
@@ -3982,7 +3982,7 @@
         367
       ]
     ],
-    "translation": "サンドボックス外のコマンドを許可"
+    "translation": "Autoriser les commandes non sandboxées"
   },
   "settings.sandbox.autoAllowBash": {
     "message": "Auto-allow Bash if sandboxed",
@@ -3994,7 +3994,7 @@
         347
       ]
     ],
-    "translation": "サンドボックス化されている場合Bashを自動許可"
+    "translation": "Autoriser automatiquement Bash s'il est sandboxé"
   },
   "settings.sandbox.label": {
     "message": "Sandbox",
@@ -4006,7 +4006,7 @@
         318
       ]
     ],
-    "translation": "サンドボックス"
+    "translation": "Sandbox"
   },
   "settings.sandbox.network.allowLocalBinding": {
     "message": "Allow local binding",
@@ -4018,7 +4018,7 @@
         399
       ]
     ],
-    "translation": "ローカルバインディングを許可"
+    "translation": "Autoriser la liaison locale"
   },
   "settings.sandbox.network.allowedDomains": {
     "message": "Allowed Domains (comma-separated)",
@@ -4030,7 +4030,7 @@
         408
       ]
     ],
-    "translation": "許可するドメイン (カンマ区切り)"
+    "translation": "Domaines autorisés (séparés par des virgules)"
   },
   "settings.sandbox.network.label": {
     "message": "Network Settings",
@@ -4042,7 +4042,7 @@
         377
       ]
     ],
-    "translation": "ネットワーク設定"
+    "translation": "Paramètres réseau"
   },
   "settings.section.agent_cli": {
     "message": "Agent CLI",
@@ -4054,7 +4054,7 @@
         102
       ]
     ],
-    "translation": "エージェント CLI"
+    "translation": "CLI d'agent"
   },
   "settings.section.agent_cli.description": {
     "message": "Which CLI Lantern works with, and how it is paid for.",
@@ -4066,7 +4066,7 @@
         104
       ]
     ],
-    "translation": "Lantern が使う CLI と、その支払い方法です。"
+    "translation": "Quel CLI Lantern utilise et comment il est payé."
   },
   "settings.section.appearance": {
     "message": "Appearance",
@@ -4078,7 +4078,7 @@
         250
       ]
     ],
-    "translation": "外観"
+    "translation": "Apparence"
   },
   "settings.section.automation": {
     "message": "Automation",
@@ -4090,7 +4090,7 @@
         208
       ]
     ],
-    "translation": "自動化"
+    "translation": "Automatisation"
   },
   "settings.section.automation.description": {
     "message": "What Lantern does on its own.",
@@ -4102,7 +4102,7 @@
         210
       ]
     ],
-    "translation": "Lantern が自動で行うことです。"
+    "translation": "Ce que Lantern fait tout seul."
   },
   "settings.section.conversations": {
     "message": "Conversations",
@@ -4114,7 +4114,7 @@
         155
       ]
     ],
-    "translation": "会話"
+    "translation": "Conversations"
   },
   "settings.section.conversations.description": {
     "message": "What appears in the lists.",
@@ -4126,7 +4126,7 @@
         157
       ]
     ],
-    "translation": "一覧に表示される内容です。"
+    "translation": "Ce qui s'affiche dans les listes."
   },
   "settings.section.input": {
     "message": "Keyboard & models",
@@ -4138,7 +4138,7 @@
         239
       ]
     ],
-    "translation": "キーボードとモデル"
+    "translation": "Clavier et modèles"
   },
   "settings.section.input.description": {
     "message": "Shortcuts, and the models offered in the session toolbar.",
@@ -4150,7 +4150,7 @@
         241
       ]
     ],
-    "translation": "ショートカットと、セッションツールバーに表示するモデルです。"
+    "translation": "Raccourcis et modèles proposés dans la barre d'outils de session."
   },
   "settings.section.notifications": {
     "placeholders": {},
@@ -4161,7 +4161,7 @@
         104
       ]
     ],
-    "translation": "通知"
+    "translation": "Notifications"
   },
   "settings.section.session_display": {
     "placeholders": {},
@@ -4172,7 +4172,7 @@
         97
       ]
     ],
-    "translation": "セッション表示"
+    "translation": "Affichage de la session"
   },
   "settings.section.sources": {
     "message": "Agent CLIs",
@@ -4188,7 +4188,7 @@
         90
       ]
     ],
-    "translation": "エージェント CLI"
+    "translation": "CLIs d'agents"
   },
   "settings.section.system_info": {
     "placeholders": {},
@@ -4199,7 +4199,7 @@
         117
       ]
     ],
-    "translation": "システム情報"
+    "translation": "Information système"
   },
   "settings.session.auto_schedule_continue_on_rate_limit": {
     "placeholders": {},
@@ -4210,7 +4210,7 @@
         225
       ]
     ],
-    "translation": "レート制限時に自動的に継続をスケジュール"
+    "translation": "Planifier automatiquement Continuer en cas de limite de débit"
   },
   "settings.session.auto_schedule_continue_on_rate_limit.description": {
     "placeholders": {},
@@ -4221,7 +4221,7 @@
         231
       ]
     ],
-    "translation": "Claude がレート制限に達した際に、自動的に継続メッセージをスケジュール実行します"
+    "translation": "Planifier automatiquement un message de continuation lorsque Claude atteint les limites de débit"
   },
   "settings.session.display": {
     "placeholders": {},
@@ -4232,7 +4232,7 @@
         154
       ]
     ],
-    "translation": "セッション表示"
+    "translation": "Affichage de la session"
   },
   "settings.session.hide_no_user_message": {
     "placeholders": {},
@@ -4243,7 +4243,7 @@
         172
       ]
     ],
-    "translation": "ユーザーメッセージのないセッションを非表示"
+    "translation": "Masquer les sessions sans messages utilisateur"
   },
   "settings.session.hide_no_user_message.description": {
     "placeholders": {},
@@ -4254,7 +4254,7 @@
         178
       ]
     ],
-    "translation": "ユーザーコマンドまたはメッセージを含むセッションのみを表示"
+    "translation": "Afficher uniquement les sessions qui contiennent des commandes ou des messages utilisateur"
   },
   "settings.session.unify_same_title": {
     "placeholders": {},
@@ -4265,7 +4265,7 @@
         192
       ]
     ],
-    "translation": "同じタイトルのセッションを統合"
+    "translation": "Unifier les sessions avec le même titre"
   },
   "settings.session.unify_same_title.description": {
     "placeholders": {},
@@ -4276,7 +4276,7 @@
         198
       ]
     ],
-    "translation": "同じタイトルの複数のセッションがある場合、最新のセッションのみを表示"
+    "translation": "Lorsque plusieurs sessions ont le même titre, afficher uniquement la dernière session"
   },
   "settings.settingSources.label": {
     "message": "Setting Sources",
@@ -4288,7 +4288,7 @@
         446
       ]
     ],
-    "translation": "設定ソース"
+    "translation": "Sources de paramètres"
   },
   "settings.systemPrompt.includeDefault": {
     "message": "Include Claude Code system prompt",
@@ -4300,7 +4300,7 @@
         276
       ]
     ],
-    "translation": "Claude Code のシステムプロンプトを含める"
+    "translation": "Inclure l'invite système Claude Code par défaut"
   },
   "settings.tab.title": {
     "placeholders": {},
@@ -4311,7 +4311,7 @@
         66
       ]
     ],
-    "translation": "表示と通知の設定"
+    "translation": "Paramètres d'affichage et de notification"
   },
   "settings.theme": {
     "placeholders": {},
@@ -4322,7 +4322,7 @@
         80
       ]
     ],
-    "translation": "テーマ"
+    "translation": "Thème"
   },
   "settings.theme.dark": {
     "placeholders": {},
@@ -4333,7 +4333,7 @@
         92
       ]
     ],
-    "translation": "ダーク"
+    "translation": "Sombre"
   },
   "settings.theme.description": {
     "placeholders": {},
@@ -4344,7 +4344,7 @@
         101
       ]
     ],
-    "translation": "お好みのカラーテーマを選択"
+    "translation": "Sélectionnez votre thème de couleur préféré"
   },
   "settings.theme.light": {
     "placeholders": {},
@@ -4355,7 +4355,7 @@
         89
       ]
     ],
-    "translation": "ライト"
+    "translation": "Clair"
   },
   "settings.theme.system": {
     "placeholders": {},
@@ -4366,7 +4366,7 @@
         95
       ]
     ],
-    "translation": "システム"
+    "translation": "Système"
   },
   "settings.title": {
     "message": "Claude Code Settings",
@@ -4382,7 +4382,7 @@
         71
       ]
     ],
-    "translation": "設定"
+    "translation": "Paramètres"
   },
   "settings.usage_mode": {
     "message": "Usage Mode",
@@ -4394,7 +4394,7 @@
         123
       ]
     ],
-    "translation": "利用モード"
+    "translation": "Mode d'utilisation"
   },
   "settings.usage_mode.api": {
     "message": "API",
@@ -4418,7 +4418,7 @@
         144
       ]
     ],
-    "translation": "Claude Codeの利用方法を選択してください。サブスクリプションモードではAgent SDKが必要な機能が制限されます。"
+    "translation": "Sélectionnez comment vous utilisez Claude Code. Le mode Abonnement restreint les fonctionnalités qui nécessitent le SDK d'agent."
   },
   "settings.usage_mode.subscription": {
     "message": "Subscription (Max, Pro, etc.)",
@@ -4430,7 +4430,7 @@
         132
       ]
     ],
-    "translation": "サブスクリプション (Max, Proなど)"
+    "translation": "Abonnement (Max, Pro, etc.)"
   },
   "setup.source.description": {
     "message": "Lantern reads this CLI's conversations and asks it to name topics. You can change this later in settings.",
@@ -4442,7 +4442,7 @@
         76
       ]
     ],
-    "translation": "Lantern はこの CLI の会話を読み取り、トピック名の生成も依頼します。後から設定で変更できます。"
+    "translation": "Lantern lit les conversations de ce CLI et lui demande de nommer les sujets. Vous pouvez le modifier plus tard dans les paramètres."
   },
   "setup.source.detected": {
     "message": "Detected",
@@ -4454,7 +4454,7 @@
         103
       ]
     ],
-    "translation": "検出済み"
+    "translation": "Détecté"
   },
   "setup.source.detecting": {
     "message": "Looking for installed CLIs…",
@@ -4466,7 +4466,7 @@
         86
       ]
     ],
-    "translation": "インストール済みの CLI を検索中…"
+    "translation": "Recherche de CLIs installés…"
   },
   "setup.source.session_count": {
     "message": "{count} conversations found",
@@ -4482,7 +4482,7 @@
         109
       ]
     ],
-    "translation": "{count} 件の会話が見つかりました"
+    "translation": "{count} conversations trouvées"
   },
   "setup.source.title": {
     "message": "Which agent CLI should Lantern use?",
@@ -4494,7 +4494,7 @@
         73
       ]
     ],
-    "translation": "Lantern で使うエージェント CLI はどれですか？"
+    "translation": "Quel CLI d'agent Lantern devrait-il utiliser ?"
   },
   "setup.source.unavailable": {
     "message": "Not available on this machine",
@@ -4506,7 +4506,7 @@
         115
       ]
     ],
-    "translation": "このマシンでは利用できません"
+    "translation": "Non disponible sur cette machine"
   },
   "sidebar.back.to.projects": {
     "placeholders": {},
@@ -4517,7 +4517,7 @@
         84
       ]
     ],
-    "translation": "プロジェクト一覧に戻る"
+    "translation": "Retour aux projets"
   },
   "sidebar.edited_files.count": {
     "placeholders": {
@@ -4532,7 +4532,7 @@
         131
       ]
     ],
-    "translation": "{count} ファイル"
+    "translation": "{count} fichiers"
   },
   "sidebar.edited_files.empty": {
     "placeholders": {},
@@ -4543,7 +4543,7 @@
         119
       ]
     ],
-    "translation": "編集されたファイルはありません"
+    "translation": "Aucun fichier modifié"
   },
   "sidebar.edited_files.external": {
     "placeholders": {},
@@ -4558,7 +4558,7 @@
         156
       ]
     ],
-    "translation": "プロジェクト外"
+    "translation": "Externe"
   },
   "sidebar.edited_files.internal": {
     "placeholders": {},
@@ -4569,7 +4569,7 @@
         139
       ]
     ],
-    "translation": "プロジェクト内"
+    "translation": "Dans le projet"
   },
   "sidebar.edited_files.title": {
     "placeholders": {},
@@ -4580,7 +4580,7 @@
         128
       ]
     ],
-    "translation": "編集されたファイル"
+    "translation": "Fichiers modifiés"
   },
   "sidebar.show.mcp.settings": {
     "placeholders": {},
@@ -4591,7 +4591,7 @@
         47
       ]
     ],
-    "translation": "MCPサーバー設定を表示"
+    "translation": "Afficher les paramètres du serveur MCP"
   },
   "sidebar.show.scheduler.jobs": {
     "placeholders": {},
@@ -4602,7 +4602,7 @@
         62
       ]
     ],
-    "translation": "スケジューラジョブを表示"
+    "translation": "Afficher les tâches du planificateur"
   },
   "sidebar.show.session.list": {
     "placeholders": {},
@@ -4613,7 +4613,7 @@
         37
       ]
     ],
-    "translation": "セッション一覧を表示"
+    "translation": "Afficher la liste des sessions"
   },
   "sidebar.show.task.list": {
     "placeholders": {},
@@ -4624,7 +4624,7 @@
         53
       ]
     ],
-    "translation": "タスク一覧を表示"
+    "translation": "Afficher la liste des tâches"
   },
   "sidebar.tab.mcp": {
     "placeholders": {},
@@ -4647,7 +4647,7 @@
         203
       ]
     ],
-    "translation": "プロジェクト一覧"
+    "translation": "Projets"
   },
   "sidebar.tab.scheduler": {
     "placeholders": {},
@@ -4658,7 +4658,7 @@
         65
       ]
     ],
-    "translation": "スケジューラー"
+    "translation": "Planificateur"
   },
   "sidebar.tab.sessions": {
     "placeholders": {},
@@ -4669,7 +4669,7 @@
         62
       ]
     ],
-    "translation": "セッション一覧"
+    "translation": "Sessions"
   },
   "sidebar.tab.settings": {
     "placeholders": {},
@@ -4680,7 +4680,7 @@
         66
       ]
     ],
-    "translation": "設定"
+    "translation": "Paramètres"
   },
   "sidebar.tab.system_info": {
     "placeholders": {},
@@ -4691,7 +4691,7 @@
         67
       ]
     ],
-    "translation": "システム情報"
+    "translation": "Information système"
   },
   "sidebar.tab.tasks": {
     "placeholders": {},
@@ -4702,7 +4702,7 @@
         64
       ]
     ],
-    "translation": "タスク一覧"
+    "translation": "Tâches"
   },
   "sources.description": {
     "message": "Which agent CLIs Lantern reads sessions from. Turning one off forgets its conversations; it never touches the files.",
@@ -4714,7 +4714,7 @@
         105
       ]
     ],
-    "translation": "Lantern がセッションを読み取るエージェント CLI です。オフにするとその会話は表示されなくなりますが、ファイルには一切触れません。"
+    "translation": "Les CLIs d'agents à partir desquels Lantern lit les sessions. En désactiver une oublie ses conversations ; cela ne touche jamais aux fichiers."
   },
   "sources.error": {
     "message": "Could not read the list of agent CLIs.",
@@ -4726,7 +4726,7 @@
         96
       ]
     ],
-    "translation": "エージェント CLI の一覧を読み込めませんでした。"
+    "translation": "Impossible de lire la liste des CLIs d'agents."
   },
   "sources.loading": {
     "message": "Looking for agent CLIs…",
@@ -4738,7 +4738,7 @@
         88
       ]
     ],
-    "translation": "エージェント CLI を検出しています…"
+    "translation": "Recherche de CLIs d'agents…"
   },
   "sources.read_only": {
     "message": "read-only",
@@ -4750,7 +4750,7 @@
         102
       ]
     ],
-    "translation": "読み取り専用"
+    "translation": "lecture seule"
   },
   "sources.reason.no_data": {
     "message": "no sessions recorded yet",
@@ -4762,7 +4762,7 @@
         32
       ]
     ],
-    "translation": "セッションがまだ記録されていません"
+    "translation": "aucune session enregistrée pour l'instant"
   },
   "sources.reason.not_installed": {
     "message": "not found on this machine",
@@ -4774,7 +4774,7 @@
         28
       ]
     ],
-    "translation": "このマシンでは見つかりませんでした"
+    "translation": "non trouvé sur cette machine"
   },
   "sources.reason.schema_changed": {
     "message": "storage format changed in a newer release",
@@ -4786,7 +4786,7 @@
         37
       ]
     ],
-    "translation": "新しいリリースで保存形式が変更されました"
+    "translation": "le format de stockage a changé dans une version plus récente"
   },
   "sources.reason.sqlite_storage": {
     "message": "stores sessions in a database Lantern cannot read yet",
@@ -4798,7 +4798,7 @@
         33
       ]
     ],
-    "translation": "Lantern がまだ読み取れないデータベースにセッションを保存しています"
+    "translation": "stocke les sessions dans une base de données que Lantern ne peut pas encore lire"
   },
   "sources.reason.unknown_shape": {
     "message": "sessions are in a format Lantern does not recognise",
@@ -4810,7 +4810,7 @@
         41
       ]
     ],
-    "translation": "Lantern が認識できない形式のセッションです"
+    "translation": "les sessions sont dans un format que Lantern ne reconnaît pas"
   },
   "sources.stats": {
     "message": "{sessionCount} conversations across {projectCount} projects",
@@ -4829,7 +4829,7 @@
         91
       ]
     ],
-    "translation": "{projectCount} 個のプロジェクトにまたがる {sessionCount} 件の会話"
+    "translation": "{sessionCount} conversations sur {projectCount} projets"
   },
   "sources.status.ready": {
     "message": "Ready",
@@ -4841,7 +4841,7 @@
         80
       ]
     ],
-    "translation": "利用可能"
+    "translation": "Prêt"
   },
   "sources.status.unavailable": {
     "message": "Unavailable",
@@ -4853,7 +4853,7 @@
         85
       ]
     ],
-    "translation": "利用不可"
+    "translation": "Indisponible"
   },
   "system_info.available_features": {
     "placeholders": {},
@@ -4864,7 +4864,7 @@
         126
       ]
     ],
-    "translation": "利用可能機能"
+    "translation": "Fonctionnalités disponibles"
   },
   "system_info.claude_code": {
     "placeholders": {},
@@ -4886,7 +4886,7 @@
         71
       ]
     ],
-    "translation": "バージョンと機能情報"
+    "translation": "Informations sur la version et les fonctionnalités"
   },
   "system_info.executable_path": {
     "placeholders": {},
@@ -4897,7 +4897,7 @@
         99
       ]
     ],
-    "translation": "実行ファイル"
+    "translation": "Chemin de l'exécutable"
   },
   "system_info.feature.agent_sdk.description": {
     "placeholders": {},
@@ -4908,7 +4908,7 @@
         26
       ]
     ],
-    "translation": "@anthropic-ai/claude-code ではなく @anthropic-ai/claude-agent-sdk を利用します"
+    "translation": "Utilise @anthropic-ai/claude-agent-sdk au lieu de @anthropic-ai/claude-code"
   },
   "system_info.feature.agent_sdk.title": {
     "placeholders": {},
@@ -4919,7 +4919,7 @@
         25
       ]
     ],
-    "translation": "拡張エージェントモード"
+    "translation": "Mode d'agent étendu"
   },
   "system_info.feature.run_skills_directly.description": {
     "placeholders": {},
@@ -4930,7 +4930,7 @@
         41
       ]
     ],
-    "translation": "スキルを直接実行する機能が有効になっています"
+    "translation": "Active la fonctionnalité d'exécution directe des compétences"
   },
   "system_info.feature.run_skills_directly.title": {
     "placeholders": {},
@@ -4941,7 +4941,7 @@
         40
       ]
     ],
-    "translation": "スキル直接実行"
+    "translation": "Exécution directe des compétences"
   },
   "system_info.feature.sidechain_separation.description": {
     "placeholders": {},
@@ -4952,7 +4952,7 @@
         31
       ]
     ],
-    "translation": "サイドチェーン会話が agent-*.jsonl に分離保存されます"
+    "translation": "Les conversations en chaîne secondaire sont stockées séparément dans les fichiers agent-*.jsonl"
   },
   "system_info.feature.sidechain_separation.title": {
     "placeholders": {},
@@ -4963,7 +4963,7 @@
         30
       ]
     ],
-    "translation": "サイドチェーン分離"
+    "translation": "Séparation de la chaîne secondaire"
   },
   "system_info.feature.tool_approval.description": {
     "placeholders": {},
@@ -4974,7 +4974,7 @@
         21
       ]
     ],
-    "translation": "Claude がツールを実行する前に承認または拒否でき、アクションを完全にコントロールできます"
+    "translation": "Approuvez ou rejetez les exécutions d'outils avant que Claude les exécute, vous donnant un contrôle total"
   },
   "system_info.feature.tool_approval.title": {
     "placeholders": {},
@@ -4985,7 +4985,7 @@
         20
       ]
     ],
-    "translation": "ツール実行承認"
+    "translation": "Approbation des outils"
   },
   "system_info.feature.unknown.description": {
     "placeholders": {},
@@ -4996,7 +4996,7 @@
         46
       ]
     ],
-    "translation": "機能情報は利用できません"
+    "translation": "Information de fonctionnalité non disponible"
   },
   "system_info.feature.uuid_on_sdk_message.description": {
     "placeholders": {},
@@ -5007,7 +5007,7 @@
         36
       ]
     ],
-    "translation": "SDK メッセージに UUID が含まれるようになります"
+    "translation": "Les messages SDK incluent des UUID pour le suivi"
   },
   "system_info.feature.uuid_on_sdk_message.title": {
     "placeholders": {},
@@ -5018,7 +5018,7 @@
         35
       ]
     ],
-    "translation": "SDK メッセージ UUID"
+    "translation": "UUID des messages SDK"
   },
   "system_info.title": {
     "placeholders": {},
@@ -5029,7 +5029,7 @@
         68
       ]
     ],
-    "translation": "システム情報"
+    "translation": "Information système"
   },
   "system_info.unknown": {
     "placeholders": {},
@@ -5044,7 +5044,7 @@
         115
       ]
     ],
-    "translation": "不明"
+    "translation": "Inconnu"
   },
   "system_info.version_label": {
     "placeholders": {},
@@ -5059,7 +5059,7 @@
         112
       ]
     ],
-    "translation": "バージョン"
+    "translation": "Version"
   },
   "system_info.viewer_version": {
     "placeholders": {},
@@ -5082,7 +5082,7 @@
         64
       ]
     ],
-    "translation": "新しい会話をトピックに分類するよう Claude に依頼します"
+    "translation": "Demander à Claude de classer les nouvelles conversations dans un sujet"
   },
   "topics.classify.pending": {
     "message": "Sort {pending} new",
@@ -5098,7 +5098,7 @@
         77
       ]
     ],
-    "translation": "{pending} 件を分類"
+    "translation": "Classer {pending} nouvelles"
   },
   "topics.classify.redo": {
     "message": "Redo all",
@@ -5110,7 +5110,7 @@
         91
       ]
     ],
-    "translation": "すべてやり直す"
+    "translation": "Tout refaire"
   },
   "topics.classify.redo_hint": {
     "message": "Throw away every topic and classify all conversations again",
@@ -5122,7 +5122,7 @@
         86
       ]
     ],
-    "translation": "すべてのトピックを破棄し、すべての会話を分類し直します"
+    "translation": "Supprimer tous les sujets et reclasser toutes les conversations"
   },
   "topics.classify.sorted": {
     "message": "Topics sorted",
@@ -5134,7 +5134,7 @@
         75
       ]
     ],
-    "translation": "トピック分類済み"
+    "translation": "Sujets classés"
   },
   "topics.filter.placeholder": {
     "message": "Filter topics...",
@@ -5146,7 +5146,7 @@
         79
       ]
     ],
-    "translation": "トピックを絞り込む…"
+    "translation": "Filtrer les sujets..."
   },
   "topics.subtitle": {
     "message": "Conversations grouped by what they are about, not by the folder they were started in.",
@@ -5158,7 +5158,7 @@
         68
       ]
     ],
-    "translation": "会話は、開始したフォルダーではなく内容ごとにまとめられています。"
+    "translation": "Conversations regroupées par sujet, pas par le dossier dans lequel elles ont été démarrées."
   },
   "topics.title": {
     "message": "Topics",
@@ -5170,7 +5170,7 @@
         65
       ]
     ],
-    "translation": "トピック"
+    "translation": "Sujets"
   },
   "usage_mode.api.description": {
     "message": "You use Claude Code with API keys. All features are available.",
@@ -5182,7 +5182,7 @@
         172
       ]
     ],
-    "translation": "APIキーを使用してClaude Codeを利用します。すべての機能が利用可能です。"
+    "translation": "Vous utilisez Claude Code avec des clés API. Toutes les fonctionnalités sont disponibles."
   },
   "usage_mode.api.label": {
     "message": "API",
@@ -5206,7 +5206,7 @@
         133
       ]
     ],
-    "translation": "利用モードを選択してください。この設定は後から変更できます。"
+    "translation": "Veuillez sélectionner votre mode d'utilisation. Vous pouvez le modifier plus tard dans les paramètres."
   },
   "usage_mode.dialog.title": {
     "message": "How do you use Claude Code?",
@@ -5218,7 +5218,7 @@
         130
       ]
     ],
-    "translation": "Claude Codeの利用方法は？"
+    "translation": "Comment utilisez-vous Claude Code ?"
   },
   "usage_mode.subscription.description": {
     "message": "You use Claude Code with a subscription plan (Max, Pro, etc.). Some features that require the Agent SDK will be restricted.",
@@ -5230,7 +5230,7 @@
         153
       ]
     ],
-    "translation": "サブスクリプションプラン（Max、Proなど）でClaude Codeを利用します。Agent SDKを必要とする一部の機能が制限されます。"
+    "translation": "Vous utilisez Claude Code avec un plan d'abonnement (Max, Pro, etc.). Certaines fonctionnalités qui nécessitent le SDK d'agent seront restreintes."
   },
   "usage_mode.subscription.label": {
     "message": "Subscription",
@@ -5242,7 +5242,7 @@
         149
       ]
     ],
-    "translation": "サブスクリプション"
+    "translation": "Abonnement"
   },
   "user.content.document.pdf": {
     "placeholders": {},
@@ -5253,7 +5253,7 @@
         102
       ]
     ],
-    "translation": "PDF文書"
+    "translation": "Document PDF"
   },
   "user.content.document.text": {
     "placeholders": {},
@@ -5264,7 +5264,7 @@
         144
       ]
     ],
-    "translation": "テキスト文書"
+    "translation": "Document texte"
   },
   "user.content.image": {
     "placeholders": {},
@@ -5275,7 +5275,7 @@
         39
       ]
     ],
-    "translation": "添付画像"
+    "translation": "Image jointe"
   },
   "user.content.unsupported_document": {
     "placeholders": {},
@@ -5286,7 +5286,7 @@
         174
       ]
     ],
-    "translation": "サポートされていない文書"
+    "translation": "Document non supporté"
   },
   "user.content.unsupported_document.description": {
     "placeholders": {},
@@ -5297,7 +5297,7 @@
         181
       ]
     ],
-    "translation": "文書タイプは表示がサポートされていません"
+    "translation": "Type de document non supporté pour l'affichage"
   },
   "user.content.unsupported_media": {
     "placeholders": {},
@@ -5308,7 +5308,7 @@
         73
       ]
     ],
-    "translation": "サポートされていないメディア"
+    "translation": "Média non supporté"
   },
   "user.content.unsupported_media.description": {
     "placeholders": {},
@@ -5319,6 +5319,6 @@
         80
       ]
     ],
-    "translation": "表示がサポートされていないメディア形式です"
+    "translation": "Format de média non supporté pour l'affichage"
   }
 }
