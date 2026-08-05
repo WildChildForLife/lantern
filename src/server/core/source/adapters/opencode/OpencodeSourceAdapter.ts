@@ -14,6 +14,7 @@ import {
 } from "../../models/SourceEntities.ts";
 import { OPENCODE_SOURCE_ID } from "../../models/SourceId.ts";
 import { type MessageFile, parseMessages } from "./functions/parseMessages.ts";
+import { makeSqliteStorage } from "./functions/sqliteStorage.ts";
 
 /**
  * `<data>/opencode/storage`, laid out as one directory per kind:
@@ -147,8 +148,32 @@ const makeAdapter = (): SourceAdapter => {
       return files;
     });
 
+  const sqlite = makeSqliteStorage(rootPath);
+
+  /**
+   * Which of opencode's two storage modes this install uses.
+   *
+   * The tree wins when it holds projects: an install that migrated to SQLite
+   * leaves the old directories behind, and one that never migrated has no
+   * database at all. Asking the tree first means a half-migrated directory
+   * still reads whichever layout actually holds the sessions.
+   */
+  const usesDatabase = Effect.gen(function* () {
+    const path = yield* Path.Path;
+    const storage = yield* storagePath;
+
+    const projectFiles = yield* listJsonFiles(path.join(storage, PROJECT_DIR));
+    if (projectFiles.length > 0) return false;
+
+    return yield* sqlite.exists;
+  });
+
   const listProjects = () =>
     Effect.gen(function* () {
+      if (yield* usesDatabase) {
+        return yield* sqlite.listProjects;
+      }
+
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
       const storage = yield* storagePath;
@@ -188,6 +213,10 @@ const makeAdapter = (): SourceAdapter => {
 
   const listSessions = (project: SourceProject) =>
     Effect.gen(function* () {
+      if (yield* usesDatabase) {
+        return yield* sqlite.listSessions(project);
+      }
+
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
 
@@ -212,6 +241,10 @@ const makeAdapter = (): SourceAdapter => {
 
   const readSession = (ref: SourceSessionRef) =>
     Effect.gen(function* () {
+      if (yield* usesDatabase) {
+        return yield* sqlite.readSession(ref);
+      }
+
       const path = yield* Path.Path;
       const storage = yield* storagePath;
 
@@ -285,6 +318,10 @@ const makeAdapter = (): SourceAdapter => {
 
   const resolveSessionRef = (projectStoragePath: string, sessionId: string) =>
     Effect.gen(function* () {
+      if (yield* usesDatabase) {
+        return yield* sqlite.resolveSessionRef(projectStoragePath, sessionId);
+      }
+
       const fs = yield* FileSystem.FileSystem;
       const path = yield* Path.Path;
 
@@ -322,28 +359,14 @@ const makeAdapter = (): SourceAdapter => {
         } satisfies SourceDetection;
       }
 
-      // A database beside the storage tree means this install keeps its
-      // sessions in SQLite, which is a different storage mode rather than
-      // another dialect and is not read here. Saying so is the difference
-      // between a user checking their install and a user filing a bug: as of
-      // 1.18.13 — the current release — this is what a normal install looks
-      // like, and reporting "no data" would send them looking for the wrong
-      // problem entirely.
-      const database = yield* fs
-        .exists(path.join(root, "opencode.db"))
-        .pipe(Effect.catchAll(() => Effect.succeed(false)));
+      // As of 1.18.13 — the current release — a normal install keeps its
+      // sessions in SQLite rather than the tree, so this is the ordinary case
+      // and not a fallback.
+      if (yield* usesDatabase) {
+        return yield* sqlite.detect(root);
+      }
 
       const projects = yield* listProjects();
-
-      if (database && projects.length === 0) {
-        return {
-          sourceId: OPENCODE_SOURCE_ID,
-          rootPath: root,
-          hasData: true,
-          supported: false,
-          unsupportedReason: "sqlite-storage",
-        } satisfies SourceDetection;
-      }
 
       if (projects.length === 0) {
         return {

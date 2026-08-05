@@ -62,13 +62,10 @@ and are grouped into one workspace when they ran in the same repo. Pick which to
 Claude Code stays the only interactive one — starting, resuming and approving a turn go through the
 Agent SDK, which the others have no equivalent for.
 
-> **opencode caveat.** `1.18.13` — the current release — keeps its sessions in a SQLite database
-> rather than the JSON tree Lantern reads, so a fresh install of it reports `sqlite-storage` and
-> shows no conversations. Older file-based installs read fine. Reading the database is planned.
-
 "Verified against" means that exact version was run and the history it wrote was read back, rather
 than inferred from a format description. [`docker/compatibility.md`](docker/compatibility.md) records
-how, and what each run turned up. Gemini CLI, goose and cursor-agent are not read yet.
+how, and what each run turned up. Both of opencode's storage layouts are read: the JSON tree and
+the SQLite database a current install writes. Gemini CLI, goose and cursor-agent are not read yet.
 
 ## Contents
 

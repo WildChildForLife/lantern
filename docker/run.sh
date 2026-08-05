@@ -35,7 +35,7 @@ if [ "$skip_drive" = false ]; then
   echo "==> driving the CLIs"
   # Sequentially, not in parallel: they share one small local model, and several
   # agents contending for it makes every one of them slow and flaky.
-  for cli in claude-code codex opencode qwen-code copilot; do
+  for cli in claude-code codex opencode qwen-code copilot goose; do
     echo
     echo "--- $cli ---"
     # A CLI that fails should not stop the others — a partial history still
