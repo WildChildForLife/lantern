@@ -84,8 +84,17 @@ export type SourceAdapter = {
     cachedCustomTitle: string | null,
   ) => Effect.Effect<boolean, never, SourceEnv>;
 
-  /** Absolute directories the generic watcher should watch recursively. */
-  readonly watchRoots: () => Effect.Effect<readonly string[], never, SourceEnv>;
+  /**
+   * Every absolute directory this source's files can live under.
+   *
+   * Two jobs, and they must not be conflated. The watcher watches these, but
+   * only for a source whose `capabilities.watch` is set. Path validation checks
+   * resolved paths against them for *every* source, watched or not — so a
+   * source that is only ever polled still has to name its directories. An empty
+   * list means no path can be proven safe, and every session becomes
+   * unreadable.
+   */
+  readonly roots: () => Effect.Effect<readonly string[], never, SourceEnv>;
 
   /**
    * Pure: map an absolute changed path to what needs re-syncing, or null when
