@@ -4932,18 +4932,6 @@
     ],
     "translation": "较新版本更改了存储格式"
   },
-  "sources.reason.sqlite_storage": {
-    "message": "stores sessions in a database Lantern cannot read yet",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/components/SourcesSettings.tsx",
-        33
-      ]
-    ],
-    "translation": "会话存储在 Lantern 暂时无法读取的数据库中"
-  },
   "sources.reason.unknown_shape": {
     "message": "sessions are in a format Lantern does not recognise",
     "placeholders": {},
@@ -4955,6 +4943,18 @@
       ]
     ],
     "translation": "会话格式无法被 Lantern 识别"
+  },
+  "sources.reason.unreadable": {
+    "message": "its history is there but could not be read",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        33
+      ]
+    ],
+    "translation": "历史记录存在，但无法读取"
   },
   "sources.stats": {
     "message": "{sessionCount} conversations across {projectCount} projects",

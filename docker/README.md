@@ -101,22 +101,23 @@ verified, and what the first run found.
 | ------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | Claude Code  | live             | Lantern reads it                                                                                                                    |
 | Codex        | live             | Lantern reads it                                                                                                                    |
-| opencode     | driven, not read | Runs and writes history, but `1.18.13` stores it in SQLite, which Lantern does not read yet — see `compatibility.md`                |
+| opencode     | live             | Lantern reads it, from the JSON tree or the SQLite database, whichever the install has                                              |
 | Qwen Code    | live             | Lantern reads it. Takes any OpenAI-compatible endpoint, which is why it can be driven here at all                                   |
 | Copilot CLI  | live             | Lantern reads it. BYOK needs no Copilot subscription — established by this harness, see `compatibility.md`                          |
-| goose        | scaffold         | `cli/scaffold/`, for PR-9. Native Ollama provider, and a tool-shim for weak local models                                            |
-| cursor-agent | not scaffolded   | Whether the CLI (as opposed to the IDE) can use a local model is unverified                                                         |
-| Gemini CLI   | not scaffolded   | Cannot be pointed at a non-Google model at all, so it cannot be driven here. Not Qwen Code's format either — see `compatibility.md` |
+| goose        | driven, not read | Runs and writes `sessions.db`, but its message dialect is its own — a separate adapter, see `compatibility.md`                      |
+| cursor-agent | not driven       | Whether the CLI (as opposed to the IDE) can use a local model is unverified                                                         |
+| Gemini CLI   | not driven       | Cannot be pointed at a non-Google model at all, so it cannot be driven here. Not Qwen Code's format either — see `compatibility.md` |
 
-The scaffolded CLI has a Dockerfile and an entrypoint but no compose service.
-It exists so PR-9 starts from something that runs rather than a guess.
+Nothing is scaffolded any more: every CLI above is either driven by this harness
+or has a recorded reason it cannot be.
 
 ## Known sharp edges
 
 - **opencode `1.18.13` writes SQLite, not JSON files.** Found by this harness on
   its first run, contradicting every secondary description of the 1.x line.
-  Lantern reads the JSON layout, so it reads nothing from a current opencode
-  install and says so (`sqlite-storage`). Reading it properly needs PR-9.
+  Both layouts are read now. The database is asked first, because a migrated
+  install leaves its old directories behind and the tree would otherwise pin it
+  to the history it had on the day it migrated.
 - **Codex reserves the provider ids `openai`, `ollama` and `lmstudio`.** A
   `config.toml` block using one of them is _silently discarded_ and Codex keeps
   talking to `localhost` — which inside a container is nothing. The harness uses

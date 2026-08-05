@@ -4932,18 +4932,6 @@
     ],
     "translation": "le format de stockage a changé dans une version plus récente"
   },
-  "sources.reason.sqlite_storage": {
-    "message": "stores sessions in a database Lantern cannot read yet",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/components/SourcesSettings.tsx",
-        33
-      ]
-    ],
-    "translation": "stocke les sessions dans une base de données que Lantern ne peut pas encore lire"
-  },
   "sources.reason.unknown_shape": {
     "message": "sessions are in a format Lantern does not recognise",
     "placeholders": {},
@@ -4955,6 +4943,18 @@
       ]
     ],
     "translation": "les sessions sont dans un format que Lantern ne reconnaît pas"
+  },
+  "sources.reason.unreadable": {
+    "message": "its history is there but could not be read",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SourcesSettings.tsx",
+        33
+      ]
+    ],
+    "translation": "son historique est présent mais n'a pas pu être lu"
   },
   "sources.stats": {
     "message": "{sessionCount} conversations across {projectCount} projects",
