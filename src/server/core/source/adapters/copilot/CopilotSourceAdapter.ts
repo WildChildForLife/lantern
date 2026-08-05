@@ -1,5 +1,5 @@
 import { FileSystem, Path } from "@effect/platform";
-import { Effect, Option } from "effect";
+import { Clock, Effect, Option } from "effect";
 import { ApplicationContext } from "../../../platform/services/ApplicationContext.ts";
 import { canonicalizeProjectPath } from "../../functions/canonicalizeProjectPath.ts";
 import { resolveOnPath } from "../../functions/resolveOnPath.ts";
@@ -139,16 +139,19 @@ const makeAdapter = (): SourceAdapter => {
     const path = yield* Path.Path;
     const root = yield* rootPath;
 
+    const cached = scanCache.get(root);
+    // Effect's clock rather than Date.now(), so a test can drive the window
+    // with TestClock instead of waiting on wall time. Checked before the
+    // directory read, or a cache hit still pays for one.
+    const now = yield* Clock.currentTimeMillis;
+    if (cached !== undefined && now - cached.atMs < SCAN_TTL_MS) {
+      return cached.value;
+    }
+
     const sessionRoot = path.join(root, SESSION_DIR);
     const names = yield* fs
       .readDirectory(sessionRoot)
       .pipe(Effect.catchAll(() => Effect.succeed<string[]>([])));
-
-    const cached = scanCache.get(root);
-    const now = Date.now();
-    if (cached !== undefined && now - cached.atMs < SCAN_TTL_MS) {
-      return cached.value;
-    }
 
     const found: Scanned[] = [];
 

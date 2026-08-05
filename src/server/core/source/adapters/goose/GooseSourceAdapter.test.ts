@@ -1,7 +1,13 @@
+/* This test builds a throwaway copy of the fixture with a moved schema, so the
+   failure paths run against a real database rather than a mock. */
+import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { NodeContext } from "@effect/platform-node";
 import { it } from "@effect/vitest";
 import { Effect, Layer } from "effect";
-import { describe, expect } from "vitest";
+import { afterAll, describe, expect } from "vitest";
 import { makeDrizzleTestServiceLayer } from "../../../../../testing/layers/testDrizzleServiceLayer.ts";
 import { testPlatformLayer } from "../../../../../testing/layers/testPlatformLayer.ts";
 import { DrizzleService } from "../../../../lib/db/DrizzleService.ts";
@@ -96,7 +102,75 @@ const readOf = (id: string) =>
     return yield* gooseSourceAdapter.readSession(ref);
   });
 
+/**
+ * A copy of the fixture with one schema change applied, so the failure paths
+ * can be exercised against a real database rather than a mock.
+ */
+const movedSchemaRoot = (() => {
+  const root = mkdtempSync(join(tmpdir(), "lantern-goose-moved-"));
+  mkdirSync(join(root, "sessions"), { recursive: true });
+  const path = join(root, "sessions", "sessions.db");
+  copyFileSync(`${GOOSE_HOME}/sessions/sessions.db`, path);
+
+  const database = new DatabaseSync(path);
+  database.exec("alter table messages rename column content_json to content");
+  database.close();
+
+  return root;
+})();
+
+afterAll(() => {
+  rmSync(movedSchemaRoot, { recursive: true, force: true });
+});
+
 describe("gooseSourceAdapter", () => {
+  it.live("fails to read a session rather than returning an empty one", () =>
+    Effect.gen(function* () {
+      // The whole point. A read that failed used to come back as a clean
+      // success with no entries, and upstream acts on that by clearing the
+      // session's messages and its search rows — so a goose release that
+      // touched this table would have quietly emptied every conversation,
+      // with `unparsed` still reading zero.
+      const project = (yield* gooseSourceAdapter.listProjects()).at(0);
+      if (project === undefined) throw new Error("fixture workspace missing");
+
+      const ref = (yield* gooseSourceAdapter.listSessions(project)).at(0);
+      if (ref === undefined) throw new Error("fixture session missing");
+
+      const failure = yield* gooseSourceAdapter.readSession(ref).pipe(Effect.flip);
+      expect(failure._tag).toBe("SourceReadError");
+    }).pipe(
+      Effect.provide(
+        Layer.mergeAll(
+          testPlatformLayer({
+            sourceRoots: { goose: movedSchemaRoot },
+            env: { HOME: "/home/demo" },
+          }),
+          NodeContext.layer,
+        ),
+      ),
+    ),
+  );
+
+  it.live("says the schema moved rather than reporting an empty history", () =>
+    Effect.gen(function* () {
+      const detection = yield* gooseSourceAdapter.detect();
+
+      expect(detection.hasData).toBe(true);
+      expect(detection.supported).toBe(false);
+      expect(detection.unsupportedReason).toBe("schema-changed");
+    }).pipe(
+      Effect.provide(
+        Layer.mergeAll(
+          testPlatformLayer({
+            sourceRoots: { goose: movedSchemaRoot },
+            env: { HOME: "/home/demo" },
+          }),
+          NodeContext.layer,
+        ),
+      ),
+    ),
+  );
   it.live("groups sessions by the directory each ran in", () =>
     Effect.gen(function* () {
       const found = yield* gooseSourceAdapter.listProjects();
@@ -144,17 +218,44 @@ describe("gooseSourceAdapter", () => {
     }).pipe(Effect.provide(adapterLayer)),
   );
 
-  it.live("treats a tool that ran and returned an error as an error", () =>
+  it.live("treats a call that never ran as an error", () =>
     Effect.gen(function* () {
-      // goose reports failure at two levels: `status: "error"` is the call
-      // never running, and a successful call can still return `isError` on its
-      // own result. Both mean the user did not get what they asked for.
+      // The first of goose's two failure levels: `status: "error"`, the tool
+      // was not found.
       const read = yield* readOf("20260805_4");
       const results = blocksOfType(read.entries, "tool_result");
 
       expect(results.length).toBeGreaterThan(0);
       expect(results.every((result) => result["is_error"] === true)).toBe(true);
       expect(stringField(results[0] ?? {}, "content")).not.toBe("");
+    }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("treats a call that ran and returned an error as an error too", () =>
+    Effect.gen(function* () {
+      // The second level, and the one the fixture actually exercises here:
+      // `status: "success"` with `value.isError`. Session 3 carries both that
+      // and the plain-success case, so this pins the difference rather than
+      // asserting every result is a failure.
+      const read = yield* readOf("20260805_3");
+      const results = blocksOfType(read.entries, "tool_result");
+
+      expect(results.length).toBeGreaterThan(1);
+      expect(results.some((result) => result["is_error"] === true)).toBe(true);
+      expect(results.some((result) => result["is_error"] === false)).toBe(true);
+    }).pipe(Effect.provide(adapterLayer)),
+  );
+
+  it.live("dates entries from the timestamp goose recorded", () =>
+    Effect.gen(function* () {
+      // goose keeps message times as epoch *seconds* while the session columns
+      // are SQL text. A wrong unit here dates every entry to 1970 or to the
+      // year 56000, and nothing else would notice.
+      const read = yield* readOf("20260805_1");
+      const first = read.entries.at(0);
+
+      const timestamp = first === undefined ? undefined : stringField(first, "timestamp");
+      expect(timestamp).toMatch(/^2026-08-\d{2}T/);
     }).pipe(Effect.provide(adapterLayer)),
   );
 

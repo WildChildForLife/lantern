@@ -48,11 +48,27 @@ const toolRequestSchema = z.looseObject({
   }),
 });
 
-/** The text blocks a tool returns when the call itself succeeded. */
+/**
+ * What a tool returns when the call itself succeeded.
+ *
+ * A block is tagged by `type` and only a text one has anything to render. The
+ * tag is kept so a block that carries no text can be *counted* rather than
+ * quietly dropped — an image result used to leave a tool result with empty
+ * content and every counter at zero, which is the shape of a format change
+ * that looks like it worked.
+ */
+const toolOutputBlockSchema = z.looseObject({
+  type: z.string().optional(),
+  text: z.string().optional(),
+});
+
 const toolOutputSchema = z.looseObject({
-  content: z.array(z.looseObject({ text: z.string().optional() })).optional(),
+  content: z.array(toolOutputBlockSchema).optional(),
   isError: z.boolean().optional(),
 });
+
+/** Block kinds a tool returns that Lantern has no way to render. */
+const UNRENDERABLE_BLOCK_TYPES = new Set(["image", "audio", "resource"]);
 
 const toolResponseSchema = z.looseObject({
   type: z.literal("toolResponse"),
@@ -78,6 +94,12 @@ const IGNORED_PART_TYPES = new Set([
   "toolConfirmationRequest",
   "contextLengthExceeded",
   "summarizationRequested",
+  // Named from goose's own message enum rather than observed: the harness runs
+  // a text-only local model, which produces neither. Listing them is cheap and
+  // the alternative is one image turning the whole source "Unavailable", since
+  // `detect` requires a sample to parse with nothing unaccounted for.
+  "image",
+  "redactedThinking",
 ]);
 
 export type GooseMessage = {
@@ -96,30 +118,56 @@ export type ParsedGooseMessages = {
 };
 
 /**
- * A tool's outcome, as one piece of text and whether it failed.
+ * A tool's outcome: its text, whether it failed, and how many blocks of it
+ * could not be shown.
  *
  * goose reports failure at two levels, and both mean the user did not get what
- * they asked for: `status: "error"` is the call never running, while a
- * successful call can still return `isError` on its own result.
+ * they asked for: a status other than success is the call never running, while
+ * a successful call can still return `isError` on its own result. Anything that
+ * is not plainly a success is treated as a failure — a cancelled call rendered
+ * as an empty successful one is indistinguishable from a tool that returned
+ * nothing.
  */
 const toolOutcome = (
   result: z.infer<typeof toolResponseSchema>["toolResult"],
-): { text: string; error: boolean } => {
-  if (result.status === "error") {
-    return { text: result.error ?? "", error: true };
+): { text: string; error: boolean; ignored: number; unparsed: number } => {
+  if (result.status !== undefined && result.status !== "success") {
+    return { text: result.error ?? "", error: true, ignored: 0, unparsed: 0 };
   }
 
   const value = toolOutputSchema.safeParse(result.value);
   if (!value.success) {
-    return { text: "", error: false };
+    // A result whose shape is not the one modelled here: counted, because a
+    // tool that returned something unreadable is not a tool that returned
+    // nothing.
+    return { text: "", error: false, ignored: 0, unparsed: 1 };
   }
 
-  const text = (value.data.content ?? [])
-    .map((block) => block.text ?? "")
-    .filter((block) => block !== "")
-    .join("\n");
+  const rendered: string[] = [];
+  let ignored = 0;
+  let unparsed = 0;
 
-  return { text, error: value.data.isError === true };
+  for (const block of value.data.content ?? []) {
+    if (block.text !== undefined && block.text !== "") {
+      rendered.push(block.text);
+      continue;
+    }
+
+    if (block.type !== undefined && UNRENDERABLE_BLOCK_TYPES.has(block.type)) {
+      ignored += 1;
+      continue;
+    }
+
+    // Neither text nor a kind that is known to have none.
+    unparsed += 1;
+  }
+
+  return {
+    text: rendered.join("\n"),
+    error: value.data.isError === true,
+    ignored,
+    unparsed,
+  };
 };
 
 export const parseMessages = (
@@ -224,7 +272,7 @@ export const parseMessages = (
       runText += chunk;
     };
 
-    for (const part of parts) {
+    for (const [partIndex, part] of parts.entries()) {
       const request = toolRequestSchema.safeParse(part);
       if (request.success) {
         flushRun();
@@ -243,6 +291,13 @@ export const parseMessages = (
       if (response.success) {
         flushRun();
         const outcome = toolOutcome(response.data.toolResult);
+        // Blocks the result carried that could not be shown are accounted for
+        // rather than dropped, so a result whose whole content vanished is
+        // visible as a number instead of as an empty success.
+        ignored += outcome.ignored;
+        for (let index = 0; index < outcome.unparsed; index += 1) {
+          recordUnparsed(`${message.id}#result`);
+        }
         pending.push((uuid) => ({
           ...entryBase,
           type: "user",
@@ -289,7 +344,7 @@ export const parseMessages = (
         continue;
       }
 
-      recordUnparsed(message.id);
+      recordUnparsed(`${message.id}#${partIndex}`);
     }
 
     flushRun();

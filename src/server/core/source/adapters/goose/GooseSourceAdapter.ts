@@ -2,7 +2,11 @@ import { FileSystem, Path } from "@effect/platform";
 import { Effect } from "effect";
 import { ApplicationContext } from "../../../platform/services/ApplicationContext.ts";
 import { canonicalizeProjectPath } from "../../functions/canonicalizeProjectPath.ts";
-import { hasTables, withReadOnlyDatabase } from "../../functions/readOnlySqlite.ts";
+import {
+  type ForeignDatabaseError,
+  hasTables,
+  withReadOnlyDatabase,
+} from "../../functions/readOnlySqlite.ts";
 import { resolveOnPath } from "../../functions/resolveOnPath.ts";
 import { virtualProjectPath } from "../../functions/virtualProjectPath.ts";
 import type { SourceAdapter } from "../../models/SourceAdapter.ts";
@@ -91,10 +95,16 @@ const makeAdapter = (): SourceAdapter => {
     };
   });
 
+  /**
+   * The error channel is deliberately open. Declaring `never` here forced every
+   * caller to swallow a failed read, and a read that failed then looked exactly
+   * like a session with nothing in it — which upstream acts on by clearing the
+   * session's rows and its search index.
+   */
   const withDatabase = <A>(
     use: (
       database: Parameters<Parameters<typeof withReadOnlyDatabase>[1]>[0],
-    ) => Effect.Effect<A, never>,
+    ) => Effect.Effect<A, ForeignDatabaseError>,
   ) =>
     databasePath.pipe(
       Effect.flatMap((file) => withReadOnlyDatabase(file, use)),
@@ -198,9 +208,7 @@ const makeAdapter = (): SourceAdapter => {
 
   const readOne = (found: LocatedSession) =>
     Effect.gen(function* () {
-      const rows = yield* withDatabase((database) =>
-        readMessages(database, found.row.id).pipe(Effect.orElseSucceed(() => [])),
-      );
+      const rows = yield* withDatabase((database) => readMessages(database, found.row.id));
 
       return parseMessages(rows, {
         sessionKey: found.row.id,

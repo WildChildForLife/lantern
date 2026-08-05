@@ -1,5 +1,5 @@
 import { FileSystem, Path } from "@effect/platform";
-import { Effect, Option } from "effect";
+import { Clock, Effect, Option } from "effect";
 import { z } from "zod";
 import { ApplicationContext } from "../../../platform/services/ApplicationContext.ts";
 import { canonicalizeProjectPath } from "../../functions/canonicalizeProjectPath.ts";
@@ -336,7 +336,9 @@ const makeAdapter = (): SourceAdapter => {
     const root = yield* rootPath;
 
     const cached = scanCache.get(root);
-    const now = Date.now();
+    // Effect's clock rather than Date.now(), so a test can drive the window
+    // with TestClock instead of waiting on wall time.
+    const now = yield* Clock.currentTimeMillis;
     if (cached !== undefined && now - cached.atMs < SCAN_TTL_MS) {
       return cached.value;
     }

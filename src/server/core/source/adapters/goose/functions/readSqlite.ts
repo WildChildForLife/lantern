@@ -60,9 +60,16 @@ export type GooseSessionRow = {
 };
 
 /**
- * goose writes timestamps as SQL text rather than epoch milliseconds, so an
- * unparseable one becomes 0 instead of `NaN` — which would otherwise reach the
- * cache as a null mtime and re-sync the session on every pass.
+ * goose writes these as SQL text rather than epoch milliseconds.
+ *
+ * A value that will not parse becomes 0, and that is a lossy choice worth
+ * naming: sync re-reads a session when its mtime is *greater* than the cached
+ * one, so a session stuck at 0 is never re-read again however many turns it
+ * gains, and shows as 1970 in the list. `NaN` would behave the same way, since
+ * every comparison against it is false. Neither is good; 0 is at least
+ * orderable, and a session dated 1970 is visible in the list in a way a silent
+ * skip would not be. If goose ever writes a zone-suffixed timestamp this is
+ * where it will land, so it is the first place to look for a stuck session.
  */
 const toEpochMs = (value: string | null | undefined): number => {
   if (value === null || value === undefined || value === "") return 0;
