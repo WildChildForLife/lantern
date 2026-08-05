@@ -99,12 +99,13 @@ jobs:
         with:
           registry-url: https://registry.npmjs.org
 
+      # Authenticates over OIDC against the trusted publisher configured for
+      # lantern-viewer on npm, so no token is stored here. pnpm exchanges the
+      # id-token granted above for a short-lived publish credential; there is
+      # deliberately no NODE_AUTH_TOKEN fallback, because a silent fallback is
+      # how a long-lived token quietly stays in use.
       - name: Publish
         run: pnpm publish --provenance --no-git-checks --access public
-        env:
-          # NPM_TOKEN is the conventional name; AUTH_TOKEN is accepted so an
-          # existing secret under that name keeps working.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN || secrets.AUTH_TOKEN }}
 
   packages:
     name: linux packages
