@@ -4891,7 +4891,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        103
+        107
       ]
     ],
     "translation": "read-only"
@@ -4970,7 +4970,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        92
+        96
       ]
     ],
     "translation": "{sessionCount} conversations across {projectCount} projects"
@@ -4982,7 +4982,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        81
+        85
       ]
     ],
     "translation": "Ready"
@@ -4994,7 +4994,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        86
+        90
       ]
     ],
     "translation": "Unavailable"

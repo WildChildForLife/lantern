@@ -11,7 +11,7 @@
 > Find the conversation you forgot you started.
 
 Lantern is a self-hosted dashboard for your agent CLI sessions. It reads the logs Claude Code already
-writes to `~/.claude/projects/` — and, optionally, [four other agent CLIs](#supported-agents) —
+writes to `~/.claude/projects/` — and, optionally, [five other agent CLIs](#supported-agents) —
 then groups every conversation by **what it is about**, not by which folder it happened to start in.
 
 If you run a lot of agent sessions across a lot of projects and machines — and across more than one
@@ -46,6 +46,10 @@ Lantern gives you topics, a searchable list of everything, and a board view of t
       <img src="docs/icons/copilot.svg" width="30" height="30" alt=""><br>
       <b>Copilot CLI</b>
     </td>
+    <td align="center" width="120">
+      <b>G</b><br>
+      <b>goose</b>
+    </td>
   </tr>
 </table>
 
@@ -65,7 +69,8 @@ Agent SDK, which the others have no equivalent for.
 "Verified against" means that exact version was run and the history it wrote was read back, rather
 than inferred from a format description. [`docker/compatibility.md`](docker/compatibility.md) records
 how, and what each run turned up. Both of opencode's storage layouts are read: the JSON tree and
-the SQLite database a current install writes. Gemini CLI, goose and cursor-agent are not read yet.
+the SQLite database a current install writes, and goose's own database. Gemini CLI and cursor-agent are
+not read yet.
 
 ## Contents
 
@@ -89,7 +94,7 @@ the SQLite database a current install writes. Gemini CLI, goose and cursor-agent
   are cached per session, nothing runs in the background, and each pass reports the usage it drew.
 - **Every session in one place.** A flat, filterable list across every project — and every machine, if
   you point Lantern at more than one log directory.
-- **More than one CLI.** Claude Code, Codex CLI, opencode, Qwen Code and GitHub Copilot CLI sessions sit side by side,
+- **More than one CLI.** Claude Code, Codex CLI, opencode, Qwen Code, GitHub Copilot CLI and goose sessions sit side by side,
   grouped into the same workspace when they ran in the same repo. Pick which CLIs to read in settings.
   Claude Code stays the interactive one; other sources are read-only. See
   [Supported agents](#supported-agents).
@@ -270,7 +275,8 @@ node dist/main.js [options]
 | `-v, --verbose`             | `LANTERN_VERBOSE`               | Verbose debug logging                                       | off         |
 | `--source <id>`             | `LANTERN_SOURCES`               | Agent CLI to read; repeat for more. Scopes one run          | stored      |
 
-Valid `--source` ids are `claude-code`, `codex`, `opencode`, `qwen-code` and `copilot`. Repeat the flag
+Valid `--source` ids are `claude-code`, `codex`, `opencode`, `qwen-code`, `copilot` and `goose`. Repeat
+the flag
 for more than one
 (`--source claude-code --source codex`), or set `LANTERN_SOURCES` to a comma-separated list. Passing it
 scopes a single run without changing what is stored in settings.
@@ -294,7 +300,7 @@ Windows). Deleting that directory costs nothing but a rebuild on the next start.
 
 ## Reading other agent CLIs
 
-Codex, opencode, Qwen Code and Copilot CLI are read from wherever those CLIs themselves keep their
+Codex, opencode, Qwen Code, Copilot CLI and goose are read from wherever those CLIs themselves keep their
 history, so pointing Lantern at them is the same gesture as pointing the CLI at them:
 
 | Source        | Default location          | Moved by                              |
@@ -304,6 +310,7 @@ history, so pointing Lantern at them is the same gesture as pointing the CLI at 
 | `opencode`    | `~/.local/share/opencode` | `XDG_DATA_HOME`                       |
 | `qwen-code`   | `~/.qwen`                 | `HOME` only — see below               |
 | `copilot`     | `~/.copilot`              | `HOME` only — see below               |
+| `goose`       | `~/.local/share/goose`    | `XDG_DATA_HOME`                       |
 
 `~` here is `$HOME`, or `%USERPROFILE%` on Windows shells that do not set `HOME`. Each row names the
 variable that CLI honours itself, so moving its history moves Lantern's view of it. Qwen Code and
@@ -322,6 +329,7 @@ docker run -d --name lantern \
   -v "$HOME/.local/share/opencode:/root/.local/share/opencode:ro" \
   -v "$HOME/.qwen:/root/.qwen:ro" \
   -v "$HOME/.copilot:/root/.copilot:ro" \
+  -v "$HOME/.local/share/goose:/root/.local/share/goose:ro" \
   -v lantern_cache:/root/.lantern \
   ghcr.io/wildchildforlife/lantern:latest
 ```

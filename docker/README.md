@@ -97,16 +97,16 @@ verified, and what the first run found.
 
 ## Status per CLI
 
-| CLI          | State            | Notes                                                                                                                               |
-| ------------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Claude Code  | live             | Lantern reads it                                                                                                                    |
-| Codex        | live             | Lantern reads it                                                                                                                    |
-| opencode     | live             | Lantern reads it, from the JSON tree or the SQLite database, whichever the install has                                              |
-| Qwen Code    | live             | Lantern reads it. Takes any OpenAI-compatible endpoint, which is why it can be driven here at all                                   |
-| Copilot CLI  | live             | Lantern reads it. BYOK needs no Copilot subscription — established by this harness, see `compatibility.md`                          |
-| goose        | driven, not read | Runs and writes `sessions.db`, but its message dialect is its own — a separate adapter, see `compatibility.md`                      |
-| cursor-agent | not driven       | Whether the CLI (as opposed to the IDE) can use a local model is unverified                                                         |
-| Gemini CLI   | not driven       | Cannot be pointed at a non-Google model at all, so it cannot be driven here. Not Qwen Code's format either — see `compatibility.md` |
+| CLI          | State      | Notes                                                                                                                               |
+| ------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code  | live       | Lantern reads it                                                                                                                    |
+| Codex        | live       | Lantern reads it                                                                                                                    |
+| opencode     | live       | Lantern reads it, from the JSON tree or the SQLite database, whichever the install has                                              |
+| Qwen Code    | live       | Lantern reads it. Takes any OpenAI-compatible endpoint, which is why it can be driven here at all                                   |
+| Copilot CLI  | live       | Lantern reads it. BYOK needs no Copilot subscription — established by this harness, see `compatibility.md`                          |
+| goose        | live       | Lantern reads it. Same read-only SQLite backend as opencode's database, with its own message dialect                                |
+| cursor-agent | not driven | Whether the CLI (as opposed to the IDE) can use a local model is unverified                                                         |
+| Gemini CLI   | not driven | Cannot be pointed at a non-Google model at all, so it cannot be driven here. Not Qwen Code's format either — see `compatibility.md` |
 
 Nothing is scaffolded any more: every CLI above is either driven by this harness
 or has a recorded reason it cannot be.

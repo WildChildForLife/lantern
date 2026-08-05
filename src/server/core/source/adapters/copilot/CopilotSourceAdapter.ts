@@ -39,6 +39,26 @@ const EVENTS_FILE = "events.jsonl";
  */
 const DETECT_SAMPLE = 5;
 
+/**
+ * A scan is repeated within one sync — `listProjects` runs it, then
+ * `listSessions` runs it again per project — and each pass stats every session
+ * on disk. Holding the result briefly collapses that to one pass without
+ * hiding a session that appears while the server runs: the window is shorter
+ * than the interval between syncs, so the next tick sees it.
+ *
+ * Keyed by root, because tests point two layers at different fixture
+ * directories inside one process and must not share an answer.
+ */
+const SCAN_TTL_MS = 2_000;
+
+/** One session's file, and the identity read from its opening event. */
+type Scanned = {
+  readonly filePath: string;
+  readonly mtimeMs: number;
+  readonly meta: CopilotMeta;
+  readonly id: string;
+};
+
 /** `session.start` is the first line and a few hundred bytes. */
 const HEAD_BYTES = 8 * 1024;
 
@@ -107,12 +127,12 @@ const makeAdapter = (): SourceAdapter => {
     return names.sort();
   });
 
+  const scanCache = new Map<string, { atMs: number; value: readonly Scanned[] }>();
+
   /**
    * Every session on disk with the identity from its opening event.
    *
-   * Not memoised: a session directory appears whenever the CLI is run, and a
-   * cached listing would hide it until a restart. Each entry costs one small
-   * read rather than a parse of the whole transcript.
+   * Held for `SCAN_TTL_MS` — see the note on that constant.
    */
   const scan = Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem;
@@ -124,7 +144,13 @@ const makeAdapter = (): SourceAdapter => {
       .readDirectory(sessionRoot)
       .pipe(Effect.catchAll(() => Effect.succeed<string[]>([])));
 
-    const found: Array<{ filePath: string; mtimeMs: number; meta: CopilotMeta; id: string }> = [];
+    const cached = scanCache.get(root);
+    const now = Date.now();
+    if (cached !== undefined && now - cached.atMs < SCAN_TTL_MS) {
+      return cached.value;
+    }
+
+    const found: Scanned[] = [];
 
     for (const name of names.sort()) {
       const filePath = path.join(sessionRoot, name, EVENTS_FILE);
@@ -142,6 +168,7 @@ const makeAdapter = (): SourceAdapter => {
       });
     }
 
+    scanCache.set(root, { atMs: now, value: found });
     return found;
   });
 
