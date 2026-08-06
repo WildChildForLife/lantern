@@ -4891,7 +4891,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        103
+        107
       ]
     ],
     "translation": "只读"
@@ -4970,7 +4970,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        92
+        96
       ]
     ],
     "translation": "{projectCount} 个项目中的 {sessionCount} 个会话"
@@ -4982,7 +4982,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        81
+        85
       ]
     ],
     "translation": "可用"
@@ -4994,7 +4994,7 @@
     "origin": [
       [
         "src/web/components/settings/SourceTile.tsx",
-        86
+        90
       ]
     ],
     "translation": "不可用"

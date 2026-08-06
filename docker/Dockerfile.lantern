@@ -23,3 +23,13 @@ RUN npm install -g \
       "@qwen-code/qwen-code@${QWEN_CODE_VERSION}" \
       "@github/copilot@${COPILOT_VERSION}" \
   && npm cache clean --force
+
+# goose ships a binary rather than an npm package.
+ARG GOOSE_VERSION=stable
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends curl bzip2 ca-certificates \
+  && rm -rf /var/lib/apt/lists/* \
+  && curl -fsSL "https://github.com/block/goose/releases/download/${GOOSE_VERSION}/download_cli.sh" \
+     | CONFIGURE=false bash \
+  && mv /root/.local/bin/goose /usr/local/bin/goose \
+  && chmod 0755 /usr/local/bin/goose
