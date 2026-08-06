@@ -1,5 +1,5 @@
 import { FileSystem, Path } from "@effect/platform";
-import { Effect, Option } from "effect";
+import { Clock, Effect, Option } from "effect";
 import { z } from "zod";
 import { ApplicationContext } from "../../../platform/services/ApplicationContext.ts";
 import { canonicalizeProjectPath } from "../../functions/canonicalizeProjectPath.ts";
@@ -316,8 +316,33 @@ const makeAdapter = (): SourceAdapter => {
       return meta;
     });
 
+  /**
+   * A scan is repeated within one sync — `listProjects` runs it, then
+   * `listSessions` runs it again per project — and each pass walks both trees.
+   * Holding the result briefly collapses that to one walk without hiding a
+   * rollout that appears while the server runs: the window is shorter than the
+   * interval between syncs, so the next tick sees it.
+   *
+   * Keyed by root, because tests point two layers at different fixture
+   * directories inside one process and must not share an answer. The per-file
+   * metadata cache above is a different thing: it survives longer, because a
+   * rollout's opening line never changes once written.
+   */
+  const SCAN_TTL_MS = 2_000;
+  const scanCache = new Map<string, { atMs: number; value: readonly ScannedRollout[] }>();
+
   /** Every rollout under both trees, with the metadata needed to group it. */
   const scan = Effect.gen(function* () {
+    const root = yield* rootPath;
+
+    const cached = scanCache.get(root);
+    // Effect's clock rather than Date.now(), so a test can drive the window
+    // with TestClock instead of waiting on wall time.
+    const now = yield* Clock.currentTimeMillis;
+    if (cached !== undefined && now - cached.atMs < SCAN_TTL_MS) {
+      return cached.value;
+    }
+
     const files = yield* listRolloutFiles;
 
     const entries: ScannedRollout[] = [];
@@ -328,6 +353,7 @@ const makeAdapter = (): SourceAdapter => {
       entries.push({ filePath, mtimeMs, meta });
     }
 
+    scanCache.set(root, { atMs: now, value: entries });
     return entries;
   });
 

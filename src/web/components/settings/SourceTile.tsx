@@ -17,6 +17,10 @@ const TILE_STYLES: Record<string, { readonly initial: string; readonly accent: s
   opencode: { initial: "◈", accent: "bg-foreground/5 text-foreground border-foreground/15" },
   "qwen-code": { initial: "◆", accent: "bg-violet-500/10 text-violet-500 border-violet-500/25" },
   copilot: { initial: "●", accent: "bg-foreground/5 text-foreground border-foreground/15" },
+  // A monogram rather than a mark: goose's logo is a multi-colour illustration
+  // with black fills, which disappears on a dark tile. A letter that is always
+  // legible beats a logo that is sometimes invisible.
+  goose: { initial: "G", accent: "bg-emerald-500/10 text-emerald-500 border-emerald-500/25" },
 };
 
 const FALLBACK = { initial: "•", accent: "bg-muted text-muted-foreground border-border" };

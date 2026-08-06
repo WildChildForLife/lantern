@@ -55,7 +55,7 @@ echo "==> enabling every source"
 # Seeded rather than passed as LANTERN_SOURCES, which would lock the settings
 # UI for the whole run and defeat the point of testing it.
 "${COMPOSE[@]}" run --rm --no-deps --entrypoint /bin/sh lantern -c \
-  'mkdir -p /root/.lantern/sources && printf "{\"enabled\":[\"claude-code\",\"codex\",\"opencode\",\"qwen-code\",\"copilot\"]}\n" > /root/.lantern/sources/sources.json' \
+  'mkdir -p /root/.lantern/sources && printf "{\"enabled\":[\"claude-code\",\"codex\",\"opencode\",\"qwen-code\",\"copilot\",\"goose\"]}\n" > /root/.lantern/sources/sources.json' \
   >/dev/null
 
 # The release image first, then the harness image that adds the CLIs on top of

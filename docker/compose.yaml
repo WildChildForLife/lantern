@@ -173,7 +173,7 @@ services:
       GOOSE_MODEL: "${OLLAMA_MODEL:-qwen3:0.6b}"
       PROMPTS: /prompts
     volumes:
-      - goose_home:/home/agent/.local/share
+      - goose_home:/home/agent/.local/share/goose
       - ./workspace:/workspace-src:ro
       - ./prompts:/prompts:ro
     restart: "no"
@@ -212,6 +212,9 @@ services:
       - opencode_home:/root/.local/share
       - qwen_home:/root/.qwen
       - copilot_home:/root/.copilot
+      # Nested inside the opencode mount above: goose and opencode both live
+      # under XDG_DATA_HOME, so the child path is what distinguishes them.
+      - goose_home:/root/.local/share/goose
       - lantern_state:/root/.lantern
     restart: unless-stopped
     init: true
