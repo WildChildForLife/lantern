@@ -20,11 +20,21 @@ REPO_ROOT=$(cd "$(dirname "$0")/.." && pwd)
 TARBALL="https://registry.npmjs.org/lantern-viewer/-/lantern-viewer-${VERSION}.tgz"
 
 echo "resolving $TARBALL"
-if ! curl -fsIL "$TARBALL" >/dev/null 2>&1; then
-  echo "bump-tap.sh: $TARBALL is not on the registry yet." >&2
-  echo "bump-tap.sh: wait for the release workflow's npm job, then re-run." >&2
-  exit 1
-fi
+# The release workflow runs this straight after publishing, so allow for the
+# registry taking a moment to serve what it has just accepted.
+ATTEMPTS=${BUMP_TAP_ATTEMPTS:-10}
+for attempt in $(seq 1 "$ATTEMPTS"); do
+  if curl -fsIL "$TARBALL" >/dev/null 2>&1; then
+    break
+  fi
+  if [ "$attempt" -eq "$ATTEMPTS" ]; then
+    echo "bump-tap.sh: $TARBALL is not on the registry after $ATTEMPTS attempts." >&2
+    echo "bump-tap.sh: check the npm job published, then re-run." >&2
+    exit 1
+  fi
+  echo "  not there yet, retrying in 6s ($attempt/$ATTEMPTS)"
+  sleep 6
+done
 
 # sha256sum on Linux, shasum where it is absent (macOS ships only the latter).
 if command -v sha256sum >/dev/null 2>&1; then

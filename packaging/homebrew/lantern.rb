@@ -11,8 +11,8 @@
 class Lantern < Formula
   desc "Self-hosted dashboard for your agent CLI sessions, grouped by topic"
   homepage "https://github.com/WildChildForLife/lantern"
-  url "https://registry.npmjs.org/lantern-viewer/-/lantern-viewer-0.1.1.tgz"
-  sha256 "3c6663c170b14b23871e2473de6877aefa74881041245da437a4929230af4882"
+  url "https://registry.npmjs.org/lantern-viewer/-/lantern-viewer-0.2.0.tgz"
+  sha256 "344b29d69a3a22a94c58cab43c825c5e12ca39437b71cec6f2c48baf2a006a12"
   license "MIT"
 
   depends_on "node"
