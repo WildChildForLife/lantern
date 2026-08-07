@@ -65,6 +65,8 @@ export const testPlatformLayer = (overrides?: {
             return overrides?.env?.USERPROFILE ?? undefined;
           case "LANTERN_HOSTNAME":
             return overrides?.env?.LANTERN_HOSTNAME ?? undefined;
+          case "LANTERN_PASSWORD":
+            return overrides?.env?.LANTERN_PASSWORD ?? undefined;
           case "PATH":
             return overrides?.env?.PATH ?? undefined;
           case "SHELL":
