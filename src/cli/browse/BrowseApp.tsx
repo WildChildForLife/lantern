@@ -5,7 +5,6 @@ import { type ActionPlan, planAction } from "../actions/planAction.ts";
 import { nextResumeAction, RESUME_ACTION_LABELS, type ResumeAction } from "../config/cliConfig.ts";
 import { TextInput } from "../ui/prompts/TextInput.tsx";
 import { theme } from "../ui/theme.ts";
-import { ActionMenu } from "./components/ActionMenu.tsx";
 import { Board } from "./components/Board.tsx";
 import { HelpOverlay } from "./components/HelpOverlay.tsx";
 import { StatusBar, type Status } from "./components/StatusBar.tsx";
@@ -174,10 +173,8 @@ export const BrowseApp = ({
         setStatus({ text: `Enter now: ${RESUME_ACTION_LABELS[following]}`, tone: "info" });
         return;
       }
-      case "open-menu":
-        if (activeRow !== undefined) {
-          setMode("menu");
-        }
+      case "run-chosen":
+        runAction(enterAction);
         return;
       case "run":
         runAction(action.action);
@@ -246,23 +243,6 @@ export const BrowseApp = ({
           now={now}
         />
       )}
-
-      {mode === "menu" && activeRow !== undefined ? (
-        <Box marginTop={1}>
-          <ActionMenu
-            row={activeRow}
-            defaultAction={enterAction}
-            interactive={interactiveSources.includes(activeRow.source)}
-            onSubmit={(action) => {
-              setMode("board");
-              runAction(action);
-            }}
-            onCancel={() => {
-              setMode("board");
-            }}
-          />
-        </Box>
-      ) : null}
 
       {mode === "help" ? (
         <Box marginTop={1}>

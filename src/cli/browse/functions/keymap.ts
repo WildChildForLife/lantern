@@ -13,7 +13,7 @@ export type KeyInput = {
 };
 
 /** Which overlay, if any, currently owns the keyboard. */
-export type BrowseMode = "board" | "filter" | "menu" | "help";
+export type BrowseMode = "board" | "filter" | "help";
 
 export type BrowseAction =
   | { type: "quit" }
@@ -24,7 +24,7 @@ export type BrowseAction =
   | { type: "close-overlay" }
   | { type: "toggle-help" }
   | { type: "refresh" }
-  | { type: "open-menu" }
+  | { type: "run-chosen" }
   | { type: "cycle-enter-action" }
   | { type: "run"; action: ResumeAction };
 
@@ -50,7 +50,8 @@ const resolveBoardAction = (key: KeyInput): BrowseAction | null => {
   if (key.input === "?") return { type: "toggle-help" };
   if (key.input === "r") return { type: "refresh" };
   if (key.input === "e") return { type: "cycle-enter-action" };
-  if (key.return === true) return { type: "open-menu" };
+  // Enter does whatever the header says it does — `e` is what changes that.
+  if (key.return === true) return { type: "run-chosen" };
 
   const direct = DIRECT_ACTIONS[key.input];
 
@@ -80,9 +81,6 @@ export const resolveKeyAction = (key: KeyInput, mode: BrowseMode): BrowseAction 
       return key.return === true || key.escape === true ? { type: "close-overlay" } : null;
     case "help":
       return { type: "close-overlay" };
-    // The menu runs its own selection loop, so nothing here applies to it.
-    case "menu":
-      return null;
     default:
       mode satisfies never;
       return null;

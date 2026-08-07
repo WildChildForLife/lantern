@@ -41,13 +41,18 @@ describe("resolveKeyAction on the board", () => {
     expect(resolveKeyAction(press("/"), "board")).toStrictEqual({ type: "open-filter" });
   });
 
-  it("opens the action menu on Enter", () => {
+  /** The header says what Enter does; opening a menu of the same four would repeat it. */
+  it("runs the chosen action on Enter, without a menu", () => {
     expect(resolveKeyAction(press("", { return: true }), "board")).toStrictEqual({
-      type: "open-menu",
+      type: "run-chosen",
     });
   });
 
-  /** The menu is a convenience, not a toll gate: the actions have hotkeys too. */
+  it("cycles the chosen action on e", () => {
+    expect(resolveKeyAction(press("e"), "board")).toStrictEqual({ type: "cycle-enter-action" });
+  });
+
+  /** Every action also has its own key, so none of them needs the header changed first. */
   it.each([
     ["c", "copy-id"],
     ["p", "print"],

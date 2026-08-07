@@ -160,22 +160,22 @@ describe("BrowseApp", () => {
     expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "refused" }));
   });
 
-  it("opens the action menu on enter", async () => {
-    const { stdin, lastFrame } = setup();
+  /** The header already says what Enter does; a menu of the same four repeats it. */
+  it("does the header's action on enter, without asking again", async () => {
+    const { stdin, onLeave } = setup();
     await nextFrame();
     await press(stdin, ENTER);
 
-    expect(lastFrame()).toContain("Resume here");
-    expect(lastFrame()).toContain("Copy the conversation id");
+    expect(onLeave).toHaveBeenCalledWith(expect.objectContaining({ kind: "handoff" }));
   });
 
-  it("greys the resume actions out for a read-only conversation", async () => {
-    const { stdin, lastFrame } = setup();
+  it("says why on enter when the conversation is from a read-only CLI", async () => {
+    const { stdin, onRun } = setup();
     await nextFrame();
     await press(stdin, ARROW_RIGHT);
     await press(stdin, ENTER);
 
-    expect(lastFrame()).toContain("read-only source");
+    expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "refused" }));
   });
 
   it("narrows the board as the filter is typed", async () => {
@@ -273,7 +273,6 @@ describe("BrowseApp", () => {
     await press(stdin, "e");
     await press(stdin, "e");
     await press(stdin, "e");
-    await press(stdin, ENTER);
     await press(stdin, ENTER);
 
     expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "copy" }));

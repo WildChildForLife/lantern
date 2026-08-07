@@ -303,7 +303,8 @@ without starting a server or opening a browser.
 | `r`     | re-read the logs · `?` the key list · `q` quit             |
 
 The header shows what `enter` will do; `e` cycles through resuming here, opening a new window,
-printing the command and copying the id, and remembers the choice for next time.
+printing the command and copying the id, and remembers the choice for next time. Enter then does
+exactly that — there is no menu in between, and each of the four has its own key as well.
 
 Below about ninety columns the board becomes a topic list on the left and its conversations on the
 right; the keys are unchanged.

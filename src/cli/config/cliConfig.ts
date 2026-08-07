@@ -3,8 +3,8 @@ import { z } from "zod";
 /**
  * What pressing Enter on a conversation does.
  *
- * All four are always reachable from the action menu; this only decides which
- * one the menu opens on.
+ * Shown in the board's header and cycled with `e`. All four also have a key of
+ * their own, so this only decides what Enter does.
  */
 export const resumeActionSchema = z.enum(["resume-here", "new-window", "print", "copy-id"]);
 
