@@ -71,6 +71,27 @@ describe("toLanternOptions precedence", () => {
     expect(toLanternOptions(undefined, { hostname: "localhost" }).hostname).toBe("127.0.0.1");
   });
 
+  /**
+   * `export LANTERN_HOSTNAME=` is how a shell profile clears a variable, not
+   * how it answers a question — treating it as answered would make the stored
+   * tier unreachable for anyone whose dotfiles do that.
+   */
+  it("treats an exported-but-empty variable as unset", () => {
+    vi.stubEnv("LANTERN_HOSTNAME", "");
+    vi.stubEnv("LANTERN_CLAUDE_DIR", "");
+    vi.stubEnv("PORT", "");
+
+    const options = toLanternOptions(undefined, {
+      hostname: "0.0.0.0",
+      claudeDir: "/from/file",
+      port: 3400,
+    });
+
+    expect(options.hostname).toBe("0.0.0.0");
+    expect(options.claudeDir).toBe("/from/file");
+    expect(options.port).toBe(3400);
+  });
+
   /** The stored selection lives in sources.json, which this tier must not shadow. */
   it("leaves sources alone", () => {
     expect(toLanternOptions(undefined, { port: 3400 }).sources).toBeUndefined();

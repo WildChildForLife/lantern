@@ -326,9 +326,13 @@ clipboard escape sequence first, so it reaches your machine's clipboard even ove
 | `--source <id>`             | `LANTERN_SOURCES`               | Agent CLI to read; repeat for more. Scopes one run          | stored      |
 | `--no-init`                 | `LANTERN_NO_INIT`               | Never offer the setup wizard on a first launch              | offered     |
 
-Each row resolves in the same order: the flag, then the environment variable, then
-`~/.lantern/config.json`, then the default. `--password` is the exception — the wizard never writes
-one to the file.
+Rows the wizard writes — port, hostname, `--claude-dir`, `--executable` and the three terminal
+options — resolve in this order: the flag, then the environment variable, then
+`~/.lantern/config.json`, then the default. An environment variable exported as empty counts as
+unset, so it does not shadow the file.
+
+`--password`, `--verbose`, `--source` and `--no-init` have no stored tier: they resolve from the flag
+or the environment variable only. Password is deliberate — the wizard never writes one down.
 
 Valid `--source` ids are `claude-code`, `codex`, `opencode`, `qwen-code`, `copilot` and `goose`. Repeat
 the flag

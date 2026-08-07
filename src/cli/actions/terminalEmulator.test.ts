@@ -64,6 +64,26 @@ describe("buildEmulatorLaunch", () => {
     expect(buildEmulatorLaunch("kitty", params)?.args.at(-1)).toContain("exec");
   });
 
+  /**
+   * Reached from inside WSL, where both the directory and the command are
+   * POSIX — Windows Terminal can run neither without going back through wsl.
+   */
+  it("goes back through wsl.exe when opening a window from WSL", () => {
+    const launch = buildEmulatorLaunch("wt.exe", params);
+
+    expect(launch?.args).toContain("wsl.exe");
+    expect(launch?.args).toContain("--cd");
+    expect(launch?.args).toContain("/home/dev/lantern");
+  });
+
+  /** Every other recipe honours cwd; this one resumed in the wrong repo. */
+  it("opens cmd.exe in the conversation's own directory", () => {
+    const launch = buildEmulatorLaunch("cmd.exe", params);
+
+    expect(launch?.args).toContain("/d");
+    expect(launch?.args).toContain("/home/dev/lantern");
+  });
+
   it("returns null for a binary it has no recipe for", () => {
     expect(buildEmulatorLaunch("nethack", params)).toBeNull();
   });

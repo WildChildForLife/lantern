@@ -6,8 +6,11 @@ type TextInputProps = {
   /** Shown greyed out, and submitted as-is when the field is left empty. */
   placeholder?: string | undefined;
   initialValue?: string | undefined;
-  /** Returns a message when the value cannot be accepted, otherwise null. */
-  validate?: ((value: string) => string | null) | undefined;
+  /**
+   * Returns a message when the value cannot be accepted, otherwise null. May
+   * answer asynchronously, for checks that have to touch the filesystem.
+   */
+  validate?: ((value: string) => string | null | Promise<string | null>) | undefined;
   onSubmit: (value: string) => void;
   onChange?: ((value: string) => void) | undefined;
   onCancel?: (() => void) | undefined;
@@ -45,12 +48,22 @@ export const TextInput = ({
 
     if (key.return) {
       const submitted = value === "" ? (placeholder ?? "") : value;
-      const message = validate?.(submitted) ?? null;
-      if (message !== null) {
-        setError(message);
+      if (validate === undefined) {
+        onSubmit(submitted);
         return;
       }
-      onSubmit(submitted);
+
+      void Promise.resolve(validate(submitted))
+        .then((message) => {
+          if (message === null) {
+            onSubmit(submitted);
+            return;
+          }
+          setError(message);
+        })
+        .catch((error: unknown) => {
+          setError(String(error));
+        });
       return;
     }
 

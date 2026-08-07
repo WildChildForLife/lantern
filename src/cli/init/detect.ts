@@ -3,6 +3,7 @@ import { NodeContext } from "@effect/platform-node";
 import { Effect, Layer } from "effect";
 import { resolveClaudeCodePath } from "../../server/core/claude-code/models/ClaudeCode.ts";
 import { ApplicationContext } from "../../server/core/platform/services/ApplicationContext.ts";
+import { EnvService } from "../../server/core/platform/services/EnvService.ts";
 import type { SourceId } from "../../server/core/source/models/SourceId.ts";
 import { ALL_SOURCE_ADAPTERS } from "../../server/core/source/services/SourceRegistry.ts";
 import { cliPlatformLayer } from "../platformLayer.ts";
@@ -23,6 +24,13 @@ export type Detection = {
   executable: string | null;
   /** Whether the in-app terminal's PTY binary exists for this platform. */
   terminalAvailable: boolean;
+  /**
+   * Whether `LANTERN_PASSWORD` is already set here.
+   *
+   * The wizard refuses to write a password down, so this is the only way it can
+   * tell whether a non-loopback bind would actually be protected.
+   */
+  passwordSet: boolean;
 };
 
 /**
@@ -49,6 +57,7 @@ const detectTerminalSupport = Effect.tryPromise({
 export const detectEnvironment = (claudeDir?: string): Promise<Detection> => {
   const program = Effect.gen(function* () {
     const context = yield* ApplicationContext;
+    const envService = yield* EnvService;
     const paths = yield* context.claudeCodePaths;
 
     const sources = yield* Effect.forEach(ALL_SOURCE_ADAPTERS, (adapter) =>
@@ -76,6 +85,7 @@ export const detectEnvironment = (claudeDir?: string): Promise<Detection> => {
       claudeDirectory: paths.globalClaudeDirectoryPath,
       executable,
       terminalAvailable: yield* detectTerminalSupport,
+      passwordSet: (yield* envService.getEnv("LANTERN_PASSWORD")) !== undefined,
     };
   });
 

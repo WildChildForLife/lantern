@@ -40,5 +40,14 @@ export const maybeRunFirstRunWizard = async (
 
   const { runInit } = await import("./init/initCommand.tsx");
 
-  return (await runInit({ claudeDir })) ?? (await loadStoredOptions());
+  // Setup is an offer, never a gate. A state directory that cannot be written —
+  // an unset HOME, a read-only volume, a full disk — used to leave Lantern
+  // serving fine; it must not now stop it booting on the one launch that runs
+  // the wizard.
+  const configured = await runInit({ claudeDir }).catch((error: unknown) => {
+    process.stderr.write(`Could not finish setup: ${String(error)}\nStarting anyway.\n`);
+    return null;
+  });
+
+  return configured ?? (await loadStoredOptions());
 };

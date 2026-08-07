@@ -117,9 +117,17 @@ export const buildEmulatorLaunch = (
         ].flatMap((script) => ["-e", script]),
       };
     case "wt.exe":
-      return { binary, args: ["-d", params.cwd, "sh", "-c", inner] };
+      // Reached from inside WSL, where `cwd` and the command are both POSIX and
+      // Windows Terminal cannot run either directly — `wsl.exe` is the way back
+      // into the distribution they belong to.
+      return {
+        binary,
+        args: ["wsl.exe", "--cd", params.cwd, "--", "sh", "-c", inner],
+      };
     case "cmd.exe":
-      return { binary, args: ["/c", "start", "cmd", "/k", params.command] };
+      // `/d` sets the new window's directory; every other recipe honours cwd and
+      // this one has to as well, or the conversation resumes in the wrong repo.
+      return { binary, args: ["/c", "start", "", "/d", params.cwd, "cmd", "/k", params.command] };
     default:
       return null;
   }

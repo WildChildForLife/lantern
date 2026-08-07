@@ -6,6 +6,7 @@ import { SourceConfigBaseDir, writeSourceConfig } from "../../server/core/source
 import type { SharedCommandOptions } from "../commandOptions.ts";
 import type { CliConfig } from "../config/cliConfig.ts";
 import { CliConfigBaseDir, getCliConfigPath, writeCliConfig } from "../config/cliConfigStore.ts";
+import { loadEnabledSources } from "../config/loadEnabledSources.ts";
 import { loadStoredOptions } from "../config/loadStoredOptions.ts";
 import { resyncBoard } from "../runtime.ts";
 import { detectEnvironment } from "./detect.ts";
@@ -58,6 +59,7 @@ export const runInit = async (options: SharedCommandOptions): Promise<CliConfig 
   process.stdout.write("Looking at what is already on this machine…\n");
   const detection = await detectEnvironment(options.claudeDir);
   const existing = await loadStoredOptions();
+  const enabledSources = await loadEnabledSources();
 
   const collected: { answers: WizardAnswers | null } = { answers: null };
 
@@ -65,7 +67,7 @@ export const runInit = async (options: SharedCommandOptions): Promise<CliConfig 
     <InitWizard
       detection={detection}
       initial={{
-        sources: undefined,
+        sources: enabledSources.length === 0 ? undefined : enabledSources,
         claudeDir: options.claudeDir ?? existing.claudeDir,
         executable: existing.executable,
         port: existing.port,

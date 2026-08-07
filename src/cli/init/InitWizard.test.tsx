@@ -1,8 +1,19 @@
 import { render } from "ink-testing-library";
 import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
+import type * as DetectModuleNamespace from "./detect.ts";
 import type { Detection } from "./detect.ts";
+
+type DetectModule = typeof DetectModuleNamespace;
 import { InitWizard } from "./InitWizard.tsx";
+
+// The claude-dir step checks the path really holds a `projects` directory;
+// these tests are about the wizard's flow, not the filesystem.
+vi.mock("./detect.ts", async (importOriginal) => {
+  const original = await importOriginal<DetectModule>();
+
+  return { ...original, looksLikeClaudeDirectory: () => Promise.resolve(true) };
+});
 
 const ENTER = "\r";
 const ARROW_DOWN = `${String.fromCodePoint(0x1b)}[B`;
@@ -29,6 +40,7 @@ const detection: Detection = {
   claudeDirectory: "/home/dev/.claude",
   executable: "/usr/local/bin/claude",
   terminalAvailable: true,
+  passwordSet: false,
 };
 
 const setup = (overrides?: Partial<Detection>) => {
@@ -91,7 +103,7 @@ describe("InitWizard", () => {
     await acceptAll(stdin, 2);
 
     expect(lastFrame()).toContain("Where is the claude executable?");
-    expect(lastFrame()).toContain("Found /usr/local/bin/claude");
+    expect(lastFrame()).toContain("Using /usr/local/bin/claude");
   });
 
   it("says so when there is no claude on PATH", async () => {
@@ -159,5 +171,91 @@ describe("InitWizard", () => {
     await acceptAll(stdin, 8);
 
     expect(onDone).toHaveBeenCalledWith(expect.objectContaining({ sources: ["claude-code"] }));
+  });
+
+  /**
+   * The regression these exist for: the wizard used to render the right thing
+   * and then throw the answer away, which a test asserting on the frame cannot
+   * see.
+   */
+  it("backs out to the bind address when the warning is declined", async () => {
+    const { stdin, lastFrame, onDone } = setup();
+    await nextFrame();
+    await acceptAll(stdin, 4);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ENTER);
+    await press(stdin, "n");
+
+    expect(lastFrame()).toContain("Which address should it bind to?");
+    expect(onDone).not.toHaveBeenCalled();
+  });
+
+  it("defaults the warning to backing out when no password is set", async () => {
+    const { stdin, lastFrame } = setup();
+    await nextFrame();
+    await acceptAll(stdin, 4);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ENTER);
+    // Enter takes the highlighted answer, which must be the safe one.
+    await press(stdin, ENTER);
+
+    expect(lastFrame()).toContain("Which address should it bind to?");
+  });
+
+  it("says the port is protected when a password is already in the environment", async () => {
+    const { stdin, lastFrame } = setup({ passwordSet: true });
+    await nextFrame();
+    await acceptAll(stdin, 4);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ENTER);
+
+    expect(lastFrame()).toContain("is password-protected");
+  });
+
+  it("keeps a bind address the user insisted on", async () => {
+    const { stdin, onDone } = setup();
+    await nextFrame();
+    await acceptAll(stdin, 4);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ENTER);
+    await press(stdin, "y");
+    await acceptAll(stdin, 3);
+
+    expect(onDone).toHaveBeenCalledWith(expect.objectContaining({ hostname: "0.0.0.0" }));
+  });
+
+  /** Enter-through on a re-run must not quietly rewrite what is already stored. */
+  it("keeps stored answers rather than the detected ones", async () => {
+    const onDone = vi.fn();
+    const { stdin } = render(
+      <InitWizard
+        detection={detection}
+        initial={{
+          sources: ["codex"],
+          claudeDir: "/mnt/backup/claude",
+          executable: "/opt/claude",
+        }}
+        onDone={onDone}
+      />,
+    );
+
+    await nextFrame();
+    await acceptAll(stdin, 6);
+
+    expect(onDone).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sources: ["codex"],
+        claudeDir: "/mnt/backup/claude",
+        executable: "/opt/claude",
+      }),
+    );
   });
 });

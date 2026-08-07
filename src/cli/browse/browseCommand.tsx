@@ -31,7 +31,9 @@ const runPlan = async (plan: ActionPlan): Promise<Status> => {
         : { text: `Could not reach a clipboard.`, tone: "error" };
     }
     case "spawn":
-      spawnDetached(plan.binary, plan.args, plan.cwd);
+      // Deliberately "opening": the launcher backgrounds the emulator and
+      // exits, so there is nothing left to ask whether the window appeared.
+      await spawnDetached(plan.binary, plan.args, plan.cwd, process.platform);
       return { text: `Opening a new ${plan.binary} window…`, tone: "ok" };
     case "refused":
       return { text: `Cannot resume: ${plan.reason}.`, tone: "error" };
@@ -92,18 +94,29 @@ export const runBrowse = async (
   const leaving: { plan: ActionPlan | null } = { plan: null };
   let board: BoardData = data;
   let refreshing = false;
+  const failure: { text: string | null } = { text: null };
 
   const refresh = () => {
     if (refreshing) {
       return;
     }
     refreshing = true;
+    failure.text = null;
     draw();
-    void resyncBoard(cliOptions, stored).then((next) => {
-      board = next;
-      refreshing = false;
-      draw();
-    });
+    void resyncBoard(cliOptions, stored)
+      .then((next) => {
+        board = next;
+      })
+      // A re-read that throws must not take the board with it: Node kills the
+      // process on an unhandled rejection, and it would do so while Ink owns
+      // the screen and stdin is still in raw mode.
+      .catch((error: unknown) => {
+        failure.text = `Could not re-read the logs: ${String(error)}`;
+      })
+      .finally(() => {
+        refreshing = false;
+        draw();
+      });
   };
 
   const element = () => (
@@ -124,6 +137,7 @@ export const runBrowse = async (
       }}
       onRefresh={refresh}
       refreshing={refreshing}
+      refreshError={failure.text}
     />
   );
 

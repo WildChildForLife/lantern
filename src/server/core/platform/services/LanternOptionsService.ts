@@ -51,10 +51,19 @@ export type LanternOptions = {
   sources?: SourceId[] | undefined;
 };
 
+/**
+ * An environment variable, treating an exported-but-empty one as unset.
+ *
+ * `export LANTERN_HOSTNAME=` is how a shell profile clears a variable, not how
+ * it answers a question — and `??` would otherwise let that empty string
+ * shadow the stored settings underneath it.
+ */
 const getOptionalEnv = (key: string): string | undefined => {
   // biome-ignore lint/style/noProcessEnv: allow only here
   // oxlint-disable-next-line node/no-process-env -- configuration boundary
-  return process.env[key] ?? undefined;
+  const value = process.env[key];
+
+  return value === undefined || value === "" ? undefined : value;
 };
 
 const splitList = (value: string | undefined): string[] | undefined =>

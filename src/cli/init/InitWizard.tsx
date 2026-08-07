@@ -7,7 +7,7 @@ import { MultiSelect } from "../ui/prompts/MultiSelect.tsx";
 import { Select } from "../ui/prompts/Select.tsx";
 import { TextInput } from "../ui/prompts/TextInput.tsx";
 import { theme } from "../ui/theme.ts";
-import type { Detection } from "./detect.ts";
+import { type Detection, looksLikeClaudeDirectory } from "./detect.ts";
 import { nextStep, WIZARD_STEPS, type WizardStep } from "./steps.ts";
 
 export type WizardAnswers = {
@@ -30,6 +30,9 @@ type InitWizardProps = {
 };
 
 const DEFAULT_PORT = 3000;
+
+const validateClaudeDirectory = async (value: string): Promise<string | null> =>
+  (await looksLikeClaudeDirectory(value)) ? null : `No projects directory under ${value}.`;
 
 const parsePort = (value: string): number | null => {
   const port = Number.parseInt(value, 10);
@@ -112,7 +115,9 @@ export const InitWizard = ({ detection, initial, onDone }: InitWizardProps) => {
 
       {step === "claude-dir" ? (
         <TextInput
-          placeholder={detection.claudeDirectory}
+          placeholder={answers.claudeDir ?? detection.claudeDirectory}
+          // A typo here is otherwise only discovered as an empty dashboard.
+          validate={validateClaudeDirectory}
           onSubmit={(claudeDir) => {
             advance({ claudeDir });
           }}
@@ -123,13 +128,13 @@ export const InitWizard = ({ detection, initial, onDone }: InitWizardProps) => {
         <Box flexDirection="column">
           <Box marginBottom={1}>
             <Text dimColor>
-              {detection.executable === null
+              {answers.executable === undefined
                 ? "Not found on PATH. Leave blank to keep looking at start-up."
-                : `Found ${detection.executable}. Enter to keep it.`}
+                : `Using ${answers.executable}. Enter to keep it.`}
             </Text>
           </Box>
           <TextInput
-            placeholder={detection.executable ?? ""}
+            placeholder={answers.executable ?? detection.executable ?? ""}
             onSubmit={(executable) => {
               advance({ executable: executable === "" ? undefined : executable });
             }}
@@ -164,19 +169,30 @@ export const InitWizard = ({ detection, initial, onDone }: InitWizardProps) => {
 
       {step === "password" ? (
         <Box flexDirection="column">
-          <Text color={theme.danger}>
-            Lantern ships an in-app terminal. Binding to {answers.hostname} without a password hands
-            a shell to whoever finds the port.
+          <Text color={detection.passwordSet ? theme.ok : theme.danger}>
+            {detection.passwordSet
+              ? `LANTERN_PASSWORD is set, so binding to ${answers.hostname} is password-protected.`
+              : `Lantern ships an in-app terminal. Binding to ${answers.hostname} without a password hands a shell to whoever finds the port.`}
           </Text>
           <Box marginTop={1} marginBottom={1}>
             <Text dimColor>
-              Set one with LANTERN_PASSWORD, or pass --password. It is deliberately not written to
-              the settings file, so it stays out of your backups and dotfiles.
+              {detection.passwordSet
+                ? "Keep that variable set wherever you start Lantern — it is not written to the settings file."
+                : "Set one with LANTERN_PASSWORD, or pass --password. It is deliberately not written to the settings file, so it stays out of your backups and dotfiles."}
             </Text>
           </Box>
+          <Text>Bind to {answers.hostname} anyway?</Text>
           <Confirm
-            onSubmit={() => {
-              advance({});
+            // Defaults to backing out when nothing would protect the port, so
+            // the dangerous answer is never the one Enter gives.
+            initialValue={detection.passwordSet}
+            onSubmit={(proceed) => {
+              if (proceed) {
+                advance({});
+                return;
+              }
+
+              setStep("hostname");
             }}
           />
         </Box>

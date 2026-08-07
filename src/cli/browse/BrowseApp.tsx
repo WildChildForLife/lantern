@@ -31,6 +31,8 @@ export type BrowseAppProps = {
   onLeave: (plan: ActionPlan) => void;
   onRefresh: () => void;
   refreshing: boolean;
+  /** Set when the last re-read failed, so the board can say so. */
+  refreshError?: string | null | undefined;
 };
 
 const clamp = (value: number, max: number): number =>
@@ -58,6 +60,7 @@ export const BrowseApp = ({
   onLeave,
   onRefresh,
   refreshing,
+  refreshError,
 }: BrowseAppProps) => {
   const { exit } = useApp();
   const { stdout } = useStdout();
@@ -114,7 +117,13 @@ export const BrowseApp = ({
       }
 
       setStatus({ text: "…", tone: "info" });
-      void onRun(plan).then(setStatus);
+      // Same reason as the refresh path: an unhandled rejection here would kill
+      // the process with the terminal still in raw mode.
+      void onRun(plan)
+        .then(setStatus)
+        .catch((error: unknown) => {
+          setStatus({ text: String(error), tone: "error" });
+        });
     },
     [buildPlan, exit, onLeave, onRun],
   );
@@ -246,7 +255,15 @@ export const BrowseApp = ({
       ) : null}
 
       <Box marginTop={1}>
-        <StatusBar row={activeRow} status={status} width={stdout?.columns ?? 100} />
+        <StatusBar
+          row={activeRow}
+          status={
+            refreshError === null || refreshError === undefined
+              ? status
+              : { text: refreshError, tone: "error" }
+          }
+          width={stdout?.columns ?? 100}
+        />
       </Box>
     </Box>
   );
