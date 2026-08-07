@@ -6,7 +6,7 @@
 # Publishing needs an AUR account with a registered SSH key — see
 # packaging/aur/README.md. scripts/bump-tap.sh refreshes pkgver and the checksum.
 pkgname=lantern
-pkgver=0.1.0
+pkgver=0.1.1
 pkgrel=1
 pkgdesc="Self-hosted dashboard for your agent CLI sessions, grouped by topic"
 arch=('any')
@@ -15,7 +15,7 @@ license=('MIT')
 depends=('nodejs>=24')
 makedepends=('npm')
 source=("$pkgname-$pkgver.tgz::https://registry.npmjs.org/lantern-viewer/-/lantern-viewer-$pkgver.tgz")
-sha256sums=('fbd655b0523e3f10690babcffa5bd1651d1d573b108695c08c7006028c04014e')
+sha256sums=('3c6663c170b14b23871e2473de6877aefa74881041245da437a4929230af4882')
 options=('!strip')
 
 package() {
