@@ -264,7 +264,7 @@ node dist/main.js [options]
 | Option                      | Environment                     | Description                                                 | Default     |
 | --------------------------- | ------------------------------- | ----------------------------------------------------------- | ----------- |
 | `-p, --port <port>`         | `PORT`                          | Port to listen on                                           | `3000`      |
-| `-h, --hostname <hostname>` | `HOSTNAME`                      | Hostname to bind                                            | `localhost` |
+| `-h, --hostname <hostname>` | `LANTERN_HOSTNAME`              | Address to bind                                             | `127.0.0.1` |
 | `-P, --password <password>` | `LANTERN_PASSWORD`              | Require a password. **Set this if you bind to `0.0.0.0`**   | (none)      |
 | `--claude-dir <path>`       | `LANTERN_CLAUDE_DIR`            | Path to the Claude directory to read                        | `~/.claude` |
 | `-e, --executable <path>`   | `LANTERN_CLAUDE_EXECUTABLE`     | Path to the `claude` executable                             | auto        |
@@ -282,6 +282,15 @@ for more than one
 scopes a single run without changing what is stored in settings.
 
 Flag-style environment variables are on for `1` or `true` and off otherwise.
+
+Lantern binds `127.0.0.1` by default. `localhost` is treated the same way, because
+Node resolves it to `::1` first on a dual-stack machine and that leaves `127.0.0.1`
+refused. Pass `::1` for IPv6 loopback, `::` for both, or `0.0.0.0` for every
+interface — and read [Security](#security) before you do the last one.
+
+The bind address is **not** read from `HOSTNAME`. Docker and Kubernetes set that
+to the container id, so honouring it would leave a container serving on an address
+nothing can reach.
 
 ### Security
 

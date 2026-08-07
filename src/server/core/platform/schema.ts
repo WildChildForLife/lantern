@@ -6,6 +6,12 @@ export const envSchema = z.object({
   /** Windows names the home directory here and leaves `HOME` unset. */
   USERPROFILE: z.string().optional(),
   PATH: z.string().optional(),
+  /**
+   * The address to bind to. Deliberately not the bare `HOSTNAME`: Docker and
+   * Kubernetes set that to the container id, and binding to it makes the server
+   * unreachable.
+   */
+  LANTERN_HOSTNAME: z.string().optional(),
   SHELL: z.string().optional(),
   LANTERN_TERMINAL_SHELL: z.string().optional(),
   LANTERN_TERMINAL_UNRESTRICTED: z.string().optional(),
