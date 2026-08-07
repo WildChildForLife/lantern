@@ -16,7 +16,7 @@ describe("DeprecatedEnvDetector", () => {
 
   it.live("stays quiet when only current variable names are set", () =>
     Effect.gen(function* () {
-      const consoleSpy = vi.spyOn(console, "log");
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
       // biome-ignore lint/style/noProcessEnv: Testing environment variable detection
       process.env.LANTERN_PASSWORD = "test";
@@ -36,7 +36,7 @@ describe("DeprecatedEnvDetector", () => {
 
   it.live("names the replacement for a renamed variable without failing", () =>
     Effect.gen(function* () {
-      const consoleSpy = vi.spyOn(console, "log");
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
       // biome-ignore lint/style/noProcessEnv: Testing environment variable detection
       process.env.CCV_PASSWORD = "test";
@@ -59,7 +59,7 @@ describe("DeprecatedEnvDetector", () => {
 
   it.live("reports every renamed variable that is still set", () =>
     Effect.gen(function* () {
-      const consoleSpy = vi.spyOn(console, "log");
+      const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
       // biome-ignore lint/style/noProcessEnv: Testing environment variable detection
       process.env.CCV_PASSWORD = "test";
