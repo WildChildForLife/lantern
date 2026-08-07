@@ -1,6 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import type { Conversation } from "@/lib/conversation-schema";
+import type { CostConfidence } from "@/lib/format/formatCost";
 import { sseAtom } from "@/lib/sse/store/sseAtom";
 import { createVirtualUserEntry } from "@/lib/virtual-messages/createVirtualUserEntry";
 import { shouldRemoveVirtualMessage } from "@/lib/virtual-messages/shouldRemoveVirtualMessage";
@@ -9,7 +10,6 @@ import {
   removeVirtualMessage,
 } from "@/lib/virtual-messages/virtualMessageStore";
 import { sessionDetailQuery } from "@/web/lib/api/queries";
-import type { CostConfidence } from "@/web/lib/formatCost";
 
 const filterConversations = (
   conversations: ReadonlyArray<

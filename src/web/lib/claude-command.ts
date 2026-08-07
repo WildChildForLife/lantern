@@ -1,17 +1,5 @@
+import { shellEscape } from "@/lib/shell/shellEscape";
 import type { CCOptionsSchema } from "@/server/core/claude-code/schema";
-
-/**
- * Shell-escape a string using double quotes.
- * Escapes backslashes, double quotes, dollar signs, and backticks.
- */
-const shellEscape = (value: string): string => {
-  const escaped = value
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/\$/g, "\\$")
-    .replace(/`/g, "\\`");
-  return `"${escaped}"`;
-};
 
 type BuildClaudeCommandParams = {
   text: string;

@@ -78,7 +78,8 @@ not read yet.
 - [Install](#install) · [macOS](#macos) · [Linux](#linux) · [Windows](#windows) ·
   [npm](#npm-any-platform) · [Docker](#docker) · [From source](#from-source) ·
   [Platform support](#platform-support)
-- [Usage](#usage) · [Options](#options) · [Security](#security)
+- [Usage](#usage) · [Setup](#setup) · [Browsing from the terminal](#browsing-from-the-terminal) ·
+  [Options](#options) · [Security](#security)
 - [Reading other agent CLIs](#reading-other-agent-clis)
 - [Reading logs from more than one machine](#reading-logs-from-more-than-one-machine)
 - [How grouping works](#how-grouping-works)
@@ -261,8 +262,52 @@ from either are welcome.
 ## Usage
 
 ```bash
-node dist/main.js [options]
+lantern [options]          # start the web UI
+lantern init               # set Lantern up, and remember the answers
+lantern browse             # find a conversation without leaving the terminal
 ```
+
+### Setup
+
+The first time you run `lantern` at a terminal it walks you through setup: which agent CLIs to read,
+where they keep their logs, which port and address to bind, whether to enable the in-app terminal,
+and what pressing Enter should do on a conversation. Every question arrives with the answer already
+detected, so the fast path is Enter a few times.
+
+The answers go in `~/.lantern/config.json` (and the CLI selection in `~/.lantern/sources/sources.json`,
+the same file the settings panel writes). Run `lantern init` again at any point to change them.
+
+Settings sit **below** environment variables in the [options](#options) table: a flag beats an
+environment variable, which beats the file, which beats the built-in default. So a container's `PORT`
+still wins, and a flag typed on the spot wins over both. Your password is deliberately never written
+to the file — set `LANTERN_PASSWORD` or pass `--password`.
+
+Nothing prompts without a terminal attached, so Docker, CI and `npx … | tee` start straight up.
+`--no-init` or `LANTERN_NO_INIT=1` turns the offer off for good.
+
+### Browsing from the terminal
+
+`lantern browse` draws the same board the web UI does — one column per topic, conversations as rows —
+without starting a server or opening a browser.
+
+| Key     | Does                                                       |
+| ------- | ---------------------------------------------------------- |
+| `← →`   | move between topics (`h` `l` also work)                    |
+| `↑ ↓`   | move between conversations (`j` `k`), `g`/`G` for the ends |
+| `/`     | filter by topic, title or project                          |
+| `enter` | what to do with this conversation                          |
+| `R`     | resume here, replacing this screen                         |
+| `o`     | open it in a new terminal window                           |
+| `p`     | print the resume command and quit                          |
+| `c`     | copy the conversation id                                   |
+| `r`     | re-read the logs · `?` the key list · `q` quit             |
+
+Below about ninety columns the board becomes a topic list on the left and its conversations on the
+right; the keys are unchanged.
+
+Resuming is Claude Code only, as everywhere else in Lantern — conversations from the other five CLIs
+show those actions greyed out, and copying the id still works. Copying uses the terminal's own
+clipboard escape sequence first, so it reaches your machine's clipboard even over SSH.
 
 ### Options
 
@@ -279,6 +324,11 @@ node dist/main.js [options]
 | `--api-only`                | `LANTERN_API_ONLY`              | Serve the API without the web UI                            | off         |
 | `-v, --verbose`             | `LANTERN_VERBOSE`               | Verbose debug logging                                       | off         |
 | `--source <id>`             | `LANTERN_SOURCES`               | Agent CLI to read; repeat for more. Scopes one run          | stored      |
+| `--no-init`                 | `LANTERN_NO_INIT`               | Never offer the setup wizard on a first launch              | offered     |
+
+Each row resolves in the same order: the flag, then the environment variable, then
+`~/.lantern/config.json`, then the default. `--password` is the exception — the wizard never writes
+one to the file.
 
 Valid `--source` ids are `claude-code`, `codex`, `opencode`, `qwen-code`, `copilot` and `goose`. Repeat
 the flag

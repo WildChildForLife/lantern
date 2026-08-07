@@ -24,9 +24,12 @@ import { GitController } from "./core/git/presentation/GitController.ts";
 import { GitService } from "./core/git/services/GitService.ts";
 import { NotificationController } from "./core/notification/presentation/NotificationController.ts";
 import { NotificationService } from "./core/notification/services/NotificationService.ts";
-import { resolveBindHostname } from "./core/platform/resolveBindHostname.ts";
 import { isDevelopmentEnv } from "./core/platform/runtimeEnv.ts";
-import type { CliOptions } from "./core/platform/services/LanternOptionsService.ts";
+import {
+  type CliOptions,
+  type StoredOptions,
+  toLanternOptions,
+} from "./core/platform/services/LanternOptionsService.ts";
 import { ProjectRepository } from "./core/project/infrastructure/ProjectRepository.ts";
 import { ProjectController } from "./core/project/presentation/ProjectController.ts";
 import { ProjectMetaService } from "./core/project/services/ProjectMetaService.ts";
@@ -58,16 +61,20 @@ import { platformLayer } from "./lib/effect/layers.ts";
 import { serverLoggerLayer, withServerLogLevel } from "./logging.ts";
 import { setupTerminalWebSocket } from "./terminal/terminalWebSocket.ts";
 
-export const startServer = async (options: CliOptions) => {
+export const startServer = async (options: CliOptions, stored?: StoredOptions) => {
+  // Resolved once, here, so the port and bind address the server listens on and
+  // the ones every service reads come from the same precedence rules.
+  const resolved = toLanternOptions(options, stored);
+
   const runWithLogger = <A, E>(effect: Effect.Effect<A, E, never>) =>
     Effect.runPromise(
-      effect.pipe(withServerLogLevel(options.verbose), Effect.provide(serverLoggerLayer)),
+      effect.pipe(withServerLogLevel(resolved.verbose), Effect.provide(serverLoggerLayer)),
     );
 
   // biome-ignore lint/style/noProcessEnv: allow only here
   // oxlint-disable-next-line node/no-process-env -- configuration boundary
   const isDevelopment = isDevelopmentEnv(process.env.LANTERN_ENV);
-  const apiOnly = options.apiOnly === true;
+  const apiOnly = resolved.apiOnly === true;
 
   if (!isDevelopment && !apiOnly) {
     const staticPath = await Effect.runPromise(
@@ -106,7 +113,7 @@ export const startServer = async (options: CliOptions) => {
   });
 
   const program = Effect.gen(function* () {
-    yield* routes(honoApp, options);
+    yield* routes(honoApp, options, stored);
     if (!apiOnly) {
       yield* setupTerminalWebSocket(server);
     }
@@ -119,24 +126,15 @@ export const startServer = async (options: CliOptions) => {
   const port = isDevelopment
     ? // biome-ignore lint/style/noProcessEnv: allow only here
       // oxlint-disable-next-line node/no-process-env -- configuration boundary
-      (process.env.DEV_BE_PORT ?? "3401")
-    : // biome-ignore lint/style/noProcessEnv: allow only here
-      // oxlint-disable-next-line node/no-process-env -- configuration boundary
-      (options.port ?? process.env.PORT ?? "3000");
+      Number.parseInt(process.env.DEV_BE_PORT ?? "3401", 10)
+    : resolved.port;
 
-  const hostname = resolveBindHostname(
-    options.hostname,
-    // biome-ignore lint/style/noProcessEnv: allow only here
-    // oxlint-disable-next-line node/no-process-env -- configuration boundary
-    process.env.LANTERN_HOSTNAME,
-  );
-
-  server.listen(parseInt(port, 10), hostname, () => {
+  server.listen(port, resolved.hostname, () => {
     const info = server.address();
     const serverPort = typeof info === "object" && info !== null ? info.port : port;
     const mode = apiOnly ? " (API-only mode)" : "";
     void runWithLogger(
-      Effect.logInfo(`Server is running on http://${hostname}:${serverPort}${mode}`),
+      Effect.logInfo(`Server is running on http://${resolved.hostname}:${serverPort}${mode}`),
     );
   });
 };

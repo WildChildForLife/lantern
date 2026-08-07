@@ -1,0 +1,253 @@
+import { Box, Text, useApp, useInput, useStdout } from "ink";
+import { useCallback, useMemo, useState } from "react";
+import type { ConversationListEntry, TopicGroup } from "../../server/core/types.ts";
+import { type ActionPlan, planAction } from "../actions/planAction.ts";
+import type { ResumeAction } from "../config/cliConfig.ts";
+import { TextInput } from "../ui/prompts/TextInput.tsx";
+import { theme } from "../ui/theme.ts";
+import { ActionMenu } from "./components/ActionMenu.tsx";
+import { Board } from "./components/Board.tsx";
+import { HelpOverlay } from "./components/HelpOverlay.tsx";
+import { StatusBar, type Status } from "./components/StatusBar.tsx";
+import { TwoPane } from "./components/TwoPane.tsx";
+import { buildColumns } from "./functions/buildColumns.ts";
+import { type BrowseMode, resolveKeyAction } from "./functions/keymap.ts";
+import { resolveLayout } from "./functions/layout.ts";
+
+export type BrowseAppProps = {
+  topics: TopicGroup[];
+  conversations: ConversationListEntry[];
+  total: number;
+  interactiveSources: string[];
+  executable: string | undefined;
+  defaultAction: ResumeAction;
+  terminalCommand: string | undefined;
+  emulator: string | null;
+  platform: NodeJS.Platform;
+  now: Date;
+  /** Runs a plan that can be carried out without giving up the screen. */
+  onRun: (plan: ActionPlan) => Promise<Status>;
+  /** Takes over: the caller unmounts and then acts on the plan. */
+  onLeave: (plan: ActionPlan) => void;
+  onRefresh: () => void;
+  refreshing: boolean;
+};
+
+const clamp = (value: number, max: number): number =>
+  Math.min(Math.max(0, value), Math.max(0, max));
+
+/**
+ * The board, in a terminal.
+ *
+ * State is deliberately shallow — which column, which row, which overlay — and
+ * every decision about what a key means lives in `resolveKeyAction`, so this
+ * component is wiring rather than behaviour.
+ */
+export const BrowseApp = ({
+  topics,
+  conversations,
+  total,
+  interactiveSources,
+  executable,
+  defaultAction,
+  terminalCommand,
+  emulator,
+  platform,
+  now,
+  onRun,
+  onLeave,
+  onRefresh,
+  refreshing,
+}: BrowseAppProps) => {
+  const { exit } = useApp();
+  const { stdout } = useStdout();
+  const [columnIndex, setColumnIndex] = useState(0);
+  const [rowIndex, setRowIndex] = useState(0);
+  const [filter, setFilter] = useState("");
+  const [mode, setMode] = useState<BrowseMode>("board");
+  const [status, setStatus] = useState<Status>(null);
+
+  const columns = useMemo(
+    () => buildColumns({ topics, conversations, filter }),
+    [topics, conversations, filter],
+  );
+
+  const layout = resolveLayout({
+    width: stdout?.columns ?? 100,
+    height: stdout?.rows ?? 30,
+    topicCount: columns.length,
+  });
+
+  const safeColumnIndex = clamp(columnIndex, columns.length - 1);
+  const activeColumn = columns[safeColumnIndex];
+  const safeRowIndex = clamp(rowIndex, (activeColumn?.rows.length ?? 1) - 1);
+  const activeRow = activeColumn?.rows[safeRowIndex];
+
+  const buildPlan = useCallback(
+    (action: ResumeAction): ActionPlan | null =>
+      activeRow === undefined
+        ? null
+        : planAction({
+            action,
+            sessionId: activeRow.sessionId,
+            cwd: activeRow.projectPath ?? process.cwd(),
+            executable,
+            terminalCommand,
+            interactive: interactiveSources.includes(activeRow.source),
+            emulator,
+            platform,
+          }),
+    [activeRow, executable, terminalCommand, interactiveSources, emulator, platform],
+  );
+
+  const runAction = useCallback(
+    (action: ResumeAction) => {
+      const plan = buildPlan(action);
+      if (plan === null) {
+        return;
+      }
+
+      if (plan.kind === "print" || plan.kind === "handoff") {
+        onLeave(plan);
+        exit();
+        return;
+      }
+
+      setStatus({ text: "…", tone: "info" });
+      void onRun(plan).then(setStatus);
+    },
+    [buildPlan, exit, onLeave, onRun],
+  );
+
+  useInput((input, key) => {
+    const action = resolveKeyAction({ input, ...key }, mode);
+    if (action === null) {
+      return;
+    }
+
+    switch (action.type) {
+      case "quit":
+        exit();
+        return;
+      case "move-column":
+        setColumnIndex(clamp(safeColumnIndex + action.delta, columns.length - 1));
+        setRowIndex(0);
+        setStatus(null);
+        return;
+      case "move-row":
+        setRowIndex(clamp(safeRowIndex + action.delta, (activeColumn?.rows.length ?? 1) - 1));
+        setStatus(null);
+        return;
+      case "row-edge":
+        setRowIndex(action.edge === "first" ? 0 : (activeColumn?.rows.length ?? 1) - 1);
+        return;
+      case "open-filter":
+        setMode("filter");
+        return;
+      case "close-overlay":
+        setMode("board");
+        return;
+      case "toggle-help":
+        setMode("help");
+        return;
+      case "refresh":
+        setStatus({ text: "Re-reading the logs…", tone: "info" });
+        onRefresh();
+        return;
+      case "open-menu":
+        if (activeRow !== undefined) {
+          setMode("menu");
+        }
+        return;
+      case "run":
+        runAction(action.action);
+        return;
+      default:
+        action satisfies never;
+    }
+  });
+
+  const truncated = total > conversations.length;
+
+  return (
+    <Box flexDirection="column" paddingX={1}>
+      <Box marginBottom={1}>
+        <Text color={theme.accent} bold>
+          Lantern
+        </Text>
+        <Text dimColor>
+          {"  "}
+          {columns.length} topics · {conversations.length} conversations
+          {truncated ? ` of ${total}` : ""}
+          {refreshing ? " · refreshing" : ""}
+        </Text>
+      </Box>
+
+      {mode === "filter" ? (
+        <Box marginBottom={1}>
+          <Text color={theme.accent}>filter </Text>
+          <TextInput
+            initialValue={filter}
+            onChange={setFilter}
+            onSubmit={() => {
+              setMode("board");
+            }}
+            onCancel={() => {
+              setFilter("");
+              setMode("board");
+            }}
+          />
+        </Box>
+      ) : null}
+
+      {columns.length === 0 ? (
+        <Text color={theme.muted}>
+          {filter === "" ? "No conversations found." : `Nothing matches "${filter}".`}
+        </Text>
+      ) : layout.mode === "board" ? (
+        <Board
+          columns={columns}
+          layout={layout}
+          columnIndex={safeColumnIndex}
+          rowIndex={safeRowIndex}
+          now={now}
+        />
+      ) : (
+        <TwoPane
+          columns={columns}
+          layout={layout}
+          columnIndex={safeColumnIndex}
+          rowIndex={safeRowIndex}
+          now={now}
+        />
+      )}
+
+      {mode === "menu" && activeRow !== undefined ? (
+        <Box marginTop={1}>
+          <ActionMenu
+            row={activeRow}
+            defaultAction={defaultAction}
+            interactive={interactiveSources.includes(activeRow.source)}
+            onSubmit={(action) => {
+              setMode("board");
+              runAction(action);
+            }}
+            onCancel={() => {
+              setMode("board");
+            }}
+          />
+        </Box>
+      ) : null}
+
+      {mode === "help" ? (
+        <Box marginTop={1}>
+          <HelpOverlay />
+        </Box>
+      ) : null}
+
+      <Box marginTop={1}>
+        <StatusBar row={activeRow} status={status} width={stdout?.columns ?? 100} />
+      </Box>
+    </Box>
+  );
+};
