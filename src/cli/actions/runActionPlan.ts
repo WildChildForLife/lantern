@@ -91,6 +91,9 @@ export const copyToClipboard = async (
   );
 };
 
+/** How long to give a launch to fail before assuming it got off the ground. */
+const LAUNCH_SETTLE_MILLIS = 400;
+
 /**
  * Opens a terminal window and genuinely lets go of it.
  *
@@ -98,39 +101,50 @@ export const copyToClipboard = async (
  * closed, so this cannot be awaited — but it cannot simply be forked either: a
  * live child handle keeps Node alive, and `lantern browse` would then sit
  * there after `q` until the user closed every window they had opened. So the
- * emulator is started by a shell that backgrounds it and exits; the window is
- * reparented and outlives Lantern, which is the point of it.
+ * emulator is started by a shell that backgrounds it and exits.
  *
- * The cost of that is knowledge: once the launching shell has backgrounded the
- * emulator it exits 0 whether or not the emulator itself ever started, so this
- * deliberately reports only that the attempt was made. The caller says
- * "opening", not "opened", and the emulator is checked against PATH by
- * `findEmulator` before it is ever chosen.
+ * Backgrounding costs the exit code, which is why whatever the launch printed
+ * is captured instead and returned. Without it a failure is indistinguishable
+ * from success — the board says "opening a window" and no window ever appears,
+ * which is exactly how a broken WSL interop or a missing binary presents.
+ *
+ * The launch inherits Lantern's own working directory: every recipe names the
+ * conversation's directory itself.
  */
 export const spawnDetached = (
   binary: string,
   args: string[],
   platform: NodeJS.Platform,
-): Promise<void> => {
-  const launch = [binary, ...args].map(shellEscape).join(" ");
-
-  const command =
-    platform === "win32"
-      ? // `start` returns as soon as the window exists.
-        Command.make("cmd.exe", "/c", "start", "", binary, ...args)
-      : Command.make("sh", "-c", `${launch} </dev/null >/dev/null 2>&1 &`);
-
-  return run(
+): Promise<string> =>
+  run(
     Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
+      const logFile = yield* fs.makeTempFileScoped();
+      const launch = [binary, ...args].map(shellEscape).join(" ");
+
+      const command =
+        platform === "win32"
+          ? // `start` returns as soon as the window exists.
+            Command.make("cmd.exe", "/c", "start", "", binary, ...args)
+          : Command.make("sh", "-c", `${launch} </dev/null >${shellEscape(logFile)} 2>&1 &`);
+
       yield* command.pipe(
         Command.stdout("pipe"),
         Command.stderr("pipe"),
         Command.exitCode,
         Effect.catchAll(() => Effect.succeed(1)),
       );
-    }),
+
+      // Anything wrong with the launch itself has been printed by now; a
+      // terminal that started properly says nothing at all.
+      yield* Effect.sleep(`${LAUNCH_SETTLE_MILLIS} millis`);
+
+      return yield* fs
+        .readFileString(logFile)
+        .pipe(Effect.catchAll(() => Effect.succeed("")))
+        .pipe(Effect.map((output) => output.trim()));
+    }).pipe(Effect.scoped),
   );
-};
 
 /**
  * Replaces this process with the conversation.

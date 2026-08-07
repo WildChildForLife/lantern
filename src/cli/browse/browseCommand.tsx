@@ -55,11 +55,15 @@ const runPlan = async (plan: ActionPlan): Promise<Status> => {
         ? { text: `Copied the ${plan.label}.`, tone: "ok" }
         : { text: `Could not reach a clipboard.`, tone: "error" };
     }
-    case "spawn":
-      // Deliberately "opening": the launcher backgrounds the emulator and
-      // exits, so there is nothing left to ask whether the window appeared.
-      await spawnDetached(plan.binary, plan.args, process.platform);
-      return { text: `Opening a new ${plan.binary} window…`, tone: "ok" };
+    case "spawn": {
+      const complaint = await spawnDetached(plan.binary, plan.args, process.platform);
+
+      // Saying "opening a window" when none appeared is worse than saying
+      // nothing, so whatever the launch printed is shown instead.
+      return complaint === ""
+        ? { text: `Opening a new ${plan.binary} window…`, tone: "ok" }
+        : { text: `${plan.binary}: ${complaint.split("\n")[0] ?? complaint}`, tone: "error" };
+    }
     case "refused":
       return { text: `Cannot resume: ${plan.reason}.`, tone: "error" };
     // Both of these give up the screen, so they never reach here.

@@ -15,9 +15,6 @@ const withTempDir = <A, E>(
     }).pipe(Effect.scoped, Effect.provide(NodeContext.layer)),
   );
 
-/** The window is opened and let go of; give it a moment to appear. */
-const settle = () => new Promise((resolve) => setTimeout(resolve, 500));
-
 describe("spawnDetached", () => {
   it.live("really starts the command", () =>
     Effect.promise(() =>
@@ -27,7 +24,6 @@ describe("spawnDetached", () => {
           const marker = `${dir}/opened`;
 
           yield* Effect.promise(() => spawnDetached("touch", [marker], "linux"));
-          yield* Effect.promise(settle);
 
           expect(yield* fs.exists(marker)).toBe(true);
         }),
@@ -68,7 +64,6 @@ describe("spawnDetached", () => {
           const marker = `${dir}/relative-to-lantern`;
 
           yield* Effect.promise(() => spawnDetached("touch", [marker], "linux"));
-          yield* Effect.promise(settle);
 
           expect(yield* fs.exists(marker)).toBe(true);
         }),
@@ -87,14 +82,33 @@ describe("spawnDetached", () => {
     ),
   );
 
-  it.live("does not throw when the binary is not there", () =>
+  /**
+   * The regression this exists for: the launch is backgrounded, so its exit
+   * code is lost and a failure used to read exactly like a success — the board
+   * said "opening a window" and none ever appeared. A broken WSL interop and a
+   * missing binary both present that way.
+   */
+  it.live("reports what a failed launch printed", () =>
     Effect.promise(() =>
       withTempDir(() =>
-        Effect.promise(() => spawnDetached("lantern-no-such-binary", [], "linux")).pipe(
-          Effect.map(() => {
-            expect(true).toBe(true);
-          }),
-        ),
+        Effect.gen(function* () {
+          const complaint = yield* Effect.promise(() =>
+            spawnDetached("lantern-no-such-binary", [], "linux"),
+          );
+
+          expect(complaint).not.toBe("");
+          expect(complaint).toContain("lantern-no-such-binary");
+        }),
+      ),
+    ),
+  );
+
+  it.live("says nothing when the launch got off the ground", () =>
+    Effect.promise(() =>
+      withTempDir(() =>
+        Effect.gen(function* () {
+          expect(yield* Effect.promise(() => spawnDetached("true", [], "linux"))).toBe("");
+        }),
       ),
     ),
   );
