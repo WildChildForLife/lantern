@@ -10,20 +10,22 @@ const run = <A, E>(
 ): Promise<A> => Effect.runPromise(effect.pipe(Effect.provide(NodeContext.layer)));
 
 /**
- * The directory to start the conversation in, if it is still there.
+ * Whether a conversation's directory is still there.
  *
- * Lantern's whole point is conversations you had forgotten, and the repository
- * one of them ran in may well have been deleted since. Spawning into a missing
- * directory fails outright, so fall back to where Lantern was started rather
- * than refusing to resume at all.
+ * Checked before resuming rather than fallen back from: `claude --resume`
+ * looks a session up under the directory it runs in, so starting it anywhere
+ * else does not resume in the wrong place — it reports the conversation as
+ * missing, which is a far more confusing failure than being told the folder
+ * has gone.
  */
-const usableDirectory = (cwd: string) =>
-  Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const exists = yield* fs.exists(cwd).pipe(Effect.catchAll(() => Effect.succeed(false)));
+export const directoryExists = (path: string): Promise<boolean> =>
+  run(
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem;
 
-    return exists ? cwd : process.cwd();
-  });
+      return yield* fs.exists(path).pipe(Effect.catchAll(() => Effect.succeed(false)));
+    }),
+  );
 
 /** Whether a binary is on PATH, without caring what it prints. */
 const isOnPath = (binary: string, platform: NodeJS.Platform) =>
@@ -121,10 +123,8 @@ export const spawnDetached = (
 
   return run(
     Effect.gen(function* () {
-      const directory = yield* usableDirectory(cwd);
-
       yield* command.pipe(
-        Command.workingDirectory(directory),
+        Command.workingDirectory(cwd),
         Command.stdout("pipe"),
         Command.stderr("pipe"),
         Command.exitCode,
@@ -144,10 +144,8 @@ export const spawnDetached = (
 export const handOver = (binary: string, args: string[], cwd: string): Promise<number> =>
   run(
     Effect.gen(function* () {
-      const directory = yield* usableDirectory(cwd);
-
       return yield* Command.make(binary, ...args).pipe(
-        Command.workingDirectory(directory),
+        Command.workingDirectory(cwd),
         Command.stdin("inherit"),
         Command.stdout("inherit"),
         Command.stderr("inherit"),

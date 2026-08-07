@@ -1,5 +1,4 @@
 import type { SourceId } from "../../server/core/source/models/SourceId.ts";
-import type { ResumeAction } from "../config/cliConfig.ts";
 
 export type WizardStep =
   | "sources"
@@ -9,8 +8,6 @@ export type WizardStep =
   | "hostname"
   | "password"
   | "terminal"
-  | "resume-action"
-  | "emulator"
   | "sync"
   | "done";
 
@@ -23,8 +20,6 @@ export const WIZARD_STEPS = {
   hostname: "Which address should it bind to?",
   password: "Binding beyond this machine",
   terminal: "Enable the in-app terminal?",
-  "resume-action": "What should Enter do on a conversation?",
-  emulator: "Which command opens a new terminal window?",
   sync: "Read your conversation logs now?",
 } as const satisfies Record<Exclude<WizardStep, "done">, string>;
 
@@ -32,7 +27,6 @@ export const WIZARD_STEPS = {
 export type StepContext = {
   sources: readonly SourceId[];
   hostname: string;
-  resumeAction: ResumeAction;
 };
 
 /**
@@ -49,8 +43,11 @@ export const isLoopback = (hostname: string): boolean =>
  *
  * Pure, and separate from the component, because most of the wizard's
  * behaviour is which questions it does *not* ask: no executable to find when
- * Claude Code is not being read, no password warning for a loopback bind, no
- * emulator to choose unless a new window is what Enter does.
+ * Claude Code is not being read, and no password warning for a loopback bind.
+ *
+ * What Enter does on a conversation is deliberately not asked here — it is
+ * shown on the board and switched there, where the user can see what it
+ * applies to.
  */
 export const nextStep = (current: WizardStep, context: StepContext): WizardStep => {
   const readsClaudeCode = context.sources.includes("claude-code");
@@ -69,10 +66,6 @@ export const nextStep = (current: WizardStep, context: StepContext): WizardStep 
     case "password":
       return "terminal";
     case "terminal":
-      return "resume-action";
-    case "resume-action":
-      return context.resumeAction === "new-window" ? "emulator" : "sync";
-    case "emulator":
       return "sync";
     case "sync":
     case "done":

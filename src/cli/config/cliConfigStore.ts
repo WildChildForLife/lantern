@@ -1,9 +1,15 @@
 import { FileSystem, Path } from "@effect/platform";
+import { NodeContext } from "@effect/platform-node";
 import { Context, Effect, Layer } from "effect";
 import { resolveHomeDirectory } from "../../server/core/platform/resolveHomeDirectory.ts";
 import { EnvService } from "../../server/core/platform/services/EnvService.ts";
 import { stateDirPath } from "../../server/lib/config/stateDir.ts";
-import { type CliConfig, defaultCliConfig, parseCliConfig } from "./cliConfig.ts";
+import {
+  type CliConfig,
+  defaultCliConfig,
+  parseCliConfig,
+  type ResumeAction,
+} from "./cliConfig.ts";
 
 const CONFIG_FILE = "config.json";
 
@@ -71,6 +77,25 @@ export const readCliConfig = Effect.gen(function* () {
 
   return parsed;
 });
+
+/**
+ * Remembers a new choice of what Enter does, leaving every other setting alone.
+ *
+ * Read-modify-write rather than a blind overwrite: the board is changing one
+ * preference, not restating the whole file.
+ */
+export const saveResumeAction = (action: ResumeAction): Promise<void> =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const current = yield* readCliConfig;
+
+      yield* writeCliConfig({ ...current, browse: { ...current.browse, resumeAction: action } });
+    }).pipe(
+      Effect.provide(CliConfigBaseDir.Live),
+      Effect.provide(EnvService.Live),
+      Effect.provide(NodeContext.layer),
+    ),
+  );
 
 export const writeCliConfig = (config: CliConfig) =>
   Effect.gen(function* () {

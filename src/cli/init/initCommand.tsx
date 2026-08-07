@@ -28,10 +28,8 @@ const persist = (answers: WizardAnswers, existing: CliConfig) =>
       claudeDir: answers.claudeDir,
       executable: answers.executable,
       terminalDisabled: answers.terminalDisabled,
-      browse: {
-        resumeAction: answers.resumeAction,
-        terminalCommand: answers.terminalCommand,
-      },
+      // Not asked about here: what Enter does is switched on the board itself.
+      browse: existing.browse,
     };
 
     yield* writeCliConfig(config);
@@ -73,8 +71,6 @@ export const runInit = async (options: SharedCommandOptions): Promise<CliConfig 
         port: existing.port,
         hostname: existing.hostname,
         terminalDisabled: existing.terminalDisabled,
-        resumeAction: existing.browse.resumeAction,
-        terminalCommand: existing.browse.terminalCommand,
       }}
       onDone={(answers) => {
         collected.answers = answers;
@@ -110,7 +106,6 @@ export const runInit = async (options: SharedCommandOptions): Promise<CliConfig 
       `  agent CLIs   ${answers.sources.join(", ")}`,
       `  web UI       http://${answers.hostname}:${answers.port}`,
       `  terminal     ${answers.terminalDisabled ? "off" : "on"}`,
-      `  enter key    ${answers.resumeAction}`,
       "",
       "Next:",
       "  lantern          start the web UI",

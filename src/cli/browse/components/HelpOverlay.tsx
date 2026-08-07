@@ -7,6 +7,7 @@ const KEYS: [string, string][] = [
   ["g G", "first / last conversation"],
   ["/", "filter by topic, title or project"],
   ["enter", "what to do with this conversation"],
+  ["e", "change what enter does"],
   ["R", "resume here, replacing this screen"],
   ["o", "open in a new terminal window"],
   ["p", "print the resume command and quit"],

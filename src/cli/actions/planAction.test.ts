@@ -96,4 +96,19 @@ describe("planAction", () => {
   it("still copies the id of a read-only conversation", () => {
     expect(planAction({ ...base, action: "copy-id", interactive: false }).kind).toBe("copy");
   });
+
+  /**
+   * `claude --resume` finds a session by the directory it runs in, so without
+   * one there is nothing sensible to run — and guessing produces "conversation
+   * not found" rather than an honest refusal.
+   */
+  it("refuses to resume a conversation whose directory is unknown", () => {
+    for (const action of ["resume-here", "new-window", "print"] as const) {
+      expect(planAction({ ...base, action, cwd: null })).toMatchObject({ kind: "refused" });
+    }
+  });
+
+  it("still copies the id when the directory is unknown", () => {
+    expect(planAction({ ...base, action: "copy-id", cwd: null }).kind).toBe("copy");
+  });
 });

@@ -5,8 +5,14 @@ import { applyTerminalTemplate, buildEmulatorLaunch } from "./terminalEmulator.t
 export type ActionRequest = {
   action: ResumeAction;
   sessionId: string;
-  /** Directory the conversation ran in; where it should be picked up again. */
-  cwd: string;
+  /**
+   * Directory the conversation ran in, or null when Lantern does not know it.
+   *
+   * Not optional detail: `claude --resume` looks the session up under the
+   * directory it is run from, so resuming anywhere else reports the
+   * conversation as missing.
+   */
+  cwd: string | null;
   executable: string | undefined;
   terminalCommand: string | undefined;
   /** Whether the CLI that wrote this conversation can be driven at all. */
@@ -42,8 +48,19 @@ export const planAction = (request: ActionRequest): ActionPlan => {
     return { kind: "refused", reason: "this CLI is read-only in Lantern" };
   }
 
+  // Running somewhere else does not resume in the wrong place, it fails to
+  // resume at all — Claude Code finds a session by the directory it is in.
+  if (request.cwd === null) {
+    return {
+      kind: "refused",
+      reason: "Lantern does not know which directory this conversation ran in",
+    };
+  }
+
+  const cwd = request.cwd;
+
   if (request.action === "print") {
-    return { kind: "print", text: command, cwd: request.cwd };
+    return { kind: "print", text: command, cwd };
   }
 
   if (request.action === "resume-here") {
@@ -56,23 +73,23 @@ export const planAction = (request: ActionRequest): ActionPlan => {
           ? CLAUDE_EXECUTABLE_NAME
           : request.executable,
       args: ["--resume", request.sessionId],
-      cwd: request.cwd,
+      cwd,
     };
   }
 
-  const params = { command, cwd: request.cwd };
+  const params = { command, cwd };
 
   if (request.terminalCommand !== undefined && request.terminalCommand !== "") {
     const launch = applyTerminalTemplate(request.terminalCommand, params, {
       platform: request.platform,
     });
-    return { kind: "spawn", binary: launch.binary, args: launch.args, cwd: request.cwd };
+    return { kind: "spawn", binary: launch.binary, args: launch.args, cwd };
   }
 
   const launch = request.emulator === null ? null : buildEmulatorLaunch(request.emulator, params);
   if (launch === null) {
-    return { kind: "print", text: command, cwd: request.cwd };
+    return { kind: "print", text: command, cwd };
   }
 
-  return { kind: "spawn", binary: launch.binary, args: launch.args, cwd: request.cwd };
+  return { kind: "spawn", binary: launch.binary, args: launch.args, cwd };
 };

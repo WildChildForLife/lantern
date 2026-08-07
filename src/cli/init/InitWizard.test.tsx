@@ -81,7 +81,7 @@ describe("InitWizard", () => {
   it("takes the detected answer for every question in turn", async () => {
     const { stdin, onDone } = setup();
     await nextFrame();
-    await acceptAll(stdin, 8);
+    await acceptAll(stdin, 7);
 
     expect(onDone).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -91,7 +91,6 @@ describe("InitWizard", () => {
         port: 3000,
         hostname: "127.0.0.1",
         terminalDisabled: false,
-        resumeAction: "resume-here",
         runSync: true,
       }),
     );
@@ -154,21 +153,20 @@ describe("InitWizard", () => {
     expect(lastFrame()).toContain("No prebuilt PTY binary for this platform");
   });
 
-  it("asks for a terminal command only when a new window is the default", async () => {
+  /** It is switched on the board, so the wizard must not ask about it. */
+  it("never asks what Enter should do", async () => {
     const { stdin, lastFrame } = setup();
     await nextFrame();
     await acceptAll(stdin, 6);
-    await press(stdin, ARROW_DOWN);
-    await press(stdin, ENTER);
 
-    expect(lastFrame()).toContain("Which command opens a new terminal window?");
+    expect(lastFrame()).toContain("Read your conversation logs now?");
   });
 
   it("never leaves the user reading nothing at all", async () => {
     const { stdin, onDone } = setup();
     await nextFrame();
     await press(stdin, " ");
-    await acceptAll(stdin, 8);
+    await acceptAll(stdin, 7);
 
     expect(onDone).toHaveBeenCalledWith(expect.objectContaining({ sources: ["claude-code"] }));
   });

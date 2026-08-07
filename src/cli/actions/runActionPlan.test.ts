@@ -3,7 +3,7 @@ import { NodeContext } from "@effect/platform-node";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
-import { spawnDetached } from "./runActionPlan.ts";
+import { directoryExists, spawnDetached } from "./runActionPlan.ts";
 
 const withTempDir = <A, E>(
   use: (dir: string) => Effect.Effect<A, E, FileSystem.FileSystem>,
@@ -55,22 +55,34 @@ describe("spawnDetached", () => {
   );
 
   /**
-   * Lantern is for conversations you had forgotten, so the repository one ran
-   * in may well have been deleted since. That must not stop it resuming.
+   * The board refuses before it gets here, because `claude --resume` finds a
+   * session by the directory it runs in — starting it somewhere else reports
+   * the conversation as missing rather than resuming it.
    */
-  it.live("still runs when the conversation's directory is gone", () =>
+  it.live("does not invent a directory when the conversation's is gone", () =>
     Effect.promise(() =>
       withTempDir((dir) =>
         Effect.gen(function* () {
           const fs = yield* FileSystem.FileSystem;
-          const marker = `${dir}/from-missing-cwd`;
+          const marker = `${dir}/should-not-appear`;
 
           yield* Effect.promise(() =>
             spawnDetached("touch", [marker], `${dir}/deleted-long-ago`, "linux"),
           );
           yield* Effect.promise(settle);
 
-          expect(yield* fs.exists(marker)).toBe(true);
+          expect(yield* fs.exists(marker)).toBe(false);
+        }),
+      ),
+    ),
+  );
+
+  it.live("reports whether a directory is still there", () =>
+    Effect.promise(() =>
+      withTempDir((dir) =>
+        Effect.gen(function* () {
+          expect(yield* Effect.promise(() => directoryExists(dir))).toBe(true);
+          expect(yield* Effect.promise(() => directoryExists(`${dir}/gone`))).toBe(false);
         }),
       ),
     ),

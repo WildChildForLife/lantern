@@ -12,6 +12,13 @@ const ENTER = "\r";
 const nextFrame = () => new Promise((resolve) => setTimeout(resolve, 20));
 
 /**
+ * Colour codes land between adjacent `<Text>` nodes, so a phrase split across
+ * two of them is not contiguous in the raw frame.
+ */
+const plain = (frame: string | undefined): string =>
+  (frame ?? "").replaceAll(new RegExp(`${ESC}\\[[0-9;]*m`, "g"), "");
+
+/**
  * Ink drives React itself, so every keypress lands outside act(). Wrapping the
  * writes keeps the suite from printing a "not wrapped in act" warning per
  * assertion, which the shared setup file already goes to some length to avoid.
@@ -59,6 +66,7 @@ const setup = (overrides?: Partial<BrowseAppProps>) => {
   const onRun = vi.fn().mockResolvedValue({ text: "done", tone: "ok" });
   const onLeave = vi.fn();
   const onRefresh = vi.fn();
+  const onDefaultActionChange = vi.fn();
 
   const result = render(
     <BrowseApp
@@ -68,6 +76,7 @@ const setup = (overrides?: Partial<BrowseAppProps>) => {
       interactiveSources={["claude-code"]}
       executable={undefined}
       defaultAction="resume-here"
+      onDefaultActionChange={onDefaultActionChange}
       terminalCommand={undefined}
       emulator="kitty"
       platform="linux"
@@ -80,7 +89,7 @@ const setup = (overrides?: Partial<BrowseAppProps>) => {
     />,
   );
 
-  return { ...result, onRun, onLeave, onRefresh };
+  return { ...result, onRun, onLeave, onRefresh, onDefaultActionChange };
 };
 
 describe("BrowseApp", () => {
@@ -228,5 +237,60 @@ describe("BrowseApp", () => {
     expect(onRun).toHaveBeenCalledWith(
       expect.objectContaining({ kind: "copy", text: "s-checkout" }),
     );
+  });
+
+  it("shows what Enter will do", async () => {
+    const { lastFrame } = setup();
+    await nextFrame();
+
+    expect(plain(lastFrame())).toContain("enter: resume here");
+    expect(plain(lastFrame())).toContain("e to change");
+  });
+
+  it("cycles what Enter does, and remembers it", async () => {
+    const { stdin, lastFrame, onDefaultActionChange } = setup();
+    await nextFrame();
+    await press(stdin, "e");
+
+    expect(plain(lastFrame())).toContain("enter: open a new window");
+    expect(onDefaultActionChange).toHaveBeenCalledWith("new-window");
+  });
+
+  it("wraps back round to the first choice", async () => {
+    const { stdin, lastFrame } = setup();
+    await nextFrame();
+    for (let index = 0; index < 4; index += 1) {
+      await press(stdin, "e");
+    }
+
+    expect(plain(lastFrame())).toContain("enter: resume here");
+  });
+
+  it("uses the newly chosen action for Enter", async () => {
+    const { stdin, onRun } = setup();
+    await nextFrame();
+    // resume-here -> new-window -> print -> copy-id
+    await press(stdin, "e");
+    await press(stdin, "e");
+    await press(stdin, "e");
+    await press(stdin, ENTER);
+    await press(stdin, ENTER);
+
+    expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "copy" }));
+  });
+
+  /**
+   * `claude --resume` finds a session by the directory it ran in, so a
+   * conversation Lantern has no directory for cannot be resumed anywhere.
+   */
+  it("refuses to resume a conversation with no known directory", async () => {
+    const { stdin, onRun } = setup({
+      conversations: [{ ...conversation("s-orphan", "api", "Orphan"), projectPath: null }],
+      topics: [topics[0] ?? { id: "api", label: "Orders API", icon: "plug", count: 1 }],
+    });
+    await nextFrame();
+    await press(stdin, "R");
+
+    expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "refused" }));
   });
 });

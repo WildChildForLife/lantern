@@ -4,7 +4,6 @@ import { isLoopback, nextStep, WIZARD_STEPS } from "./steps.ts";
 const answers = {
   sources: ["claude-code"] as const,
   hostname: "127.0.0.1",
-  resumeAction: "resume-here" as const,
 };
 
 describe("isLoopback", () => {
@@ -34,7 +33,6 @@ describe("nextStep", () => {
       "port",
       "hostname",
       "terminal",
-      "resume-action",
       "sync",
     ]);
   });
@@ -54,9 +52,11 @@ describe("nextStep", () => {
     expect(nextStep("hostname", { ...answers, hostname: "127.0.0.1" })).toBe("terminal");
   });
 
-  it("asks which emulator to use only when a new window is the default", () => {
-    expect(nextStep("resume-action", { ...answers, resumeAction: "new-window" })).toBe("emulator");
-    expect(nextStep("resume-action", { ...answers, resumeAction: "print" })).toBe("sync");
+  /** Switched on the board instead, where the user can see what it applies to. */
+  it("never asks what Enter should do", () => {
+    expect(nextStep("terminal", { ...answers })).toBe("sync");
+    expect(Object.keys(WIZARD_STEPS)).not.toContain("resume-action");
+    expect(Object.keys(WIZARD_STEPS)).not.toContain("emulator");
   });
 
   it("ends after the sync question", () => {

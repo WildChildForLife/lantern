@@ -270,9 +270,9 @@ lantern browse             # find a conversation without leaving the terminal
 ### Setup
 
 The first time you run `lantern` at a terminal it walks you through setup: which agent CLIs to read,
-where they keep their logs, which port and address to bind, whether to enable the in-app terminal,
-and what pressing Enter should do on a conversation. Every question arrives with the answer already
-detected, so the fast path is Enter a few times.
+where they keep their logs, which port and address to bind, and whether to enable the in-app
+terminal. Every question arrives with the answer already detected, so the fast path is Enter a few
+times.
 
 The answers go in `~/.lantern/config.json` (and the CLI selection in `~/.lantern/sources/sources.json`,
 the same file the settings panel writes). Run `lantern init` again at any point to change them.
@@ -302,8 +302,15 @@ without starting a server or opening a browser.
 | `c`     | copy the conversation id                                   |
 | `r`     | re-read the logs · `?` the key list · `q` quit             |
 
+The header shows what `enter` will do; `e` cycles through resuming here, opening a new window,
+printing the command and copying the id, and remembers the choice for next time.
+
 Below about ninety columns the board becomes a topic list on the left and its conversations on the
 right; the keys are unchanged.
+
+A conversation is always resumed **in the directory it ran in** — `claude --resume` looks a session
+up by that directory, so anywhere else it reports the conversation as missing. If that folder has
+since been deleted, Lantern says so rather than resuming somewhere wrong.
 
 Resuming is Claude Code only, as everywhere else in Lantern — conversations from the other five CLIs
 show those actions greyed out, and copying the id still works. Copying uses the terminal's own

@@ -46,7 +46,7 @@ export const StatusBar = ({ row, status, width }: StatusBarProps) => (
     </Box>
     <Box>
       <Text dimColor>
-        ←→ topics · ↑↓ conversations · / filter · enter actions · r refresh · ? keys · q quit
+        ←→ topics · ↑↓ conversations · / filter · enter run · e change · r refresh · ? keys · q quit
       </Text>
     </Box>
   </Box>

@@ -25,6 +25,7 @@ export type BrowseAction =
   | { type: "toggle-help" }
   | { type: "refresh" }
   | { type: "open-menu" }
+  | { type: "cycle-enter-action" }
   | { type: "run"; action: ResumeAction };
 
 /** Hotkeys that run an action straight from the board, skipping the menu. */
@@ -48,6 +49,7 @@ const resolveBoardAction = (key: KeyInput): BrowseAction | null => {
   if (key.input === "/") return { type: "open-filter" };
   if (key.input === "?") return { type: "toggle-help" };
   if (key.input === "r") return { type: "refresh" };
+  if (key.input === "e") return { type: "cycle-enter-action" };
   if (key.return === true) return { type: "open-menu" };
 
   const direct = DIRECT_ACTIONS[key.input];

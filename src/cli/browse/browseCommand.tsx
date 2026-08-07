@@ -2,12 +2,14 @@ import { render } from "ink";
 import type { ActionPlan } from "../actions/planAction.ts";
 import {
   copyToClipboard,
+  directoryExists,
   findEmulator,
   handOver,
   spawnDetached,
 } from "../actions/runActionPlan.ts";
 import type { SharedCommandOptions } from "../commandOptions.ts";
-import type { CliConfig } from "../config/cliConfig.ts";
+import type { CliConfig, ResumeAction } from "../config/cliConfig.ts";
+import { saveResumeAction } from "../config/cliConfigStore.ts";
 import { type BoardData, loadBoard, resyncBoard } from "../runtime.ts";
 import { BrowseApp } from "./BrowseApp.tsx";
 import type { Status } from "./components/StatusBar.tsx";
@@ -21,8 +23,30 @@ const readEnv = (): Record<string, string | undefined> =>
   // oxlint-disable-next-line node/no-process-env -- terminal detection boundary
   ({ ...process.env });
 
+/**
+ * The one thing every resume needs: the conversation's own directory.
+ *
+ * `claude --resume` looks a session up under the directory it runs in, so a
+ * folder that has since been deleted or moved has to be reported as such —
+ * running anywhere else makes Claude Code say the conversation does not exist.
+ */
+const missingDirectory = async (plan: ActionPlan): Promise<Status> => {
+  if (plan.kind === "copy" || plan.kind === "refused") {
+    return null;
+  }
+
+  return (await directoryExists(plan.cwd))
+    ? null
+    : { text: `${plan.cwd} no longer exists, so it cannot be resumed there.`, tone: "error" };
+};
+
 /** Carries out a plan that does not need the screen. */
 const runPlan = async (plan: ActionPlan): Promise<Status> => {
+  const gone = await missingDirectory(plan);
+  if (gone !== null) {
+    return gone;
+  }
+
   switch (plan.kind) {
     case "copy": {
       const copied = await copyToClipboard(plan.text, process.platform, readEnv(), writeOut);
@@ -96,6 +120,12 @@ export const runBrowse = async (
   let refreshing = false;
   const failure: { text: string | null } = { text: null };
 
+  const rememberEnterAction = (action: ResumeAction) => {
+    // Best effort: a settings file that cannot be written must not stop the
+    // board from using the new choice for the rest of the session.
+    void saveResumeAction(action).catch(() => undefined);
+  };
+
   const refresh = () => {
     if (refreshing) {
       return;
@@ -135,6 +165,7 @@ export const runBrowse = async (
       onLeave={(plan) => {
         leaving.plan = plan;
       }}
+      onDefaultActionChange={rememberEnterAction}
       onRefresh={refresh}
       refreshing={refreshing}
       refreshError={failure.text}
@@ -152,6 +183,15 @@ export const runBrowse = async (
   const plan = leaving.plan;
   if (plan === null) {
     return 0;
+  }
+
+  // Checked here as well as in runPlan: these two give the screen back first,
+  // so they leave the app before anything has verified the directory.
+  if ((plan.kind === "print" || plan.kind === "handoff") && !(await directoryExists(plan.cwd))) {
+    process.stderr.write(
+      `${plan.cwd} no longer exists.\nClaude Code finds a conversation by the directory it ran in, so it cannot be resumed from anywhere else.\n`,
+    );
+    return 1;
   }
 
   if (plan.kind === "print") {

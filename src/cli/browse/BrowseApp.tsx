@@ -2,7 +2,7 @@ import { Box, Text, useApp, useInput, useStdout } from "ink";
 import { useCallback, useMemo, useState } from "react";
 import type { ConversationListEntry, TopicGroup } from "../../server/core/types.ts";
 import { type ActionPlan, planAction } from "../actions/planAction.ts";
-import type { ResumeAction } from "../config/cliConfig.ts";
+import { nextResumeAction, RESUME_ACTION_LABELS, type ResumeAction } from "../config/cliConfig.ts";
 import { TextInput } from "../ui/prompts/TextInput.tsx";
 import { theme } from "../ui/theme.ts";
 import { ActionMenu } from "./components/ActionMenu.tsx";
@@ -21,6 +21,8 @@ export type BrowseAppProps = {
   interactiveSources: string[];
   executable: string | undefined;
   defaultAction: ResumeAction;
+  /** Remembers a new choice of what Enter does, so it survives the session. */
+  onDefaultActionChange: (action: ResumeAction) => void;
   terminalCommand: string | undefined;
   emulator: string | null;
   platform: NodeJS.Platform;
@@ -52,6 +54,7 @@ export const BrowseApp = ({
   interactiveSources,
   executable,
   defaultAction,
+  onDefaultActionChange,
   terminalCommand,
   emulator,
   platform,
@@ -69,6 +72,7 @@ export const BrowseApp = ({
   const [filter, setFilter] = useState("");
   const [mode, setMode] = useState<BrowseMode>("board");
   const [status, setStatus] = useState<Status>(null);
+  const [enterAction, setEnterAction] = useState<ResumeAction>(defaultAction);
 
   const columns = useMemo(
     () => buildColumns({ topics, conversations, filter }),
@@ -93,7 +97,7 @@ export const BrowseApp = ({
         : planAction({
             action,
             sessionId: activeRow.sessionId,
-            cwd: activeRow.projectPath ?? process.cwd(),
+            cwd: activeRow.projectPath,
             executable,
             terminalCommand,
             interactive: interactiveSources.includes(activeRow.source),
@@ -163,6 +167,13 @@ export const BrowseApp = ({
         setStatus({ text: "Re-reading the logs…", tone: "info" });
         onRefresh();
         return;
+      case "cycle-enter-action": {
+        const following = nextResumeAction(enterAction);
+        setEnterAction(following);
+        onDefaultActionChange(following);
+        setStatus({ text: `Enter now: ${RESUME_ACTION_LABELS[following]}`, tone: "info" });
+        return;
+      }
       case "open-menu":
         if (activeRow !== undefined) {
           setMode("menu");
@@ -189,6 +200,11 @@ export const BrowseApp = ({
           {columns.length} topics · {conversations.length} conversations
           {truncated ? ` of ${total}` : ""}
           {refreshing ? " · refreshing" : ""}
+        </Text>
+        <Text>
+          <Text dimColor>{"  ·  enter: "}</Text>
+          <Text color={theme.accent}>{RESUME_ACTION_LABELS[enterAction]}</Text>
+          <Text dimColor> (e to change)</Text>
         </Text>
       </Box>
 
@@ -235,7 +251,7 @@ export const BrowseApp = ({
         <Box marginTop={1}>
           <ActionMenu
             row={activeRow}
-            defaultAction={defaultAction}
+            defaultAction={enterAction}
             interactive={interactiveSources.includes(activeRow.source)}
             onSubmit={(action) => {
               setMode("board");

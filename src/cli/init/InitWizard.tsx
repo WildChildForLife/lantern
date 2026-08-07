@@ -1,7 +1,6 @@
 import { Box, Text, useApp } from "ink";
 import { useState } from "react";
 import type { SourceId } from "../../server/core/source/models/SourceId.ts";
-import type { ResumeAction } from "../config/cliConfig.ts";
 import { Confirm } from "../ui/prompts/Confirm.tsx";
 import { MultiSelect } from "../ui/prompts/MultiSelect.tsx";
 import { Select } from "../ui/prompts/Select.tsx";
@@ -17,8 +16,6 @@ export type WizardAnswers = {
   port: number;
   hostname: string;
   terminalDisabled: boolean;
-  resumeAction: ResumeAction;
-  terminalCommand: string | undefined;
   runSync: boolean;
 };
 
@@ -44,7 +41,7 @@ const parsePort = (value: string): number | null => {
  * The setup wizard.
  *
  * Every question arrives with the detected answer already filled in, so the
- * fast path through it is Enter nine times. The order itself lives in
+ * fast path through it is Enter six times. The order itself lives in
  * `nextStep`, which decides what to skip.
  */
 export const InitWizard = ({ detection, initial, onDone }: InitWizardProps) => {
@@ -58,8 +55,6 @@ export const InitWizard = ({ detection, initial, onDone }: InitWizardProps) => {
     port: initial.port ?? DEFAULT_PORT,
     hostname: initial.hostname ?? "127.0.0.1",
     terminalDisabled: initial.terminalDisabled ?? !detection.terminalAvailable,
-    resumeAction: initial.resumeAction ?? "resume-here",
-    terminalCommand: initial.terminalCommand,
     runSync: true,
   });
 
@@ -209,45 +204,6 @@ export const InitWizard = ({ detection, initial, onDone }: InitWizardProps) => {
             initialValue={!answers.terminalDisabled}
             onSubmit={(enabled) => {
               advance({ terminalDisabled: !enabled });
-            }}
-          />
-        </Box>
-      ) : null}
-
-      {step === "resume-action" ? (
-        <Select
-          options={[
-            {
-              value: "resume-here",
-              label: "Resume here",
-              hint: "replaces the board with the conversation",
-            },
-            {
-              value: "new-window",
-              label: "Open a new terminal window",
-              hint: "leaves the board up",
-            },
-            { value: "print", label: "Print the command", hint: "quits and writes it out" },
-            { value: "copy-id", label: "Copy the conversation id" },
-          ]}
-          initialValue={answers.resumeAction}
-          onSubmit={(resumeAction) => {
-            advance({ resumeAction });
-          }}
-        />
-      ) : null}
-
-      {step === "emulator" ? (
-        <Box flexDirection="column">
-          <Box marginBottom={1}>
-            <Text dimColor>
-              Leave blank to detect one. {"{{command}}"} and {"{{cwd}}"} are filled in.
-            </Text>
-          </Box>
-          <TextInput
-            initialValue={answers.terminalCommand ?? ""}
-            onSubmit={(terminalCommand) => {
-              advance({ terminalCommand: terminalCommand === "" ? undefined : terminalCommand });
             }}
           />
         </Box>

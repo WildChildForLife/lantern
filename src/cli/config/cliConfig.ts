@@ -10,6 +10,25 @@ export const resumeActionSchema = z.enum(["resume-here", "new-window", "print", 
 
 export type ResumeAction = z.infer<typeof resumeActionSchema>;
 
+/** The order `e` walks through on the board. */
+export const RESUME_ACTIONS: readonly ResumeAction[] = [
+  "resume-here",
+  "new-window",
+  "print",
+  "copy-id",
+];
+
+/** Human wording for what Enter will do, for the board to show. */
+export const RESUME_ACTION_LABELS: Record<ResumeAction, string> = {
+  "resume-here": "resume here",
+  "new-window": "open a new window",
+  print: "print the command",
+  "copy-id": "copy the id",
+};
+
+export const nextResumeAction = (current: ResumeAction): ResumeAction =>
+  RESUME_ACTIONS[(RESUME_ACTIONS.indexOf(current) + 1) % RESUME_ACTIONS.length] ?? "resume-here";
+
 export const browseConfigSchema = z.object({
   resumeAction: resumeActionSchema.default("resume-here"),
   /**
