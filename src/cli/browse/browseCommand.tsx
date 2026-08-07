@@ -58,7 +58,7 @@ const runPlan = async (plan: ActionPlan): Promise<Status> => {
     case "spawn":
       // Deliberately "opening": the launcher backgrounds the emulator and
       // exits, so there is nothing left to ask whether the window appeared.
-      await spawnDetached(plan.binary, plan.args, plan.cwd, process.platform);
+      await spawnDetached(plan.binary, plan.args, process.platform);
       return { text: `Opening a new ${plan.binary} window…`, tone: "ok" };
     case "refused":
       return { text: `Cannot resume: ${plan.reason}.`, tone: "error" };

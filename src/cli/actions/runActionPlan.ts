@@ -110,7 +110,6 @@ export const copyToClipboard = async (
 export const spawnDetached = (
   binary: string,
   args: string[],
-  cwd: string,
   platform: NodeJS.Platform,
 ): Promise<void> => {
   const launch = [binary, ...args].map(shellEscape).join(" ");
@@ -124,7 +123,6 @@ export const spawnDetached = (
   return run(
     Effect.gen(function* () {
       yield* command.pipe(
-        Command.workingDirectory(cwd),
         Command.stdout("pipe"),
         Command.stderr("pipe"),
         Command.exitCode,

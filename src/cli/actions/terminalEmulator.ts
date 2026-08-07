@@ -52,15 +52,18 @@ export const candidateBinaries = (
 ): string[] => {
   const candidates: string[] = [];
 
-  // A WSL session's windows are Windows windows, whatever the platform says.
-  if (env["WSL_DISTRO_NAME"] !== undefined) {
-    candidates.push("wt.exe");
-  }
-
+  // The terminal the user is in comes first, ahead of any platform default —
+  // reopening the same application is the least surprising thing a "new
+  // window" can do, and that is the whole point of looking at TERM_PROGRAM.
   const current = env["TERM_PROGRAM"];
   const fromCurrent = current === undefined ? undefined : BY_TERM_PROGRAM[current];
   if (fromCurrent !== undefined) {
     candidates.push(fromCurrent);
+  }
+
+  // A WSL session's windows are Windows windows, whatever the platform says.
+  if (env["WSL_DISTRO_NAME"] !== undefined) {
+    candidates.push("wt.exe");
   }
 
   if (platform === "darwin") {

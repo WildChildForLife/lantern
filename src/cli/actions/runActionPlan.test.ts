@@ -26,7 +26,7 @@ describe("spawnDetached", () => {
           const fs = yield* FileSystem.FileSystem;
           const marker = `${dir}/opened`;
 
-          yield* Effect.promise(() => spawnDetached("touch", [marker], dir, "linux"));
+          yield* Effect.promise(() => spawnDetached("touch", [marker], "linux"));
           yield* Effect.promise(settle);
 
           expect(yield* fs.exists(marker)).toBe(true);
@@ -43,10 +43,10 @@ describe("spawnDetached", () => {
    */
   it.live("returns without waiting for the window to close", () =>
     Effect.promise(() =>
-      withTempDir((dir) =>
+      withTempDir(() =>
         Effect.gen(function* () {
           const started = Date.now();
-          yield* Effect.promise(() => spawnDetached("sleep", ["5"], dir, "linux"));
+          yield* Effect.promise(() => spawnDetached("sleep", ["5"], "linux"));
 
           expect(Date.now() - started).toBeLessThan(2000);
         }),
@@ -55,23 +55,22 @@ describe("spawnDetached", () => {
   );
 
   /**
-   * The board refuses before it gets here, because `claude --resume` finds a
-   * session by the directory it runs in — starting it somewhere else reports
-   * the conversation as missing rather than resuming it.
+   * The launch inherits Lantern's own directory: every recipe names the
+   * conversation's directory itself, and handing a POSIX one to a Windows
+   * binary from inside WSL turns it into a UNC path `wsl.exe` cannot
+   * translate. Whether the directory still exists is settled before this runs.
    */
-  it.live("does not invent a directory when the conversation's is gone", () =>
+  it.live("does not impose a working directory on the launch", () =>
     Effect.promise(() =>
       withTempDir((dir) =>
         Effect.gen(function* () {
           const fs = yield* FileSystem.FileSystem;
-          const marker = `${dir}/should-not-appear`;
+          const marker = `${dir}/relative-to-lantern`;
 
-          yield* Effect.promise(() =>
-            spawnDetached("touch", [marker], `${dir}/deleted-long-ago`, "linux"),
-          );
+          yield* Effect.promise(() => spawnDetached("touch", [marker], "linux"));
           yield* Effect.promise(settle);
 
-          expect(yield* fs.exists(marker)).toBe(false);
+          expect(yield* fs.exists(marker)).toBe(true);
         }),
       ),
     ),
@@ -90,8 +89,8 @@ describe("spawnDetached", () => {
 
   it.live("does not throw when the binary is not there", () =>
     Effect.promise(() =>
-      withTempDir((dir) =>
-        Effect.promise(() => spawnDetached("lantern-no-such-binary", [], dir, "linux")).pipe(
+      withTempDir(() =>
+        Effect.promise(() => spawnDetached("lantern-no-such-binary", [], "linux")).pipe(
           Effect.map(() => {
             expect(true).toBe(true);
           }),

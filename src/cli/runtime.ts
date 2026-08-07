@@ -1,6 +1,7 @@
 import { NodeContext } from "@effect/platform-node";
 import { Effect, Layer } from "effect";
 import { SessionAllowlistRepository } from "../server/core/claude-code/infrastructure/SessionAllowlistRepository.ts";
+import { resolveClaudeCodePath } from "../server/core/claude-code/models/ClaudeCode.ts";
 import {
   type CliOptions,
   LanternOptionsService,
@@ -84,7 +85,12 @@ const loadBoardData = Effect.gen(function* () {
     interactiveSources: registry.all
       .filter((adapter) => adapter.capabilities.interactive)
       .map((adapter) => adapter.id),
-    executable: yield* optionsService.getOption("executable"),
+    // The absolute path, not the bare name. A window is opened by a shell that
+    // reads no profile, so `claude` alone is not on its PATH — which is what
+    // "claude: not found" in a fresh window means.
+    executable: yield* resolveClaudeCodePath.pipe(
+      Effect.catchAll(() => optionsService.getOption("executable")),
+    ),
   };
 });
 

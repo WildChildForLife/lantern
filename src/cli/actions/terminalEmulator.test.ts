@@ -20,6 +20,13 @@ describe("candidateBinaries", () => {
     expect(candidateBinaries("linux", { WSL_DISTRO_NAME: "Ubuntu" })[0]).toBe("wt.exe");
   });
 
+  /** Reopening the app the user is already in beats any platform default. */
+  it("prefers the current terminal over the WSL default", () => {
+    expect(
+      candidateBinaries("linux", { WSL_DISTRO_NAME: "Ubuntu", TERM_PROGRAM: "WezTerm" })[0],
+    ).toBe("wezterm");
+  });
+
   it("offers the common Linux emulators", () => {
     const candidates = candidateBinaries("linux", {});
 
