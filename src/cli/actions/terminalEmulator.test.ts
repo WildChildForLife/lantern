@@ -69,11 +69,38 @@ describe("buildEmulatorLaunch", () => {
    * POSIX — Windows Terminal can run neither without going back through wsl.
    */
   it("goes back through wsl.exe when opening a window from WSL", () => {
-    const launch = buildEmulatorLaunch("wt.exe", params);
+    const launch = buildEmulatorLaunch("wt.exe", params, { wsl: true });
 
     expect(launch?.args).toContain("wsl.exe");
     expect(launch?.args).toContain("--cd");
     expect(launch?.args).toContain("/home/dev/lantern");
+  });
+
+  /** No distribution in the picture, and no POSIX shell to reach. */
+  it("does not reach for wsl.exe when Windows Terminal runs on Windows itself", () => {
+    const launch = buildEmulatorLaunch("wt.exe", params, { wsl: false });
+
+    expect(launch?.args).not.toContain("wsl.exe");
+    expect(launch?.args).toContain("cmd.exe");
+    expect(launch?.args).toContain("/home/dev/lantern");
+  });
+
+  /**
+   * The regression this exists for: Windows Terminal reads `;` as a separator
+   * between the commands it should open, so the `; exec $SHELL` that keeps the
+   * window alive was taken as a second command and reported as a missing file.
+   */
+  it.each([true, false])("escapes semicolons for Windows Terminal (wsl: %s)", (wsl) => {
+    const launch = buildEmulatorLaunch(
+      "wt.exe",
+      { command: `claude --resume "abc"; echo done`, cwd: "/home/dev/lantern" },
+      { wsl },
+    );
+
+    const line = launch?.args.at(-1) ?? "";
+
+    expect(line).not.toMatch(/(?<!\\);/);
+    expect(line).toContain("\\;");
   });
 
   /** Every other recipe honours cwd; this one resumed in the wrong repo. */

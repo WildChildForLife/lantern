@@ -20,6 +20,8 @@ export type ActionRequest = {
   /** Terminal binary found on this machine, or null if none was. */
   emulator: string | null;
   platform: NodeJS.Platform;
+  /** Whether Lantern is running inside WSL, which changes how a window opens. */
+  wsl?: boolean | undefined;
 };
 
 export type ActionPlan =
@@ -86,7 +88,10 @@ export const planAction = (request: ActionRequest): ActionPlan => {
     return { kind: "spawn", binary: launch.binary, args: launch.args, cwd };
   }
 
-  const launch = request.emulator === null ? null : buildEmulatorLaunch(request.emulator, params);
+  const launch =
+    request.emulator === null
+      ? null
+      : buildEmulatorLaunch(request.emulator, params, { wsl: request.wsl });
   if (launch === null) {
     return { kind: "print", text: command, cwd };
   }

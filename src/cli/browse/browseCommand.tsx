@@ -161,6 +161,7 @@ export const runBrowse = async (
       terminalCommand={stored.browse.terminalCommand}
       emulator={emulator}
       platform={process.platform}
+      wsl={readEnv()["WSL_DISTRO_NAME"] !== undefined}
       now={new Date()}
       onRun={runPlan}
       onLeave={(plan) => {

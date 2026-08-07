@@ -11,6 +11,13 @@ export type LaunchParams = {
   cwd: string;
 };
 
+/**
+ * Windows Terminal reads `;` as a separator between the commands it should
+ * open, so an unescaped one in the command *we* want run is taken as a second
+ * pane — and reported as a missing file.
+ */
+const escapeForWindowsTerminal = (command: string): string => command.replaceAll(";", "\\;");
+
 /** What `TERM_PROGRAM` says, mapped to the binary that reopens the same thing. */
 const BY_TERM_PROGRAM: Record<string, string> = {
   WezTerm: "wezterm",
@@ -85,6 +92,7 @@ const withTrailingShell = (command: string): string => `${command}; exec \${SHEL
 export const buildEmulatorLaunch = (
   binary: string,
   params: LaunchParams,
+  context?: { wsl?: boolean | undefined },
 ): EmulatorLaunch | null => {
   const inner = withTrailingShell(params.command);
 
@@ -117,13 +125,27 @@ export const buildEmulatorLaunch = (
         ].flatMap((script) => ["-e", script]),
       };
     case "wt.exe":
-      // Reached from inside WSL, where `cwd` and the command are both POSIX and
-      // Windows Terminal cannot run either directly — `wsl.exe` is the way back
-      // into the distribution they belong to.
-      return {
-        binary,
-        args: ["wsl.exe", "--cd", params.cwd, "--", "sh", "-c", inner],
-      };
+      // Inside WSL both the directory and the command are POSIX, and Windows
+      // Terminal can run neither directly — `wsl.exe` is the way back into the
+      // distribution they belong to. Started from Windows itself there is no
+      // distribution in the picture and no POSIX shell to reach.
+      return context?.wsl === true
+        ? {
+            binary,
+            args: [
+              "wsl.exe",
+              "--cd",
+              params.cwd,
+              "--",
+              "sh",
+              "-c",
+              escapeForWindowsTerminal(inner),
+            ],
+          }
+        : {
+            binary,
+            args: ["-d", params.cwd, "cmd.exe", "/k", escapeForWindowsTerminal(params.command)],
+          };
     case "cmd.exe":
       // `/d` sets the new window's directory; every other recipe honours cwd and
       // this one has to as well, or the conversation resumes in the wrong repo.

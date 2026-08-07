@@ -302,6 +302,19 @@ without starting a server or opening a browser.
 | `c`     | copy the conversation id                                   |
 | `r`     | re-read the logs · `?` the key list · `q` quit             |
 
+If Lantern picks the wrong terminal — or your terminal cannot be driven from a command line, as
+Warp cannot — name the command yourself in `~/.lantern/config.json`. `{{command}}` and `{{cwd}}` are
+filled in:
+
+```json
+{
+  "browse": {
+    "resumeAction": "new-window",
+    "terminalCommand": "wt.exe -d {{cwd}} cmd.exe /k {{command}}"
+  }
+}
+```
+
 The header shows what `enter` will do; `e` cycles through resuming here, opening a new window,
 printing the command and copying the id, and remembers the choice for next time. Enter then does
 exactly that — there is no menu in between, and each of the four has its own key as well.

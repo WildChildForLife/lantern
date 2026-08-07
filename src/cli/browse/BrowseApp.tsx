@@ -25,6 +25,7 @@ export type BrowseAppProps = {
   terminalCommand: string | undefined;
   emulator: string | null;
   platform: NodeJS.Platform;
+  wsl: boolean;
   now: Date;
   /** Runs a plan that can be carried out without giving up the screen. */
   onRun: (plan: ActionPlan) => Promise<Status>;
@@ -57,6 +58,7 @@ export const BrowseApp = ({
   terminalCommand,
   emulator,
   platform,
+  wsl,
   now,
   onRun,
   onLeave,
@@ -102,8 +104,9 @@ export const BrowseApp = ({
             interactive: interactiveSources.includes(activeRow.source),
             emulator,
             platform,
+            wsl,
           }),
-    [activeRow, executable, terminalCommand, interactiveSources, emulator, platform],
+    [activeRow, executable, terminalCommand, interactiveSources, emulator, platform, wsl],
   );
 
   const runAction = useCallback(
