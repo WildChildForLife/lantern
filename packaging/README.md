@@ -46,7 +46,7 @@ Requires the tap repository `WildChildForLife/homebrew-tap` with the formula at
 ```bash
 git clone https://github.com/WildChildForLife/homebrew-tap
 cp packaging/homebrew/lantern.rb homebrew-tap/Formula/lantern.rb
-cd homebrew-tap && git commit -am "lantern 0.1.0" && git push
+cd homebrew-tap && git commit -am "lantern 0.2.0" && git push
 ```
 
 Users then install with:
@@ -65,11 +65,11 @@ Requires an AUR account with a registered SSH key. This cannot be automated from
 CI without putting that key in a secret.
 
 ```bash
-git clone ssh://aur@aur.archlinux.org/lantern.git aur-lantern
+git clone ssh://aur@aur.archlinux.org/lantern-viewer.git aur-lantern
 cp packaging/aur/PKGBUILD aur-lantern/
 cd aur-lantern
 makepkg --printsrcinfo > .SRCINFO   # required by the AUR
-git commit -am "lantern 0.1.0" && git push
+git commit -am "lantern-viewer 0.2.0" && git push
 ```
 
 `.SRCINFO` is generated rather than committed from here, because `makepkg` is the

@@ -3,9 +3,15 @@
 # AUR recipe. Built from the published npm tarball rather than from git, so what
 # users install is the same artifact the other channels ship.
 #
+# Named lantern-viewer, not lantern: the unrelated censorship-circumvention tool
+# already on the AUR declares provides=('lantern') and conflicts=('lantern'), so
+# that name would be refused. Its binary is /usr/bin/Lantern against our
+# /usr/bin/lantern, which do not collide on a case-sensitive filesystem — the two
+# packages can be installed side by side, so no conflicts entry is needed here.
+#
 # Publishing needs an AUR account with a registered SSH key — see
-# packaging/aur/README.md. scripts/bump-tap.sh refreshes pkgver and the checksum.
-pkgname=lantern
+# packaging/README.md. scripts/bump-tap.sh refreshes pkgver and the checksum.
+pkgname=lantern-viewer
 pkgver=0.1.1
 pkgrel=1
 pkgdesc="Self-hosted dashboard for your agent CLI sessions, grouped by topic"

@@ -151,8 +151,11 @@ Arch, from the AUR — the recipe lives in
 [`packaging/aur`](packaging/aur/PKGBUILD) and is not on the AUR itself yet:
 
 ```bash
-paru -S lantern      # or: yay -S lantern
+paru -S lantern-viewer      # or: yay -S lantern-viewer
 ```
+
+Named `lantern-viewer` there because an unrelated censorship-circumvention tool
+already claims `lantern` on the AUR. The command it installs is still `lantern`.
 
 Sessions are read from `~/.claude/projects`. On `x86_64` everything works. On `aarch64` the in-app
 terminal is unavailable — see [Platform support](#platform-support).
