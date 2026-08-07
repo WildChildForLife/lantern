@@ -45,8 +45,8 @@ Then publish each.
 
 The release workflow does this. The `homebrew` job runs after `npm` — the formula
 installs from the npm tarball, so it can only be bumped once that exists — points
-`packaging/homebrew/lantern.rb` at the new version, and pushes it to
-`WildChildForLife/homebrew-tap` as `Formula/lantern.rb`.
+`packaging/homebrew/lantern-viewer.rb` at the new version, and pushes it to
+`WildChildForLife/homebrew-tap` as `Formula/lantern-viewer.rb`.
 
 It needs a `TAP_GITHUB_TOKEN` secret, because `GITHUB_TOKEN` is scoped to this
 repository alone. Use a **fine-grained** personal access token:
@@ -67,14 +67,14 @@ hand in that case:
 ```bash
 scripts/bump-tap.sh 0.2.0
 git clone https://github.com/WildChildForLife/homebrew-tap
-cp packaging/homebrew/lantern.rb homebrew-tap/Formula/lantern.rb
-cd homebrew-tap && git commit -am "lantern 0.2.0" && git push
+cp packaging/homebrew/lantern-viewer.rb homebrew-tap/Formula/lantern-viewer.rb
+cd homebrew-tap && git commit -am "lantern-viewer 0.2.0" && git push
 ```
 
 Users then install with:
 
 ```bash
-brew install wildchildforlife/tap/lantern
+brew install wildchildforlife/tap/lantern-viewer
 ```
 
 To automate this, add a personal access token with `contents: write` on the tap

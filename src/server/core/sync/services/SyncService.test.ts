@@ -29,7 +29,11 @@ const relativeToRepo = (absolutePath: string): string =>
 
 const testLayer = Layer.mergeAll(
   makeDrizzleTestServiceLayer(),
-  testPlatformLayer(),
+  // Pinned, because canonicalPath is case-folded on case-insensitive
+  // filesystems and this test snapshots it. Left to the host, the same snapshot
+  // records /path/to/Demo on Linux and /path/to/demo on macOS, so the suite
+  // could only ever pass on one of them.
+  testPlatformLayer({ platform: "linux" }),
   NodeFileSystem.layer,
   SourceRegistry.withAdapters(ALL_SOURCE_ADAPTERS),
 );

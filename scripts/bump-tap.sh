@@ -9,7 +9,7 @@
 #
 # It only rewrites the files in this repository. Publishing them is a separate,
 # credentialled step:
-#   Homebrew  cp packaging/homebrew/lantern.rb <tap>/Formula/ && commit
+#   Homebrew  cp packaging/homebrew/lantern-viewer.rb <tap>/Formula/ && commit
 #   AUR       cp packaging/aur/PKGBUILD <aur-clone>/ && makepkg --printsrcinfo > .SRCINFO && commit
 set -euo pipefail
 
@@ -44,7 +44,7 @@ else
 fi
 echo "sha256 $SHA"
 
-FORMULA="$REPO_ROOT/packaging/homebrew/lantern.rb"
+FORMULA="$REPO_ROOT/packaging/homebrew/lantern-viewer.rb"
 PKGBUILD="$REPO_ROOT/packaging/aur/PKGBUILD"
 
 # The URL and sha lines are rewritten wholesale rather than patched in place, so a
