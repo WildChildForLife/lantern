@@ -464,6 +464,10 @@ To work against the bundled fixtures instead of your own conversations:
 node dist/main.js --port 4100 --claude-dir ./fixtures/claude-home
 ```
 
+The fixture conversations record invented working directories, so `lantern browse` will refuse to
+resume any of them — that refusal is the correct behaviour, not a fault. Point it at your own
+history to exercise resuming.
+
 [AGENTS.md](AGENTS.md) describes the architecture: a Hono + Effect-TS backend, a Vite + TanStack Router
 frontend, and a SQLite cache.
 

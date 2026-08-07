@@ -1,4 +1,5 @@
 import { render } from "ink";
+import { describeMissingDirectory } from "../actions/describeMissingDirectory.ts";
 import type { ActionPlan } from "../actions/planAction.ts";
 import {
   copyToClipboard,
@@ -37,7 +38,7 @@ const missingDirectory = async (plan: ActionPlan): Promise<Status> => {
 
   return (await directoryExists(plan.cwd))
     ? null
-    : { text: `${plan.cwd} no longer exists, so it cannot be resumed there.`, tone: "error" };
+    : { text: `${describeMissingDirectory(plan.cwd, process.platform)}.`, tone: "error" };
 };
 
 /** Carries out a plan that does not need the screen. */
@@ -188,9 +189,7 @@ export const runBrowse = async (
   // Checked here as well as in runPlan: these two give the screen back first,
   // so they leave the app before anything has verified the directory.
   if ((plan.kind === "print" || plan.kind === "handoff") && !(await directoryExists(plan.cwd))) {
-    process.stderr.write(
-      `${plan.cwd} no longer exists.\nClaude Code finds a conversation by the directory it ran in, so it cannot be resumed from anywhere else.\n`,
-    );
+    process.stderr.write(`${describeMissingDirectory(plan.cwd, process.platform)}.\n`);
     return 1;
   }
 
