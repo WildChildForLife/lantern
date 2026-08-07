@@ -19,8 +19,6 @@ const TOOL_VISUALIZERS: Record<string, ToolVisualizerComponent> = {
   TaskUpdate: TaskManagementVisualizer,
   TodoWrite: TodoWriteVisualizer,
   LanternAskUserQuestion: AskUserQuestionVisualizer,
-  // Sessions recorded before the tool was renamed still carry the old name.
-  CCVAskUserQuestion: AskUserQuestionVisualizer,
 };
 
 export const getToolVisualizer = (toolName: string): ToolVisualizerComponent | undefined => {

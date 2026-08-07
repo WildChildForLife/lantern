@@ -1,7 +1,6 @@
 import { Context, Effect, Layer, Ref } from "effect";
 import type { InferEffect } from "../../../lib/effect/types.ts";
 import { type SourceId, sourceIdSchema } from "../../source/models/SourceId.ts";
-import { withLegacyEnvAliases } from "../legacyEnv.ts";
 import { resolveBindHostname } from "../resolveBindHostname.ts";
 
 export type CliOptions = {
@@ -36,7 +35,7 @@ export type LanternOptions = {
 const getOptionalEnv = (key: string): string | undefined => {
   // biome-ignore lint/style/noProcessEnv: allow only here
   // oxlint-disable-next-line node/no-process-env -- configuration boundary
-  return withLegacyEnvAliases(process.env)[key] ?? undefined;
+  return process.env[key] ?? undefined;
 };
 
 const splitList = (value: string | undefined): string[] | undefined =>
