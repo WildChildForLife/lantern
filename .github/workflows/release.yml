@@ -163,6 +163,63 @@ jobs:
           path: packaging/dist/*
           if-no-files-found: error
 
+  homebrew:
+    name: homebrew tap
+    # The formula installs from the npm tarball, so it can only be bumped once
+    # that tarball exists.
+    needs: npm
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Mapped here because the secrets context is not available to step `if`
+    # conditions; env is.
+    env:
+      TAP_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node & pnpm
+        uses: ./.github/actions/setup-node
+
+      - name: Point the recipes at this release
+        run: scripts/bump-tap.sh "${GITHUB_REF_NAME#v}"
+
+      - name: Push the formula to the tap
+        # GITHUB_TOKEN cannot reach another repository, so this needs a token
+        # scoped to the tap. Without it the step is skipped rather than failing
+        # the release — a stale formula is worth less than a red release, and the
+        # summary below says plainly what happened.
+        if: ${{ env.TAP_TOKEN != '' }}
+        env:
+          GH_TOKEN: ${{ env.TAP_TOKEN }}
+          VERSION: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          git clone "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY_OWNER}/homebrew-tap.git" tap
+          cp packaging/homebrew/lantern.rb tap/Formula/lantern.rb
+          cd tap
+          git config user.name "WildChildForLife"
+          git config user.email "youssef.elgharbaoui@gmail.com"
+          if git diff --quiet; then
+            echo "formula already at ${VERSION#v}, nothing to push"
+            exit 0
+          fi
+          git commit -am "lantern ${VERSION#v}"
+          git push
+          echo "pushed formula ${VERSION#v} to the tap" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Say so when the tap was not updated
+        if: ${{ env.TAP_TOKEN == '' }}
+        run: |
+          {
+            echo "### Homebrew tap not updated"
+            echo ""
+            echo "\`TAP_GITHUB_TOKEN\` is not set, so the formula still points at the previous release."
+            echo "Bump it by hand with \`scripts/bump-tap.sh ${GITHUB_REF_NAME#v}\` — see \`packaging/README.md\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
   github-release:
     name: github release
     needs: [container, npm]

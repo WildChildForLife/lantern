@@ -16,13 +16,16 @@ The release workflow runs on a `v*` tag and needs nothing but the tag.
 | npm                 | `lantern-viewer`                           | yes¹      |
 | Debian / Ubuntu     | `lantern_<version>_{amd64,arm64}.deb`      | yes       |
 | Fedora / RHEL       | `lantern-<version>-1.{x86_64,aarch64}.rpm` | yes       |
-| Homebrew            | formula in `WildChildForLife/homebrew-tap` | no²       |
+| Homebrew            | formula in `WildChildForLife/homebrew-tap` | yes²      |
 | Arch (AUR)          | `PKGBUILD`                                 | no²       |
 
 ¹ Needs an `NPM_TOKEN` (or `AUTH_TOKEN`) repository secret. Without it that one
 job fails and the rest of the release still completes.
 
-² Both live in repositories this one cannot push to. See below.
+² Automated, but only when `TAP_GITHUB_TOKEN` is set — `GITHUB_TOKEN` cannot reach
+another repository. Without it the release still succeeds and the run summary says
+the formula was left behind. The AUR stays manual: publishing there needs an SSH
+key registered to an AUR account, which is not something to keep in a secret.
 
 The `.deb` and `.rpm` files are attached to the GitHub release, so there is no
 apt or dnf repository to host and nothing to sign.
@@ -40,13 +43,32 @@ Then publish each.
 
 ### Homebrew
 
-Requires the tap repository `WildChildForLife/homebrew-tap` with the formula at
-`Formula/lantern.rb`.
+The release workflow does this. The `homebrew` job runs after `npm` — the formula
+installs from the npm tarball, so it can only be bumped once that exists — points
+`packaging/homebrew/lantern.rb` at the new version, and pushes it to
+`WildChildForLife/homebrew-tap` as `Formula/lantern.rb`.
+
+It needs a `TAP_GITHUB_TOKEN` secret, because `GITHUB_TOKEN` is scoped to this
+repository alone. Use a **fine-grained** personal access token:
+
+- Resource owner: `WildChildForLife`
+- Repository access: only `WildChildForLife/homebrew-tap`
+- Permissions: **Contents → Read and write**
+- Expiration: set one, and diarise the renewal
 
 ```bash
+gh secret set TAP_GITHUB_TOKEN --repo WildChildForLife/lantern
+```
+
+Without the secret the job still runs, skips the push, and writes a note to the
+run summary — a stale formula is worth less than a failed release. To do it by
+hand in that case:
+
+```bash
+scripts/bump-tap.sh 0.2.0
 git clone https://github.com/WildChildForLife/homebrew-tap
 cp packaging/homebrew/lantern.rb homebrew-tap/Formula/lantern.rb
-cd homebrew-tap && git commit -am "lantern 0.1.0" && git push
+cd homebrew-tap && git commit -am "lantern 0.2.0" && git push
 ```
 
 Users then install with:
