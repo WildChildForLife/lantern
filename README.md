@@ -121,9 +121,14 @@ without it.
 ### macOS
 
 ```bash
-brew install wildchildforlife/tap/lantern
+brew tap wildchildforlife/tap
+brew trust wildchildforlife/tap     # Homebrew gates third-party taps
+brew install lantern-viewer
 lantern --port 3400
 ```
+
+The formula is `lantern-viewer` because homebrew-cask already ships an unrelated
+`lantern`. The command it installs is still `lantern`.
 
 Sessions are read from `~/.claude/projects`. Everything works here, the in-app terminal included, on
 both Intel and Apple Silicon.

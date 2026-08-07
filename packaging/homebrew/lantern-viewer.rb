@@ -3,12 +3,17 @@
 
 # Formula for the Homebrew tap at WildChildForLife/homebrew-tap.
 #
+# Named lantern-viewer, matching the npm package: homebrew-cask already ships an
+# unrelated `lantern`, so a bare `brew upgrade lantern` resolves to that cask and
+# fails with "Cask 'lantern' is not installed". The installed command is still
+# `lantern`.
+#
 # This copy is the source of truth; scripts/bump-tap.sh rewrites the version and
 # checksum from a published npm release and copies it into the tap repository.
 #
 # Node arrives as a formula dependency, so `brew install` pulls the runtime and
 # the user never installs one by hand.
-class Lantern < Formula
+class LanternViewer < Formula
   desc "Self-hosted dashboard for your agent CLI sessions, grouped by topic"
   homepage "https://github.com/WildChildForLife/lantern"
   url "https://registry.npmjs.org/lantern-viewer/-/lantern-viewer-0.2.0.tgz"

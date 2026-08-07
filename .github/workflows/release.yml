@@ -198,7 +198,7 @@ jobs:
         run: |
           set -euo pipefail
           git clone "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY_OWNER}/homebrew-tap.git" tap
-          cp packaging/homebrew/lantern.rb tap/Formula/lantern.rb
+          cp packaging/homebrew/lantern-viewer.rb tap/Formula/lantern-viewer.rb
           cd tap
           git config user.name "WildChildForLife"
           git config user.email "youssef.elgharbaoui@gmail.com"
