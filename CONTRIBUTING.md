@@ -25,11 +25,14 @@ pnpm gatecheck check
 ```
 
 That runs formatting, linting, type checking and tests over your diff, and is the same gate CI applies.
-Please also run `./scripts/lingui-check.sh` if you touched user-facing strings.
+
+Two things it will not catch, so run them yourself when they apply:
+
+- `pnpm lint` — `gatecheck` only inspects the diff, and `oxfmt` formats Markdown as well as code, so a
+  documentation change can pass the gate and still fail CI.
+- `./scripts/lingui-check.sh` — if you touched user-facing strings.
 
 ## House rules
-
-These come from the upstream project and still hold:
 
 - **No `as` type casting**, anywhere, including tests. If the types look unsolvable without it, say so
   in the pull request rather than casting around it.
@@ -37,8 +40,12 @@ These come from the upstream project and still hold:
   rather than `node:fs`, `node:path` or `child_process`.
 - **Hono RPC + TanStack Query for API calls.** No raw `fetch` in the web app.
 - **Prefer pure functions.** Reach for Effect only where you genuinely need side effects or state; pure
-  logic is easier to test and most of the interesting code here is pure.
-- Write tests alongside the change. The clustering logic in particular is pure and easy to cover.
+  logic is easier to test and most of the interesting code here is pure. `resolveHomeDirectory`,
+  `hasRusptyBinary` and `resolveBindHostname` are the shape to copy: a plain function, a file of its
+  own, and a test for each branch.
+- **Write tests alongside the change.** The clustering logic in particular is pure and easy to cover.
+- **Read from the source adapters, never from a hard-coded path.** Lantern reads Claude Code, Codex
+  CLI, opencode, Qwen Code, GitHub Copilot CLI and goose. Anything that assumes one of them is a bug.
 
 ## Commit messages
 
@@ -51,6 +58,17 @@ These come from the upstream project and still hold:
 | `chore`, `ci`, `build`, `refactor` | Internal work, excluded from release notes |
 
 Use `fix` only for things a user would notice. A linter or type error is a `chore`.
+
+Commit messages become the release notes, so write the description for someone reading the changelog
+rather than the diff.
+
+## Releasing
+
+Push a `v*` tag and the workflow does the rest: container images, the npm package, Debian and RPM
+packages attached to the release, the release notes, and the Homebrew formula. The tag has to match
+the `version` in `package.json` or the build refuses to run.
+
+`packaging/README.md` covers the parts that need a human, and which secrets each channel needs.
 
 ## Scope
 
