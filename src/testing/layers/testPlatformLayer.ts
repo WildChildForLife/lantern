@@ -63,6 +63,8 @@ export const testPlatformLayer = (overrides?: {
           // run on, and defaulting both would hide which one a test is exercising.
           case "USERPROFILE":
             return overrides?.env?.USERPROFILE ?? undefined;
+          case "LANTERN_HOSTNAME":
+            return overrides?.env?.LANTERN_HOSTNAME ?? undefined;
           case "PATH":
             return overrides?.env?.PATH ?? undefined;
           case "SHELL":

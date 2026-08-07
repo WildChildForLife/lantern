@@ -2,6 +2,7 @@ import { Context, Effect, Layer, Ref } from "effect";
 import type { InferEffect } from "../../../lib/effect/types.ts";
 import { type SourceId, sourceIdSchema } from "../../source/models/SourceId.ts";
 import { withLegacyEnvAliases } from "../legacyEnv.ts";
+import { resolveBindHostname } from "../resolveBindHostname.ts";
 
 export type CliOptions = {
   port: string;
@@ -62,7 +63,7 @@ const isFlagEnabled = (value: string | undefined) => {
 const toLanternOptions = (cliOptions?: CliOptions): LanternOptions => {
   return {
     port: Number.parseInt(cliOptions?.port ?? getOptionalEnv("PORT") ?? "3000", 10),
-    hostname: cliOptions?.hostname ?? getOptionalEnv("HOSTNAME") ?? "localhost",
+    hostname: resolveBindHostname(cliOptions?.hostname, getOptionalEnv("LANTERN_HOSTNAME")),
     verbose:
       cliOptions?.verbose ?? (isFlagEnabled(getOptionalEnv("LANTERN_VERBOSE")) ? true : undefined),
     password: cliOptions?.password ?? getOptionalEnv("LANTERN_PASSWORD") ?? undefined,

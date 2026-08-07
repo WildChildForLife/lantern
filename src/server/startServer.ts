@@ -24,6 +24,7 @@ import { GitController } from "./core/git/presentation/GitController.ts";
 import { GitService } from "./core/git/services/GitService.ts";
 import { NotificationController } from "./core/notification/presentation/NotificationController.ts";
 import { NotificationService } from "./core/notification/services/NotificationService.ts";
+import { resolveBindHostname } from "./core/platform/resolveBindHostname.ts";
 import { isDevelopmentEnv } from "./core/platform/runtimeEnv.ts";
 import type { CliOptions } from "./core/platform/services/LanternOptionsService.ts";
 import { ProjectRepository } from "./core/project/infrastructure/ProjectRepository.ts";
@@ -123,9 +124,12 @@ export const startServer = async (options: CliOptions) => {
       // oxlint-disable-next-line node/no-process-env -- configuration boundary
       (options.port ?? process.env.PORT ?? "3000");
 
-  // biome-ignore lint/style/noProcessEnv: allow only here
-  // oxlint-disable-next-line node/no-process-env -- configuration boundary
-  const hostname = options.hostname ?? process.env.HOSTNAME ?? "localhost";
+  const hostname = resolveBindHostname(
+    options.hostname,
+    // biome-ignore lint/style/noProcessEnv: allow only here
+    // oxlint-disable-next-line node/no-process-env -- configuration boundary
+    process.env.LANTERN_HOSTNAME,
+  );
 
   server.listen(parseInt(port, 10), hostname, () => {
     const info = server.address();
