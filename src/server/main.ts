@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import { Effect } from "effect";
 import packageJson from "../../package.json" with { type: "json" };
-import { checkDeprecatedEnvs } from "./core/platform/services/DeprecatedEnvDetector.ts";
 import type { CliOptions } from "./core/platform/services/LanternOptionsService.ts";
 import { checkNodeVersion } from "./nodeVersionCheck.ts";
 import { startServer } from "./startServer.ts";
@@ -31,8 +29,6 @@ program
     (value: string, previous: string[] | undefined) => [...(previous ?? []), value],
   )
   .action(async (options: CliOptions) => {
-    await Effect.runPromise(checkDeprecatedEnvs);
-
     await startServer(options);
   });
 
