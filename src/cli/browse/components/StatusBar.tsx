@@ -68,8 +68,13 @@ export const StatusBar = ({ row, status, width }: StatusBarProps) => (
         left, so a hint line that spills onto a second row pushes the last
         conversation off the bottom of the screen.
       */}
+      {/*
+        Sorting is deliberately not on this line. It is the one key here that
+        spends a CLI call, and among the movement keys it read as another way to
+        move around — it has its own row above, in its own colour.
+      */}
       <Text dimColor wrap="truncate">
-        ←→ topics · ↑↓ rows · / filter · enter act · e change · t sort · r reload · ? keys · q quit
+        ←→ topics · ↑↓ rows · / filter · e change · r reload · ? keys · q quit
       </Text>
     </Box>
   </Box>

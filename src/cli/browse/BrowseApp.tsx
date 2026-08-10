@@ -6,6 +6,7 @@ import { nextResumeAction, RESUME_ACTION_LABELS, type ResumeAction } from "../co
 import { TextInput } from "../ui/prompts/TextInput.tsx";
 import { theme } from "../ui/theme.ts";
 import { Board } from "./components/Board.tsx";
+import { CLASSIFY_CALLOUT_HEIGHT, ClassifyCallout } from "./components/ClassifyCallout.tsx";
 import { ConfirmResort } from "./components/ConfirmResort.tsx";
 import { HelpOverlay } from "./components/HelpOverlay.tsx";
 import {
@@ -111,11 +112,17 @@ export const BrowseApp = ({
   const width = stdout?.columns ?? 100;
   const height = stdout?.rows ?? 30;
 
+  const calloutVisible = classifying || (unclassified !== undefined && unclassified > 0);
+
   const layout = resolveLayout({
     width,
     height,
     topicCount: columns.length,
-    reservedRows: printed === null || printed === undefined ? 0 : PRINTED_COMMAND_HEIGHT,
+    // Everything drawn under the board has to be counted, or the status bar goes
+    // off the bottom of a screen the board has already filled.
+    reservedRows:
+      (printed === null || printed === undefined ? 0 : PRINTED_COMMAND_HEIGHT) +
+      (calloutVisible ? CLASSIFY_CALLOUT_HEIGHT : 0),
   });
 
   const safeColumnIndex = clamp(columnIndex, columns.length - 1);
@@ -300,15 +307,6 @@ export const BrowseApp = ({
             {truncated ? ` of ${total}` : ""}
             {refreshing ? " · refreshing" : ""}
           </Text>
-          {/* Only worth a word when there is something to sort, or a pass running. */}
-          {classifying ? (
-            <Text color={theme.accent}> · sorting topics…</Text>
-          ) : unclassified !== undefined && unclassified > 0 ? (
-            <Text>
-              <Text dimColor> · </Text>
-              <Text color={theme.accent}>{unclassified} unsorted</Text>
-            </Text>
-          ) : null}
           <Text dimColor>{" · enter: "}</Text>
           <Text color={theme.accent}>{RESUME_ACTION_LABELS[enterAction]}</Text>
         </Text>
@@ -365,6 +363,13 @@ export const BrowseApp = ({
       {mode === "help" ? (
         <Box marginTop={1}>
           <HelpOverlay />
+        </Box>
+      ) : null}
+
+      {/* Its own row, above the key line it used to be lost in. */}
+      {calloutVisible ? (
+        <Box marginTop={1}>
+          <ClassifyCallout unclassified={unclassified ?? 0} classifying={classifying} />
         </Box>
       ) : null}
 

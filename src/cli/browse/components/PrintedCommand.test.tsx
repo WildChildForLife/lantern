@@ -1,5 +1,6 @@
 import { render } from "ink-testing-library";
 import { describe, expect, it } from "vitest";
+import { FLASH_STEP_MILLIS, FLASH_STEPS } from "../functions/useFlash.ts";
 import { PrintedCommandPanel } from "./PrintedCommand.tsx";
 
 const ESC = String.fromCodePoint(0x1b);
@@ -7,7 +8,9 @@ const ESC = String.fromCodePoint(0x1b);
 const plain = (frame: string | undefined): string =>
   (frame ?? "").replaceAll(new RegExp(`${ESC}\\[[0-9;]*m`, "g"), "");
 
-const nextFrame = () => new Promise((resolve) => setTimeout(resolve, 20));
+/** Long enough for every step of the blink to have run. */
+const settle = () =>
+  new Promise((resolve) => setTimeout(resolve, FLASH_STEPS * FLASH_STEP_MILLIS + 100));
 
 describe("PrintedCommandPanel", () => {
   it("shows the command and the directory it has to be run in", () => {
@@ -38,7 +41,7 @@ describe("PrintedCommandPanel", () => {
    * the same place and, for the same conversation, says the same thing.
    */
   it("settles on a readable panel once the blinking is over", async () => {
-    const { lastFrame, rerender } = render(
+    const { lastFrame, rerender, unmount } = render(
       <PrintedCommandPanel
         printed={{ cwd: "/home/dev/lantern", text: "claude --resume x", token: 1 }}
         width={80}
@@ -52,10 +55,12 @@ describe("PrintedCommandPanel", () => {
       />,
     );
 
-    for (let step = 0; step < 8; step += 1) {
-      await nextFrame();
-    }
+    await settle();
 
     expect(plain(lastFrame())).toContain("claude --resume y");
+
+    // The blink is the only thing on the board that runs on a timer. Left
+    // running, it fires into a torn-down test worker.
+    unmount();
   });
 });

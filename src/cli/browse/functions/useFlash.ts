@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /** How long one on or off step of the flash lasts. */
 export const FLASH_STEP_MILLIS = 120;
@@ -19,8 +19,17 @@ export const FLASH_STEPS = 5;
  */
 export const useFlash = (token: number): boolean => {
   const [step, setStep] = useState(0);
+  const seen = useRef(token);
 
   useEffect(() => {
+    // A change, not a first sight of it. Appearing is a change the user can see
+    // already, and blinking on mount would leave a timer running behind every
+    // panel that was simply drawn.
+    if (seen.current === token) {
+      return;
+    }
+
+    seen.current = token;
     setStep(FLASH_STEPS);
   }, [token]);
 

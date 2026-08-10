@@ -314,7 +314,7 @@ describe("BrowseApp", () => {
     expect(onRefresh).toHaveBeenCalled();
   });
 
-  /** A pass costs a CLI call and takes a while; the header has to say it is running. */
+  /** A pass costs a CLI call and takes a while; the board has to say it is running. */
   it("says a pass is running while it runs", async () => {
     const { stdin, lastFrame } = setup({
       onClassify: vi.fn().mockReturnValue(new Promise(() => undefined)),
@@ -322,7 +322,7 @@ describe("BrowseApp", () => {
     await nextFrame();
     await press(stdin, "t");
 
-    expect(plain(lastFrame())).toContain("sorting topics…");
+    expect(plain(lastFrame())).toContain("sorting into topics…");
   });
 
   it("does not start a second pass over the first", async () => {
@@ -369,19 +369,30 @@ describe("BrowseApp", () => {
     expect(onClassify).not.toHaveBeenCalled();
   });
 
-  it("says how many conversations have no topic yet", async () => {
+  /**
+   * On its own row, not among the movement keys: sorting is the one key on the
+   * board that spends a CLI call, and listed with the rest it read as another way
+   * to move around.
+   */
+  it("asks for the sort on a row of its own, away from the key line", async () => {
     const { lastFrame } = setup({ unclassified: 7 });
     await nextFrame();
 
-    expect(plain(lastFrame())).toContain("7 unsorted");
+    const lines = plain(lastFrame()).split("\n");
+    const callout = lines.findIndex((line) => line.includes("sort 7 conversations into topics"));
+    const keys = lines.findIndex((line) => line.includes("←→ topics"));
+
+    expect(callout).toBeGreaterThan(-1);
+    expect(keys).toBeGreaterThan(callout);
+    expect(lines[keys]).not.toContain("sort");
   });
 
-  /** Nothing to sort is not worth a word in a header that is already busy. */
+  /** A standing invitation to spend a CLI call on an empty pass is worse than none. */
   it("says nothing about sorting when everything has a topic", async () => {
     const { lastFrame } = setup({ unclassified: 0 });
     await nextFrame();
 
-    expect(plain(lastFrame())).not.toContain("unsorted");
+    expect(plain(lastFrame())).not.toContain("into topics");
   });
 
   it("asks for a re-read on r", async () => {
@@ -426,8 +437,7 @@ describe("BrowseApp", () => {
 
   /**
    * The header used to be a row of separate Texts, each wrapping on its own,
-   * which split "Lantern" down the middle on a narrow terminal and broke the
-   * unsorted count across two rows.
+   * which split "Lantern" down the middle on a narrow terminal.
    */
   it("keeps the header on one line", async () => {
     const { lastFrame } = setup({ unclassified: 69, total: 900 });
@@ -436,7 +446,8 @@ describe("BrowseApp", () => {
     const header = plain(lastFrame()).split("\n")[0] ?? "";
 
     expect(header).toContain("Lantern");
-    expect(header).toContain("69 unsorted");
+    expect(header).toContain("3 conversations of 900");
+    expect(header).toContain("enter: resume here");
   });
 
   /** `e` is on the key line and in the help; the header only says what Enter does now. */
