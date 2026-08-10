@@ -32,7 +32,6 @@ export type BrowseAction =
 const DIRECT_ACTIONS: Record<string, ResumeAction> = {
   c: "copy-id",
   p: "print",
-  o: "new-window",
   R: "resume-here",
 };
 

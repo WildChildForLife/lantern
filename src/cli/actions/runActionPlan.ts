@@ -1,9 +1,7 @@
 import { Command, type CommandExecutor, FileSystem } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
 import { Effect } from "effect";
-import { shellEscape } from "../../lib/shell/shellEscape.ts";
 import { clipboardCommand, encodeOsc52 } from "./clipboard.ts";
-import { candidateBinaries } from "./terminalEmulator.ts";
 
 const run = <A, E>(
   effect: Effect.Effect<A, E, CommandExecutor.CommandExecutor | FileSystem.FileSystem>,
@@ -24,36 +22,6 @@ export const directoryExists = (path: string): Promise<boolean> =>
       const fs = yield* FileSystem.FileSystem;
 
       return yield* fs.exists(path).pipe(Effect.catchAll(() => Effect.succeed(false)));
-    }),
-  );
-
-/** Whether a binary is on PATH, without caring what it prints. */
-const isOnPath = (binary: string, platform: NodeJS.Platform) =>
-  Command.make(platform === "win32" ? "where" : "which", binary).pipe(
-    Command.exitCode,
-    Effect.map((code) => code === 0),
-    Effect.catchAll(() => Effect.succeed(false)),
-  );
-
-/**
- * The first terminal emulator this machine actually has.
- *
- * Probed rather than assumed: the candidate list is the same everywhere, and
- * most of it is not installed on any given machine.
- */
-export const findEmulator = (
-  platform: NodeJS.Platform,
-  env: Record<string, string | undefined>,
-): Promise<string | null> =>
-  run(
-    Effect.gen(function* () {
-      for (const binary of candidateBinaries(platform, env)) {
-        if (yield* isOnPath(binary, platform)) {
-          return binary;
-        }
-      }
-
-      return null;
     }),
   );
 
@@ -91,67 +59,14 @@ export const copyToClipboard = async (
   );
 };
 
-/** How long to give a launch to fail before assuming it got off the ground. */
-const LAUNCH_SETTLE_MILLIS = 400;
-
 /**
- * Opens a terminal window and genuinely lets go of it.
- *
- * kitty, wezterm, alacritty and the rest do not return until their window is
- * closed, so this cannot be awaited — but it cannot simply be forked either: a
- * live child handle keeps Node alive, and `lantern browse` would then sit
- * there after `q` until the user closed every window they had opened. So the
- * emulator is started by a shell that backgrounds it and exits.
- *
- * Backgrounding costs the exit code, which is why whatever the launch printed
- * is captured instead and returned. Without it a failure is indistinguishable
- * from success — the board says "opening a window" and no window ever appears,
- * which is exactly how a broken WSL interop or a missing binary presents.
- *
- * The launch inherits Lantern's own working directory: every recipe names the
- * conversation's directory itself.
- */
-export const spawnDetached = (
-  binary: string,
-  args: string[],
-  platform: NodeJS.Platform,
-): Promise<string> =>
-  run(
-    Effect.gen(function* () {
-      const fs = yield* FileSystem.FileSystem;
-      const logFile = yield* fs.makeTempFileScoped();
-      const launch = [binary, ...args].map(shellEscape).join(" ");
-
-      const command =
-        platform === "win32"
-          ? // `start` returns as soon as the window exists.
-            Command.make("cmd.exe", "/c", "start", "", binary, ...args)
-          : Command.make("sh", "-c", `${launch} </dev/null >${shellEscape(logFile)} 2>&1 &`);
-
-      yield* command.pipe(
-        Command.stdout("pipe"),
-        Command.stderr("pipe"),
-        Command.exitCode,
-        Effect.catchAll(() => Effect.succeed(1)),
-      );
-
-      // Anything wrong with the launch itself has been printed by now; a
-      // terminal that started properly says nothing at all.
-      yield* Effect.sleep(`${LAUNCH_SETTLE_MILLIS} millis`);
-
-      return yield* fs
-        .readFileString(logFile)
-        .pipe(Effect.catchAll(() => Effect.succeed("")))
-        .pipe(Effect.map((output) => output.trim()));
-    }).pipe(Effect.scoped),
-  );
-
-/**
- * Replaces this process with the conversation.
+ * Lends the terminal to the conversation, and takes it back afterwards.
  *
  * Node has no `execve`, so the nearest thing is a child that inherits the
- * terminal while Lantern waits on it. The board is already unmounted by the
- * time this runs, so nothing is competing for the screen.
+ * terminal while Lantern waits on it. The board is unmounted and off the
+ * alternate screen by the time this runs, so nothing is competing for the
+ * screen — and when the session ends, the board is drawn again rather than the
+ * process exiting with it.
  */
 export const handOver = (binary: string, args: string[], cwd: string): Promise<number> =>
   run(

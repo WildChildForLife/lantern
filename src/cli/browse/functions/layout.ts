@@ -34,12 +34,20 @@ export const resolveLayout = ({
   width,
   height,
   topicCount,
+  reservedRows = 0,
 }: {
   width: number;
   height: number;
   topicCount: number;
+  /**
+   * Rows something else has already claimed — the printed-command panel is the
+   * only one so far. Counted here rather than left to overflow: the board now
+   * fills the screen, so a panel that appears under it would push the status bar
+   * off the bottom instead of simply being drawn below the fold.
+   */
+  reservedRows?: number | undefined;
 }): Layout => {
-  const visibleRows = Math.max(1, height - CHROME_HEIGHT);
+  const visibleRows = Math.max(1, height - CHROME_HEIGHT - Math.max(0, reservedRows));
 
   if (width < BOARD_MIN_WIDTH) {
     return {

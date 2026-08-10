@@ -7,6 +7,11 @@ import { TextInput } from "../ui/prompts/TextInput.tsx";
 import { theme } from "../ui/theme.ts";
 import { Board } from "./components/Board.tsx";
 import { HelpOverlay } from "./components/HelpOverlay.tsx";
+import {
+  type PrintedCommand,
+  PRINTED_COMMAND_HEIGHT,
+  PrintedCommandPanel,
+} from "./components/PrintedCommand.tsx";
 import { StatusBar, type Status } from "./components/StatusBar.tsx";
 import { TwoPane } from "./components/TwoPane.tsx";
 import { buildColumns } from "./functions/buildColumns.ts";
@@ -22,19 +27,30 @@ export type BrowseAppProps = {
   defaultAction: ResumeAction;
   /** Remembers a new choice of what Enter does, so it survives the session. */
   onDefaultActionChange: (action: ResumeAction) => void;
-  terminalCommand: string | undefined;
-  emulator: string | null;
-  platform: NodeJS.Platform;
-  wsl: boolean;
   now: Date;
   /** Runs a plan that can be carried out without giving up the screen. */
   onRun: (plan: ActionPlan) => Promise<Status>;
-  /** Takes over: the caller unmounts and then acts on the plan. */
-  onLeave: (plan: ActionPlan) => void;
+  /**
+   * Runs the session, with the terminal already handed over to it.
+   *
+   * Called inside Ink's terminal suspension: the board stops drawing but stays
+   * mounted, so what it returns is a status for a board that still has the
+   * user's place in it, not for a new one.
+   */
+  onResume: (plan: ActionPlan) => Promise<Status>;
   onRefresh: () => void;
   refreshing: boolean;
   /** Set when the last re-read failed, so the board can say so. */
   refreshError?: string | null | undefined;
+  /**
+   * The resume command on show, held by the caller.
+   *
+   * Owned there rather than here so that quitting can print it again on the
+   * screen the user is left looking at — the board's own output goes with the
+   * alternate screen.
+   */
+  printed?: PrintedCommand | null | undefined;
+  onPrint?: ((printed: { cwd: string; text: string }) => void) | undefined;
 };
 
 const clamp = (value: number, max: number): number =>
@@ -55,18 +71,16 @@ export const BrowseApp = ({
   executable,
   defaultAction,
   onDefaultActionChange,
-  terminalCommand,
-  emulator,
-  platform,
-  wsl,
   now,
   onRun,
-  onLeave,
+  onResume,
   onRefresh,
   refreshing,
   refreshError,
+  printed,
+  onPrint,
 }: BrowseAppProps) => {
-  const { exit } = useApp();
+  const { exit, suspendTerminal } = useApp();
   const { stdout } = useStdout();
   const [columnIndex, setColumnIndex] = useState(0);
   const [rowIndex, setRowIndex] = useState(0);
@@ -80,10 +94,14 @@ export const BrowseApp = ({
     [topics, conversations, filter],
   );
 
+  const width = stdout?.columns ?? 100;
+  const height = stdout?.rows ?? 30;
+
   const layout = resolveLayout({
-    width: stdout?.columns ?? 100,
-    height: stdout?.rows ?? 30,
+    width,
+    height,
     topicCount: columns.length,
+    reservedRows: printed === null || printed === undefined ? 0 : PRINTED_COMMAND_HEIGHT,
   });
 
   const safeColumnIndex = clamp(columnIndex, columns.length - 1);
@@ -100,13 +118,9 @@ export const BrowseApp = ({
             sessionId: activeRow.sessionId,
             cwd: activeRow.projectPath,
             executable,
-            terminalCommand,
             interactive: interactiveSources.includes(activeRow.source),
-            emulator,
-            platform,
-            wsl,
           }),
-    [activeRow, executable, terminalCommand, interactiveSources, emulator, platform, wsl],
+    [activeRow, executable, interactiveSources],
   );
 
   const runAction = useCallback(
@@ -116,9 +130,20 @@ export const BrowseApp = ({
         return;
       }
 
-      if (plan.kind === "print" || plan.kind === "handoff") {
-        onLeave(plan);
-        exit();
+      // Resuming is the only thing that still needs the screen, and it borrows
+      // it rather than taking it: the board stops drawing, the session runs in
+      // its place, and the same board — same topic, same row, same filter — is
+      // drawn again when the session ends. The logs are re-read on the way back,
+      // because the conversation that just ended has grown.
+      if (plan.kind === "handoff") {
+        setStatus({ text: "Resuming…", tone: "info" });
+        void suspendTerminal(async () => {
+          setStatus(await onResume(plan));
+        })
+          .then(onRefresh)
+          .catch((error: unknown) => {
+            setStatus({ text: String(error), tone: "error" });
+          });
         return;
       }
 
@@ -126,12 +151,20 @@ export const BrowseApp = ({
       // Same reason as the refresh path: an unhandled rejection here would kill
       // the process with the terminal still in raw mode.
       void onRun(plan)
-        .then(setStatus)
+        .then((result) => {
+          setStatus(result);
+
+          // Shown only once the directory behind it has been checked: a command
+          // that cannot work is worse on screen than not printed at all.
+          if (plan.kind === "print" && (result === null || result.tone !== "error")) {
+            onPrint?.({ cwd: plan.cwd, text: plan.text });
+          }
+        })
         .catch((error: unknown) => {
           setStatus({ text: String(error), tone: "error" });
         });
     },
-    [buildPlan, exit, onLeave, onRun],
+    [buildPlan, onPrint, onRefresh, onResume, onRun, suspendTerminal],
   );
 
   useInput((input, key) => {
@@ -190,7 +223,10 @@ export const BrowseApp = ({
   const truncated = total > conversations.length;
 
   return (
-    <Box flexDirection="column" paddingX={1}>
+    // The whole terminal, from the top row: the caller has already switched to
+    // the alternate screen, and a fixed height is what pins the status bar to
+    // the bottom of it instead of letting it float under the last column.
+    <Box flexDirection="column" paddingX={1} height={Math.max(1, height - 1)}>
       <Box marginBottom={1}>
         <Text color={theme.accent} bold>
           Lantern
@@ -225,33 +261,44 @@ export const BrowseApp = ({
         </Box>
       ) : null}
 
-      {columns.length === 0 ? (
-        <Text color={theme.muted}>
-          {filter === "" ? "No conversations found." : `Nothing matches "${filter}".`}
-        </Text>
-      ) : layout.mode === "board" ? (
-        <Board
-          columns={columns}
-          layout={layout}
-          columnIndex={safeColumnIndex}
-          rowIndex={safeRowIndex}
-          now={now}
-        />
-      ) : (
-        <TwoPane
-          columns={columns}
-          layout={layout}
-          columnIndex={safeColumnIndex}
-          rowIndex={safeRowIndex}
-          now={now}
-        />
-      )}
+      {/* Takes the slack, so everything below it sits at the bottom of the screen. */}
+      <Box flexDirection="column" flexGrow={1}>
+        {columns.length === 0 ? (
+          <Text color={theme.muted}>
+            {filter === "" ? "No conversations found." : `Nothing matches "${filter}".`}
+          </Text>
+        ) : layout.mode === "board" ? (
+          <Board
+            columns={columns}
+            layout={layout}
+            columnIndex={safeColumnIndex}
+            rowIndex={safeRowIndex}
+            now={now}
+          />
+        ) : (
+          <TwoPane
+            columns={columns}
+            layout={layout}
+            columnIndex={safeColumnIndex}
+            rowIndex={safeRowIndex}
+            now={now}
+          />
+        )}
+      </Box>
 
       {mode === "help" ? (
         <Box marginTop={1}>
           <HelpOverlay />
         </Box>
       ) : null}
+
+      {printed === null || printed === undefined ? null : (
+        // A clear line between the board and the command, so the command does
+        // not read as another row of the table.
+        <Box marginTop={1}>
+          <PrintedCommandPanel printed={printed} width={Math.max(20, width - 2)} />
+        </Box>
+      )}
 
       <Box marginTop={1}>
         <StatusBar
@@ -261,7 +308,7 @@ export const BrowseApp = ({
               ? status
               : { text: refreshError, tone: "error" }
           }
-          width={stdout?.columns ?? 100}
+          width={width}
         />
       </Box>
     </Box>

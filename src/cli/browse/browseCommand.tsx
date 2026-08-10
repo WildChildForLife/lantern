@@ -1,18 +1,13 @@
 import { render } from "ink";
 import { describeMissingDirectory } from "../actions/describeMissingDirectory.ts";
 import type { ActionPlan } from "../actions/planAction.ts";
-import {
-  copyToClipboard,
-  directoryExists,
-  findEmulator,
-  handOver,
-  spawnDetached,
-} from "../actions/runActionPlan.ts";
+import { copyToClipboard, directoryExists, handOver } from "../actions/runActionPlan.ts";
 import type { SharedCommandOptions } from "../commandOptions.ts";
 import type { CliConfig, ResumeAction } from "../config/cliConfig.ts";
 import { saveResumeAction } from "../config/cliConfigStore.ts";
 import { type BoardData, loadBoard, resyncBoard } from "../runtime.ts";
 import { BrowseApp } from "./BrowseApp.tsx";
+import type { PrintedCommand } from "./components/PrintedCommand.tsx";
 import type { Status } from "./components/StatusBar.tsx";
 
 const writeOut = (text: string) => {
@@ -55,25 +50,45 @@ const runPlan = async (plan: ActionPlan): Promise<Status> => {
         ? { text: `Copied the ${plan.label}.`, tone: "ok" }
         : { text: `Could not reach a clipboard.`, tone: "error" };
     }
-    case "spawn": {
-      const complaint = await spawnDetached(plan.binary, plan.args, process.platform);
-
-      // Saying "opening a window" when none appeared is worse than saying
-      // nothing, so whatever the launch printed is shown instead.
-      return complaint === ""
-        ? { text: `Opening a new ${plan.binary} window…`, tone: "ok" }
-        : { text: `${plan.binary}: ${complaint.split("\n")[0] ?? complaint}`, tone: "error" };
-    }
     case "refused":
       return { text: `Cannot resume: ${plan.reason}.`, tone: "error" };
-    // Both of these give up the screen, so they never reach here.
+    // The board shows the command itself; all this had to do was check that the
+    // directory behind it is still there.
     case "print":
+      return null;
+    // Resuming borrows the screen, so it goes through resumeSession instead.
     case "handoff":
       return null;
     default:
       plan satisfies never;
       return null;
   }
+};
+
+/**
+ * Runs the session, and says how it went.
+ *
+ * The board is suspended rather than gone by the time this is called, so the
+ * answer is a status line for a board that is about to be drawn again — not the
+ * process's own exit code, which is what this used to become.
+ */
+const resumeSession = async (plan: ActionPlan): Promise<Status> => {
+  if (plan.kind !== "handoff") {
+    return null;
+  }
+
+  // Checked again here, and not only when the board drew the row: a folder can
+  // go between reading the logs and pressing R.
+  const gone = await missingDirectory(plan);
+  if (gone !== null) {
+    return gone;
+  }
+
+  const exitCode = await handOver(plan.binary, plan.args, plan.cwd);
+
+  return exitCode === 0
+    ? { text: "Back from the session. Pick another conversation, or q to quit.", tone: "info" }
+    : { text: `The session exited with code ${exitCode}.`, tone: "error" };
 };
 
 export const runBrowse = async (
@@ -115,14 +130,11 @@ export const runBrowse = async (
     return 1;
   }
 
-  const emulator = await findEmulator(process.platform, readEnv());
-
-  // Set from inside the app, acted on once Ink has given the terminal back. A
-  // holder rather than a bare variable: assignment happens in a callback, and
-  // narrowing does not follow it.
-  const leaving: { plan: ActionPlan | null } = { plan: null };
   let board: BoardData = data;
   let refreshing = false;
+  // Holders rather than bare variables: both are assigned from a callback, and
+  // narrowing does not follow that.
+  const shown: { command: PrintedCommand | null } = { command: null };
   const failure: { text: string | null } = { text: null };
 
   const rememberEnterAction = (action: ResumeAction) => {
@@ -162,49 +174,40 @@ export const runBrowse = async (
       interactiveSources={board.interactiveSources}
       executable={board.executable}
       defaultAction={stored.browse.resumeAction}
-      terminalCommand={stored.browse.terminalCommand}
-      emulator={emulator}
-      platform={process.platform}
-      wsl={readEnv()["WSL_DISTRO_NAME"] !== undefined}
       now={new Date()}
       onRun={runPlan}
-      onLeave={(plan) => {
-        leaving.plan = plan;
-      }}
+      onResume={resumeSession}
       onDefaultActionChange={rememberEnterAction}
       onRefresh={refresh}
       refreshing={refreshing}
       refreshError={failure.text}
+      printed={shown.command}
+      onPrint={(next) => {
+        // A fresh token even for the same command, so the panel blinks on every
+        // `p` rather than only when the text happens to differ.
+        shown.command = { ...next, token: (shown.command?.token ?? 0) + 1 };
+        draw();
+      }}
     />
   );
+
+  // The board owns the terminal from the top row down, on the same alternate
+  // screen `less` and `vim` use, so quitting gives the user back the scrollback
+  // they started with. Resuming a conversation suspends this rather than
+  // unmounting it, which is what keeps the user's place on the board.
+  const instance = render(element(), { alternateScreen: true });
 
   const draw = () => {
     instance.rerender(element());
   };
 
-  const instance = render(element());
-
   await instance.waitUntilExit();
 
-  const plan = leaving.plan;
-  if (plan === null) {
-    return 0;
-  }
-
-  // Checked here as well as in runPlan: these two give the screen back first,
-  // so they leave the app before anything has verified the directory.
-  if ((plan.kind === "print" || plan.kind === "handoff") && !(await directoryExists(plan.cwd))) {
-    process.stderr.write(`${describeMissingDirectory(plan.cwd, process.platform)}.\n`);
-    return 1;
-  }
-
-  if (plan.kind === "print") {
-    process.stdout.write(`cd ${plan.cwd}\n${plan.text}\n`);
-    return 0;
-  }
-
-  if (plan.kind === "handoff") {
-    return handOver(plan.binary, plan.args, plan.cwd);
+  // The alternate screen has taken the board's output with it, including a
+  // command the user asked to see. Printing it here is what makes `p` then `q`
+  // leave something behind to paste.
+  if (shown.command !== null) {
+    writeOut(`cd ${shown.command.cwd}\n${shown.command.text}\n`);
   }
 
   return 0;

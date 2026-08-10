@@ -3,25 +3,24 @@ import { z } from "zod";
 /**
  * What pressing Enter on a conversation does.
  *
- * Shown in the board's header and cycled with `e`. All four also have a key of
+ * Shown in the board's header and cycled with `e`. All three also have a key of
  * their own, so this only decides what Enter does.
+ *
+ * Everything here happens in the terminal Lantern is already running in.
+ * Opening a second window was tried and removed: it meant detecting an emulator,
+ * guessing its flags, and reporting a launch that had already been backgrounded
+ * — three ways to fail at something the shell in front of the user does better.
  */
-export const resumeActionSchema = z.enum(["resume-here", "new-window", "print", "copy-id"]);
+export const resumeActionSchema = z.enum(["resume-here", "print", "copy-id"]);
 
 export type ResumeAction = z.infer<typeof resumeActionSchema>;
 
 /** The order `e` walks through on the board. */
-export const RESUME_ACTIONS: readonly ResumeAction[] = [
-  "resume-here",
-  "new-window",
-  "print",
-  "copy-id",
-];
+export const RESUME_ACTIONS: readonly ResumeAction[] = ["resume-here", "print", "copy-id"];
 
 /** Human wording for what Enter will do, for the board to show. */
 export const RESUME_ACTION_LABELS: Record<ResumeAction, string> = {
   "resume-here": "resume here",
-  "new-window": "open a new window",
   print: "print the command",
   "copy-id": "copy the id",
 };
@@ -31,12 +30,6 @@ export const nextResumeAction = (current: ResumeAction): ResumeAction =>
 
 export const browseConfigSchema = z.object({
   resumeAction: resumeActionSchema.default("resume-here"),
-  /**
-   * Command template for "open in a new terminal window", overriding detection.
-   * `{{command}}` is replaced with the shell command to run, `{{cwd}}` with the
-   * directory to run it in.
-   */
-  terminalCommand: z.string().optional(),
 });
 
 export type BrowseConfig = z.infer<typeof browseConfigSchema>;

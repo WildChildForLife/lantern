@@ -70,4 +70,21 @@ describe("resolveLayout", () => {
 
     expect(layout.visibleColumns).toBe(0);
   });
+
+  /**
+   * The board fills the screen, so a panel under it would push the status bar
+   * off the bottom rather than simply landing below the fold.
+   */
+  it("gives back the rows something else has claimed", () => {
+    const alone = resolveLayout({ width: 160, height: 40, topicCount: 3 });
+    const sharing = resolveLayout({ width: 160, height: 40, topicCount: 3, reservedRows: 6 });
+
+    expect(alone.visibleRows - sharing.visibleRows).toBe(6);
+  });
+
+  it("still leaves a row visible when the reservation is larger than the screen", () => {
+    expect(
+      resolveLayout({ width: 160, height: 10, topicCount: 3, reservedRows: 40 }).visibleRows,
+    ).toBe(1);
+  });
 });

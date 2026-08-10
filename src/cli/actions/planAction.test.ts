@@ -5,10 +5,7 @@ const base = {
   sessionId: "abc-123",
   cwd: "/home/dev/lantern",
   executable: undefined,
-  terminalCommand: undefined,
   interactive: true,
-  emulator: "kitty",
-  platform: "linux",
 } as const;
 
 describe("planAction", () => {
@@ -49,6 +46,12 @@ describe("planAction", () => {
     });
   });
 
+  it("hands over to the configured executable", () => {
+    expect(planAction({ ...base, action: "resume-here", executable: "/opt/claude" })).toMatchObject(
+      { binary: "/opt/claude" },
+    );
+  });
+
   /** Passed as argv, so the id must not be shell-quoted here. */
   it("does not quote the id when handing over, since no shell is involved", () => {
     const plan = planAction({ ...base, action: "resume-here", sessionId: 'a"b' });
@@ -61,31 +64,8 @@ describe("planAction", () => {
     });
   });
 
-  it("opens a detected emulator for a new window", () => {
-    const plan = planAction({ ...base, action: "new-window" });
-
-    expect(plan.kind).toBe("spawn");
-  });
-
-  it("prefers the user's own terminal command over detection", () => {
-    const plan = planAction({
-      ...base,
-      action: "new-window",
-      terminalCommand: "my-term -e {{command}}",
-    });
-
-    expect(plan).toMatchObject({ kind: "spawn", binary: "sh" });
-  });
-
-  /** Guessing at flags for an unknown emulator would open the wrong thing. */
-  it("falls back to printing when no emulator was found", () => {
-    const plan = planAction({ ...base, action: "new-window", emulator: null });
-
-    expect(plan).toMatchObject({ kind: "print" });
-  });
-
   it("refuses to resume a conversation from a read-only CLI", () => {
-    for (const action of ["resume-here", "new-window", "print"] as const) {
+    for (const action of ["resume-here", "print"] as const) {
       expect(planAction({ ...base, action, interactive: false })).toMatchObject({
         kind: "refused",
       });
@@ -103,7 +83,7 @@ describe("planAction", () => {
    * not found" rather than an honest refusal.
    */
   it("refuses to resume a conversation whose directory is unknown", () => {
-    for (const action of ["resume-here", "new-window", "print"] as const) {
+    for (const action of ["resume-here", "print"] as const) {
       expect(planAction({ ...base, action, cwd: null })).toMatchObject({ kind: "refused" });
     }
   });

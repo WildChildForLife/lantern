@@ -56,10 +56,14 @@ describe("resolveKeyAction on the board", () => {
   it.each([
     ["c", "copy-id"],
     ["p", "print"],
-    ["o", "new-window"],
     ["R", "resume-here"],
   ])("runs %s directly", (input, action) => {
     expect(resolveKeyAction(press(input), "board")).toStrictEqual({ type: "run", action });
+  });
+
+  /** Opening a second terminal window was removed; `o` means nothing now. */
+  it("has nothing bound to o", () => {
+    expect(resolveKeyAction(press("o"), "board")).toBeNull();
   });
 
   it("refreshes and shows help", () => {

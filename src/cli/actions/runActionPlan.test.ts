@@ -3,7 +3,7 @@ import { NodeContext } from "@effect/platform-node";
 import { it } from "@effect/vitest";
 import { Effect } from "effect";
 import { describe, expect } from "vitest";
-import { directoryExists, spawnDetached } from "./runActionPlan.ts";
+import { directoryExists, handOver } from "./runActionPlan.ts";
 
 const withTempDir = <A, E>(
   use: (dir: string) => Effect.Effect<A, E, FileSystem.FileSystem>,
@@ -15,62 +15,7 @@ const withTempDir = <A, E>(
     }).pipe(Effect.scoped, Effect.provide(NodeContext.layer)),
   );
 
-describe("spawnDetached", () => {
-  it.live("really starts the command", () =>
-    Effect.promise(() =>
-      withTempDir((dir) =>
-        Effect.gen(function* () {
-          const fs = yield* FileSystem.FileSystem;
-          const marker = `${dir}/opened`;
-
-          yield* Effect.promise(() => spawnDetached("touch", [marker], "linux"));
-
-          expect(yield* fs.exists(marker)).toBe(true);
-        }),
-      ),
-    ),
-  );
-
-  /**
-   * The regression this exists for: a live child handle keeps Node alive, so
-   * `lantern browse` would sit there after `q` until every window the user had
-   * opened was closed. What is waited on here must be the launching shell, not
-   * the window.
-   */
-  it.live("returns without waiting for the window to close", () =>
-    Effect.promise(() =>
-      withTempDir(() =>
-        Effect.gen(function* () {
-          const started = Date.now();
-          yield* Effect.promise(() => spawnDetached("sleep", ["5"], "linux"));
-
-          expect(Date.now() - started).toBeLessThan(2000);
-        }),
-      ),
-    ),
-  );
-
-  /**
-   * The launch inherits Lantern's own directory: every recipe names the
-   * conversation's directory itself, and handing a POSIX one to a Windows
-   * binary from inside WSL turns it into a UNC path `wsl.exe` cannot
-   * translate. Whether the directory still exists is settled before this runs.
-   */
-  it.live("does not impose a working directory on the launch", () =>
-    Effect.promise(() =>
-      withTempDir((dir) =>
-        Effect.gen(function* () {
-          const fs = yield* FileSystem.FileSystem;
-          const marker = `${dir}/relative-to-lantern`;
-
-          yield* Effect.promise(() => spawnDetached("touch", [marker], "linux"));
-
-          expect(yield* fs.exists(marker)).toBe(true);
-        }),
-      ),
-    ),
-  );
-
+describe("directoryExists", () => {
   it.live("reports whether a directory is still there", () =>
     Effect.promise(() =>
       withTempDir((dir) =>
@@ -81,33 +26,50 @@ describe("spawnDetached", () => {
       ),
     ),
   );
+});
 
+describe("handOver", () => {
   /**
-   * The regression this exists for: the launch is backgrounded, so its exit
-   * code is lost and a failure used to read exactly like a success — the board
-   * said "opening a window" and none ever appeared. A broken WSL interop and a
-   * missing binary both present that way.
+   * The board is redrawn afterwards, so the exit code is the one thing that says
+   * how the session went — and it has to be the child's, not Lantern's.
    */
-  it.live("reports what a failed launch printed", () =>
+  it.live("waits for the session and reports how it ended", () =>
     Effect.promise(() =>
-      withTempDir(() =>
+      withTempDir((dir) =>
         Effect.gen(function* () {
-          const complaint = yield* Effect.promise(() =>
-            spawnDetached("lantern-no-such-binary", [], "linux"),
-          );
-
-          expect(complaint).not.toBe("");
-          expect(complaint).toContain("lantern-no-such-binary");
+          expect(yield* Effect.promise(() => handOver("sh", ["-c", "exit 0"], dir))).toBe(0);
+          expect(yield* Effect.promise(() => handOver("sh", ["-c", "exit 3"], dir))).toBe(3);
         }),
       ),
     ),
   );
 
-  it.live("says nothing when the launch got off the ground", () =>
+  it.live("runs the session in the conversation's own directory", () =>
     Effect.promise(() =>
-      withTempDir(() =>
+      withTempDir((dir) =>
         Effect.gen(function* () {
-          expect(yield* Effect.promise(() => spawnDetached("true", [], "linux"))).toBe("");
+          const fs = yield* FileSystem.FileSystem;
+
+          yield* Effect.promise(() => handOver("sh", ["-c", "touch resumed-here"], dir));
+
+          expect(yield* fs.exists(`${dir}/resumed-here`)).toBe(true);
+        }),
+      ),
+    ),
+  );
+
+  /**
+   * A `claude` that is not on PATH must come back as a code the board can report,
+   * not as a rejected promise: the board is already unmounted by then, and an
+   * unhandled rejection would kill the process with the terminal mid-handover.
+   */
+  it.live("comes back with a code when the executable is not there at all", () =>
+    Effect.promise(() =>
+      withTempDir((dir) =>
+        Effect.gen(function* () {
+          expect(yield* Effect.promise(() => handOver("lantern-no-such-binary", [], dir))).toBe(
+            127,
+          );
         }),
       ),
     ),

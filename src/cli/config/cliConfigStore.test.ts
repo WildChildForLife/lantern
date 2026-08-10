@@ -50,17 +50,14 @@ describe("cliConfigStore", () => {
           ...defaultCliConfig,
           port: 3400,
           hostname: "0.0.0.0",
-          browse: { resumeAction: "new-window", terminalCommand: "kitty" },
+          browse: { resumeAction: "copy-id" },
         });
 
         const stored = yield* readCliConfig;
 
         expect(stored.port).toBe(3400);
         expect(stored.hostname).toBe("0.0.0.0");
-        expect(stored.browse).toStrictEqual({
-          resumeAction: "new-window",
-          terminalCommand: "kitty",
-        });
+        expect(stored.browse).toStrictEqual({ resumeAction: "copy-id" });
       }).pipe(Effect.provide(withBaseDir(baseDir))),
     ),
   );

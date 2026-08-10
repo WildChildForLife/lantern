@@ -64,9 +64,10 @@ const conversations = [
 
 const setup = (overrides?: Partial<BrowseAppProps>) => {
   const onRun = vi.fn().mockResolvedValue({ text: "done", tone: "ok" });
-  const onLeave = vi.fn();
+  const onResume = vi.fn().mockResolvedValue({ text: "Back from the session.", tone: "info" });
   const onRefresh = vi.fn();
   const onDefaultActionChange = vi.fn();
+  const onPrint = vi.fn();
 
   const result = render(
     <BrowseApp
@@ -77,20 +78,17 @@ const setup = (overrides?: Partial<BrowseAppProps>) => {
       executable={undefined}
       defaultAction="resume-here"
       onDefaultActionChange={onDefaultActionChange}
-      terminalCommand={undefined}
-      emulator="kitty"
-      platform="linux"
-      wsl={false}
       now={new Date("2026-08-07T00:00:00.000Z")}
       onRun={onRun}
-      onLeave={onLeave}
+      onResume={onResume}
       onRefresh={onRefresh}
+      onPrint={onPrint}
       refreshing={false}
       {...overrides}
     />,
   );
 
-  return { ...result, onRun, onLeave, onRefresh, onDefaultActionChange };
+  return { ...result, onRun, onResume, onRefresh, onDefaultActionChange, onPrint };
 };
 
 describe("BrowseApp", () => {
@@ -128,28 +126,108 @@ describe("BrowseApp", () => {
     expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "copy", text: "s-refund" }));
   });
 
-  /** Printing and resuming both need the screen back, so the caller finishes them. */
-  it("hands the terminal back before printing the command", async () => {
-    const { stdin, onLeave } = setup();
+  /** Printing used to end the session; it is shown on the board instead now. */
+  it("shows the command without giving up the screen", async () => {
+    const { stdin, onResume, onPrint } = setup({ onRun: vi.fn().mockResolvedValue(null) });
     await nextFrame();
     await press(stdin, "p");
 
-    expect(onLeave).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: "print", text: `claude --resume "s-refund"` }),
-    );
+    expect(onPrint).toHaveBeenCalledWith({
+      cwd: "/home/dev/lantern",
+      text: `claude --resume "s-refund"`,
+    });
+    expect(onResume).not.toHaveBeenCalled();
   });
 
-  it("hands over to claude when resuming in place", async () => {
-    const { stdin, onLeave } = setup();
+  /**
+   * A command whose directory has gone cannot work, and showing it anyway would
+   * hand the user something to paste that reports the conversation as missing.
+   */
+  it("does not show a command the directory check turned down", async () => {
+    const { stdin, onPrint } = setup({
+      onRun: vi.fn().mockResolvedValue({ text: "that folder has gone", tone: "error" }),
+    });
+    await nextFrame();
+    await press(stdin, "p");
+
+    expect(onPrint).not.toHaveBeenCalled();
+  });
+
+  it("draws the command it was given, under the board", async () => {
+    const { lastFrame } = setup({
+      printed: { cwd: "/home/dev/lantern", text: `claude --resume "s-refund"`, token: 1 },
+    });
+    await nextFrame();
+
+    expect(plain(lastFrame())).toContain(`claude --resume "s-refund"`);
+    expect(plain(lastFrame())).toContain("cd /home/dev/lantern");
+  });
+
+  it("lends the terminal to claude when resuming in place", async () => {
+    const { stdin, onResume } = setup();
     await nextFrame();
     await press(stdin, "R");
 
-    expect(onLeave).toHaveBeenCalledWith({
+    expect(onResume).toHaveBeenCalledWith({
       kind: "handoff",
       binary: "claude",
       args: ["--resume", "s-refund"],
       cwd: "/home/dev/lantern",
     });
+  });
+
+  /**
+   * The board is suspended for the session rather than unmounted, so coming back
+   * to the same conversation is not a restore — there is nothing to restore.
+   */
+  it("is still on the same conversation after the session ends", async () => {
+    const { stdin, onResume, onRun } = setup();
+    await nextFrame();
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, "R");
+
+    expect(onResume).toHaveBeenCalledWith(
+      expect.objectContaining({ args: ["--resume", "s-checkout"] }),
+    );
+
+    await press(stdin, "c");
+    expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ text: "s-checkout" }));
+  });
+
+  it("keeps the filter that was in force before the session", async () => {
+    const { stdin, lastFrame } = setup();
+    await nextFrame();
+    await press(stdin, "/");
+    await press(stdin, "router");
+    await press(stdin, ENTER);
+    await press(stdin, "R");
+    await nextFrame();
+
+    expect(lastFrame()).toContain("Router DHCP");
+    expect(lastFrame()).not.toContain("Add refunds");
+  });
+
+  it("says how the session that just ended went", async () => {
+    const { stdin, lastFrame } = setup({
+      onResume: vi
+        .fn()
+        .mockResolvedValue({ text: "The session exited with code 3.", tone: "error" }),
+    });
+    await nextFrame();
+    await press(stdin, "R");
+    await nextFrame();
+
+    expect(lastFrame()).toContain("The session exited with code 3.");
+  });
+
+  /** The conversation that just ended has grown, so the board re-reads the logs. */
+  it("re-reads the logs on the way back from a session", async () => {
+    const { stdin, onRefresh } = setup();
+    await nextFrame();
+    await press(stdin, "R");
+    await nextFrame();
+
+    expect(onRefresh).toHaveBeenCalled();
   });
 
   it("refuses to resume a conversation from a read-only CLI", async () => {
@@ -161,13 +239,13 @@ describe("BrowseApp", () => {
     expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "refused" }));
   });
 
-  /** The header already says what Enter does; a menu of the same four repeats it. */
+  /** The header already says what Enter does; a menu of the same three repeats it. */
   it("does the header's action on enter, without asking again", async () => {
-    const { stdin, onLeave } = setup();
+    const { stdin, onResume } = setup();
     await nextFrame();
     await press(stdin, ENTER);
 
-    expect(onLeave).toHaveBeenCalledWith(expect.objectContaining({ kind: "handoff" }));
+    expect(onResume).toHaveBeenCalledWith(expect.objectContaining({ kind: "handoff" }));
   });
 
   it("says why on enter when the conversation is from a read-only CLI", async () => {
@@ -204,7 +282,16 @@ describe("BrowseApp", () => {
     await press(stdin, "?");
 
     expect(lastFrame()).toContain("Keys");
-    expect(lastFrame()).toContain("resume here, replacing this screen");
+    expect(lastFrame()).toContain("resume here, and come back to the board after");
+  });
+
+  /** The key list is what people go to; a removed action must not still be in it. */
+  it("no longer offers a new terminal window", async () => {
+    const { stdin, lastFrame } = setup();
+    await nextFrame();
+    await press(stdin, "?");
+
+    expect(plain(lastFrame())).not.toContain("new terminal window");
   });
 
   it("asks for a re-read on r", async () => {
@@ -253,14 +340,14 @@ describe("BrowseApp", () => {
     await nextFrame();
     await press(stdin, "e");
 
-    expect(plain(lastFrame())).toContain("enter: open a new window");
-    expect(onDefaultActionChange).toHaveBeenCalledWith("new-window");
+    expect(plain(lastFrame())).toContain("enter: print the command");
+    expect(onDefaultActionChange).toHaveBeenCalledWith("print");
   });
 
   it("wraps back round to the first choice", async () => {
     const { stdin, lastFrame } = setup();
     await nextFrame();
-    for (let index = 0; index < 4; index += 1) {
+    for (let index = 0; index < 3; index += 1) {
       await press(stdin, "e");
     }
 
@@ -270,8 +357,7 @@ describe("BrowseApp", () => {
   it("uses the newly chosen action for Enter", async () => {
     const { stdin, onRun } = setup();
     await nextFrame();
-    // resume-here -> new-window -> print -> copy-id
-    await press(stdin, "e");
+    // resume-here -> print -> copy-id
     await press(stdin, "e");
     await press(stdin, "e");
     await press(stdin, ENTER);

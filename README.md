@@ -288,7 +288,8 @@ Nothing prompts without a terminal attached, so Docker, CI and `npx … | tee` s
 ### Browsing from the terminal
 
 `lantern browse` draws the same board the web UI does — one column per topic, conversations as rows —
-without starting a server or opening a browser.
+without starting a server or opening a browser. It takes the whole terminal while it is up, on the
+same alternate screen `less` and `vim` use, and gives your scrollback back when you quit.
 
 | Key     | Does                                                       |
 | ------- | ---------------------------------------------------------- |
@@ -296,28 +297,22 @@ without starting a server or opening a browser.
 | `↑ ↓`   | move between conversations (`j` `k`), `g`/`G` for the ends |
 | `/`     | filter by topic, title or project                          |
 | `enter` | what to do with this conversation                          |
-| `R`     | resume here, replacing this screen                         |
-| `o`     | open it in a new terminal window                           |
-| `p`     | print the resume command and quit                          |
+| `R`     | resume here, and come back to the board after              |
+| `p`     | show the resume command, without leaving                   |
 | `c`     | copy the conversation id                                   |
 | `r`     | re-read the logs · `?` the key list · `q` quit             |
 
-If Lantern picks the wrong terminal — or your terminal cannot be driven from a command line, as
-Warp cannot — name the command yourself in `~/.lantern/config.json`. `{{command}}` and `{{cwd}}` are
-filled in:
+`R` lends the terminal to the session rather than giving it away: when you leave `claude`, the same
+board comes back — same topic, same conversation, same filter — with the logs re-read, so you can
+resume something else without starting `lantern browse` again.
 
-```json
-{
-  "browse": {
-    "resumeAction": "new-window",
-    "terminalCommand": "wt.exe -d {{cwd}} cmd.exe /k {{command}}"
-  }
-}
-```
+`p` shows the command under the board instead of quitting. Pressing `p` on another conversation
+replaces it and blinks so you can see that it changed, and whatever is on show is printed once more
+on the way out, so `p` then `q` leaves something behind to paste.
 
-The header shows what `enter` will do; `e` cycles through resuming here, opening a new window,
-printing the command and copying the id, and remembers the choice for next time. Enter then does
-exactly that — there is no menu in between, and each of the four has its own key as well.
+The header shows what `enter` will do; `e` cycles through resuming here, showing the command and
+copying the id, and remembers the choice for next time. Enter then does exactly that — there is no
+menu in between, and each of the three has its own key as well.
 
 Below about ninety columns the board becomes a topic list on the left and its conversations on the
 right; the keys are unchanged.
