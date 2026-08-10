@@ -31,6 +31,10 @@ overrides:
   # a major it does not support.
   fast-uri: ">=3.1.4 <4"
   postcss: ">=8.5.18"
+  # Bounded below 4: the advisory is fixed in the 3.x line, and postcss — which is
+  # what drags this in, through vite — declares a 3.x range, so an unbounded floor
+  # would force an ESM-only major it cannot load.
+  nanoid: ">=3.3.17 <4"
   ip-address: ">=10.3.1"
   qs: ">=6.15.2"
   body-parser: ">=2.3.0"
