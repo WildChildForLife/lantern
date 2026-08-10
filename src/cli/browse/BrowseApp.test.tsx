@@ -68,6 +68,7 @@ const setup = (overrides?: Partial<BrowseAppProps>) => {
   const onRefresh = vi.fn();
   const onDefaultActionChange = vi.fn();
   const onPrint = vi.fn();
+  const onClassify = vi.fn().mockResolvedValue({ text: "Sorted 2 into topics.", tone: "ok" });
 
   const result = render(
     <BrowseApp
@@ -82,13 +83,14 @@ const setup = (overrides?: Partial<BrowseAppProps>) => {
       onRun={onRun}
       onResume={onResume}
       onRefresh={onRefresh}
+      onClassify={onClassify}
       onPrint={onPrint}
       refreshing={false}
       {...overrides}
     />,
   );
 
-  return { ...result, onRun, onResume, onRefresh, onDefaultActionChange, onPrint };
+  return { ...result, onRun, onResume, onRefresh, onDefaultActionChange, onPrint, onClassify };
 };
 
 describe("BrowseApp", () => {
@@ -292,6 +294,94 @@ describe("BrowseApp", () => {
     await press(stdin, "?");
 
     expect(plain(lastFrame())).not.toContain("new terminal window");
+  });
+
+  it("sorts the conversations with no topic on t", async () => {
+    const { stdin, onClassify } = setup();
+    await nextFrame();
+    await press(stdin, "t");
+
+    expect(onClassify).toHaveBeenCalledWith("unclassified");
+  });
+
+  it("says what the pass did, and re-reads the logs after it", async () => {
+    const { stdin, lastFrame, onRefresh } = setup();
+    await nextFrame();
+    await press(stdin, "t");
+    await nextFrame();
+
+    expect(lastFrame()).toContain("Sorted 2 into topics.");
+    expect(onRefresh).toHaveBeenCalled();
+  });
+
+  /** A pass costs a CLI call and takes a while; the header has to say it is running. */
+  it("says a pass is running while it runs", async () => {
+    const { stdin, lastFrame } = setup({
+      onClassify: vi.fn().mockReturnValue(new Promise(() => undefined)),
+    });
+    await nextFrame();
+    await press(stdin, "t");
+
+    expect(plain(lastFrame())).toContain("sorting topics…");
+  });
+
+  it("does not start a second pass over the first", async () => {
+    const running = vi.fn().mockReturnValue(new Promise(() => undefined));
+    const { stdin } = setup({ onClassify: running });
+    await nextFrame();
+    await press(stdin, "t");
+    await press(stdin, "t");
+
+    expect(running).toHaveBeenCalledTimes(1);
+  });
+
+  it("says so when a pass fails outright", async () => {
+    const { stdin, lastFrame } = setup({
+      onClassify: vi.fn().mockRejectedValue(new Error("no CLI configured")),
+    });
+    await nextFrame();
+    await press(stdin, "t");
+    await nextFrame();
+
+    expect(lastFrame()).toContain("Could not sort the conversations");
+  });
+
+  /** Redoing every topic throws away work already paid for, so T asks first. */
+  it("asks before redoing every topic, and only sorts on y", async () => {
+    const { stdin, lastFrame, onClassify } = setup();
+    await nextFrame();
+    await press(stdin, "T");
+
+    expect(plain(lastFrame())).toContain("Throw away every topic and sort again?");
+    expect(onClassify).not.toHaveBeenCalled();
+
+    await press(stdin, "y");
+    expect(onClassify).toHaveBeenCalledWith("all");
+  });
+
+  it("leaves the topics alone when the question is answered with anything else", async () => {
+    const { stdin, lastFrame, onClassify } = setup();
+    await nextFrame();
+    await press(stdin, "T");
+    await press(stdin, ENTER);
+
+    expect(plain(lastFrame())).not.toContain("Throw away every topic");
+    expect(onClassify).not.toHaveBeenCalled();
+  });
+
+  it("says how many conversations have no topic yet", async () => {
+    const { lastFrame } = setup({ unclassified: 7 });
+    await nextFrame();
+
+    expect(plain(lastFrame())).toContain("7 unsorted");
+  });
+
+  /** Nothing to sort is not worth a word in a header that is already busy. */
+  it("says nothing about sorting when everything has a topic", async () => {
+    const { lastFrame } = setup({ unclassified: 0 });
+    await nextFrame();
+
+    expect(plain(lastFrame())).not.toContain("unsorted");
   });
 
   it("asks for a re-read on r", async () => {

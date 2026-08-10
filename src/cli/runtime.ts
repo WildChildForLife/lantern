@@ -9,6 +9,7 @@ import {
 } from "../server/core/platform/services/LanternOptionsService.ts";
 import { ProjectMetaService } from "../server/core/project/services/ProjectMetaService.ts";
 import { SessionRepository } from "../server/core/session/infrastructure/SessionRepository.ts";
+import type { ClassifyResult } from "../server/core/session/schema.ts";
 import { SessionLocatorService } from "../server/core/session/services/SessionLocatorService.ts";
 import { SessionMetaService } from "../server/core/session/services/SessionMetaService.ts";
 import { TopicClassifierService } from "../server/core/session/services/TopicClassifierService.ts";
@@ -62,6 +63,13 @@ export type BoardData = {
   conversations: ConversationListEntry[];
   /** How many conversations exist, which may be more than were loaded. */
   total: number;
+  /**
+   * How many have no topic at all.
+   *
+   * Shown in the header so the sort key is worth pressing before it is pressed:
+   * a pass over nothing costs a CLI call to find that out.
+   */
+  unclassified: number;
   /** Source ids Lantern can drive a turn on. The rest are read-only. */
   interactiveSources: string[];
   /** Resolved path of the `claude` binary, when one was configured. */
@@ -72,6 +80,7 @@ const loadBoardData = Effect.gen(function* () {
   const sessionRepository = yield* SessionRepository;
   const registry = yield* SourceRegistry;
   const optionsService = yield* LanternOptionsService;
+  const topicClassifier = yield* TopicClassifierService;
 
   const { topics } = yield* sessionRepository.getConversationTopics();
   const { conversations, total } = yield* sessionRepository.getAllConversations({
@@ -82,6 +91,7 @@ const loadBoardData = Effect.gen(function* () {
     topics: [...topics],
     conversations: [...conversations],
     total,
+    unclassified: yield* topicClassifier.countUnclassified(),
     interactiveSources: registry.all
       .filter((adapter) => adapter.capabilities.interactive)
       .map((adapter) => adapter.id),
@@ -149,3 +159,31 @@ export const resyncBoard = (options: CliOptions, stored: StoredOptions): Promise
     ),
   );
 };
+
+/**
+ * Sorts conversations into topics with the configured agent CLI.
+ *
+ * The same service the web app's buttons go through, called directly rather than
+ * over HTTP — the board has the layer graph already, and starting a server to
+ * ask a question of the local database would be the long way round.
+ *
+ * A `selection` scope has no meaning here: the board sorts what has no topic, or
+ * everything, and there is no multi-select to draw from.
+ */
+export const classifyBoard = (
+  options: CliOptions,
+  stored: StoredOptions,
+  scope: "unclassified" | "all",
+): Promise<ClassifyResult> =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const topicClassifier = yield* TopicClassifierService;
+
+      return yield* topicClassifier.classify({ scope: { kind: scope } });
+    }).pipe(
+      Effect.provide(readOnlyLayer(options, stored)),
+      Effect.scoped,
+      withServerLogLevel(options.verbose),
+      Effect.provide(serverLoggerLayer),
+    ),
+  );

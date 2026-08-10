@@ -1,5 +1,7 @@
-import type { ClassifyResult } from "@/server/core/session/schema";
-import type { ClassifyRequest } from "@/web/lib/api/classifyTopics";
+import type { ClassifyResult } from "../../server/core/session/schema.ts";
+
+/** Which conversations a pass was asked to cover, as far as wording cares. */
+export type ClassifyScopeKind = "unclassified" | "all" | "selection";
 
 /**
  * What a classification pass amounted to, decided before any wording is chosen.
@@ -7,6 +9,10 @@ import type { ClassifyRequest } from "@/web/lib/api/classifyTopics";
  * Split out so the rule "when do we say nothing needed doing" is unit tested
  * without a translation catalogue in the way — that claim was wrong before, and
  * a pass that answered but matched nothing reported itself as already sorted.
+ *
+ * Shared rather than per-interface: the web app turns this into toasts and the
+ * terminal board turns it into a status line, and a pass must not describe
+ * itself differently depending on which one asked for it.
  */
 export type ClassifyOutcome =
   | { readonly kind: "stopped-early"; readonly classified: number; readonly remaining: number }
@@ -24,7 +30,7 @@ export type ClassifyOutcome =
 
 export const describeClassifyOutcome = (
   result: ClassifyResult,
-  scope: ClassifyRequest["kind"],
+  scope: ClassifyScopeKind,
 ): ClassifyOutcome => {
   if (result.failed) {
     return { kind: "stopped-early", classified: result.classified, remaining: result.remaining };

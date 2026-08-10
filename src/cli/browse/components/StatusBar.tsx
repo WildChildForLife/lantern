@@ -63,9 +63,13 @@ export const StatusBar = ({ row, status, width }: StatusBarProps) => (
       )}
     </Box>
     <Box>
-      <Text dimColor>
-        ←→ topics · ↑↓ conversations · / filter · enter do it · e change · r refresh · ? keys · q
-        quit
+      {/*
+        Truncated rather than wrapped: the board is sized to the rows it has been
+        left, so a hint line that spills onto a second row pushes the last
+        conversation off the bottom of the screen.
+      */}
+      <Text dimColor wrap="truncate">
+        ←→ topics · ↑↓ rows · / filter · enter act · e change · t sort · r reload · ? keys · q quit
       </Text>
     </Box>
   </Box>

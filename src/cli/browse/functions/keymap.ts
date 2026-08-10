@@ -13,7 +13,10 @@ export type KeyInput = {
 };
 
 /** Which overlay, if any, currently owns the keyboard. */
-export type BrowseMode = "board" | "filter" | "help";
+export type BrowseMode = "board" | "filter" | "help" | "confirm-resort";
+
+/** Which conversations a classification pass should cover. */
+export type ClassifyScopeKey = "unclassified" | "all";
 
 export type BrowseAction =
   | { type: "quit" }
@@ -26,6 +29,9 @@ export type BrowseAction =
   | { type: "refresh" }
   | { type: "run-chosen" }
   | { type: "cycle-enter-action" }
+  | { type: "classify"; scope: ClassifyScopeKey }
+  /** Asks first: redoing every topic throws away work already paid for. */
+  | { type: "ask-resort-all" }
   | { type: "run"; action: ResumeAction };
 
 /** Hotkeys that run an action straight from the board, skipping the menu. */
@@ -49,6 +55,8 @@ const resolveBoardAction = (key: KeyInput): BrowseAction | null => {
   if (key.input === "?") return { type: "toggle-help" };
   if (key.input === "r") return { type: "refresh" };
   if (key.input === "e") return { type: "cycle-enter-action" };
+  if (key.input === "t") return { type: "classify", scope: "unclassified" };
+  if (key.input === "T") return { type: "ask-resort-all" };
   // Enter does whatever the header says it does — `e` is what changes that.
   if (key.return === true) return { type: "run-chosen" };
 
@@ -80,6 +88,12 @@ export const resolveKeyAction = (key: KeyInput, mode: BrowseMode): BrowseAction 
       return key.return === true || key.escape === true ? { type: "close-overlay" } : null;
     case "help":
       return { type: "close-overlay" };
+    // Only `y` goes ahead. Anything else — including Enter, which is easy to
+    // press by reflex — backs out of throwing every topic away.
+    case "confirm-resort":
+      return key.input === "y" || key.input === "Y"
+        ? { type: "classify", scope: "all" }
+        : { type: "close-overlay" };
     default:
       mode satisfies never;
       return null;

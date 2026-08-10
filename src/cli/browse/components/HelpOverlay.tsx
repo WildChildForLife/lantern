@@ -11,6 +11,8 @@ const KEYS: [string, string][] = [
   ["R", "resume here, and come back to the board after"],
   ["p", "show the resume command, without leaving"],
   ["c", "copy the conversation id"],
+  ["t", "sort the conversations with no topic, using the AI"],
+  ["T", "throw every topic away and sort again (asks first)"],
   ["r", "re-read the logs"],
   ["? ", "this list"],
   ["q", "quit"],

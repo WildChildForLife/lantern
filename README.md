@@ -300,6 +300,8 @@ same alternate screen `less` and `vim` use, and gives your scrollback back when 
 | `R`     | resume here, and come back to the board after              |
 | `p`     | show the resume command, without leaving                   |
 | `c`     | copy the conversation id                                   |
+| `t`     | sort the conversations with no topic yet                   |
+| `T`     | throw every topic away and sort again (asks first)         |
 | `r`     | re-read the logs · `?` the key list · `q` quit             |
 
 `R` lends the terminal to the session rather than giving it away: when you leave `claude`, the same
@@ -309,6 +311,13 @@ resume something else without starting `lantern browse` again.
 `p` shows the command under the board instead of quitting. Pressing `p` on another conversation
 replaces it and blinks so you can see that it changed, and whatever is on show is printed once more
 on the way out, so `p` then `q` leaves something behind to paste.
+
+`t` sorts conversations into topics with the configured agent CLI — the same pass the web UI's
+buttons start, run against the same local cache. The header says how many have no topic yet, so you
+can see whether there is anything to sort before spending a CLI call on finding out, and the board
+re-reads the logs when the pass ends so the new topics appear without pressing `r`. `T` is the
+terminal's "Redo all": it throws every stored topic away and files everything again, and because
+that spends a pass on conversations already filed it asks first — only `y` goes ahead.
 
 The header shows what `enter` will do; `e` cycles through resuming here, showing the command and
 copying the id, and remembers the choice for next time. Enter then does exactly that — there is no

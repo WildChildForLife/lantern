@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
-import type { ClassifyResult } from "@/server/core/session/schema";
-import { describeClassifyOutcome } from "./classifyOutcome";
+import type { ClassifyResult } from "../../server/core/session/schema.ts";
+import { describeClassifyOutcome } from "./classifyOutcome.ts";
 
 const result = (overrides: Partial<ClassifyResult> = {}): ClassifyResult => ({
   classified: 0,

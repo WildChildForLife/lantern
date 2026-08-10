@@ -1,14 +1,17 @@
 import { render } from "ink";
+import { describeClassifyOutcome } from "../../lib/topics/classifyOutcome.ts";
 import { describeMissingDirectory } from "../actions/describeMissingDirectory.ts";
 import type { ActionPlan } from "../actions/planAction.ts";
 import { copyToClipboard, directoryExists, handOver } from "../actions/runActionPlan.ts";
 import type { SharedCommandOptions } from "../commandOptions.ts";
 import type { CliConfig, ResumeAction } from "../config/cliConfig.ts";
 import { saveResumeAction } from "../config/cliConfigStore.ts";
-import { type BoardData, loadBoard, resyncBoard } from "../runtime.ts";
+import { type BoardData, classifyBoard, loadBoard, resyncBoard } from "../runtime.ts";
 import { BrowseApp } from "./BrowseApp.tsx";
 import type { PrintedCommand } from "./components/PrintedCommand.tsx";
 import type { Status } from "./components/StatusBar.tsx";
+import { describeClassifyStatus } from "./functions/classifyMessage.ts";
+import type { ClassifyScopeKey } from "./functions/keymap.ts";
 
 const writeOut = (text: string) => {
   process.stdout.write(text);
@@ -143,6 +146,18 @@ export const runBrowse = async (
     void saveResumeAction(action).catch(() => undefined);
   };
 
+  /**
+   * Sorts conversations into topics, and says what the pass amounted to.
+   *
+   * The pass itself can take a while and costs a CLI call, so it is reported the
+   * same way the web app reports it — through the shared outcome, so the terminal
+   * cannot end up making a different claim about the same result.
+   */
+  const classify = async (scope: ClassifyScopeKey): Promise<Status> =>
+    describeClassifyStatus(
+      describeClassifyOutcome(await classifyBoard(cliOptions, stored, scope), scope),
+    );
+
   const refresh = () => {
     if (refreshing) {
       return;
@@ -171,12 +186,14 @@ export const runBrowse = async (
       topics={board.topics}
       conversations={board.conversations}
       total={board.total}
+      unclassified={board.unclassified}
       interactiveSources={board.interactiveSources}
       executable={board.executable}
       defaultAction={stored.browse.resumeAction}
       now={new Date()}
       onRun={runPlan}
       onResume={resumeSession}
+      onClassify={classify}
       onDefaultActionChange={rememberEnterAction}
       onRefresh={refresh}
       refreshing={refreshing}

@@ -71,6 +71,18 @@ describe("resolveKeyAction on the board", () => {
     expect(resolveKeyAction(press("?"), "board")).toStrictEqual({ type: "toggle-help" });
   });
 
+  it("sorts the conversations with no topic on t", () => {
+    expect(resolveKeyAction(press("t"), "board")).toStrictEqual({
+      type: "classify",
+      scope: "unclassified",
+    });
+  });
+
+  /** T does not sort on its own: it opens the question, and `y` answers it. */
+  it("asks before redoing every topic", () => {
+    expect(resolveKeyAction(press("T"), "board")).toStrictEqual({ type: "ask-resort-all" });
+  });
+
   it.each([["q"], ["Q"]])("quits on %s", (input) => {
     expect(resolveKeyAction(press(input), "board")).toStrictEqual({ type: "quit" });
   });
@@ -102,6 +114,40 @@ describe("resolveKeyAction while typing a filter", () => {
 
   it("still quits on Ctrl-C", () => {
     expect(resolveKeyAction(press("c", { ctrl: true }), "filter")).toStrictEqual({ type: "quit" });
+  });
+});
+
+describe("resolveKeyAction with the resort question open", () => {
+  it.each([["y"], ["Y"]])("redoes every topic on %s", (input) => {
+    expect(resolveKeyAction(press(input), "confirm-resort")).toStrictEqual({
+      type: "classify",
+      scope: "all",
+    });
+  });
+
+  /**
+   * Everything else backs out, Enter included: it is the key most likely to be
+   * pressed by reflex, and this is the one action that throws work away.
+   */
+  it.each([["n"], ["q"], ["z"]])("leaves the topics alone on %s", (input) => {
+    expect(resolveKeyAction(press(input), "confirm-resort")).toStrictEqual({
+      type: "close-overlay",
+    });
+  });
+
+  it("leaves the topics alone on Enter and on Escape", () => {
+    expect(resolveKeyAction(press("", { return: true }), "confirm-resort")).toStrictEqual({
+      type: "close-overlay",
+    });
+    expect(resolveKeyAction(press("", { escape: true }), "confirm-resort")).toStrictEqual({
+      type: "close-overlay",
+    });
+  });
+
+  it("still quits on Ctrl-C", () => {
+    expect(resolveKeyAction(press("c", { ctrl: true }), "confirm-resort")).toStrictEqual({
+      type: "quit",
+    });
   });
 });
 

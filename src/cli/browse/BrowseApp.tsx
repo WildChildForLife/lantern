@@ -6,6 +6,7 @@ import { nextResumeAction, RESUME_ACTION_LABELS, type ResumeAction } from "../co
 import { TextInput } from "../ui/prompts/TextInput.tsx";
 import { theme } from "../ui/theme.ts";
 import { Board } from "./components/Board.tsx";
+import { ConfirmResort } from "./components/ConfirmResort.tsx";
 import { HelpOverlay } from "./components/HelpOverlay.tsx";
 import {
   type PrintedCommand,
@@ -15,13 +16,15 @@ import {
 import { StatusBar, type Status } from "./components/StatusBar.tsx";
 import { TwoPane } from "./components/TwoPane.tsx";
 import { buildColumns } from "./functions/buildColumns.ts";
-import { type BrowseMode, resolveKeyAction } from "./functions/keymap.ts";
+import { type BrowseMode, type ClassifyScopeKey, resolveKeyAction } from "./functions/keymap.ts";
 import { resolveLayout } from "./functions/layout.ts";
 
 export type BrowseAppProps = {
   topics: TopicGroup[];
   conversations: ConversationListEntry[];
   total: number;
+  /** How many conversations have no topic, so the header can say whether to sort. */
+  unclassified?: number | undefined;
   interactiveSources: string[];
   executable: string | undefined;
   defaultAction: ResumeAction;
@@ -39,6 +42,14 @@ export type BrowseAppProps = {
    */
   onResume: (plan: ActionPlan) => Promise<Status>;
   onRefresh: () => void;
+  /**
+   * Sorts conversations into topics with the configured agent CLI.
+   *
+   * Returns what the pass amounted to, as a line for the status bar. The board
+   * re-reads the logs afterwards either way: a pass that filed anything has
+   * changed which column half these conversations belong in.
+   */
+  onClassify: (scope: ClassifyScopeKey) => Promise<Status>;
   refreshing: boolean;
   /** Set when the last re-read failed, so the board can say so. */
   refreshError?: string | null | undefined;
@@ -67,6 +78,7 @@ export const BrowseApp = ({
   topics,
   conversations,
   total,
+  unclassified,
   interactiveSources,
   executable,
   defaultAction,
@@ -75,6 +87,7 @@ export const BrowseApp = ({
   onRun,
   onResume,
   onRefresh,
+  onClassify,
   refreshing,
   refreshError,
   printed,
@@ -88,6 +101,7 @@ export const BrowseApp = ({
   const [mode, setMode] = useState<BrowseMode>("board");
   const [status, setStatus] = useState<Status>(null);
   const [enterAction, setEnterAction] = useState<ResumeAction>(defaultAction);
+  const [classifying, setClassifying] = useState(false);
 
   const columns = useMemo(
     () => buildColumns({ topics, conversations, filter }),
@@ -167,6 +181,41 @@ export const BrowseApp = ({
     [buildPlan, onPrint, onRefresh, onResume, onRun, suspendTerminal],
   );
 
+  const classify = useCallback(
+    (scope: ClassifyScopeKey) => {
+      // One pass at a time. The service serialises them anyway, but a second
+      // press would otherwise sit there looking like nothing had happened.
+      if (classifying) {
+        return;
+      }
+
+      setClassifying(true);
+      setStatus({
+        text:
+          scope === "all"
+            ? "Sorting every conversation into topics…"
+            : "Sorting the conversations with no topic…",
+        tone: "info",
+      });
+
+      void onClassify(scope)
+        .then((result) => {
+          setStatus(result);
+          // Even a pass that filed nothing has a fresh unsorted count to show,
+          // and one that filed something has moved conversations between
+          // columns — neither is visible until the board re-reads.
+          onRefresh();
+        })
+        .catch((error: unknown) => {
+          setStatus({ text: `Could not sort the conversations: ${String(error)}`, tone: "error" });
+        })
+        .finally(() => {
+          setClassifying(false);
+        });
+    },
+    [classifying, onClassify, onRefresh],
+  );
+
   useInput((input, key) => {
     const action = resolveKeyAction({ input, ...key }, mode);
     if (action === null) {
@@ -201,6 +250,13 @@ export const BrowseApp = ({
       case "refresh":
         setStatus({ text: "Re-reading the logs…", tone: "info" });
         onRefresh();
+        return;
+      case "classify":
+        setMode("board");
+        classify(action.scope);
+        return;
+      case "ask-resort-all":
+        setMode("confirm-resort");
         return;
       case "cycle-enter-action": {
         const following = nextResumeAction(enterAction);
@@ -237,6 +293,16 @@ export const BrowseApp = ({
           {truncated ? ` of ${total}` : ""}
           {refreshing ? " · refreshing" : ""}
         </Text>
+        {/* Only worth a word when there is something to sort, or a pass running. */}
+        {classifying ? (
+          <Text color={theme.accent}> · sorting topics…</Text>
+        ) : unclassified !== undefined && unclassified > 0 ? (
+          <Text>
+            <Text dimColor> · </Text>
+            <Text color={theme.accent}>{unclassified} unsorted</Text>
+            <Text dimColor> (t)</Text>
+          </Text>
+        ) : null}
         <Text>
           <Text dimColor>{"  ·  enter: "}</Text>
           <Text color={theme.accent}>{RESUME_ACTION_LABELS[enterAction]}</Text>
@@ -285,6 +351,12 @@ export const BrowseApp = ({
           />
         )}
       </Box>
+
+      {mode === "confirm-resort" ? (
+        <Box marginTop={1}>
+          <ConfirmResort count={conversations.length} />
+        </Box>
+      ) : null}
 
       {mode === "help" ? (
         <Box marginTop={1}>
