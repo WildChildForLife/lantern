@@ -109,6 +109,8 @@
     "esbuild": "0.28.1",
     "gatecheck": "0.0.1-beta.5",
     "hono": "4.12.34",
+    "ink": "^7.1.1",
+    "ink-testing-library": "^4.0.0",
     "inquirer": "13.4.2",
     "jotai": "2.20.0",
     "jsdom": "^30.0.1",

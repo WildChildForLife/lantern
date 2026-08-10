@@ -7,6 +7,7 @@ import packageJson from "../../../../package.json" with { type: "json" };
 import {
   LanternOptionsService,
   type CliOptions,
+  type StoredOptions,
 } from "../../core/platform/services/LanternOptionsService.ts";
 import { UserConfigService } from "../../core/platform/services/UserConfigService.ts";
 import { userConfigSchema } from "../../lib/config/config.ts";
@@ -54,10 +55,10 @@ const createApiOnlyMiddleware = (apiOnly: boolean) =>
     return next();
   });
 
-export const routes = (app: HonoAppType, options: CliOptions) =>
+export const routes = (app: HonoAppType, options: CliOptions, stored?: StoredOptions) =>
   Effect.gen(function* () {
     const optionsService = yield* LanternOptionsService;
-    yield* optionsService.loadCliOptions(options);
+    yield* optionsService.loadCliOptions(options, stored);
 
     const userConfigService = yield* UserConfigService;
     const initializeService = yield* InitializeService;

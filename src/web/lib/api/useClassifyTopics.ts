@@ -2,12 +2,12 @@ import { useLingui } from "@lingui/react";
 import { useIsMutating, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useConversationSelection } from "@/lib/atoms/conversationSelection";
+import { describeClassifyOutcome } from "@/lib/topics/classifyOutcome";
 import {
   ClassificationRequestError,
   type ClassifyRequest,
   requestClassification,
 } from "@/web/lib/api/classifyTopics";
-import { describeClassifyOutcome } from "@/web/lib/classifyOutcome";
 
 /**
  * Shared by every button that can start a pass, so React Query reports one of

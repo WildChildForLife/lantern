@@ -13,6 +13,12 @@ export const envSchema = z.object({
    */
   LANTERN_HOSTNAME: z.string().optional(),
   SHELL: z.string().optional(),
+  /**
+   * Read only to tell whether a bind beyond this machine would be protected.
+   * The setup wizard never writes a password down, so the environment is the
+   * only place it can look.
+   */
+  LANTERN_PASSWORD: z.string().optional(),
   LANTERN_TERMINAL_SHELL: z.string().optional(),
   LANTERN_TERMINAL_UNRESTRICTED: z.string().optional(),
   LANTERN_TERMINAL_DISABLED: z.string().optional(),

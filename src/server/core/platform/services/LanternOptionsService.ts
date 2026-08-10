@@ -4,8 +4,16 @@ import { type SourceId, sourceIdSchema } from "../../source/models/SourceId.ts";
 import { resolveBindHostname } from "../resolveBindHostname.ts";
 
 export type CliOptions = {
-  port: string;
-  hostname: string;
+  /**
+   * Optional because a flag that was not typed is absent, not empty.
+   *
+   * Commander already hands these over as `undefined` when the flag is missing,
+   * and the CLI commands that listen on nothing have no value to give at all —
+   * an empty string here is not nullish, so it would win the precedence chain
+   * below and resolve the port to `NaN`.
+   */
+  port?: string | undefined;
+  hostname?: string | undefined;
   verbose?: boolean | undefined;
   password?: string | undefined;
   executable?: string | undefined;
@@ -15,6 +23,25 @@ export type CliOptions = {
   terminalUnrestricted?: boolean | undefined;
   apiOnly?: boolean | undefined;
   source?: string[] | undefined;
+};
+
+/**
+ * Settings persisted by `lantern init`, the tier between environment variables
+ * and the built-in defaults.
+ *
+ * Structural on purpose: the wizard owns the file and its schema, and the
+ * backend has no business depending on the CLI to read one tier of its own
+ * options.
+ */
+export type StoredOptions = {
+  port?: number | undefined;
+  hostname?: string | undefined;
+  claudeDir?: string | undefined;
+  executable?: string | undefined;
+  terminalDisabled?: boolean | undefined;
+  terminalShell?: string | undefined;
+  terminalUnrestricted?: boolean | undefined;
+  apiOnly?: boolean | undefined;
 };
 
 export type LanternOptions = {
@@ -32,10 +59,27 @@ export type LanternOptions = {
   sources?: SourceId[] | undefined;
 };
 
+/**
+ * The one rule for whether a variable was set: an exported-but-empty one is not.
+ *
+ * `export LANTERN_HOSTNAME=` is how a shell profile clears a variable, not how
+ * it answers a question — and `??` would otherwise let that empty string
+ * shadow the stored settings underneath it.
+ *
+ * Exported because the `init` wizard has to answer the same question about
+ * `LANTERN_PASSWORD` before it will call a `0.0.0.0` bind protected. Asking it
+ * two different ways is how the wizard came to tell people an open bind had a
+ * password on it when the password was an empty string.
+ */
+export const isEnvValueSet = (value: string | undefined): boolean =>
+  value !== undefined && value !== "";
+
 const getOptionalEnv = (key: string): string | undefined => {
   // biome-ignore lint/style/noProcessEnv: allow only here
   // oxlint-disable-next-line node/no-process-env -- configuration boundary
-  return process.env[key] ?? undefined;
+  const value = process.env[key];
+
+  return isEnvValueSet(value) ? value : undefined;
 };
 
 const splitList = (value: string | undefined): string[] | undefined =>
@@ -59,50 +103,81 @@ const isFlagEnabled = (value: string | undefined) => {
   return value === "1" || value.toLowerCase() === "true";
 };
 
-const toLanternOptions = (cliOptions?: CliOptions): LanternOptions => {
+/**
+ * A flag-style environment variable only ever turns something *on* — an unset
+ * or falsey one has to read as "not answered" so the tier below still gets a
+ * say.
+ */
+const envFlag = (value: string | undefined): true | undefined =>
+  isFlagEnabled(value) ? true : undefined;
+
+/**
+ * Resolves the options Lantern runs with: **CLI flag, then environment
+ * variable, then stored settings, then the built-in default**.
+ *
+ * Stored settings sit below the environment so that a container or a shell
+ * export still overrides what the wizard wrote on this machine.
+ */
+export const toLanternOptions = (
+  cliOptions?: CliOptions,
+  stored?: StoredOptions,
+): LanternOptions => {
   return {
-    port: Number.parseInt(cliOptions?.port ?? getOptionalEnv("PORT") ?? "3000", 10),
-    hostname: resolveBindHostname(cliOptions?.hostname, getOptionalEnv("LANTERN_HOSTNAME")),
+    port: Number.parseInt(
+      cliOptions?.port ?? getOptionalEnv("PORT") ?? stored?.port?.toString() ?? "3000",
+      10,
+    ),
+    hostname: resolveBindHostname(
+      cliOptions?.hostname,
+      getOptionalEnv("LANTERN_HOSTNAME") ?? stored?.hostname,
+    ),
     verbose:
       cliOptions?.verbose ?? (isFlagEnabled(getOptionalEnv("LANTERN_VERBOSE")) ? true : undefined),
     password: cliOptions?.password ?? getOptionalEnv("LANTERN_PASSWORD") ?? undefined,
-    executable: cliOptions?.executable ?? getOptionalEnv("LANTERN_CLAUDE_EXECUTABLE") ?? undefined,
-    claudeDir: cliOptions?.claudeDir ?? getOptionalEnv("LANTERN_CLAUDE_DIR"),
+    executable:
+      cliOptions?.executable ?? getOptionalEnv("LANTERN_CLAUDE_EXECUTABLE") ?? stored?.executable,
+    claudeDir: cliOptions?.claudeDir ?? getOptionalEnv("LANTERN_CLAUDE_DIR") ?? stored?.claudeDir,
     terminalDisabled:
       cliOptions?.terminalDisabled ??
-      (isFlagEnabled(getOptionalEnv("LANTERN_TERMINAL_DISABLED")) ? true : undefined),
+      envFlag(getOptionalEnv("LANTERN_TERMINAL_DISABLED")) ??
+      stored?.terminalDisabled,
     terminalShell:
-      cliOptions?.terminalShell ?? getOptionalEnv("LANTERN_TERMINAL_SHELL") ?? undefined,
+      cliOptions?.terminalShell ??
+      getOptionalEnv("LANTERN_TERMINAL_SHELL") ??
+      stored?.terminalShell,
     terminalUnrestricted:
       cliOptions?.terminalUnrestricted ??
-      (isFlagEnabled(getOptionalEnv("LANTERN_TERMINAL_UNRESTRICTED")) ? true : undefined),
-    apiOnly:
-      cliOptions?.apiOnly ?? (isFlagEnabled(getOptionalEnv("LANTERN_API_ONLY")) ? true : undefined),
+      envFlag(getOptionalEnv("LANTERN_TERMINAL_UNRESTRICTED")) ??
+      stored?.terminalUnrestricted,
+    apiOnly: cliOptions?.apiOnly ?? envFlag(getOptionalEnv("LANTERN_API_ONLY")) ?? stored?.apiOnly,
     sources: parseSources(cliOptions?.source ?? splitList(getOptionalEnv("LANTERN_SOURCES"))),
   };
 };
 
-const LayerImpl = Effect.gen(function* () {
-  const optionsRef = yield* Ref.make<LanternOptions>(toLanternOptions());
+const makeService = (initial: LanternOptions) =>
+  Effect.gen(function* () {
+    const optionsRef = yield* Ref.make<LanternOptions>(initial);
 
-  const loadCliOptions = (cliOptions: CliOptions) => {
-    return Effect.gen(function* () {
-      yield* Ref.update(optionsRef, () => toLanternOptions(cliOptions));
-    });
-  };
+    const loadCliOptions = (cliOptions: CliOptions, stored?: StoredOptions) => {
+      return Effect.gen(function* () {
+        yield* Ref.update(optionsRef, () => toLanternOptions(cliOptions, stored));
+      });
+    };
 
-  const getOption = <K extends keyof LanternOptions>(key: K) => {
-    return Effect.gen(function* () {
-      const lanternOptions = yield* Ref.get(optionsRef);
-      return lanternOptions[key];
-    });
-  };
+    const getOption = <K extends keyof LanternOptions>(key: K) => {
+      return Effect.gen(function* () {
+        const lanternOptions = yield* Ref.get(optionsRef);
+        return lanternOptions[key];
+      });
+    };
 
-  return {
-    loadCliOptions,
-    getOption,
-  };
-});
+    return {
+      loadCliOptions,
+      getOption,
+    };
+  });
+
+const LayerImpl = makeService(toLanternOptions());
 
 export type ILanternOptionsService = InferEffect<typeof LayerImpl>;
 
@@ -111,4 +186,17 @@ export class LanternOptionsService extends Context.Tag("LanternOptionsService")<
   ILanternOptionsService
 >() {
   static Live = Layer.effect(this, LayerImpl);
+
+  /**
+   * The same service, but already holding the answers.
+   *
+   * `Live` starts from the environment alone and expects `loadCliOptions` to
+   * follow, which only works for services that read their options lazily, on
+   * request. Anything that reads them while it is being *built* — the cache
+   * location, a source's roots — would see the pre-flag values. A command that
+   * knows its options up front provides this instead, and the whole graph is
+   * constructed with them already in place.
+   */
+  static withOptions = (cliOptions: CliOptions, stored?: StoredOptions) =>
+    Layer.effect(this, makeService(toLanternOptions(cliOptions, stored)));
 }

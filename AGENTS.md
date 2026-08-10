@@ -87,6 +87,27 @@ pnpm gatecheck check
 - `src/lib/conversation-schema/` - Zod schemas for JSONL validation
 - `src/testing/layers/` - Reusable Effect test layers (`testPlatformLayer` is the foundation)
 - `src/routes/` - TanStack Router routes
+- `src/cli/` - The interactive CLI: the `init` wizard and the `browse` board
+
+### The CLI (`src/cli/`)
+
+`lantern init` and `lantern browse` render a terminal UI with Ink (React) while driving the backend's
+Effect services directly, so they belong to neither `src/server` nor `src/web`. They sit outside both,
+which is also what the module-boundary lint rule expects — it classifies a file by whether its path
+contains `src/server` or `src/web`, and gives up on anything else, so `src/cli/**` may import from
+either side. Two rules still apply: no `@/` alias outside `src/web`, and tests colocated.
+
+Three things are worth knowing before changing it:
+
+- **Behaviour lives in pure functions**, under `browse/functions/`, `actions/planAction.ts` and
+  `init/steps.ts`. The components are wiring. A change to what a key does, which question comes next
+  or how an emulator is launched belongs in one of those, with a test, not in a `.tsx`.
+- **The read-only layer stack** in `runtime.ts` is the subset of `startServer.ts`'s graph that answers
+  questions about conversations, with nothing that listens, watches or schedules.
+- **Options must be loaded before the layers are built**, via `LanternOptionsService.withOptions`.
+  Services that resolve a path while being constructed — the source roots, the cache file — would
+  otherwise never see `--claude-dir`. The server can get away with loading them afterwards because it
+  reads them per request; a command that asks one question and exits cannot.
 
 ## Coding Standards
 

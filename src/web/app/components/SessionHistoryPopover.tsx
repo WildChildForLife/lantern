@@ -4,6 +4,7 @@ import { useAtomValue } from "jotai";
 import { CoinsIcon, HistoryIcon, MessageSquareIcon, PlusIcon } from "lucide-react";
 import { type FC, useMemo } from "react";
 import { formatLocaleDate } from "@/lib/date/formatLocaleDate";
+import { formatCost } from "@/lib/format/formatCost";
 import { createVirtualSessionEntries } from "@/lib/virtual-messages/createVirtualSessionEntries";
 import { virtualMessagesAtom } from "@/lib/virtual-messages/virtualMessageStore";
 import { Badge } from "@/web/components/ui/badge";
@@ -15,7 +16,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/web/components/ui/tooltip";
-import { formatCost } from "@/web/lib/formatCost";
 import { cn } from "@/web/utils";
 import { useConfig } from "../hooks/useConfig";
 import { useProject } from "../projects/[projectId]/hooks/useProject";

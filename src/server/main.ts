@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import packageJson from "../../package.json" with { type: "json" };
+import { maybeRunFirstRunWizard } from "../cli/firstRunWizard.ts";
+import { registerCliCommands } from "../cli/index.ts";
 import type { CliOptions } from "./core/platform/services/LanternOptionsService.ts";
 import { checkNodeVersion } from "./nodeVersionCheck.ts";
 import { startServer } from "./startServer.ts";
@@ -23,16 +25,22 @@ program
   .option("--terminal-shell <path>", "shell executable for terminal sessions")
   .option("--terminal-unrestricted", "disable restricted shell flags for bash sessions")
   .option("--api-only", "run in API-only mode without Web UI")
+  .option("--no-init", "never offer the setup wizard on a first launch")
   .option(
     "--source <id>",
     "agent CLI to read sessions from; repeat for more than one",
     (value: string, previous: string[] | undefined) => [...(previous ?? []), value],
   )
-  .action(async (options: CliOptions) => {
-    await startServer(options);
+  .action(async (options: CliOptions & { init?: boolean }) => {
+    // A first launch at a terminal walks through setup, then carries straight
+    // on into starting the server with the answers. Anything without a
+    // terminal — a container, CI, a pipe — skips it silently.
+    const stored = await maybeRunFirstRunWizard(options.claudeDir, options.init !== false);
+
+    await startServer(options, stored);
   });
 
-/* Other Commands Here */
+registerCliCommands(program);
 
 const main = async () => {
   await program.parseAsync(process.argv);

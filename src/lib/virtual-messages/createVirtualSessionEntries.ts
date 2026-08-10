@@ -1,4 +1,4 @@
-import type { CostConfidence } from "../../web/lib/formatCost.ts";
+import type { CostConfidence } from "../format/formatCost.ts";
 import type { VirtualMessage } from "./virtualMessageStore.ts";
 
 /**
