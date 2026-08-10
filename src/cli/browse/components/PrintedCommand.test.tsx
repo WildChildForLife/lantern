@@ -21,7 +21,7 @@ describe("PrintedCommandPanel", () => {
       />,
     );
 
-    expect(plain(lastFrame())).toContain("cd /home/dev/lantern");
+    expect(plain(lastFrame())).toContain(`cd "/home/dev/lantern"`);
     expect(plain(lastFrame())).toContain(`claude --resume "s-refund"`);
   });
 

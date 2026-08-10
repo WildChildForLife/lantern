@@ -1,7 +1,30 @@
 import { describe, it } from "@effect/vitest";
 import { Effect } from "effect";
 import { afterEach, expect, vi } from "vitest";
-import { LanternOptionsService, toLanternOptions } from "./LanternOptionsService.ts";
+import { isEnvValueSet, LanternOptionsService, toLanternOptions } from "./LanternOptionsService.ts";
+
+/**
+ * One rule, shared with the `init` wizard.
+ *
+ * The wizard asked this question its own way and got a different answer: it
+ * treated `export LANTERN_PASSWORD=` as a password, and so told the user that
+ * binding to `0.0.0.0` was protected when nothing was protecting it.
+ */
+describe("isEnvValueSet", () => {
+  it("counts a value as set", () => {
+    expect(isEnvValueSet("hunter2")).toBe(true);
+    expect(isEnvValueSet(" ")).toBe(true);
+  });
+
+  it("does not count an unset variable", () => {
+    expect(isEnvValueSet(undefined)).toBe(false);
+  });
+
+  /** `export FOO=` is how a profile clears a variable, not how it answers. */
+  it("does not count an exported-but-empty variable", () => {
+    expect(isEnvValueSet("")).toBe(false);
+  });
+});
 
 /**
  * The wizard writes settings that must lose to anything the operator says at
@@ -95,6 +118,18 @@ describe("toLanternOptions precedence", () => {
   /** The stored selection lives in sources.json, which this tier must not shadow. */
   it("leaves sources alone", () => {
     expect(toLanternOptions(undefined, { port: 3400 }).sources).toBeUndefined();
+  });
+
+  /**
+   * A command that listens on nothing has no port to give, and `??` would take an
+   * empty string as the answer — `Number.parseInt("")` is `NaN`, which then wins
+   * over the stored port and the default alike.
+   */
+  it("ignores a flag that was not typed", () => {
+    const options = toLanternOptions({ claudeDir: "/from/flag" }, { port: 3400 });
+
+    expect(options.port).toBe(3400);
+    expect(options.claudeDir).toBe("/from/flag");
   });
 });
 

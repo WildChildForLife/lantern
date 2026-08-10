@@ -87,4 +87,27 @@ describe("resolveLayout", () => {
       resolveLayout({ width: 160, height: 10, topicCount: 3, reservedRows: 40 }).visibleRows,
     ).toBe(1);
   });
+
+  /**
+   * The rows the board does not draw conversations into: two for the header, three
+   * for the status bar, two for a column's label and divider, two for the scroll
+   * indicators, and one kept spare so the frame never scrolls the terminal. This
+   * was a single number that came to nine when the truth was eleven, and the
+   * status bar went off the bottom of every scrolling column.
+   */
+  it("leaves room for everything drawn around the conversations", () => {
+    expect(resolveLayout({ width: 160, height: 40, topicCount: 3 }).visibleRows).toBe(30);
+  });
+
+  /** Rail plus its margin plus the pane has to fit the terminal it was given. */
+  it.each([[40], [45], [60], [70], [89]])("fits the two-pane layout into %i columns", (width) => {
+    const layout = resolveLayout({ width, height: 30, topicCount: 8 });
+
+    expect(layout.mode).toBe("two-pane");
+    expect(layout.railWidth + 2 + layout.columnWidth).toBeLessThanOrEqual(width);
+  });
+
+  it("keeps the rail wide enough to read a topic name at all", () => {
+    expect(resolveLayout({ width: 45, height: 30, topicCount: 8 }).railWidth).toBeGreaterThan(9);
+  });
 });

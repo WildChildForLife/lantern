@@ -1,5 +1,5 @@
 import { NodeContext } from "@effect/platform-node";
-import { Effect, Layer } from "effect";
+import { Effect, Layer, ManagedRuntime } from "effect";
 import { SessionAllowlistRepository } from "../server/core/claude-code/infrastructure/SessionAllowlistRepository.ts";
 import { resolveClaudeCodePath } from "../server/core/claude-code/models/ClaudeCode.ts";
 import {
@@ -56,7 +56,32 @@ const readOnlyLayer = (options: CliOptions, stored: StoredOptions) =>
   ).pipe(
     Layer.provideMerge(InfraBasics),
     Layer.provideMerge(Layer.mergeAll(cliPlatformLayer(options, stored), NodeContext.layer)),
+    // Quiet by default: the board owns the screen, and Effect's pretty logger
+    // would draw over it.
+    Layer.provideMerge(serverLoggerLayer),
   );
+
+/**
+ * The services a command uses, built once and kept for as long as it runs.
+ *
+ * Built once rather than per call because the cache is a real SQLite connection:
+ * a graph rebuilt on every re-read would open one, run the migrator, and hand
+ * back a handle nothing closes, so a long session on the board would accumulate
+ * a connection per keypress of `r`.
+ *
+ * `dispose` releases them. Every command that makes one is responsible for it.
+ */
+export const makeCliRuntime = (options: CliOptions, stored: StoredOptions) =>
+  ManagedRuntime.make(readOnlyLayer(options, stored));
+
+export type CliRuntime = ReturnType<typeof makeCliRuntime>;
+
+/** Runs one operation on a command's runtime, at the log level it asked for. */
+const run = <A, E>(
+  runtime: CliRuntime,
+  verbose: boolean | undefined,
+  effect: Effect.Effect<A, E, ManagedRuntime.ManagedRuntime.Context<CliRuntime>>,
+): Promise<A> => runtime.runPromise(effect.pipe(withServerLogLevel(verbose)));
 
 export type BoardData = {
   topics: TopicGroup[];
@@ -112,53 +137,42 @@ const loadBoardData = Effect.gen(function* () {
  * board on a machine full of conversations.
  */
 export const loadBoard = (
-  options: CliOptions,
-  stored: StoredOptions,
+  runtime: CliRuntime,
+  verbose: boolean | undefined,
   onSyncing?: () => void,
-): Promise<BoardData> => {
-  const program = Effect.gen(function* () {
-    const first = yield* loadBoardData;
-    if (first.total > 0) {
-      return first;
-    }
+): Promise<BoardData> =>
+  run(
+    runtime,
+    verbose,
+    Effect.gen(function* () {
+      const first = yield* loadBoardData;
+      if (first.total > 0) {
+        return first;
+      }
 
-    onSyncing?.();
-    const syncService = yield* SyncService;
-    yield* syncService.fullSync();
+      onSyncing?.();
+      const syncService = yield* SyncService;
+      yield* syncService.fullSync();
 
-    return yield* loadBoardData;
-  });
-
-  return Effect.runPromise(
-    program.pipe(
-      Effect.provide(readOnlyLayer(options, stored)),
-      Effect.scoped,
-      // Quiet by default: the board owns the screen, and Effect's pretty logger
-      // would draw over it.
-      withServerLogLevel(options.verbose),
-      Effect.provide(serverLoggerLayer),
-    ),
+      return yield* loadBoardData;
+    }),
   );
-};
 
 /** Re-reads conversations from disk, for the board's refresh key. */
-export const resyncBoard = (options: CliOptions, stored: StoredOptions): Promise<BoardData> => {
-  const program = Effect.gen(function* () {
-    const syncService = yield* SyncService;
-    yield* syncService.fullSync();
+export const resyncBoard = (
+  runtime: CliRuntime,
+  verbose: boolean | undefined,
+): Promise<BoardData> =>
+  run(
+    runtime,
+    verbose,
+    Effect.gen(function* () {
+      const syncService = yield* SyncService;
+      yield* syncService.fullSync();
 
-    return yield* loadBoardData;
-  });
-
-  return Effect.runPromise(
-    program.pipe(
-      Effect.provide(readOnlyLayer(options, stored)),
-      Effect.scoped,
-      withServerLogLevel(options.verbose),
-      Effect.provide(serverLoggerLayer),
-    ),
+      return yield* loadBoardData;
+    }),
   );
-};
 
 /**
  * Sorts conversations into topics with the configured agent CLI.
@@ -171,19 +185,16 @@ export const resyncBoard = (options: CliOptions, stored: StoredOptions): Promise
  * everything, and there is no multi-select to draw from.
  */
 export const classifyBoard = (
-  options: CliOptions,
-  stored: StoredOptions,
+  runtime: CliRuntime,
+  verbose: boolean | undefined,
   scope: "unclassified" | "all",
 ): Promise<ClassifyResult> =>
-  Effect.runPromise(
+  run(
+    runtime,
+    verbose,
     Effect.gen(function* () {
       const topicClassifier = yield* TopicClassifierService;
 
       return yield* topicClassifier.classify({ scope: { kind: scope } });
-    }).pipe(
-      Effect.provide(readOnlyLayer(options, stored)),
-      Effect.scoped,
-      withServerLogLevel(options.verbose),
-      Effect.provide(serverLoggerLayer),
-    ),
+    }),
   );

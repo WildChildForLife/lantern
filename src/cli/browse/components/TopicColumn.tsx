@@ -26,8 +26,13 @@ export const TopicColumn = ({ column, width, visibleRows, selectedRow, now }: To
 
   return (
     <Box flexDirection="column" width={width} marginRight={1}>
+      {/*
+        Truncated by Ink as well as by us: a label of CJK or emoji is twice as wide
+        as it is long, so clipping by character count alone lets it wrap and take
+        the column's grid with it.
+      */}
       <Box>
-        <Text color={color} bold={selectedRow !== null}>
+        <Text color={color} bold={selectedRow !== null} wrap="truncate">
           {topicGlyph(column.topic.icon)} {truncateToWidth(column.topic.label, width - 8)}
         </Text>
         <Text dimColor> {column.rows.length}</Text>

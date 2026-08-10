@@ -1,4 +1,5 @@
 import { render } from "ink";
+import { shellEscape } from "../../lib/shell/shellEscape.ts";
 import { describeClassifyOutcome } from "../../lib/topics/classifyOutcome.ts";
 import { describeMissingDirectory } from "../actions/describeMissingDirectory.ts";
 import type { ActionPlan } from "../actions/planAction.ts";
@@ -6,12 +7,20 @@ import { copyToClipboard, directoryExists, handOver } from "../actions/runAction
 import type { SharedCommandOptions } from "../commandOptions.ts";
 import type { CliConfig, ResumeAction } from "../config/cliConfig.ts";
 import { saveResumeAction } from "../config/cliConfigStore.ts";
-import { type BoardData, classifyBoard, loadBoard, resyncBoard } from "../runtime.ts";
+import {
+  type BoardData,
+  classifyBoard,
+  type CliRuntime,
+  loadBoard,
+  makeCliRuntime,
+  resyncBoard,
+} from "../runtime.ts";
 import { BrowseApp } from "./BrowseApp.tsx";
 import type { PrintedCommand } from "./components/PrintedCommand.tsx";
 import type { Status } from "./components/StatusBar.tsx";
 import { describeClassifyStatus } from "./functions/classifyMessage.ts";
 import type { ClassifyScopeKey } from "./functions/keymap.ts";
+import { createRedraw, type Redraw } from "./functions/redraw.ts";
 
 const writeOut = (text: string) => {
   process.stdout.write(text);
@@ -39,8 +48,14 @@ const missingDirectory = async (plan: ActionPlan): Promise<Status> => {
     : { text: `${describeMissingDirectory(plan.cwd, process.platform)}.`, tone: "error" };
 };
 
-/** Carries out a plan that does not need the screen. */
-const runPlan = async (plan: ActionPlan): Promise<Status> => {
+/**
+ * Carries out a plan that does not need the screen.
+ *
+ * `write` is Ink's writer, handed down from the board — see `onRun`. The clipboard
+ * escape has to go out through the renderer that owns the screen, not underneath
+ * it.
+ */
+const runPlan = async (plan: ActionPlan, write: (chunk: string) => void): Promise<Status> => {
   const gone = await missingDirectory(plan);
   if (gone !== null) {
     return gone;
@@ -48,7 +63,7 @@ const runPlan = async (plan: ActionPlan): Promise<Status> => {
 
   switch (plan.kind) {
     case "copy": {
-      const copied = await copyToClipboard(plan.text, process.platform, readEnv(), writeOut);
+      const copied = await copyToClipboard(plan.text, process.platform, readEnv(), write);
       return copied
         ? { text: `Copied the ${plan.label}.`, tone: "ok" }
         : { text: `Could not reach a clipboard.`, tone: "error" };
@@ -107,19 +122,34 @@ export const runBrowse = async (
     return 1;
   }
 
-  const cliOptions = {
-    // The board never listens on anything; these only exist because the
-    // options type is shared with the server.
-    port: "",
-    hostname: "",
-    claudeDir: options.claudeDir,
-    executable: options.executable,
-    verbose: options.verbose,
-    source: options.source,
-  };
+  // No port and no hostname: the board listens on nothing, and an empty string
+  // would win the precedence chain and resolve the port to NaN.
+  const runtime = makeCliRuntime(
+    {
+      claudeDir: options.claudeDir,
+      executable: options.executable,
+      verbose: options.verbose,
+      source: options.source,
+    },
+    stored,
+  );
 
+  try {
+    return await runBoard(options, stored, runtime);
+  } finally {
+    // Built once for the whole session, so it is closed once too — the cache is
+    // a real SQLite connection.
+    await runtime.dispose();
+  }
+};
+
+const runBoard = async (
+  options: SharedCommandOptions,
+  stored: CliConfig,
+  runtime: CliRuntime,
+): Promise<number> => {
   let syncing = false;
-  const data = await loadBoard(cliOptions, stored, () => {
+  const data = await loadBoard(runtime, options.verbose, () => {
     syncing = true;
     process.stderr.write("Reading your conversation logs for the first time…\n");
   });
@@ -140,6 +170,10 @@ export const runBrowse = async (
   const shown: { command: PrintedCommand | null } = { command: null };
   const failure: { text: string | null } = { text: null };
 
+  // Assigned once the board is rendered, because the redraw needs the instance and
+  // the instance needs the element. Until then there is nothing to redraw.
+  let redraw: Redraw | undefined;
+
   const rememberEnterAction = (action: ResumeAction) => {
     // Best effort: a settings file that cannot be written must not stop the
     // board from using the new choice for the rest of the session.
@@ -155,7 +189,7 @@ export const runBrowse = async (
    */
   const classify = async (scope: ClassifyScopeKey): Promise<Status> =>
     describeClassifyStatus(
-      describeClassifyOutcome(await classifyBoard(cliOptions, stored, scope), scope),
+      describeClassifyOutcome(await classifyBoard(runtime, options.verbose, scope), scope),
     );
 
   const refresh = () => {
@@ -164,8 +198,8 @@ export const runBrowse = async (
     }
     refreshing = true;
     failure.text = null;
-    draw();
-    void resyncBoard(cliOptions, stored)
+    redraw?.draw();
+    void resyncBoard(runtime, options.verbose)
       .then((next) => {
         board = next;
       })
@@ -177,7 +211,7 @@ export const runBrowse = async (
       })
       .finally(() => {
         refreshing = false;
-        draw();
+        redraw?.draw();
       });
   };
 
@@ -203,7 +237,7 @@ export const runBrowse = async (
         // A fresh token even for the same command, so the panel blinks on every
         // `p` rather than only when the text happens to differ.
         shown.command = { ...next, token: (shown.command?.token ?? 0) + 1 };
-        draw();
+        redraw?.draw();
       }}
     />
   );
@@ -214,18 +248,24 @@ export const runBrowse = async (
   // unmounting it, which is what keeps the user's place on the board.
   const instance = render(element(), { alternateScreen: true });
 
-  const draw = () => {
+  // Gated rather than called directly: every redraw here is reached from a
+  // callback that can outlive a quit — see `createRedraw`.
+  redraw = createRedraw(() => {
     instance.rerender(element());
-  };
+  });
 
   await instance.waitUntilExit();
+  redraw.stop();
 
   // The alternate screen has taken the board's output with it, including a
   // command the user asked to see. Printing it here is what makes `p` then `q`
-  // leave something behind to paste.
+  // leave something behind to paste — escaped, because pasting is the whole
+  // point and a project directory can carry a space or worse.
   if (shown.command !== null) {
-    writeOut(`cd ${shown.command.cwd}\n${shown.command.text}\n`);
+    writeOut(`cd ${shellEscape(shown.command.cwd)}\n${shown.command.text}\n`);
   }
 
-  return 0;
+  // A re-read that failed says so on the board while it is up; on the way out it
+  // is the exit code that carries it.
+  return failure.text === null ? 0 : 1;
 };

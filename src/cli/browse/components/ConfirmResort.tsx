@@ -2,6 +2,15 @@ import { Box, Text } from "ink";
 import { theme } from "../../ui/theme.ts";
 
 /**
+ * Rows the question takes, so the board can leave room for it.
+ *
+ * Border 2, heading 1, the explanation over two lines, a blank line, the keys, and
+ * the margin above the box. Counted generously: one row too many costs a
+ * conversation off the bottom of a column, one too few costs the status bar.
+ */
+export const CONFIRM_RESORT_HEIGHT = 8;
+
+/**
  * The one question the board asks before doing something.
  *
  * Redoing every topic throws away topics the user has already paid an agent CLI

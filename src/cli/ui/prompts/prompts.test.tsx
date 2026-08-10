@@ -1,4 +1,5 @@
 import { render } from "ink-testing-library";
+import { act } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { Confirm } from "./Confirm.tsx";
 import { MultiSelect } from "./MultiSelect.tsx";
@@ -15,6 +16,18 @@ const ESCAPE = ESC;
 /** Ink renders on the next tick, so assertions have to wait for a frame. */
 const nextFrame = () => new Promise((resolve) => setTimeout(resolve, 20));
 
+/**
+ * Ink drives React itself, so a keypress lands outside act(). Wrapped for the
+ * same reason the board's suite wraps its own: otherwise every assertion is
+ * preceded by a "not wrapped in act" warning.
+ */
+const press = async (stdin: { write: (input: string) => void }, input: string) => {
+  await act(async () => {
+    stdin.write(input);
+    await nextFrame();
+  });
+};
+
 const options = [
   { value: "first", label: "First" },
   { value: "second", label: "Second" },
@@ -27,10 +40,8 @@ describe("Select", () => {
     const { stdin } = render(<Select options={options} onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write(ARROW_DOWN);
-    await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith("second");
   });
@@ -40,8 +51,7 @@ describe("Select", () => {
     const { stdin } = render(<Select options={options} initialValue="third" onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith("third");
   });
@@ -51,10 +61,8 @@ describe("Select", () => {
     const { stdin } = render(<Select options={options} onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write(ARROW_UP);
-    await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, ARROW_UP);
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith("third");
   });
@@ -64,8 +72,7 @@ describe("Select", () => {
     const { stdin } = render(<Select options={options} onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write("t");
-    await nextFrame();
+    await press(stdin, "t");
 
     expect(onSubmit).toHaveBeenCalledWith("third");
   });
@@ -82,8 +89,7 @@ describe("Select", () => {
     );
 
     await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, ENTER);
 
     expect(onSubmit).not.toHaveBeenCalled();
   });
@@ -110,16 +116,11 @@ describe("MultiSelect", () => {
     const { stdin } = render(<MultiSelect options={options} onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write(ARROW_DOWN);
-    await nextFrame();
-    stdin.write(" ");
-    await nextFrame();
-    stdin.write(ARROW_UP);
-    await nextFrame();
-    stdin.write(" ");
-    await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, " ");
+    await press(stdin, ARROW_UP);
+    await press(stdin, " ");
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith(["first", "second"]);
   });
@@ -131,8 +132,7 @@ describe("MultiSelect", () => {
     );
 
     await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith(["third"]);
   });
@@ -144,10 +144,8 @@ describe("MultiSelect", () => {
     );
 
     await nextFrame();
-    stdin.write(" ");
-    await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, " ");
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith([]);
   });
@@ -159,10 +157,8 @@ describe("TextInput", () => {
     const { stdin } = render(<TextInput onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write("3400");
-    await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, "3400");
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith("3400");
   });
@@ -172,12 +168,9 @@ describe("TextInput", () => {
     const { stdin } = render(<TextInput onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write("3401");
-    await nextFrame();
-    stdin.write(BACKSPACE);
-    await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, "3401");
+    await press(stdin, BACKSPACE);
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith("340");
   });
@@ -188,8 +181,7 @@ describe("TextInput", () => {
     const { stdin } = render(<TextInput placeholder="~/.claude" onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith("~/.claude");
   });
@@ -201,10 +193,8 @@ describe("TextInput", () => {
     );
 
     await nextFrame();
-    stdin.write("nope");
-    await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, "nope");
+    await press(stdin, ENTER);
 
     expect(onSubmit).not.toHaveBeenCalled();
     expect(lastFrame()).toContain("that is not a port");
@@ -215,8 +205,7 @@ describe("TextInput", () => {
     const { stdin } = render(<TextInput onSubmit={vi.fn()} onCancel={onCancel} />);
 
     await nextFrame();
-    stdin.write(ESCAPE);
-    await nextFrame();
+    await press(stdin, ESCAPE);
 
     expect(onCancel).toHaveBeenCalled();
   });
@@ -228,8 +217,7 @@ describe("Confirm", () => {
     const { stdin } = render(<Confirm onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith(true);
   });
@@ -239,8 +227,7 @@ describe("Confirm", () => {
     const { stdin } = render(<Confirm initialValue={false} onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write(ENTER);
-    await nextFrame();
+    await press(stdin, ENTER);
 
     expect(onSubmit).toHaveBeenCalledWith(false);
   });
@@ -250,8 +237,7 @@ describe("Confirm", () => {
     const { stdin } = render(<Confirm onSubmit={onSubmit} />);
 
     await nextFrame();
-    stdin.write("n");
-    await nextFrame();
+    await press(stdin, "n");
 
     expect(onSubmit).toHaveBeenCalledWith(false);
   });

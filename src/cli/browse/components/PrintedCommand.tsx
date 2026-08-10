@@ -1,4 +1,5 @@
 import { Box, Text } from "ink";
+import { shellEscape } from "../../../lib/shell/shellEscape.ts";
 import { theme } from "../../ui/theme.ts";
 import { useFlash } from "../functions/useFlash.ts";
 
@@ -46,8 +47,13 @@ export const PrintedCommandPanel = ({
       <Text dimColor wrap="truncate">
         resume command · p on another conversation replaces it
       </Text>
+      {/*
+        Escaped, like the session id in the command below it. This panel exists to
+        be pasted: a project directory with a space in it would break the line, and
+        one with a `;` in it would run whatever came after.
+      */}
       <Text color={lit ? "cyan" : undefined} dimColor={!lit} wrap="truncate">
-        cd {printed.cwd}
+        cd {shellEscape(printed.cwd)}
       </Text>
       <Text color={lit ? theme.accent : undefined} dimColor={!lit} wrap="truncate">
         {printed.text}

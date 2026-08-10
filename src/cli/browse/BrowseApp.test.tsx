@@ -62,35 +62,34 @@ const conversations = [
   conversation("s-router", "net", "Router DHCP", "codex"),
 ];
 
+/**
+ * Renders the board, and hands back the props it was actually given.
+ *
+ * The handlers are read off `props` rather than closed over, because an override
+ * replaces them: returning the defaults would hand a test a spy the component
+ * never saw, and an assertion against a never-called spy passes for the wrong
+ * reason.
+ */
 const setup = (overrides?: Partial<BrowseAppProps>) => {
-  const onRun = vi.fn().mockResolvedValue({ text: "done", tone: "ok" });
-  const onResume = vi.fn().mockResolvedValue({ text: "Back from the session.", tone: "info" });
-  const onRefresh = vi.fn();
-  const onDefaultActionChange = vi.fn();
-  const onPrint = vi.fn();
-  const onClassify = vi.fn().mockResolvedValue({ text: "Sorted 2 into topics.", tone: "ok" });
+  const props: BrowseAppProps = {
+    topics,
+    conversations,
+    total: conversations.length,
+    interactiveSources: ["claude-code"],
+    executable: undefined,
+    defaultAction: "resume-here",
+    onDefaultActionChange: vi.fn(),
+    now: new Date("2026-08-07T00:00:00.000Z"),
+    onRun: vi.fn().mockResolvedValue({ text: "done", tone: "ok" }),
+    onResume: vi.fn().mockResolvedValue({ text: "Back from the session.", tone: "info" }),
+    onRefresh: vi.fn(),
+    onClassify: vi.fn().mockResolvedValue({ text: "Sorted 2 into topics.", tone: "ok" }),
+    onPrint: vi.fn(),
+    refreshing: false,
+    ...overrides,
+  };
 
-  const result = render(
-    <BrowseApp
-      topics={topics}
-      conversations={conversations}
-      total={conversations.length}
-      interactiveSources={["claude-code"]}
-      executable={undefined}
-      defaultAction="resume-here"
-      onDefaultActionChange={onDefaultActionChange}
-      now={new Date("2026-08-07T00:00:00.000Z")}
-      onRun={onRun}
-      onResume={onResume}
-      onRefresh={onRefresh}
-      onClassify={onClassify}
-      onPrint={onPrint}
-      refreshing={false}
-      {...overrides}
-    />,
-  );
-
-  return { ...result, onRun, onResume, onRefresh, onDefaultActionChange, onPrint, onClassify };
+  return { ...render(<BrowseApp {...props} />), ...props };
 };
 
 describe("BrowseApp", () => {
@@ -125,7 +124,10 @@ describe("BrowseApp", () => {
     await nextFrame();
     await press(stdin, "c");
 
-    expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "copy", text: "s-refund" }));
+    expect(onRun).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "copy", text: "s-refund" }),
+      expect.any(Function),
+    );
   });
 
   /** Printing used to end the session; it is shown on the board instead now. */
@@ -162,7 +164,7 @@ describe("BrowseApp", () => {
     await nextFrame();
 
     expect(plain(lastFrame())).toContain(`claude --resume "s-refund"`);
-    expect(plain(lastFrame())).toContain("cd /home/dev/lantern");
+    expect(plain(lastFrame())).toContain(`cd "/home/dev/lantern"`);
   });
 
   it("lends the terminal to claude when resuming in place", async () => {
@@ -193,7 +195,10 @@ describe("BrowseApp", () => {
     );
 
     await press(stdin, "c");
-    expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ text: "s-checkout" }));
+    expect(onRun).toHaveBeenCalledWith(
+      expect.objectContaining({ text: "s-checkout" }),
+      expect.any(Function),
+    );
   });
 
   it("keeps the filter that was in force before the session", async () => {
@@ -238,7 +243,10 @@ describe("BrowseApp", () => {
     await press(stdin, ARROW_RIGHT);
     await press(stdin, "R");
 
-    expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "refused" }));
+    expect(onRun).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "refused" }),
+      expect.any(Function),
+    );
   });
 
   /** The header already says what Enter does; a menu of the same three repeats it. */
@@ -256,7 +264,10 @@ describe("BrowseApp", () => {
     await press(stdin, ARROW_RIGHT);
     await press(stdin, ENTER);
 
-    expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "refused" }));
+    expect(onRun).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "refused" }),
+      expect.any(Function),
+    );
   });
 
   it("narrows the board as the filter is typed", async () => {
@@ -284,7 +295,7 @@ describe("BrowseApp", () => {
     await press(stdin, "?");
 
     expect(lastFrame()).toContain("Keys");
-    expect(lastFrame()).toContain("resume here, and come back to the board after");
+    expect(lastFrame()).toContain("resume here, come back after");
   });
 
   /** The key list is what people go to; a removed action must not still be in it. */
@@ -426,6 +437,7 @@ describe("BrowseApp", () => {
 
     expect(onRun).toHaveBeenCalledWith(
       expect.objectContaining({ kind: "copy", text: "s-checkout" }),
+      expect.any(Function),
     );
   });
 
@@ -486,7 +498,10 @@ describe("BrowseApp", () => {
     await press(stdin, "e");
     await press(stdin, ENTER);
 
-    expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "copy" }));
+    expect(onRun).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "copy" }),
+      expect.any(Function),
+    );
   });
 
   /**
@@ -501,6 +516,9 @@ describe("BrowseApp", () => {
     await nextFrame();
     await press(stdin, "R");
 
-    expect(onRun).toHaveBeenCalledWith(expect.objectContaining({ kind: "refused" }));
+    expect(onRun).toHaveBeenCalledWith(
+      expect.objectContaining({ kind: "refused" }),
+      expect.any(Function),
+    );
   });
 });

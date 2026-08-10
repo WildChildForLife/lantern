@@ -42,7 +42,12 @@ export const TwoPane = ({ columns, layout, columnIndex, rowIndex, now }: TwoPane
 
           return (
             <Box key={column.topic.id}>
-              <Text color={focused ? topicColor(column.topic.id) : undefined} bold={focused}>
+              {/* Same reason as the board's labels: Ink measures the display width. */}
+              <Text
+                color={focused ? topicColor(column.topic.id) : undefined}
+                bold={focused}
+                wrap="truncate"
+              >
                 {focused ? "❯ " : "  "}
                 {topicGlyph(column.topic.icon)}{" "}
                 {truncateToWidth(column.topic.label, layout.railWidth - 8)}

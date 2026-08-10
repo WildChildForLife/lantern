@@ -4,8 +4,16 @@ import { type SourceId, sourceIdSchema } from "../../source/models/SourceId.ts";
 import { resolveBindHostname } from "../resolveBindHostname.ts";
 
 export type CliOptions = {
-  port: string;
-  hostname: string;
+  /**
+   * Optional because a flag that was not typed is absent, not empty.
+   *
+   * Commander already hands these over as `undefined` when the flag is missing,
+   * and the CLI commands that listen on nothing have no value to give at all —
+   * an empty string here is not nullish, so it would win the precedence chain
+   * below and resolve the port to `NaN`.
+   */
+  port?: string | undefined;
+  hostname?: string | undefined;
   verbose?: boolean | undefined;
   password?: string | undefined;
   executable?: string | undefined;
@@ -52,18 +60,26 @@ export type LanternOptions = {
 };
 
 /**
- * An environment variable, treating an exported-but-empty one as unset.
+ * The one rule for whether a variable was set: an exported-but-empty one is not.
  *
  * `export LANTERN_HOSTNAME=` is how a shell profile clears a variable, not how
  * it answers a question — and `??` would otherwise let that empty string
  * shadow the stored settings underneath it.
+ *
+ * Exported because the `init` wizard has to answer the same question about
+ * `LANTERN_PASSWORD` before it will call a `0.0.0.0` bind protected. Asking it
+ * two different ways is how the wizard came to tell people an open bind had a
+ * password on it when the password was an empty string.
  */
+export const isEnvValueSet = (value: string | undefined): boolean =>
+  value !== undefined && value !== "";
+
 const getOptionalEnv = (key: string): string | undefined => {
   // biome-ignore lint/style/noProcessEnv: allow only here
   // oxlint-disable-next-line node/no-process-env -- configuration boundary
   const value = process.env[key];
 
-  return value === undefined || value === "" ? undefined : value;
+  return isEnvValueSet(value) ? value : undefined;
 };
 
 const splitList = (value: string | undefined): string[] | undefined =>

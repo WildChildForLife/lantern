@@ -8,7 +8,7 @@ import type { CliConfig } from "../config/cliConfig.ts";
 import { CliConfigBaseDir, getCliConfigPath, writeCliConfig } from "../config/cliConfigStore.ts";
 import { loadEnabledSources } from "../config/loadEnabledSources.ts";
 import { loadStoredOptions } from "../config/loadStoredOptions.ts";
-import { resyncBoard } from "../runtime.ts";
+import { makeCliRuntime, resyncBoard } from "../runtime.ts";
 import { detectEnvironment } from "./detect.ts";
 import { InitWizard, type WizardAnswers } from "./InitWizard.tsx";
 
@@ -90,13 +90,17 @@ export const runInit = async (options: SharedCommandOptions): Promise<CliConfig 
 
   if (answers.runSync) {
     process.stdout.write("Reading your conversation logs…\n");
-    const board = await resyncBoard(
-      { port: "", hostname: "", claudeDir: config.claudeDir },
-      config,
-    );
-    process.stdout.write(
-      `Found ${board.total} conversations across ${board.topics.length} topics.\n`,
-    );
+    const runtime = makeCliRuntime({ claudeDir: config.claudeDir }, config);
+
+    try {
+      const board = await resyncBoard(runtime, undefined);
+      process.stdout.write(
+        `Found ${board.total} conversations across ${board.topics.length} topics.\n`,
+      );
+    } finally {
+      // The read opened the cache; the wizard is about to exit, so close it.
+      await runtime.dispose();
+    }
   }
 
   process.stdout.write(

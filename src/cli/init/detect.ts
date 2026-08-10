@@ -4,6 +4,7 @@ import { Effect, Layer } from "effect";
 import { resolveClaudeCodePath } from "../../server/core/claude-code/models/ClaudeCode.ts";
 import { ApplicationContext } from "../../server/core/platform/services/ApplicationContext.ts";
 import { EnvService } from "../../server/core/platform/services/EnvService.ts";
+import { isEnvValueSet } from "../../server/core/platform/services/LanternOptionsService.ts";
 import type { SourceId } from "../../server/core/source/models/SourceId.ts";
 import { ALL_SOURCE_ADAPTERS } from "../../server/core/source/services/SourceRegistry.ts";
 import { cliPlatformLayer } from "../platformLayer.ts";
@@ -85,14 +86,14 @@ export const detectEnvironment = (claudeDir?: string): Promise<Detection> => {
       claudeDirectory: paths.globalClaudeDirectoryPath,
       executable,
       terminalAvailable: yield* detectTerminalSupport,
-      passwordSet: (yield* envService.getEnv("LANTERN_PASSWORD")) !== undefined,
+      // The same rule the server resolves options by: an exported-but-empty
+      // variable is not a password, and calling it one is how the wizard used to
+      // green-light an open bind with no authentication behind it.
+      passwordSet: isEnvValueSet(yield* envService.getEnv("LANTERN_PASSWORD")),
     };
   });
 
-  const detectLayer = Layer.mergeAll(
-    cliPlatformLayer({ port: "", hostname: "", claudeDir }, {}),
-    NodeContext.layer,
-  );
+  const detectLayer = Layer.mergeAll(cliPlatformLayer({ claudeDir }, {}), NodeContext.layer);
 
   return Effect.runPromise(program.pipe(Effect.provide(detectLayer), Effect.scoped));
 };

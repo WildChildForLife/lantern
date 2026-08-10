@@ -216,6 +216,30 @@ describe("InitWizard", () => {
     expect(lastFrame()).toContain("is password-protected");
   });
 
+  /**
+   * The claim and the default both hang off one flag, so the flag is what has to
+   * be right — `detect.ts` now answers it with the same rule the server resolves
+   * options by, where an exported-but-empty variable is not a password. This
+   * pins the consequence: with no password, the wizard neither says the bind is
+   * protected nor defaults the answer to yes.
+   */
+  it("does not claim protection, or default to yes, without a password", async () => {
+    const { stdin, lastFrame } = setup({ passwordSet: false });
+    await nextFrame();
+    await acceptAll(stdin, 4);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ARROW_DOWN);
+    await press(stdin, ENTER);
+
+    expect(lastFrame()).not.toContain("is password-protected");
+
+    // Enter takes the highlighted answer, and the highlighted answer is "no".
+    await press(stdin, ENTER);
+
+    expect(lastFrame()).toContain("Which address should it bind to?");
+  });
+
   it("keeps a bind address the user insisted on", async () => {
     const { stdin, onDone } = setup();
     await nextFrame();
@@ -230,14 +254,21 @@ describe("InitWizard", () => {
     expect(onDone).toHaveBeenCalledWith(expect.objectContaining({ hostname: "0.0.0.0" }));
   });
 
-  /** Enter-through on a re-run must not quietly rewrite what is already stored. */
+  /**
+   * Enter-through on a re-run must not quietly rewrite what is already stored.
+   *
+   * `claude-code` among the sources on purpose: without it the wizard skips the
+   * claude directory and the executable entirely, so a version of this test that
+   * stored `["codex"]` passed on initial state that was never asked about — it
+   * proved nothing about the two answers it named.
+   */
   it("keeps stored answers rather than the detected ones", async () => {
     const onDone = vi.fn();
     const { stdin } = render(
       <InitWizard
         detection={detection}
         initial={{
-          sources: ["codex"],
+          sources: ["claude-code", "codex"],
           claudeDir: "/mnt/backup/claude",
           executable: "/opt/claude",
         }}
@@ -246,14 +277,27 @@ describe("InitWizard", () => {
     );
 
     await nextFrame();
-    await acceptAll(stdin, 6);
+    await acceptAll(stdin, 8);
 
     expect(onDone).toHaveBeenCalledWith(
       expect.objectContaining({
-        sources: ["codex"],
+        sources: ["claude-code", "codex"],
         claudeDir: "/mnt/backup/claude",
         executable: "/opt/claude",
       }),
     );
+  });
+
+  /** The skip itself is worth pinning: no Claude Code, no questions about it. */
+  it("does not ask about the claude directory when Claude Code is not being read", async () => {
+    const onDone = vi.fn();
+    const { stdin, lastFrame } = render(
+      <InitWizard detection={detection} initial={{ sources: ["codex"] }} onDone={onDone} />,
+    );
+
+    await nextFrame();
+    await press(stdin, ENTER);
+
+    expect(lastFrame()).not.toContain("Claude Code keep its logs");
   });
 });

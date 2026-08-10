@@ -7,7 +7,7 @@ import { TextInput } from "../ui/prompts/TextInput.tsx";
 import { theme } from "../ui/theme.ts";
 import { Board } from "./components/Board.tsx";
 import { CLASSIFY_CALLOUT_HEIGHT, ClassifyCallout } from "./components/ClassifyCallout.tsx";
-import { ConfirmResort } from "./components/ConfirmResort.tsx";
+import { CONFIRM_RESORT_HEIGHT, ConfirmResort } from "./components/ConfirmResort.tsx";
 import { HelpOverlay } from "./components/HelpOverlay.tsx";
 import {
   type PrintedCommand,
@@ -32,8 +32,15 @@ export type BrowseAppProps = {
   /** Remembers a new choice of what Enter does, so it survives the session. */
   onDefaultActionChange: (action: ResumeAction) => void;
   now: Date;
-  /** Runs a plan that can be carried out without giving up the screen. */
-  onRun: (plan: ActionPlan) => Promise<Status>;
+  /**
+   * Runs a plan that can be carried out without giving up the screen.
+   *
+   * `write` is Ink's own writer, not `process.stdout`. Copying puts an OSC 52
+   * escape on the wire, and a terminal that neither honours nor strips it prints
+   * the payload as text — inside the board, under a renderer that is counting
+   * its own rows. Ink erases the frame, writes, and redraws around it.
+   */
+  onRun: (plan: ActionPlan, write: (chunk: string) => void) => Promise<Status>;
   /**
    * Runs the session, with the terminal already handed over to it.
    *
@@ -63,10 +70,21 @@ export type BrowseAppProps = {
    */
   printed?: PrintedCommand | null | undefined;
   onPrint?: ((printed: { cwd: string; text: string }) => void) | undefined;
+  /**
+   * The size to lay out for, when it is not the size the terminal reports.
+   *
+   * The board sizes itself to the screen, so "does what it drew fit" is a real
+   * question with a real answer — and one worth asking at several sizes, which
+   * means asking without a terminal of that size to hand.
+   */
+  terminal?: { columns: number; rows: number } | undefined;
 };
 
 const clamp = (value: number, max: number): number =>
   Math.min(Math.max(0, value), Math.max(0, max));
+
+/** The filter line, plus the blank line under it. */
+const FILTER_HEIGHT = 2;
 
 /**
  * The board, in a terminal.
@@ -93,9 +111,10 @@ export const BrowseApp = ({
   refreshError,
   printed,
   onPrint,
+  terminal,
 }: BrowseAppProps) => {
   const { exit, suspendTerminal } = useApp();
-  const { stdout } = useStdout();
+  const { stdout, write } = useStdout();
   const [columnIndex, setColumnIndex] = useState(0);
   const [rowIndex, setRowIndex] = useState(0);
   const [filter, setFilter] = useState("");
@@ -109,8 +128,8 @@ export const BrowseApp = ({
     [topics, conversations, filter],
   );
 
-  const width = stdout?.columns ?? 100;
-  const height = stdout?.rows ?? 30;
+  const width = terminal?.columns ?? stdout?.columns ?? 100;
+  const height = terminal?.rows ?? stdout?.rows ?? 30;
 
   // Always shown once the count is known, whatever the count is: a key that only
   // appears on the day it becomes relevant is a key nobody knows exists.
@@ -120,11 +139,14 @@ export const BrowseApp = ({
     width,
     height,
     topicCount: columns.length,
-    // Everything drawn under the board has to be counted, or the status bar goes
-    // off the bottom of a screen the board has already filled.
+    // Everything drawn around the board has to be counted, or the status bar goes
+    // off the bottom of a screen the board has already filled. The help overlay is
+    // absent from this sum because it replaces the board rather than joining it.
     reservedRows:
       (printed === null || printed === undefined ? 0 : PRINTED_COMMAND_HEIGHT) +
-      (calloutVisible ? CLASSIFY_CALLOUT_HEIGHT : 0),
+      (calloutVisible ? CLASSIFY_CALLOUT_HEIGHT : 0) +
+      (mode === "filter" ? FILTER_HEIGHT : 0) +
+      (mode === "confirm-resort" ? CONFIRM_RESORT_HEIGHT : 0),
   });
 
   const safeColumnIndex = clamp(columnIndex, columns.length - 1);
@@ -173,7 +195,7 @@ export const BrowseApp = ({
       setStatus({ text: "…", tone: "info" });
       // Same reason as the refresh path: an unhandled rejection here would kill
       // the process with the terminal still in raw mode.
-      void onRun(plan)
+      void onRun(plan, write)
         .then((result) => {
           setStatus(result);
 
@@ -187,7 +209,7 @@ export const BrowseApp = ({
           setStatus({ text: String(error), tone: "error" });
         });
     },
-    [buildPlan, onPrint, onRefresh, onResume, onRun, suspendTerminal],
+    [buildPlan, onPrint, onRefresh, onResume, onRun, suspendTerminal, write],
   );
 
   const classify = useCallback(
@@ -333,7 +355,15 @@ export const BrowseApp = ({
 
       {/* Takes the slack, so everything below it sits at the bottom of the screen. */}
       <Box flexDirection="column" flexGrow={1}>
-        {columns.length === 0 ? (
+        {/*
+          The key list takes the board's place rather than stacking under it. It is
+          twenty-odd rows on its own: shown as well as the board, it pushed
+          everything below it off a twenty-four-row terminal, which is the size the
+          list is most wanted on.
+        */}
+        {mode === "help" ? (
+          <HelpOverlay />
+        ) : columns.length === 0 ? (
           <Text color={theme.muted}>
             {filter === "" ? "No conversations found." : `Nothing matches "${filter}".`}
           </Text>
@@ -359,12 +389,6 @@ export const BrowseApp = ({
       {mode === "confirm-resort" ? (
         <Box marginTop={1}>
           <ConfirmResort count={conversations.length} />
-        </Box>
-      ) : null}
-
-      {mode === "help" ? (
-        <Box marginTop={1}>
-          <HelpOverlay />
         </Box>
       ) : null}
 
