@@ -80,6 +80,7 @@ const setup = (overrides?: Partial<BrowseAppProps>) => {
       terminalCommand={undefined}
       emulator="kitty"
       platform="linux"
+      wsl={false}
       now={new Date("2026-08-07T00:00:00.000Z")}
       onRun={onRun}
       onLeave={onLeave}
