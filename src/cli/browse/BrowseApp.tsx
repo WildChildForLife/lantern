@@ -287,26 +287,30 @@ export const BrowseApp = ({
         <Text color={theme.accent} bold>
           Lantern
         </Text>
-        <Text dimColor>
-          {"  "}
-          {columns.length} topics · {conversations.length} conversations
-          {truncated ? ` of ${total}` : ""}
-          {refreshing ? " · refreshing" : ""}
-        </Text>
-        {/* Only worth a word when there is something to sort, or a pass running. */}
-        {classifying ? (
-          <Text color={theme.accent}> · sorting topics…</Text>
-        ) : unclassified !== undefined && unclassified > 0 ? (
-          <Text>
-            <Text dimColor> · </Text>
-            <Text color={theme.accent}>{unclassified} unsorted</Text>
-            <Text dimColor> (t)</Text>
+        {/*
+          One truncating line rather than a row of separate Texts. Separate ones
+          wrap independently on a narrow terminal, which split "Lantern" down the
+          middle and broke the unsorted count in half — the counts are worth
+          losing the tail of the line for, not worth two mangled rows of header.
+        */}
+        <Text wrap="truncate">
+          <Text dimColor>
+            {"  "}
+            {columns.length} topics · {conversations.length} conversations
+            {truncated ? ` of ${total}` : ""}
+            {refreshing ? " · refreshing" : ""}
           </Text>
-        ) : null}
-        <Text>
-          <Text dimColor>{"  ·  enter: "}</Text>
+          {/* Only worth a word when there is something to sort, or a pass running. */}
+          {classifying ? (
+            <Text color={theme.accent}> · sorting topics…</Text>
+          ) : unclassified !== undefined && unclassified > 0 ? (
+            <Text>
+              <Text dimColor> · </Text>
+              <Text color={theme.accent}>{unclassified} unsorted</Text>
+            </Text>
+          ) : null}
+          <Text dimColor>{" · enter: "}</Text>
           <Text color={theme.accent}>{RESUME_ACTION_LABELS[enterAction]}</Text>
-          <Text dimColor> (e to change)</Text>
         </Text>
       </Box>
 

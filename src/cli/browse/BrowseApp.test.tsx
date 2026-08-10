@@ -422,7 +422,29 @@ describe("BrowseApp", () => {
     await nextFrame();
 
     expect(plain(lastFrame())).toContain("enter: resume here");
-    expect(plain(lastFrame())).toContain("e to change");
+  });
+
+  /**
+   * The header used to be a row of separate Texts, each wrapping on its own,
+   * which split "Lantern" down the middle on a narrow terminal and broke the
+   * unsorted count across two rows.
+   */
+  it("keeps the header on one line", async () => {
+    const { lastFrame } = setup({ unclassified: 69, total: 900 });
+    await nextFrame();
+
+    const header = plain(lastFrame()).split("\n")[0] ?? "";
+
+    expect(header).toContain("Lantern");
+    expect(header).toContain("69 unsorted");
+  });
+
+  /** `e` is on the key line and in the help; the header only says what Enter does now. */
+  it("does not spend header width teaching the key", async () => {
+    const { lastFrame } = setup();
+    await nextFrame();
+
+    expect(plain(lastFrame())).not.toContain("e to change");
   });
 
   it("cycles what Enter does, and remembers it", async () => {
