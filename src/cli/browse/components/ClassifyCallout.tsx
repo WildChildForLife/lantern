@@ -11,6 +11,13 @@ type ClassifyCalloutProps = {
   classifying: boolean;
 };
 
+/** The key, drawn as a key rather than as another word in a sentence. */
+const Key = ({ label }: { label: string }) => (
+  <Text color={theme.accent} inverse bold>
+    {` ${label} `}
+  </Text>
+);
+
 /**
  * The one line on the board that asks for something rather than reporting it.
  *
@@ -19,8 +26,11 @@ type ClassifyCalloutProps = {
  * Listed among the movement keys it read as one of them — so it gets its own row,
  * its own colour and the key drawn as a key.
  *
- * It disappears when there is nothing to sort. A standing invitation to spend a
- * CLI call on an empty pass is worse than no invitation at all.
+ * The row is always here, whatever the state. Hiding it when there was nothing
+ * pending was the first thing tried and it was a mistake: a key nobody can find
+ * until the day it becomes relevant is a key nobody knows exists. What changes
+ * with the state is which key it leads with — `t` when there is something to
+ * sort, `T` when the only sort left to do is a re-sort of everything.
  */
 export const ClassifyCallout = ({ unclassified, classifying }: ClassifyCalloutProps) => {
   if (classifying) {
@@ -35,15 +45,22 @@ export const ClassifyCallout = ({ unclassified, classifying }: ClassifyCalloutPr
     );
   }
 
+  // Nothing pending. Still says where sorting lives, but leads with the key that
+  // would actually do something rather than inviting an empty pass.
   if (unclassified <= 0) {
-    return null;
+    return (
+      <Box>
+        <Text color={theme.ok}>✓ </Text>
+        <Text dimColor>every conversation has a topic · </Text>
+        <Key label="T" />
+        <Text dimColor> re-sorts all of them with the AI</Text>
+      </Box>
+    );
   }
 
   return (
     <Box>
-      <Text color={theme.accent} inverse bold>
-        {" t "}
-      </Text>
+      <Key label="t" />
       <Text color={theme.accent} bold>
         {" "}
         sort {unclassified} {unclassified === 1 ? "conversation" : "conversations"} into topics

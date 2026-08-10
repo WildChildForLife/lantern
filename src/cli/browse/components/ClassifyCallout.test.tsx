@@ -33,11 +33,24 @@ describe("ClassifyCallout", () => {
     expect(lastFrame()).toContain(`${ESC}[1m`);
   });
 
-  /** A standing invitation to spend a CLI call on an empty pass is worse than none. */
-  it("says nothing when every conversation already has a topic", () => {
+  /**
+   * Hiding the row when nothing was pending was tried first and was a mistake:
+   * a key nobody can find until the day it matters is a key nobody knows about.
+   * With nothing pending it leads with T, which would actually do something,
+   * rather than inviting an empty pass.
+   */
+  it("still says where sorting lives when every conversation has a topic", () => {
     const { lastFrame } = render(<ClassifyCallout unclassified={0} classifying={false} />);
 
-    expect(plain(lastFrame())).not.toContain("sort");
+    expect(plain(lastFrame())).toContain("every conversation has a topic");
+    expect(plain(lastFrame())).toContain("T");
+    expect(plain(lastFrame())).toContain("re-sorts all of them");
+  });
+
+  it("does not invite a pass over nothing", () => {
+    const { lastFrame } = render(<ClassifyCallout unclassified={0} classifying={false} />);
+
+    expect(plain(lastFrame())).not.toContain("sort 0");
   });
 
   it("becomes the progress line while a pass runs", () => {

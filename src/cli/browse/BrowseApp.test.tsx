@@ -387,12 +387,13 @@ describe("BrowseApp", () => {
     expect(lines[keys]).not.toContain("sort");
   });
 
-  /** A standing invitation to spend a CLI call on an empty pass is worse than none. */
-  it("says nothing about sorting when everything has a topic", async () => {
+  /** The row stays, so the key is findable on a board with nothing left to sort. */
+  it("still shows where sorting lives when everything has a topic", async () => {
     const { lastFrame } = setup({ unclassified: 0 });
     await nextFrame();
 
-    expect(plain(lastFrame())).not.toContain("into topics");
+    expect(plain(lastFrame())).toContain("every conversation has a topic");
+    expect(plain(lastFrame())).not.toContain("sort 0");
   });
 
   it("asks for a re-read on r", async () => {

@@ -313,11 +313,15 @@ replaces it and blinks so you can see that it changed, and whatever is on show i
 on the way out, so `p` then `q` leaves something behind to paste.
 
 `t` sorts conversations into topics with the configured agent CLI — the same pass the web UI's
-buttons start, run against the same local cache. The header says how many have no topic yet, so you
-can see whether there is anything to sort before spending a CLI call on finding out, and the board
-re-reads the logs when the pass ends so the new topics appear without pressing `r`. `T` is the
-terminal's "Redo all": it throws every stored topic away and files everything again, and because
-that spends a pass on conversations already filed it asks first — only `y` goes ahead.
+buttons start, run against the same local cache. It has a row of its own above the key line, because
+it is the one key on the board that spends a CLI call, and it says how many conversations are waiting
+so you can see whether there is anything to sort before finding out the expensive way. The board
+re-reads the logs when the pass ends, so the new topics appear without pressing `r`.
+
+`T` is the terminal's "Redo all": every stored topic thrown away and everything filed again. It asks
+first — only `y` goes ahead — because it spends a pass on conversations that were already filed. When
+nothing is waiting to be sorted the row says so and offers `T`, rather than disappearing: a key that
+only shows up on the day it becomes relevant is a key nobody knows is there.
 
 The header shows what `enter` will do; `e` cycles through resuming here, showing the command and
 copying the id, and remembers the choice for next time. Enter then does exactly that — there is no

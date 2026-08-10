@@ -112,7 +112,9 @@ export const BrowseApp = ({
   const width = stdout?.columns ?? 100;
   const height = stdout?.rows ?? 30;
 
-  const calloutVisible = classifying || (unclassified !== undefined && unclassified > 0);
+  // Always shown once the count is known, whatever the count is: a key that only
+  // appears on the day it becomes relevant is a key nobody knows exists.
+  const calloutVisible = classifying || unclassified !== undefined;
 
   const layout = resolveLayout({
     width,
