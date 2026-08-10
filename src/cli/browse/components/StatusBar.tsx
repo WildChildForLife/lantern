@@ -1,7 +1,7 @@
 import { Box, Text } from "ink";
-import { formatCost } from "../../../lib/format/formatCost.ts";
 import { theme } from "../../ui/theme.ts";
 import type { BoardRow } from "../functions/buildColumns.ts";
+import { statusFields } from "../functions/statusFields.ts";
 
 export type Status = {
   text: string;
@@ -21,6 +21,28 @@ const TONE_COLOR = {
 } as const;
 
 /**
+ * The selected conversation's detail, a colour per fact.
+ *
+ * Which fact gets which colour is `statusFields`' decision; this only draws it,
+ * with the separators left dim so they read as structure rather than as another
+ * field.
+ */
+const ConversationDetail = ({ row }: { row: BoardRow }) => (
+  <Text wrap="truncate">
+    {statusFields(row).map((field, index) => (
+      <Text key={field.name}>
+        {index === 0 ? "" : <Text dimColor> · </Text>}
+        {field.color === null ? (
+          <Text dimColor>{field.text}</Text>
+        ) : (
+          <Text color={field.color}>{field.text}</Text>
+        )}
+      </Text>
+    ))}
+  </Text>
+);
+
+/**
  * The line under the board.
  *
  * Everything a row cannot spare the width for — the project, the model, what
@@ -34,11 +56,7 @@ export const StatusBar = ({ row, status, width }: StatusBarProps) => (
         row === undefined ? (
           <Text dimColor>No conversation selected</Text>
         ) : (
-          <Text dimColor wrap="truncate">
-            {row.projectPath ?? row.projectName ?? "unknown project"} · {row.source} ·{" "}
-            {row.modelName ?? "unknown model"} · {formatCost(row.totalCostUsd, row.costConfidence)}{" "}
-            · {row.messageCount} messages · {row.sessionId}
-          </Text>
+          <ConversationDetail row={row} />
         )
       ) : (
         <Text color={TONE_COLOR[status.tone]}>{status.text}</Text>
