@@ -235,6 +235,7 @@ from either are welcome.
 ```bash
 lantern browse             # the board, in your terminal
 lantern init               # set Lantern up, and remember the answers
+lantern upgrade            # move to the latest release
 lantern [options]          # start the web UI
 ```
 
@@ -242,6 +243,12 @@ lantern [options]          # start the web UI
 `--verbose` from the [options](#options) table. `init` takes `--claude-dir`. Either works on both
 sides of the command name — `lantern browse --claude-dir …` and `lantern --claude-dir … browse` mean
 the same thing.
+
+`upgrade` works out how Lantern was installed and runs your package manager's own install command —
+`npm`, `pnpm`, `yarn` or `bun`, whichever put it there. Anything it did not install itself it leaves
+alone and prints the command that would upgrade it: Homebrew, Docker, a git checkout, a `.deb` or
+`.rpm`, or a global prefix this user cannot write to. `--check` reports what is available and
+`--dry-run` shows the command without running it; neither changes anything.
 
 ## The board in your terminal
 
