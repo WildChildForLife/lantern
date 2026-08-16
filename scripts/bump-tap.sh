@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# Points the Homebrew formula and the AUR PKGBUILD at a published npm release.
+# Points the Homebrew formula at a published npm release.
 #
 #   scripts/bump-tap.sh <version>
 #
-# Both recipes install from the npm tarball, so the version and its checksum are
+# The formula installs from the npm tarball, so the version and its checksum are
 # all that change. The tarball has to be on the registry already — run this after
 # the release workflow's npm job succeeds.
 #
-# It only rewrites the files in this repository. Publishing them is a separate,
+# It only rewrites the file in this repository. Publishing it is a separate,
 # credentialled step:
-#   Homebrew  cp packaging/homebrew/lantern-viewer.rb <tap>/Formula/ && commit
-#   AUR       cp packaging/aur/PKGBUILD <aur-clone>/ && makepkg --printsrcinfo > .SRCINFO && commit
+#   cp packaging/homebrew/lantern-viewer.rb <tap>/Formula/ && commit
 set -euo pipefail
 
 VERSION=${1:?usage: bump-tap.sh <version>}
@@ -45,7 +44,6 @@ fi
 echo "sha256 $SHA"
 
 FORMULA="$REPO_ROOT/packaging/homebrew/lantern-viewer.rb"
-PKGBUILD="$REPO_ROOT/packaging/aur/PKGBUILD"
 
 # The URL and sha lines are rewritten wholesale rather than patched in place, so a
 # stale checksum can never survive a version bump.
@@ -62,34 +60,20 @@ const next = fs
 fs.writeFileSync(file, next);
 NODE
 
-node - "$PKGBUILD" "$VERSION" "$SHA" <<'NODE'
-const [file, version, sha] = process.argv.slice(2);
-const fs = require("node:fs");
-const next = fs
-  .readFileSync(file, "utf8")
-  .replace(/^pkgver=.*$/m, `pkgver=${version}`)
-  .replace(/^pkgrel=.*$/m, "pkgrel=1")
-  .replace(/^sha256sums=\('.*'\)$/m, `sha256sums=('${sha}')`);
-fs.writeFileSync(file, next);
-NODE
-
 # A regex that stopped matching would leave the placeholder in place and still
 # exit cleanly, which is how a formula with an unusable checksum reaches a tap.
-for file in "$FORMULA" "$PKGBUILD"; do
-  if grep -q 'REPLACE_WITH_TARBALL_SHA256' "$file"; then
-    echo "bump-tap.sh: $file still holds the placeholder checksum — the rewrite did not match." >&2
-    exit 1
-  fi
-  if ! grep -q "$SHA" "$file"; then
-    echo "bump-tap.sh: $file does not contain the checksum that was just computed." >&2
-    exit 1
-  fi
-  if ! grep -q "$VERSION" "$file"; then
-    echo "bump-tap.sh: $file was not updated to $VERSION." >&2
-    exit 1
-  fi
-done
+if grep -q 'REPLACE_WITH_TARBALL_SHA256' "$FORMULA"; then
+  echo "bump-tap.sh: $FORMULA still holds the placeholder checksum — the rewrite did not match." >&2
+  exit 1
+fi
+if ! grep -q "$SHA" "$FORMULA"; then
+  echo "bump-tap.sh: $FORMULA does not contain the checksum that was just computed." >&2
+  exit 1
+fi
+if ! grep -q "$VERSION" "$FORMULA"; then
+  echo "bump-tap.sh: $FORMULA was not updated to $VERSION." >&2
+  exit 1
+fi
 
 echo "updated:"
 grep -nE 'url |sha256 ' "$FORMULA"
-grep -nE '^pkgver=|^sha256sums=' "$PKGBUILD"
