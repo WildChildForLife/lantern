@@ -329,6 +329,21 @@ to the file — set `LANTERN_PASSWORD` or pass `--password`.
 Nothing prompts without a terminal attached, so Docker, CI and `npx … | tee` start straight up.
 `--no-init` or `LANTERN_NO_INIT=1` turns the offer off for good.
 
+### When a new version appears
+
+Lantern says so in one line at startup, and nothing more:
+
+```text
+Lantern 0.4.0 is available (you have 0.3.0). Run `lantern upgrade`.
+```
+
+The line comes from a cached answer, so it never delays a launch, and the check behind it asks the
+npm registry at most once a day. It stays quiet with no terminal attached, in CI, in Docker, for a
+`.deb`/`.rpm` install and for a git checkout — anywhere the answer would not be something you could
+act on. `NO_UPDATE_NOTIFIER=1`, `LANTERN_NO_UPDATE_NOTIFIER=1`, or `"updateNotifier": false` in
+`~/.lantern/config.json` turn it off entirely, registry request included. The cache itself lives in
+`~/.lantern/update-check.json`.
+
 ## Options
 
 | Option                      | Environment                     | Description                                                 | Default     |
@@ -345,6 +360,8 @@ Nothing prompts without a terminal attached, so Docker, CI and `npx … | tee` s
 | `-v, --verbose`             | `LANTERN_VERBOSE`               | Verbose debug logging                                       | off         |
 | `--source <id>`             | `LANTERN_SOURCES`               | Agent CLI to read; repeat for more. Scopes one run          | stored      |
 | `--no-init`                 | `LANTERN_NO_INIT`               | Never offer the setup wizard on a first launch              | offered     |
+| (none)                      | `NO_UPDATE_NOTIFIER`            | Never mention that a new version exists                     | mentioned   |
+| (none)                      | `LANTERN_NO_UPDATE_NOTIFIER`    | The same thing, under Lantern's own name                    | mentioned   |
 
 `lantern browse` reads `--claude-dir`, `--executable`, `--source` and `--verbose`; the rest belong to
 the server. The port and bind address are ignored by the board, which listens on nothing.
@@ -355,7 +372,9 @@ options — resolve in this order: the flag, then the environment variable, then
 unset, so it does not shadow the file.
 
 `--password`, `--verbose`, `--source` and `--no-init` have no stored tier: they resolve from the flag
-or the environment variable only. Password is deliberate — the wizard never writes one down.
+or the environment variable only. Password is deliberate — the wizard never writes one down. The two
+update-notifier variables are the other way around: no flag, and the stored form is
+`"updateNotifier": false` in `~/.lantern/config.json`. Any non-empty value turns them on.
 
 Valid `--source` ids are `claude-code`, `codex`, `opencode`, `qwen-code`, `copilot` and `goose`. Repeat
 the flag

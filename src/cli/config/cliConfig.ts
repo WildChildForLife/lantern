@@ -53,6 +53,14 @@ export const cliConfigSchema = z.object({
   terminalShell: z.string().optional(),
   terminalUnrestricted: z.boolean().optional(),
   apiOnly: z.boolean().optional(),
+  /**
+   * Whether to say when a newer Lantern has been published. Unset means yes.
+   *
+   * The one setting here nobody is asked for during setup: it is written by
+   * hand, by somebody who would rather Lantern never spoke to the registry.
+   * `NO_UPDATE_NOTIFIER` and `LANTERN_NO_UPDATE_NOTIFIER` do the same per run.
+   */
+  updateNotifier: z.boolean().optional(),
   browse: browseConfigSchema.prefault({}),
 });
 
