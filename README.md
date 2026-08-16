@@ -41,14 +41,15 @@ when a terminal is the wrong shape for what you are doing. See [The web UI](#the
 
 ## Contents
 
-- [Quick start](#quick-start) · [Commands](#commands)
+- [Quick start](#quick-start)
+- [Install](#install) · [macOS](#macos) · [Linux](#linux) · [Windows](#windows) ·
+  [npm](#npm-any-platform) · [Docker](#docker) · [From source](#from-source) ·
+  [Platform support](#platform-support)
+- [Commands](#commands)
 - [The board in your terminal](#the-board-in-your-terminal) · [Setup](#setup) · [Options](#options)
 - [The web UI](#the-web-ui) · [Security](#security)
 - [Supported agents](#supported-agents) · [Reading other agent CLIs](#reading-other-agent-clis) ·
   [Reading logs from more than one machine](#reading-logs-from-more-than-one-machine)
-- [Install](#install) · [macOS](#macos) · [Linux](#linux) · [Windows](#windows) ·
-  [npm](#npm-any-platform) · [Docker](#docker) · [From source](#from-source) ·
-  [Platform support](#platform-support)
 - [How grouping works](#how-grouping-works)
 - [Development](#development) · [Contributing](#contributing) · [Support](#support)
 - [Privacy](#privacy) · [Licence](#licence)
@@ -63,6 +64,171 @@ npx lantern-viewer browse
 
 On a first run Lantern reads your logs into its own cache, then draws the board. For a permanent
 install — Homebrew, `apt`, `dnf`, the AUR, Docker — see [Install](#install).
+
+## Install
+
+Every package below declares Node 24 as a dependency, so your package manager pulls a runtime in when
+one is missing — except where the distribution's own `nodejs` is too old to satisfy it, which is what
+the Debian and Ubuntu note below is about. Claude Code itself must be installed and signed in for the
+optional AI topic naming — everything else works without it.
+
+### macOS
+
+```bash
+brew tap wildchildforlife/tap
+brew trust wildchildforlife/tap     # Homebrew gates third-party taps
+brew install lantern-viewer
+lantern browse                      # or: lantern --port 3400 for the web UI
+```
+
+The formula is `lantern-viewer` because homebrew-cask already ships an unrelated
+`lantern`. The command it installs is still `lantern`.
+
+Sessions are read from `~/.claude/projects`. Everything works here, the in-app terminal included, on
+both Intel and Apple Silicon.
+
+### Linux
+
+Debian and Ubuntu, from the `.deb` on the [latest release](https://github.com/WildChildForLife/lantern/releases/latest).
+The package declares `nodejs (>= 24)` and apt enforces it, so a distribution whose own `nodejs` is
+older — Ubuntu 22.04 ships 12, Debian 12 ships 18 — must get Node 24 first or the install stops at
+`Depends: nodejs (>= 24) but 12.22.9~dfsg-1ubuntu3.6 is to be installed`. This is also the WSL2 case,
+since WSL images track those same releases:
+
+```bash
+node --version                                                      # skip the next two lines if this is v24 or newer
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+sudo apt install -y nodejs
+
+version=$(curl -fsSLI -o /dev/null -w '%{url_effective}' \
+  https://github.com/WildChildForLife/lantern/releases/latest | sed 's#.*/v##')
+curl -fsSLO "https://github.com/WildChildForLife/lantern/releases/download/v${version}/lantern_${version}_amd64.deb"
+sudo apt install "./lantern_${version}_amd64.deb"                   # swap amd64 for arm64 on a Pi
+lantern browse
+```
+
+Fedora and RHEL, from the `.rpm`. Check `node --version` first — Fedora 41 still
+ships Node 22, and Lantern needs 24. `dnf` does **not** enforce that floor, so an
+old Node here installs cleanly and fails at first launch instead:
+
+```bash
+curl -fsSL https://rpm.nodesource.com/setup_24.x | sudo bash -      # only if node is older than 24
+
+version=$(curl -fsSLI -o /dev/null -w '%{url_effective}' \
+  https://github.com/WildChildForLife/lantern/releases/latest | sed 's#.*/v##')
+sudo dnf install "https://github.com/WildChildForLife/lantern/releases/download/v${version}/lantern-${version}-1.x86_64.rpm"
+lantern browse
+```
+
+Both snippets read the current version off the `releases/latest` redirect, so they stay right after
+every release. To pin a version instead, replace `${version}` with the one you want.
+
+Arch, from the AUR — the recipe lives in
+[`packaging/aur`](packaging/aur/PKGBUILD) and is not on the AUR itself yet:
+
+```bash
+paru -S lantern      # or: yay -S lantern
+```
+
+Sessions are read from `~/.claude/projects`. On `x86_64` everything works. On `aarch64` the web UI's
+in-app terminal is unavailable — see [Platform support](#platform-support).
+
+If your distribution is not listed, or you would rather not add a package, use
+[npm](#npm-any-platform) or [Docker](#docker).
+
+### Windows
+
+```powershell
+winget install OpenJS.NodeJS
+npx lantern-viewer browse
+```
+
+There is no native Windows package yet, so this is the one platform that still needs Node installed
+first — [Docker](#docker) avoids that, for the web UI.
+
+Sessions are read from `%USERPROFILE%\.claude\projects`, and Lantern's own cache from
+`%USERPROFILE%\.lantern`. The `claude` executable is found on `PATH` with `where`, so if
+`where claude` finds nothing, pass `--executable` with the full path.
+
+The web UI's in-app terminal is unavailable on Windows — see
+[Platform support](#platform-support). If you want it, run Lantern inside **WSL2** instead and treat
+it as a Linux install; sessions written by a Windows Claude Code are then reachable at
+`/mnt/c/Users/<you>/.claude`, which you can point at with `--claude-dir`.
+
+### npm (any platform)
+
+Needs Node.js 24 or newer already present:
+
+```bash
+npx lantern-viewer browse           # the board
+npx lantern-viewer --port 3400      # the web UI
+```
+
+### Docker
+
+For the web UI. `lantern browse` wants a terminal, which is not what a detached container has.
+Identical on macOS, Linux and Windows apart from the volume syntax.
+
+```bash
+docker run -d --name lantern \
+  -p 127.0.0.1:3400:3400 \
+  -v "$HOME/.claude:/root/.claude:ro" \
+  -v lantern_cache:/root/.lantern \
+  ghcr.io/wildchildforlife/lantern:latest
+```
+
+On Windows PowerShell, swap `$HOME` for `$env:USERPROFILE` and the line continuations for backticks:
+
+```powershell
+docker run -d --name lantern `
+  -p 127.0.0.1:3400:3400 `
+  -v "${env:USERPROFILE}\.claude:/root/.claude:ro" `
+  -v lantern_cache:/root/.lantern `
+  ghcr.io/wildchildforlife/lantern:latest
+```
+
+Or with Compose, which is the same thing plus a password:
+
+```bash
+curl -O https://raw.githubusercontent.com/WildChildForLife/lantern/main/docker-compose.yml
+echo "LANTERN_PASSWORD=pick-something" > .env
+docker compose up -d
+```
+
+That mounts Claude Code's logs only. To read Codex or opencode as well, see
+[Reading other agent CLIs](#reading-other-agent-clis).
+
+Images are published for `linux/amd64` and `linux/arm64`, so a Raspberry Pi or an Apple Silicon
+machine works the same way — except the in-app terminal, which is unavailable on the `arm64` image.
+
+### From source
+
+Any platform, once Node 24 and pnpm are present:
+
+```bash
+git clone https://github.com/WildChildForLife/lantern.git
+cd lantern
+pnpm install
+pnpm build
+node dist/main.js browse             # or: node dist/main.js --port 3400
+```
+
+### Platform support
+
+Everything works everywhere except the web UI's in-app terminal, which needs a prebuilt PTY binary
+that `@replit/ruspty` does not publish for every target. Where it is missing, Lantern disables the
+terminal and says so in its startup log; nothing else is affected, and `lantern browse` does not use
+it.
+
+| Platform                       | Supported | In-app terminal |
+| ------------------------------ | --------- | --------------- |
+| macOS (Apple Silicon or Intel) | yes       | yes             |
+| Linux `x86_64`                 | yes       | yes             |
+| Linux `aarch64`                | yes       | no              |
+| Windows                        | yes       | no — use WSL2   |
+
+CI runs on Linux only, so macOS and Windows are verified by hand rather than on every commit. Reports
+from either are welcome.
 
 ## Commands
 
@@ -363,153 +529,6 @@ up on restart rather than live.
 <p align="center">
   <img src="docs/screenshots/conversations.jpg" alt="Every conversation across every project, newest first" width="100%">
 </p>
-
-## Install
-
-Every package below pulls Node in as a dependency, so there is no runtime to install first. Claude
-Code itself must be installed and signed in for the optional AI topic naming — everything else works
-without it.
-
-### macOS
-
-```bash
-brew tap wildchildforlife/tap
-brew trust wildchildforlife/tap     # Homebrew gates third-party taps
-brew install lantern-viewer
-lantern browse                      # or: lantern --port 3400 for the web UI
-```
-
-The formula is `lantern-viewer` because homebrew-cask already ships an unrelated
-`lantern`. The command it installs is still `lantern`.
-
-Sessions are read from `~/.claude/projects`. Everything works here, the in-app terminal included, on
-both Intel and Apple Silicon.
-
-### Linux
-
-Debian and Ubuntu, from the `.deb` on the [latest release](https://github.com/WildChildForLife/lantern/releases/latest):
-
-```bash
-curl -fsSLO https://github.com/WildChildForLife/lantern/releases/latest/download/lantern_0.1.0_amd64.deb
-sudo apt install ./lantern_0.1.0_amd64.deb    # swap amd64 for arm64 on a Pi
-lantern browse
-```
-
-Fedora and RHEL, from the `.rpm`. Check `node --version` first — Fedora 41 still
-ships Node 22, and Lantern needs 24:
-
-```bash
-curl -fsSL https://rpm.nodesource.com/setup_24.x | sudo bash -   # only if node is older than 24
-sudo dnf install https://github.com/WildChildForLife/lantern/releases/latest/download/lantern-0.1.0-1.x86_64.rpm
-lantern browse
-```
-
-Arch, from the AUR — the recipe lives in
-[`packaging/aur`](packaging/aur/PKGBUILD) and is not on the AUR itself yet:
-
-```bash
-paru -S lantern      # or: yay -S lantern
-```
-
-Sessions are read from `~/.claude/projects`. On `x86_64` everything works. On `aarch64` the web UI's
-in-app terminal is unavailable — see [Platform support](#platform-support).
-
-If your distribution is not listed, or you would rather not add a package, use
-[npm](#npm-any-platform) or [Docker](#docker).
-
-### Windows
-
-```powershell
-winget install OpenJS.NodeJS
-npx lantern-viewer browse
-```
-
-There is no native Windows package yet, so this is the one platform that still needs Node installed
-first — [Docker](#docker) avoids that, for the web UI.
-
-Sessions are read from `%USERPROFILE%\.claude\projects`, and Lantern's own cache from
-`%USERPROFILE%\.lantern`. The `claude` executable is found on `PATH` with `where`, so if
-`where claude` finds nothing, pass `--executable` with the full path.
-
-The web UI's in-app terminal is unavailable on Windows — see
-[Platform support](#platform-support). If you want it, run Lantern inside **WSL2** instead and treat
-it as a Linux install; sessions written by a Windows Claude Code are then reachable at
-`/mnt/c/Users/<you>/.claude`, which you can point at with `--claude-dir`.
-
-### npm (any platform)
-
-Needs Node.js 24 or newer already present:
-
-```bash
-npx lantern-viewer browse           # the board
-npx lantern-viewer --port 3400      # the web UI
-```
-
-### Docker
-
-For the web UI. `lantern browse` wants a terminal, which is not what a detached container has.
-Identical on macOS, Linux and Windows apart from the volume syntax.
-
-```bash
-docker run -d --name lantern \
-  -p 127.0.0.1:3400:3400 \
-  -v "$HOME/.claude:/root/.claude:ro" \
-  -v lantern_cache:/root/.lantern \
-  ghcr.io/wildchildforlife/lantern:latest
-```
-
-On Windows PowerShell, swap `$HOME` for `$env:USERPROFILE` and the line continuations for backticks:
-
-```powershell
-docker run -d --name lantern `
-  -p 127.0.0.1:3400:3400 `
-  -v "${env:USERPROFILE}\.claude:/root/.claude:ro" `
-  -v lantern_cache:/root/.lantern `
-  ghcr.io/wildchildforlife/lantern:latest
-```
-
-Or with Compose, which is the same thing plus a password:
-
-```bash
-curl -O https://raw.githubusercontent.com/WildChildForLife/lantern/main/docker-compose.yml
-echo "LANTERN_PASSWORD=pick-something" > .env
-docker compose up -d
-```
-
-That mounts Claude Code's logs only. To read Codex or opencode as well, see
-[Reading other agent CLIs](#reading-other-agent-clis).
-
-Images are published for `linux/amd64` and `linux/arm64`, so a Raspberry Pi or an Apple Silicon
-machine works the same way — except the in-app terminal, which is unavailable on the `arm64` image.
-
-### From source
-
-Any platform, once Node 24 and pnpm are present:
-
-```bash
-git clone https://github.com/WildChildForLife/lantern.git
-cd lantern
-pnpm install
-pnpm build
-node dist/main.js browse             # or: node dist/main.js --port 3400
-```
-
-### Platform support
-
-Everything works everywhere except the web UI's in-app terminal, which needs a prebuilt PTY binary
-that `@replit/ruspty` does not publish for every target. Where it is missing, Lantern disables the
-terminal and says so in its startup log; nothing else is affected, and `lantern browse` does not use
-it.
-
-| Platform                       | Supported | In-app terminal |
-| ------------------------------ | --------- | --------------- |
-| macOS (Apple Silicon or Intel) | yes       | yes             |
-| Linux `x86_64`                 | yes       | yes             |
-| Linux `aarch64`                | yes       | no              |
-| Windows                        | yes       | no — use WSL2   |
-
-CI runs on Linux only, so macOS and Windows are verified by hand rather than on every commit. Reports
-from either are welcome.
 
 ## How grouping works
 
