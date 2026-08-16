@@ -13,8 +13,17 @@ RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store \
 
 COPY . .
 RUN chmod +x scripts/docker-entrypoint.sh
+# verify-deps-before-run is off because the install above ran with
+# --ignore-scripts, which pnpm reads back as "these dependencies are not
+# finished" and answers by running `pnpm install` again before the script. That
+# second install runs the root `prepare` hook, `lefthook install`, which needs a
+# git repository — and .git is deliberately not in the build context. The result
+# was `fatal: not a git repository` failing the image build outright. Nothing is
+# skipped by turning the check off here: the install it wants to repeat is the
+# one on the line above.
 RUN --mount=type=cache,id=pnpm-store,target=/root/.pnpm-store \
-    pnpm build && pnpm prune --prod --ignore-scripts
+    pnpm --config.verify-deps-before-run=false build \
+    && pnpm prune --prod --ignore-scripts
 
 FROM base AS runner
 WORKDIR /app
