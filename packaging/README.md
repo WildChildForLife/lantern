@@ -81,11 +81,11 @@ brew install wildchildforlife/tap/lantern-viewer
 `src/cli/upgrade/installSource.ts` classifies an install by these paths, so a
 change here is a change there.
 
-| Channel   | Lantern lives in                                     | Upgraded by                    |
-| --------- | ---------------------------------------------------- | ------------------------------ |
-| npm       | `<prefix>/lib/node_modules/lantern-viewer`           | `lantern upgrade`              |
-| Homebrew  | `<brew prefix>/Cellar/lantern-viewer/<version>`       | `brew upgrade lantern-viewer`  |
-| Container | `/app` inside the image                              | pulling a newer image          |
+| Channel   | Lantern lives in                                | Upgraded by                   |
+| --------- | ----------------------------------------------- | ----------------------------- |
+| npm       | `<prefix>/lib/node_modules/lantern-viewer`      | `lantern upgrade`             |
+| Homebrew  | `<brew prefix>/Cellar/lantern-viewer/<version>` | `brew upgrade lantern-viewer` |
+| Container | `/app` inside the image                         | pulling a newer image         |
 
 ## Retired channels
 
@@ -99,7 +99,7 @@ ceiling — so the three channels shipped materially different installs.
 
 `lantern upgrade` recognises the `/usr/lib/lantern` layout those packages used
 and tells whoever is still on one how to move to npm. That message is why v0.4.0
-had to ship the command *and* the packages: somebody running a `.deb` only ever
+had to ship the command _and_ the packages: somebody running a `.deb` only ever
 runs code that came in the `.deb`.
 
 What the packages did test, and still needs testing, is an install on a machine
