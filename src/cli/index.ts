@@ -44,4 +44,18 @@ export const registerCliCommands = (program: Command): void => {
       );
       process.exitCode = exitCode;
     });
+
+  program
+    .command("upgrade")
+    .description("upgrade Lantern where it was installed, or say what would")
+    .option("--check", "report what is available, without changing anything")
+    .option("--dry-run", "print the command that would run, without running it")
+    .action(async (_options: unknown, command: Command) => {
+      const { parseUpgradeOptions, runUpgrade } = await import("./upgrade/upgradeCommand.ts");
+
+      // `opts()`, not `optsWithGlobals()`: these two flags belong to this
+      // command alone, so unlike the shared options there is nothing on the
+      // root command to merge in.
+      process.exitCode = await runUpgrade(parseUpgradeOptions(command.opts()));
+    });
 };

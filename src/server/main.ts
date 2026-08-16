@@ -3,6 +3,7 @@ import { Command } from "commander";
 import packageJson from "../../package.json" with { type: "json" };
 import { maybeRunFirstRunWizard } from "../cli/firstRunWizard.ts";
 import { registerCliCommands } from "../cli/index.ts";
+import { maybeNotifyUpdate } from "../cli/update/notifyUpdate.ts";
 import type { CliOptions } from "./core/platform/services/LanternOptionsService.ts";
 import { checkNodeVersion } from "./nodeVersionCheck.ts";
 import { startServer } from "./startServer.ts";
@@ -43,6 +44,21 @@ program
 registerCliCommands(program);
 
 const main = async () => {
+  // Before the command runs, so the line lands in the scrollback rather than
+  // inside the alternate screen `browse` is about to take. It reads a cached
+  // answer and never waits on the network — the request that refreshes that
+  // cache is left running behind whatever starts next.
+  await maybeNotifyUpdate(
+    process.argv,
+    // stderr, because that is where the notice goes: `lantern | tee` is still
+    // somebody sitting at a terminal, and a redirected stdout is not a reason
+    // to keep quiet about a new version.
+    process.stderr.isTTY === true,
+    // oxlint-disable-next-line no-process-env
+    process.env,
+    Date.now(),
+  );
+
   await program.parseAsync(process.argv);
 };
 
