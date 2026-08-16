@@ -63,14 +63,16 @@ npx lantern-viewer browse
 ```
 
 On a first run Lantern reads your logs into its own cache, then draws the board. For a permanent
-install — Homebrew, `apt`, `dnf`, the AUR, Docker — see [Install](#install).
+install — npm, Homebrew, Docker — see [Install](#install).
 
 ## Install
 
-Every package below declares Node 24 as a dependency, so your package manager pulls a runtime in when
-one is missing — except where the distribution's own `nodejs` is too old to satisfy it, which is what
-the Debian and Ubuntu note below is about. Claude Code itself must be installed and signed in for the
-optional AI topic naming — everything else works without it.
+Lantern is one npm package, installed three ways: with npm itself, through Homebrew, or as a
+container. Homebrew brings Node with it; npm needs Node 24 already there, and Docker ships its own.
+Whichever you pick, `lantern upgrade` keeps it current afterwards.
+
+Claude Code itself must be installed and signed in for the optional AI topic naming — everything
+else works without it.
 
 ### macOS
 
@@ -89,52 +91,44 @@ both Intel and Apple Silicon.
 
 ### Linux
 
-Debian and Ubuntu, from the `.deb` on the [latest release](https://github.com/WildChildForLife/lantern/releases/latest).
-The package declares `nodejs (>= 24)` and apt enforces it, so a distribution whose own `nodejs` is
-older — Ubuntu 22.04 ships 12, Debian 12 ships 18 — must get Node 24 first or the install stops at
-`Depends: nodejs (>= 24) but 12.22.9~dfsg-1ubuntu3.6 is to be installed`. This is also the WSL2 case,
-since WSL images track those same releases:
+npm, once Node 24 is there. Most distributions still ship something older — Ubuntu 24.04 has 18,
+Debian 12 has 18, Fedora 41 has 22 — and Lantern refuses to start on any of them, so check first:
 
 ```bash
 node --version                                                      # skip the next two lines if this is v24 or newer
-curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -   # or rpm.nodesource.com/setup_24.x for dnf
 sudo apt install -y nodejs
 
-version=$(curl -fsSLI -o /dev/null -w '%{url_effective}' \
-  https://github.com/WildChildForLife/lantern/releases/latest | sed 's#.*/v##')
-curl -fsSLO "https://github.com/WildChildForLife/lantern/releases/download/v${version}/lantern_${version}_amd64.deb"
-sudo apt install "./lantern_${version}_amd64.deb"                   # swap amd64 for arm64 on a Pi
+npm install -g lantern-viewer
 lantern browse
 ```
 
-Fedora and RHEL, from the `.rpm`. Check `node --version` first — Fedora 41 still
-ships Node 22, and Lantern needs 24. `dnf` does **not** enforce that floor, so an
-old Node here installs cleanly and fails at first launch instead:
+Or through [linuxbrew](https://docs.brew.sh/Homebrew-on-Linux), which brings its own Node:
 
 ```bash
-curl -fsSL https://rpm.nodesource.com/setup_24.x | sudo bash -      # only if node is older than 24
-
-version=$(curl -fsSLI -o /dev/null -w '%{url_effective}' \
-  https://github.com/WildChildForLife/lantern/releases/latest | sed 's#.*/v##')
-sudo dnf install "https://github.com/WildChildForLife/lantern/releases/download/v${version}/lantern-${version}-1.x86_64.rpm"
-lantern browse
-```
-
-Both snippets read the current version off the `releases/latest` redirect, so they stay right after
-every release. To pin a version instead, replace `${version}` with the one you want.
-
-Arch, from the AUR — the recipe lives in
-[`packaging/aur`](packaging/aur/PKGBUILD) and is not on the AUR itself yet:
-
-```bash
-paru -S lantern      # or: yay -S lantern
+brew install wildchildforlife/tap/lantern-viewer
 ```
 
 Sessions are read from `~/.claude/projects`. On `x86_64` everything works. On `aarch64` the web UI's
 in-app terminal is unavailable — see [Platform support](#platform-support).
 
-If your distribution is not listed, or you would rather not add a package, use
-[npm](#npm-any-platform) or [Docker](#docker).
+#### Coming from the `.deb` or `.rpm`?
+
+Those packages were retired after v0.4.0, and no newer version is published as one. They were meant
+to save you installing Node by hand and did the opposite: `apt` enforces the `nodejs (>= 24)`
+dependency that no current release can satisfy, so the install failed outright.
+
+Moving to npm gets you the same build, and something the packages never had — `lantern upgrade`:
+
+```bash
+sudo apt remove lantern      # or: sudo dnf remove lantern
+npm install -g lantern-viewer
+```
+
+Your settings and cache in `~/.lantern` survive both steps. `lantern upgrade` on a package install
+prints exactly this, so there is nothing to remember.
+
+The AUR recipe is gone too; it was never published to the AUR itself.
 
 ### Windows
 
@@ -143,8 +137,9 @@ winget install OpenJS.NodeJS
 npx lantern-viewer browse
 ```
 
-There is no native Windows package yet, so this is the one platform that still needs Node installed
-first — [Docker](#docker) avoids that, for the web UI.
+`npx` runs Lantern without installing it. For a permanent install that `lantern upgrade` can keep
+current, `npm install -g lantern-viewer` once Node is there. [Docker](#docker) avoids Node
+altogether, for the web UI.
 
 Sessions are read from `%USERPROFILE%\.claude\projects`, and Lantern's own cache from
 `%USERPROFILE%\.lantern`. The `claude` executable is found on `PATH` with `where`, so if
@@ -160,9 +155,14 @@ it as a Linux install; sessions written by a Windows Claude Code are then reacha
 Needs Node.js 24 or newer already present:
 
 ```bash
-npx lantern-viewer browse           # the board
-npx lantern-viewer --port 3400      # the web UI
+npm install -g lantern-viewer       # a permanent install, upgradeable with `lantern upgrade`
+lantern browse
+
+npx lantern-viewer browse           # or run it once, without installing
+npx lantern-viewer --port 3400
 ```
+
+`npm`, `pnpm`, `yarn` and `bun` all work, and `lantern upgrade` uses whichever one put it there.
 
 ### Docker
 
