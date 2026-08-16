@@ -46,3 +46,9 @@ jobs:
 
       - name: Run pack check
         run: ./scripts/pack/check.sh
+
+      # Reuses the tarball the check above just built: installs it globally on a
+      # machine that has never seen Lantern, and boots it. This is the coverage
+      # the deb and rpm smoke test used to provide before those channels went.
+      - name: Smoke test the tarball
+        run: ./scripts/pack/smoke.sh

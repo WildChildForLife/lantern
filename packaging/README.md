@@ -102,6 +102,13 @@ and tells whoever is still on one how to move to npm. That message is why v0.4.0
 had to ship the command *and* the packages: somebody running a `.deb` only ever
 runs code that came in the `.deb`.
 
+What the packages did test, and still needs testing, is an install on a machine
+that has none of this repository's `node_modules`. `scripts/pack/smoke.sh` took
+that over: it installs the packed tarball globally inside `node:24-slim`, checks
+`lantern` reaches PATH, that `lantern upgrade` recognises the install rather than
+refusing it, and that the server starts and answers — and CI runs it on every
+pull request, which the deb smoke test only ever did on a tag.
+
 One note worth keeping from the workflow that attached those packages to the
 release: GitHub skips a job when anything in its **transitive** dependency chain
 failed, not merely its direct `needs`. An asset job downstream of the npm job was
