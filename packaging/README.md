@@ -89,8 +89,8 @@ change here is a change there.
 
 ## Retired channels
 
-The `.deb`, `.rpm` and AUR packages were dropped after v0.4.0, which is the last
-release that carries them. They existed to save users installing Node by hand,
+The `.deb`, `.rpm` and AUR packages were dropped after v0.3.0, the last release
+that carries them. They existed to save users installing Node by hand,
 and did the opposite: the packages declare `nodejs (>= 24)`, every current
 Debian and Ubuntu ships an older `nodejs`, and apt refuses the install outright
 rather than pulling a newer Node in. The deb and rpm trees were also not the npm
@@ -98,9 +98,15 @@ tree — `@anthropic-ai/claude-code` was stripped from them to stay under a size
 ceiling — so the three channels shipped materially different installs.
 
 `lantern upgrade` recognises the `/usr/lib/lantern` layout those packages used
-and tells whoever is still on one how to move to npm. That message is why v0.4.0
-had to ship the command _and_ the packages: somebody running a `.deb` only ever
-runs code that came in the `.deb`.
+and tells whoever is still on one how to move to npm — but it only exists from
+v0.4.0, and the packages stopped at v0.3.0, so nobody on one will ever read it:
+a `.deb` install runs only the code that came in the `.deb`.
+
+That ordering was meant to be the other way round, and it would have mattered if
+anyone were on one. Across v0.1.0 to v0.3.0 the deb and rpm assets were
+downloaded once in total, by a maintainer, and that install failed on the
+`nodejs (>= 24)` dependency — the failure that retired the channel. The README
+carries the move-to-npm instructions regardless, for anyone who turns up.
 
 What the packages did test, and still needs testing, is an install on a machine
 that has none of this repository's `node_modules`. `scripts/pack/smoke.sh` took
