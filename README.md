@@ -114,7 +114,7 @@ in-app terminal is unavailable — see [Platform support](#platform-support).
 
 #### Coming from the `.deb` or `.rpm`?
 
-Those packages were retired after v0.4.0, and no newer version is published as one. They were meant
+Those packages were retired after v0.3.0, and no newer version is published as one. They were meant
 to save you installing Node by hand and did the opposite: `apt` enforces the `nodejs (>= 24)`
 dependency that no current release can satisfy, so the install failed outright.
 
