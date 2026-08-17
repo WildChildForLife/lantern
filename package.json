@@ -47,7 +47,7 @@
     "@anthropic-ai/sdk": "0.95.1",
     "@effect/cluster": "0.60.2",
     "@effect/experimental": "0.61.1",
-    "@effect/language-service": "0.87.1",
+    "@effect/language-service": "0.87.2",
     "@effect/platform": "0.97.1",
     "@effect/platform-node": "0.108.1",
     "@effect/rpc": "0.76.2",
