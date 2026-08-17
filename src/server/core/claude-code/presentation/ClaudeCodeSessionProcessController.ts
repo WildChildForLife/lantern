@@ -17,14 +17,12 @@ const LayerImpl = Effect.gen(function* () {
 
       return {
         response: {
-          processes: publicSessionProcesses.map(
-            (p): PublicSessionProcess => ({
-              id: p.def.sessionProcessId,
-              projectId: p.def.projectId,
-              sessionId: p.sessionId,
-              status: p.type === "paused" ? "paused" : "running",
-            }),
-          ),
+          processes: publicSessionProcesses.map((p): PublicSessionProcess => ({
+            id: p.def.sessionProcessId,
+            projectId: p.def.projectId,
+            sessionId: p.sessionId,
+            status: p.type === "paused" ? "paused" : "running",
+          })),
         },
         status: 200,
       } as const satisfies ControllerResponse;

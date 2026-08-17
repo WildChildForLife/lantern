@@ -63,14 +63,12 @@ export const detectEnvironment = (claudeDir?: string): Promise<Detection> => {
 
     const sources = yield* Effect.forEach(ALL_SOURCE_ADAPTERS, (adapter) =>
       adapter.detect().pipe(
-        Effect.map(
-          (detection): DetectedSource => ({
-            id: adapter.id,
-            displayName: adapter.displayName,
-            rootPath: detection.rootPath,
-            usable: detection.hasData && detection.supported,
-          }),
-        ),
+        Effect.map((detection): DetectedSource => ({
+          id: adapter.id,
+          displayName: adapter.displayName,
+          rootPath: detection.rootPath,
+          usable: detection.hasData && detection.supported,
+        })),
       ),
     );
 

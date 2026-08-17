@@ -117,7 +117,7 @@
     "lefthook": "2.1.6",
     "lucide-react": "1.28.0",
     "npm-run-all2": "8.0.4",
-    "oxfmt": "^0.61.0",
+    "oxfmt": "^0.63.0",
     "oxlint": "^1.76.0",
     "oxlint-tsgolint": "^0.22.1",
     "parse-git-diff": "0.0.20",
