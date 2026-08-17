@@ -5275,7 +5275,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        114
+        119
       ]
     ],
     "translation": "La classification a échoué"
@@ -5291,7 +5291,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        109
+        114
       ]
     ],
     "translation": "La classification a échoué ({status})"
@@ -5307,7 +5307,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        98
+        103
       ]
     ],
     "translation": "{count} ont été gardées pour le prochain passage"
@@ -5319,7 +5319,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        62
+        67
       ]
     ],
     "translation": "Toutes les conversations ont déjà un sujet"
@@ -5331,7 +5331,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        72
+        77
       ]
     ],
     "translation": "Aucune des conversations sélectionnées n'a pu être classée"
@@ -5347,7 +5347,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        87
+        92
       ]
     ],
     "translation": "{count} conversations classées par sujet"
@@ -5366,7 +5366,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        82
+        87
       ]
     ],
     "translation": "{count} conversations classées par sujet ({cost} USD d'utilisation)"

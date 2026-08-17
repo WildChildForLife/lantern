@@ -7,7 +7,7 @@ import { testPlatformLayer } from "../../../../testing/layers/testPlatformLayer.
 import { type DrizzleDb, DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessionTopics, sessions } from "../../../lib/db/schema.ts";
 import { claudeCodeSourceAdapter } from "../../source/adapters/claude-code/ClaudeCodeSourceAdapter.ts";
-import type { SourceAdapter } from "../../source/models/SourceAdapter.ts";
+import { HeadlessUnavailableError, type SourceAdapter } from "../../source/models/SourceAdapter.ts";
 import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import { CLASSIFIER_MARKER } from "../functions/buildClassificationPrompt.ts";
 import { TopicClassifierService } from "./TopicClassifierService.ts";
@@ -18,6 +18,29 @@ import { TopicClassifierService } from "./TopicClassifierService.ts";
  * offers no headless mode.
  */
 const noHeadlessAdapter: SourceAdapter = { ...claudeCodeSourceAdapter, headless: undefined };
+
+/** The reason a real resolution failure carries, and the one a user can act on. */
+const UNRESOLVABLE_REASON = "Claude Code CLI not found - pass --executable /path/to/claude";
+
+/**
+ * An adapter that offers a headless mode and then cannot produce an executable,
+ * which is what an install under another node version looks like from here.
+ */
+const unresolvableAdapter: SourceAdapter = {
+  ...claudeCodeSourceAdapter,
+  headless: {
+    executable: () =>
+      Effect.fail(
+        new HeadlessUnavailableError({
+          sourceId: claudeCodeSourceAdapter.id,
+          reason: UNRESOLVABLE_REASON,
+        }),
+      ),
+    // Never reached: resolving the executable is what fails.
+    args: (prompt) => [prompt],
+    parse: (stdout) => ({ text: stdout, costUsd: 0 }),
+  },
+};
 
 /**
  * A runner that really does spawn something — `echo`, printing the answer the
@@ -196,6 +219,7 @@ describe("TopicClassifierService", () => {
           requested: 1,
           queued: 1,
           failed: false,
+          failureReason: null,
         });
         // The already-filed conversation kept the label it had.
         expect(
@@ -328,6 +352,30 @@ describe("TopicClassifierService", () => {
       ),
     );
 
+    /**
+     * A forced pass learns the CLI cannot answer before any batch runs, so its
+     * reason comes from the wipe check rather than from a failed call. It has to
+     * be the same actionable sentence either way: "Redo all" is the button
+     * pressed on the machine where `claude` is installed out of Lantern's sight.
+     */
+    it.effect("says why a forced pass could not start, not just that it did not", () =>
+      Effect.gen(function* () {
+        const classifier = yield* TopicClassifierService;
+
+        const result = yield* classifier.classify({ scope: { kind: "all" } });
+
+        expect(result.failed).toBe(true);
+        expect(result.failureReason).toBe(UNRESOLVABLE_REASON);
+      }).pipe(
+        Effect.provide(
+          testLayer(
+            [{ id: "new-one", customTitle: "Rework the topic classifier" }],
+            unresolvableAdapter,
+          ),
+        ),
+      ),
+    );
+
     it.effect("puts the topics back when a forced pass files nothing", () =>
       Effect.gen(function* () {
         const classifier = yield* TopicClassifierService;
@@ -409,6 +457,7 @@ describe("TopicClassifierService", () => {
           requested: 0,
           queued: 0,
           failed: false,
+          failureReason: null,
         });
       }).pipe(
         Effect.provide(

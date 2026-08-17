@@ -59,6 +59,12 @@ export type ClassifyResult = {
   /** Conversations this pass queued. `requested - queued` were left for later. */
   queued: number;
   failed: boolean;
+  /**
+   * Why it failed, in one line, or null when it did not. A count alone cannot
+   * tell "the CLI is not installed where Lantern can see it" from "the CLI
+   * answered badly", and those are fixed differently.
+   */
+  failureReason: string | null;
 };
 
 export const sessionMetaSchema = z.object({

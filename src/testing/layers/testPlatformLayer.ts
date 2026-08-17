@@ -79,6 +79,18 @@ export const testPlatformLayer = (overrides?: {
             return overrides?.env?.CODEX_HOME ?? undefined;
           case "XDG_DATA_HOME":
             return overrides?.env?.XDG_DATA_HOME ?? undefined;
+          // Where the node version managers keep their installs, which is where
+          // a `claude` that PATH does not carry is looked for.
+          case "NVM_DIR":
+            return overrides?.env?.NVM_DIR ?? undefined;
+          case "FNM_DIR":
+            return overrides?.env?.FNM_DIR ?? undefined;
+          case "VOLTA_HOME":
+            return overrides?.env?.VOLTA_HOME ?? undefined;
+          case "PNPM_HOME":
+            return overrides?.env?.PNPM_HOME ?? undefined;
+          case "APPDATA":
+            return overrides?.env?.APPDATA ?? undefined;
           case "LANTERN_TERMINAL_DISABLED":
             return overrides?.env?.LANTERN_TERMINAL_DISABLED ?? undefined;
           default:

@@ -3,6 +3,7 @@ import { NodeContext } from "@effect/platform-node";
 import { it } from "@effect/vitest";
 import { Effect, Layer } from "effect";
 import { describe, expect } from "vitest";
+import { testFileSystemLayer } from "../../../../testing/layers/testFileSystemLayer.ts";
 import { testPlatformLayer } from "../../../../testing/layers/testPlatformLayer.ts";
 import * as ClaudeCode from "./ClaudeCode.ts";
 
@@ -119,7 +120,7 @@ describe("ClaudeCode.Config", () => {
 
         expect(config.claudeCodeExecutablePath).toBe("/usr/local/bin/claude");
         expect(shellModes.every((mode) => mode === false)).toBe(true);
-      }).pipe(Effect.provide(testPlatformLayer())),
+      }).pipe(Effect.provide(Layer.mergeAll(testPlatformLayer(), testFileSystemLayer()))),
     );
 
     it.live("should correctly parse results of 'which claude' and 'claude --version'", () =>
@@ -144,7 +145,7 @@ describe("ClaudeCode.Config", () => {
           minor: 0,
           patch: 53,
         });
-      }).pipe(Effect.provide(testPlatformLayer())),
+      }).pipe(Effect.provide(Layer.mergeAll(testPlatformLayer(), testFileSystemLayer()))),
     );
 
     it.live("should skip npx shim path and use legitimate path with higher priority", () =>
@@ -174,7 +175,7 @@ describe("ClaudeCode.Config", () => {
           minor: 0,
           patch: 100,
         });
-      }).pipe(Effect.provide(testPlatformLayer())),
+      }).pipe(Effect.provide(Layer.mergeAll(testPlatformLayer(), testFileSystemLayer()))),
     );
 
     it.live("should use first npx shim path when all paths are npx shims", () =>
@@ -206,7 +207,7 @@ describe("ClaudeCode.Config", () => {
           minor: 0,
           patch: 50,
         });
-      }).pipe(Effect.provide(testPlatformLayer())),
+      }).pipe(Effect.provide(Layer.mergeAll(testPlatformLayer(), testFileSystemLayer()))),
     );
 
     it.live("should use project-local node_modules/.bin if it is the first result (not _npx)", () =>
@@ -236,7 +237,69 @@ describe("ClaudeCode.Config", () => {
           minor: 0,
           patch: 30,
         });
-      }).pipe(Effect.provide(testPlatformLayer())),
+      }).pipe(Effect.provide(Layer.mergeAll(testPlatformLayer(), testFileSystemLayer()))),
+    );
+  });
+
+  /**
+   * Lantern needs node >=24 and Claude Code is usually installed under whatever
+   * node came before it. The version manager that keeps the two apart takes
+   * `claude` off PATH for Lantern's process while leaving it installed — the
+   * state a machine is in right after `nvm use 24`.
+   */
+  describe("when claude is installed but not on PATH", () => {
+    const home = "/home/tester";
+    const installed = `${home}/.nvm/versions/node/v24.18.1/bin/claude`;
+
+    const emptyPathLookup = Layer.effect(
+      CommandExecutor.CommandExecutor,
+      Effect.map(CommandExecutor.CommandExecutor, (realExecutor) => ({
+        ...realExecutor,
+        string: () => Effect.succeed(""),
+      })),
+    ).pipe(Layer.provide(NodeContext.layer));
+
+    const installFileSystem = testFileSystemLayer({
+      exists: (path) => Effect.succeed(path === installed),
+      readDirectory: (path) =>
+        path === `${home}/.nvm/versions/node`
+          ? Effect.succeed(["v22.22.0", "v24.18.1"])
+          : Effect.succeed([]),
+    });
+
+    it.live("takes the newest node version's copy", () =>
+      Effect.gen(function* () {
+        const resolved = yield* ClaudeCode.resolveClaudeCodePath.pipe(
+          Effect.provide(emptyPathLookup),
+        );
+
+        expect(resolved).toBe(installed);
+      }).pipe(
+        Effect.provide(
+          Layer.mergeAll(testPlatformLayer({ env: { HOME: home } }), installFileSystem),
+        ),
+      ),
+    );
+
+    it.live("says what to do when there is nothing to find anywhere", () =>
+      Effect.gen(function* () {
+        const failure = yield* ClaudeCode.resolveClaudeCodePath.pipe(
+          Effect.provide(emptyPathLookup),
+          Effect.flip,
+        );
+
+        expect(failure.message).toContain("--executable");
+      }).pipe(
+        Effect.provide(
+          Layer.mergeAll(
+            testPlatformLayer({ env: { HOME: home } }),
+            testFileSystemLayer({
+              exists: () => Effect.succeed(false),
+              readDirectory: () => Effect.succeed([]),
+            }),
+          ),
+        ),
+      ),
     );
   });
 });

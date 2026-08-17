@@ -15,7 +15,13 @@ export type ClassifyScopeKind = "unclassified" | "all" | "selection";
  * itself differently depending on which one asked for it.
  */
 export type ClassifyOutcome =
-  | { readonly kind: "stopped-early"; readonly classified: number; readonly remaining: number }
+  | {
+      readonly kind: "stopped-early";
+      readonly classified: number;
+      readonly remaining: number;
+      /** Why it stopped, in one line, when the pass could say. */
+      readonly reason: string | null;
+    }
   /** Nothing was asked of the CLI because every conversation already has a topic. */
   | { readonly kind: "nothing-to-do" }
   /** Nothing was asked because none of the picked conversations could be sorted. */
@@ -33,7 +39,12 @@ export const describeClassifyOutcome = (
   scope: ClassifyScopeKind,
 ): ClassifyOutcome => {
   if (result.failed) {
-    return { kind: "stopped-early", classified: result.classified, remaining: result.remaining };
+    return {
+      kind: "stopped-early",
+      classified: result.classified,
+      remaining: result.remaining,
+      reason: result.failureReason,
+    };
   }
 
   // Nothing was asked of the CLI. For a default pass that means everything is

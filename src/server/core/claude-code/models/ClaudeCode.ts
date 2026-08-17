@@ -1,8 +1,14 @@
 import * as agentSdk from "@anthropic-ai/claude-agent-sdk";
-import { Command, Path } from "@effect/platform";
-import { Data, Effect } from "effect";
+import { Command, FileSystem, Path } from "@effect/platform";
+import { Data, Effect, Option } from "effect";
 import { uniq } from "es-toolkit";
+import { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
+import { EnvService } from "../../platform/services/EnvService.ts";
 import { LanternOptionsService } from "../../platform/services/LanternOptionsService.ts";
+import {
+  claudeInstallLocations,
+  versionRootCandidates,
+} from "../functions/claudeInstallLocations.ts";
 import * as ClaudeCodeVersion from "./ClaudeCodeVersion.ts";
 
 type AgentSdkQuery = typeof agentSdk.query;
@@ -36,6 +42,54 @@ class ClaudeCodeAgentSdkNotSupportedError extends Data.TaggedError(
 )<{
   message: string;
 }> {}
+
+/**
+ * The known install directories, searched when PATH came back empty.
+ *
+ * Reading a handful of directories is cheap and only ever happens once PATH has
+ * already failed, which on a machine where `which claude` works is never.
+ */
+const searchInstalledClaudePaths = Effect.gen(function* () {
+  const path = yield* Path.Path;
+  const fs = yield* FileSystem.FileSystem;
+  const context = yield* ApplicationContext;
+  const envService = yield* EnvService;
+
+  const join = (...segments: string[]) => path.join(...segments);
+
+  const locations = claudeInstallLocations(
+    {
+      home: yield* context.homeDirectory,
+      platform: context.platform,
+      nvmDir: yield* envService.getEnv("NVM_DIR"),
+      fnmDir: yield* envService.getEnv("FNM_DIR"),
+      voltaHome: yield* envService.getEnv("VOLTA_HOME"),
+      pnpmHome: yield* envService.getEnv("PNPM_HOME"),
+      xdgDataHome: yield* envService.getEnv("XDG_DATA_HOME"),
+      appData: yield* envService.getEnv("APPDATA"),
+    },
+    join,
+  );
+
+  // A directory that is not there, or that this user may not read, is an
+  // absence like any other — never a reason to fail the whole lookup.
+  const exists = (candidate: string) =>
+    fs.exists(candidate).pipe(Effect.catchAll(() => Effect.succeed(false)));
+
+  const fromVersionRoots = yield* Effect.forEach(locations.versionRoots, (root) =>
+    fs.readDirectory(root.dir).pipe(
+      Effect.map((versions) => versionRootCandidates(root, versions, context.platform, join)),
+      Effect.catchAll(() => Effect.succeed<readonly string[]>([])),
+    ),
+  );
+
+  const candidates = [...locations.files, ...fromVersionRoots.flat()];
+
+  return {
+    candidates,
+    found: Option.getOrUndefined(yield* Effect.findFirst(candidates, exists)),
+  };
+});
 
 export const resolveClaudeCodePath = Effect.gen(function* () {
   const path = yield* Path.Path;
@@ -80,16 +134,32 @@ export const resolveClaudeCodePath = Effect.gen(function* () {
   );
 
   const resolvedClaudePath = claudePaths.at(0);
-
-  if (resolvedClaudePath === undefined) {
-    return yield* Effect.fail(
-      new ClaudeCodePathNotFoundError({
-        message: "Claude Code CLI not found in any location",
-      }),
-    );
+  if (resolvedClaudePath !== undefined) {
+    return resolvedClaudePath;
   }
 
-  return resolvedClaudePath;
+  // PATH is not the whole machine. Claude Code is normally installed under one
+  // node version and Lantern needs another, so the version manager that keeps
+  // them apart is exactly what takes `claude` off PATH here while leaving it
+  // installed and runnable — see `claudeInstallLocations`.
+  const installed = yield* searchInstalledClaudePaths;
+  if (installed.found !== undefined) {
+    yield* Effect.logInfo(
+      `[ClaudeCode] not on PATH; using the installed copy at ${installed.found}`,
+    );
+    return installed.found;
+  }
+
+  // Where it looked belongs in the log, not in the message: the message is
+  // read off a status bar one line high, and a list of twenty paths there says
+  // less than the one thing the user can do about it.
+  yield* Effect.logDebug(`[ClaudeCode] looked in: ${installed.candidates.join(", ")}`);
+
+  return yield* Effect.fail(
+    new ClaudeCodePathNotFoundError({
+      message: "Claude Code CLI not found - pass --executable /path/to/claude",
+    }),
+  );
 });
 
 export const Config = Effect.gen(function* () {

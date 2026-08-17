@@ -5275,7 +5275,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        114
+        119
       ]
     ],
     "translation": "A classificação falhou"
@@ -5291,7 +5291,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        109
+        114
       ]
     ],
     "translation": "A classificação falhou ({status})"
@@ -5307,7 +5307,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        98
+        103
       ]
     ],
     "translation": "{count} ficaram para a próxima passagem"
@@ -5319,7 +5319,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        62
+        67
       ]
     ],
     "translation": "Todas as conversas já têm um tópico"
@@ -5331,7 +5331,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        72
+        77
       ]
     ],
     "translation": "Nenhuma das conversas selecionadas pôde ser classificada"
@@ -5347,7 +5347,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        87
+        92
       ]
     ],
     "translation": "{count} conversas classificadas em tópicos"
@@ -5366,7 +5366,7 @@
     "origin": [
       [
         "src/web/lib/api/useClassifyTopics.ts",
-        82
+        87
       ]
     ],
     "translation": "{count} conversas classificadas em tópicos ({cost} USD de uso)"

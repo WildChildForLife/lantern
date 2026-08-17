@@ -53,6 +53,11 @@ export const useClassifyTopics = () => {
             message: "Sorted {count}, then stopped early. {remaining} still have no topic.",
             values: { count: outcome.classified, remaining: outcome.remaining },
           }),
+          // The reason comes from the CLI itself, so it is not translated and
+          // does not belong in the headline. It is still the only part that
+          // says what to do — most often that Claude Code is installed where
+          // Lantern cannot see it.
+          outcome.reason === null ? undefined : { description: outcome.reason },
         );
         return;
       }
