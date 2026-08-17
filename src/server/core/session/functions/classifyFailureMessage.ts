@@ -20,14 +20,14 @@ export const classifyFailureMessage = (
     case null:
       return null;
     case "unusable-answer":
-      return "the agent CLI answered with nothing that could be read as topics";
+      return "The agent CLI answered with nothing that could be read as topics";
     case "cli-unavailable": {
       // Command failures arrive as several lines of stderr. The first line is
       // the one that names the problem; the rest is the transcript.
       const firstLine = (detail ?? "").split("\n")[0]?.trim() ?? "";
 
       return firstLine === ""
-        ? "the agent CLI could not be run"
+        ? "The agent CLI could not be run"
         : firstLine.slice(0, MAX_DETAIL_LENGTH);
     }
     default:

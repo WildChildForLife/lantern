@@ -14,8 +14,8 @@ describe("classifyFailureMessage", () => {
   });
 
   test("still explains itself when the CLI failed without saying why", () => {
-    expect(classifyFailureMessage("cli-unavailable", null)).toBe("the agent CLI could not be run");
-    expect(classifyFailureMessage("cli-unavailable", "   ")).toBe("the agent CLI could not be run");
+    expect(classifyFailureMessage("cli-unavailable", null)).toBe("The agent CLI could not be run");
+    expect(classifyFailureMessage("cli-unavailable", "   ")).toBe("The agent CLI could not be run");
   });
 
   test("keeps a long CLI complaint to one line", () => {
@@ -28,7 +28,7 @@ describe("classifyFailureMessage", () => {
 
   test("names an answer it could not read as topics", () => {
     expect(classifyFailureMessage("unusable-answer", null)).toBe(
-      "the agent CLI answered with nothing that could be read as topics",
+      "The agent CLI answered with nothing that could be read as topics",
     );
   });
 });

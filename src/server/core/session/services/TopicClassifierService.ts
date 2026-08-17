@@ -273,22 +273,29 @@ const LayerImpl = Effect.gen(function* () {
    *
    * Wiping first and asking afterwards is how "Redo all" with no CLI installed
    * used to lose every topic and file none.
+   *
+   * The reason the CLI could not answer is written to `failureDetail` rather
+   * than only logged: this is the one path that finds out before a batch is
+   * ever run, and "Redo all" is the very button somebody presses on a machine
+   * where `claude` is installed somewhere Lantern cannot see.
    */
-  const wipeForForcedPass = Effect.gen(function* () {
-    const usable = yield* classifierRunner.pipe(
-      Effect.as(true),
-      Effect.catchAll((error) =>
-        Effect.logError(`[TopicClassifier] not wiping topics: ${String(error)}`).pipe(
-          Effect.as(false),
+  const wipeForForcedPass = (failureDetail: Ref.Ref<string | null>) =>
+    Effect.gen(function* () {
+      const usable = yield* classifierRunner.pipe(
+        Effect.as(true),
+        Effect.catchAll((error) =>
+          Effect.logError(`[TopicClassifier] not wiping topics: ${String(error)}`).pipe(
+            Effect.zipRight(Ref.set(failureDetail, describeClassifierError(error))),
+            Effect.as(false),
+          ),
         ),
-      ),
-    );
-    if (!usable) return null;
+      );
+      if (!usable) return null;
 
-    const snapshot = storedTopics();
-    db.delete(sessionTopics).run();
-    return snapshot;
-  });
+      const snapshot = storedTopics();
+      db.delete(sessionTopics).run();
+      return snapshot;
+    });
 
   /**
    * Classifies what the scope resolves to, in batches, capped per pass. What the
@@ -311,7 +318,7 @@ const LayerImpl = Effect.gen(function* () {
          */
         const failureDetail = yield* Ref.make<string | null>(null);
 
-        const snapshot = forced ? yield* wipeForForcedPass : null;
+        const snapshot = forced ? yield* wipeForForcedPass(failureDetail) : null;
         if (forced && snapshot === null) {
           return {
             classified: 0,
@@ -321,7 +328,7 @@ const LayerImpl = Effect.gen(function* () {
             requested: 0,
             queued: 0,
             failed: true,
-            failureReason: classifyFailureMessage("cli-unavailable", null),
+            failureReason: classifyFailureMessage("cli-unavailable", yield* Ref.get(failureDetail)),
           } satisfies ClassifyResult;
         }
 
