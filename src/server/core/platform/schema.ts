@@ -29,6 +29,18 @@ export const envSchema = z.object({
    * of its own, so this is the variable that moves it.
    */
   XDG_DATA_HOME: z.string().optional(),
+  /**
+   * Where the node version managers keep their installs. Read only to find a
+   * `claude` that PATH does not carry, which is the normal state of affairs
+   * when Claude Code was installed under a different node version than the one
+   * running Lantern.
+   */
+  NVM_DIR: z.string().optional(),
+  FNM_DIR: z.string().optional(),
+  VOLTA_HOME: z.string().optional(),
+  PNPM_HOME: z.string().optional(),
+  /** Windows names the per-user application directory here. */
+  APPDATA: z.string().optional(),
 });
 
 export type EnvSchema = z.infer<typeof envSchema>;

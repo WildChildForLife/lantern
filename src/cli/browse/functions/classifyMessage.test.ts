@@ -27,9 +27,33 @@ describe("describeClassifyStatus", () => {
 
   it("reports a pass that gave up part way as a failure", () => {
     expect(
-      describeClassifyStatus({ kind: "stopped-early", classified: 40, remaining: 12 }),
+      describeClassifyStatus({
+        kind: "stopped-early",
+        classified: 40,
+        remaining: 12,
+        reason: null,
+      }),
     ).toStrictEqual({
       text: "Sorted 40, then stopped early. 12 still have no topic.",
+      tone: "error",
+    });
+  });
+
+  /**
+   * The count is not the problem, and the problem is what the user can act on:
+   * a CLI installed under another node version is invisible to the board
+   * otherwise, since the log it is written to is the screen the board draws on.
+   */
+  it("leads with why it stopped when the pass knows", () => {
+    expect(
+      describeClassifyStatus({
+        kind: "stopped-early",
+        classified: 0,
+        remaining: 22,
+        reason: "Claude Code CLI not found - pass --executable /path/to/claude",
+      }),
+    ).toStrictEqual({
+      text: "Claude Code CLI not found - pass --executable /path/to/claude. 22 still have no topic.",
       tone: "error",
     });
   });

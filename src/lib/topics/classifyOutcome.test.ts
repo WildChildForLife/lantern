@@ -10,6 +10,7 @@ const result = (overrides: Partial<ClassifyResult> = {}): ClassifyResult => ({
   requested: 0,
   queued: 0,
   failed: false,
+  failureReason: null,
   ...overrides,
 });
 
@@ -19,7 +20,7 @@ test("a pass that gave up part way reports what is left", () => {
       result({ classified: 40, remaining: 12, requested: 52, queued: 52, failed: true }),
       "unclassified",
     ),
-  ).toEqual({ kind: "stopped-early", classified: 40, remaining: 12 });
+  ).toEqual({ kind: "stopped-early", classified: 40, remaining: 12, reason: null });
 });
 
 test("a default pass with nothing pending means everything is filed", () => {
@@ -58,5 +59,26 @@ test("a CLI that answered but matched nothing is not 'already sorted'", () => {
     classified: 0,
     costUsd: 0,
     leftOver: 0,
+  });
+});
+
+test("a pass that gave up carries the reason it was given", () => {
+  expect(
+    describeClassifyOutcome(
+      result({
+        classified: 0,
+        remaining: 22,
+        requested: 22,
+        queued: 22,
+        failed: true,
+        failureReason: "Claude Code CLI not found - pass --executable /path/to/claude",
+      }),
+      "unclassified",
+    ),
+  ).toEqual({
+    kind: "stopped-early",
+    classified: 0,
+    remaining: 22,
+    reason: "Claude Code CLI not found - pass --executable /path/to/claude",
   });
 });

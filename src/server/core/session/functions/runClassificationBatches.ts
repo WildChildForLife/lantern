@@ -24,11 +24,19 @@ export type ClassificationBatchDeps<R = never> = {
   readonly store: (batch: readonly ClassificationCandidate[], answer: string) => number;
 };
 
+/**
+ * Why a pass stopped before the end. `failed` says that it did; this says what
+ * to tell the user, and the two are worth telling apart — "the CLI could not be
+ * asked" and "the CLI answered something unusable" are fixed differently.
+ */
+export type ClassificationFailure = "cli-unavailable" | "unusable-answer";
+
 export type ClassificationBatchOutcome = {
   readonly classified: number;
   readonly batches: number;
   readonly costUsd: number;
   readonly failed: boolean;
+  readonly failure: ClassificationFailure | null;
 };
 
 /**
@@ -45,7 +53,7 @@ export const runClassificationBatches = <R = never>(
     let classified = 0;
     let batches = 0;
     let costUsd = 0;
-    let failed = false;
+    let failure: ClassificationFailure | null = null;
 
     for (let offset = 0; offset < candidates.length; offset += batchSize) {
       const batch = candidates.slice(offset, offset + batchSize);
@@ -53,7 +61,7 @@ export const runClassificationBatches = <R = never>(
 
       const answer = yield* deps.ask(buildClassificationPrompt(batch, deps.existingTopics()));
       if (answer === null) {
-        failed = true;
+        failure = "cli-unavailable";
         break;
       }
 
@@ -65,10 +73,10 @@ export const runClassificationBatches = <R = never>(
       // An unusable answer means the next batch would likely fail the same way;
       // stopping keeps a broken run cheap.
       if (stored === 0) {
-        failed = true;
+        failure = "unusable-answer";
         break;
       }
     }
 
-    return { classified, batches, costUsd, failed };
+    return { classified, batches, costUsd, failed: failure !== null, failure };
   });

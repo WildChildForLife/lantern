@@ -196,6 +196,7 @@ describe("TopicClassifierService", () => {
           requested: 1,
           queued: 1,
           failed: false,
+          failureReason: null,
         });
         // The already-filed conversation kept the label it had.
         expect(
@@ -409,6 +410,7 @@ describe("TopicClassifierService", () => {
           requested: 0,
           queued: 0,
           failed: false,
+          failureReason: null,
         });
       }).pipe(
         Effect.provide(

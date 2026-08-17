@@ -34,7 +34,13 @@ describe("runClassificationBatches", () => {
 
       expect(askedSizes).toEqual([40, 40, 10]);
       expect(topicReads).toBe(3);
-      expect(outcome).toEqual({ classified: 90, batches: 3, costUsd: 0, failed: false });
+      expect(outcome).toEqual({
+        classified: 90,
+        batches: 3,
+        costUsd: 0,
+        failed: false,
+        failure: null,
+      });
     }),
   );
 
@@ -52,7 +58,13 @@ describe("runClassificationBatches", () => {
       });
 
       expect(asks).toBe(2);
-      expect(outcome).toEqual({ classified: 40, batches: 1, costUsd: 0.002, failed: true });
+      expect(outcome).toEqual({
+        classified: 40,
+        batches: 1,
+        costUsd: 0.002,
+        failed: true,
+        failure: "cli-unavailable",
+      });
     }),
   );
 
@@ -70,7 +82,13 @@ describe("runClassificationBatches", () => {
       });
 
       expect(asks).toBe(1);
-      expect(outcome).toEqual({ classified: 0, batches: 1, costUsd: 0.001, failed: true });
+      expect(outcome).toEqual({
+        classified: 0,
+        batches: 1,
+        costUsd: 0.001,
+        failed: true,
+        failure: "unusable-answer",
+      });
     }),
   );
 
@@ -101,7 +119,13 @@ describe("runClassificationBatches", () => {
       });
 
       expect(asks).toBe(0);
-      expect(outcome).toEqual({ classified: 0, batches: 0, costUsd: 0, failed: false });
+      expect(outcome).toEqual({
+        classified: 0,
+        batches: 0,
+        costUsd: 0,
+        failed: false,
+        failure: null,
+      });
     }),
   );
 

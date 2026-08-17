@@ -1,11 +1,12 @@
 import { Command } from "@effect/platform";
 import { and, desc, eq, inArray, isNotNull, isNull, or, sql } from "drizzle-orm";
-import { Context, Effect, Layer } from "effect";
+import { Context, Effect, Layer, Ref } from "effect";
 import { MAX_CLASSIFY_PER_PASS } from "../../../../lib/topics/classifyLimits.ts";
 import { DrizzleService } from "../../../lib/db/DrizzleService.ts";
 import { projects, sessionTopics, sessions } from "../../../lib/db/schema.ts";
 import type { InferEffect } from "../../../lib/effect/types.ts";
 import { UserConfigService } from "../../platform/services/UserConfigService.ts";
+import { HeadlessUnavailableError } from "../../source/models/SourceAdapter.ts";
 import { CLAUDE_CODE_SOURCE_ID, sourceIdSchema } from "../../source/models/SourceId.ts";
 import { SourceRegistry } from "../../source/services/SourceRegistry.ts";
 import {
@@ -17,6 +18,7 @@ import {
   selectPassCandidates,
   toClassificationCandidate,
 } from "../functions/classificationCandidates.ts";
+import { classifyFailureMessage } from "../functions/classifyFailureMessage.ts";
 import type { ClassifyScope } from "../functions/classifyScope.ts";
 import { normalizeTopicIcon } from "../functions/groupConversationsByTopic.ts";
 import { runClassificationBatches } from "../functions/runClassificationBatches.ts";
@@ -41,6 +43,17 @@ import type { ClassifyResult } from "../schema.ts";
 
 /** Conversations per CLI call. Large enough to be cheap, small enough to stay accurate. */
 const BATCH_SIZE = 40;
+
+/**
+ * The sentence to show for a failed call. `HeadlessUnavailableError` carries
+ * the useful one — why the CLI could not be resolved — under `reason`, where a
+ * plain `String(error)` would print the tag instead.
+ */
+const describeClassifierError = (error: unknown): string => {
+  if (error instanceof HeadlessUnavailableError) return error.reason;
+
+  return error instanceof Error ? error.message : String(error);
+};
 
 /**
  * Only Claude Code takes a model flag here. The others are driven by whatever
@@ -291,6 +304,13 @@ const LayerImpl = Effect.gen(function* () {
         const max = options.maxCandidates ?? MAX_CLASSIFY_PER_PASS;
         const forced = options.scope.kind === "all";
 
+        /**
+         * What the CLI said when it could not answer. Held here rather than
+         * returned by `ask`, whose null is all `runClassificationBatches` needs
+         * to know — the words are for the user, not for the loop.
+         */
+        const failureDetail = yield* Ref.make<string | null>(null);
+
         const snapshot = forced ? yield* wipeForForcedPass : null;
         if (forced && snapshot === null) {
           return {
@@ -301,6 +321,7 @@ const LayerImpl = Effect.gen(function* () {
             requested: 0,
             queued: 0,
             failed: true,
+            failureReason: classifyFailureMessage("cli-unavailable", null),
           } satisfies ClassifyResult;
         }
 
@@ -312,6 +333,7 @@ const LayerImpl = Effect.gen(function* () {
             runClassifier(prompt).pipe(
               Effect.catchAll((error) =>
                 Effect.logError(`[TopicClassifier] CLI failed: ${String(error)}`).pipe(
+                  Effect.zipRight(Ref.set(failureDetail, describeClassifierError(error))),
                   Effect.as(null),
                 ),
               ),
@@ -333,6 +355,7 @@ const LayerImpl = Effect.gen(function* () {
           requested,
           queued: queued.length,
           failed: outcome.failed,
+          failureReason: classifyFailureMessage(outcome.failure, yield* Ref.get(failureDetail)),
         } satisfies ClassifyResult;
       }),
     );

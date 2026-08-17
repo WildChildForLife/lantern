@@ -16,7 +16,12 @@ export const describeClassifyStatus = (outcome: ClassifyOutcome): Status => {
   switch (outcome.kind) {
     case "stopped-early":
       return {
-        text: `Sorted ${outcome.classified}, then stopped early. ${outcome.remaining} still have no topic.`,
+        // What went wrong first, when the pass knows: a count says a pass
+        // failed, and only the reason says what to do about it.
+        text:
+          outcome.reason === null
+            ? `Sorted ${outcome.classified}, then stopped early. ${outcome.remaining} still have no topic.`
+            : `${outcome.reason}. ${outcome.remaining} still have no topic.`,
         tone: "error",
       };
     case "nothing-to-do":

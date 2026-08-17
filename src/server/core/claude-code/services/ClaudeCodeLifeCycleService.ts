@@ -5,6 +5,7 @@ import { Context, Effect, Layer, Runtime } from "effect";
 import { ulid } from "ulid";
 import type { InferEffect } from "../../../lib/effect/types.ts";
 import { EventBus } from "../../events/services/EventBus.ts";
+import type { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
 import type { EnvService } from "../../platform/services/EnvService.ts";
 import type { LanternOptionsService } from "../../platform/services/LanternOptionsService.ts";
 import type { SessionMetaService } from "../../session/services/SessionMetaService.ts";
@@ -33,6 +34,7 @@ const LayerImpl = Effect.gen(function* () {
     | CommandExecutor
     | SessionMetaService
     | ClaudeCodePermissionService
+    | ApplicationContext
     | EnvService
     | LanternOptionsService
   >();

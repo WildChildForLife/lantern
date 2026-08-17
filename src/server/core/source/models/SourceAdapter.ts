@@ -1,6 +1,7 @@
 import type { CommandExecutor, FileSystem, Path } from "@effect/platform";
 import { Data, type Effect } from "effect";
 import type { ApplicationContext } from "../../platform/services/ApplicationContext.ts";
+import type { EnvService } from "../../platform/services/EnvService.ts";
 import type { LanternOptionsService } from "../../platform/services/LanternOptionsService.ts";
 import type {
   SourceChange,
@@ -122,10 +123,15 @@ export type SourceAdapter = {
 
 /**
  * What resolving and running a CLI needs, on top of what reading files needs:
- * a process to run `which`, and the options that can name an executable
- * outright.
+ * a process to run `which`, the options that can name an executable outright,
+ * and the environment the version managers describe their installs in — PATH
+ * alone does not find a CLI installed under another node version.
  */
-export type HeadlessEnv = SourceEnv | CommandExecutor.CommandExecutor | LanternOptionsService;
+export type HeadlessEnv =
+  | SourceEnv
+  | CommandExecutor.CommandExecutor
+  | LanternOptionsService
+  | EnvService;
 
 export type HeadlessAnswer = {
   readonly text: string;
