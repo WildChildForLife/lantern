@@ -3,6 +3,7 @@ import { Command } from "commander";
 import packageJson from "../../package.json" with { type: "json" };
 import { maybeRunFirstRunWizard } from "../cli/firstRunWizard.ts";
 import { registerCliCommands } from "../cli/index.ts";
+import { describeUnknownCommand } from "../cli/unknownCommand.ts";
 import { maybeNotifyUpdate } from "../cli/update/notifyUpdate.ts";
 import type { CliOptions } from "./core/platform/services/LanternOptionsService.ts";
 import { checkNodeVersion } from "./nodeVersionCheck.ts";
@@ -12,7 +13,12 @@ checkNodeVersion();
 
 const program = new Command();
 
-program.name(packageJson.name).version(packageJson.version).description(packageJson.description);
+// The npm package is `lantern-viewer`, because homebrew-cask already ships an
+// unrelated `lantern` — but the command it installs is `lantern`, and that is
+// what help text and error messages have to print for them to be paste-able.
+const [commandName = packageJson.name] = Object.keys(packageJson.bin);
+
+program.name(commandName).version(packageJson.version).description(packageJson.description);
 
 // start server
 program
@@ -32,7 +38,23 @@ program
     "agent CLI to read sessions from; repeat for more than one",
     (value: string, previous: string[] | undefined) => [...(previous ?? []), value],
   )
-  .action(async (options: CliOptions & { init?: boolean }) => {
+  // Commander would otherwise reject a mistyped subcommand as one argument too
+  // many, in those words. Taking the arguments instead lets the action say
+  // which word it did not know — see `describeUnknownCommand`.
+  .allowExcessArguments()
+  .action(async (options: CliOptions & { init?: boolean }, command: Command) => {
+    const unknown = describeUnknownCommand(
+      command.args,
+      command.commands.map((sub) => ({ name: sub.name(), aliases: sub.aliases() })),
+      command.name(),
+    );
+
+    if (unknown !== null) {
+      process.stderr.write(`${unknown}\n`);
+      process.exitCode = 1;
+      return;
+    }
+
     // A first launch at a terminal walks through setup, then carries straight
     // on into starting the server with the answers. Anything without a
     // terminal — a container, CI, a pipe — skips it silently.
