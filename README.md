@@ -42,8 +42,8 @@ when a terminal is the wrong shape for what you are doing. See [The web UI](#the
 ## Contents
 
 - [Quick start](#quick-start)
-- [Install](#install) · [macOS](#macos) · [Linux](#linux) · [Windows](#windows) ·
-  [npm](#npm-any-platform) · [Docker](#docker) · [From source](#from-source) ·
+- [Install](#install) · [npm](#npm-any-platform) · [macOS](#macos) · [Linux](#linux) ·
+  [Windows](#windows) · [Docker](#docker) · [From source](#from-source) ·
   [Platform support](#platform-support)
 - [Commands](#commands)
 - [The board in your terminal](#the-board-in-your-terminal) · [Setup](#setup) · [Options](#options)
@@ -73,7 +73,22 @@ One npm package behind three front doors, all kept current by `lantern upgrade`:
 - **Homebrew** — brings Node with it
 - **Docker** — ships its own
 
-Only the optional AI topic naming needs Claude Code installed and signed in.
+Only the optional AI topic naming needs Claude Code installed and signed in. There is no setup step
+to run afterwards — `lantern browse` works straight out of the box.
+
+### npm (any platform)
+
+Needs Node.js 24 or newer already present:
+
+```bash
+npm install -g lantern-viewer       # permanent, upgradeable with `lantern upgrade`
+lantern browse
+
+npx lantern-viewer browse           # or run once, without installing
+npx lantern-viewer --port 3400
+```
+
+`pnpm`, `yarn` and `bun` work too; `lantern upgrade` uses whichever one put it there.
 
 ### macOS
 
@@ -139,20 +154,6 @@ Reads `%USERPROFILE%\.claude\projects`, caches in `%USERPROFILE%\.lantern`. `cla
 The in-app terminal is unavailable here — see [Platform support](#platform-support). For it, run
 Lantern in **WSL2** as a Linux install and point `--claude-dir` at
 `/mnt/c/Users/<you>/.claude`.
-
-### npm (any platform)
-
-Needs Node.js 24 or newer already present:
-
-```bash
-npm install -g lantern-viewer       # permanent, upgradeable with `lantern upgrade`
-lantern browse
-
-npx lantern-viewer browse           # or run once, without installing
-npx lantern-viewer --port 3400
-```
-
-`pnpm`, `yarn` and `bun` work too; `lantern upgrade` uses whichever one put it there.
 
 ### Docker
 
@@ -224,14 +225,16 @@ from either are welcome.
 
 ```bash
 lantern browse             # the board, in your terminal
-lantern init               # set Lantern up, and remember the answers
+lantern init               # optional: set Lantern up, and remember the answers
 lantern upgrade            # move to the latest release
 lantern [options]          # start the web UI
 ```
 
 - **`browse`** — alias `b`. Takes `--claude-dir`, `--executable`, `--source`, `--verbose` from the
   [options](#options) table, on either side of the command name.
-- **`init`** — takes `--claude-dir`.
+- **`init`** — takes `--claude-dir`. Never required: every setting it writes has a working default,
+  and `browse` never stops to ask for one. Run it when you want a different port, bind address or
+  set of agent CLIs remembered.
 - **`upgrade`** — runs the package manager that installed Lantern. Anything it did not install —
   Homebrew, Docker, a git checkout, a `.deb`, a prefix it cannot write to — is left alone with the
   right command printed instead. `--check` and `--dry-run` change nothing.
@@ -299,13 +302,17 @@ right; the keys are unchanged.
 
 ## Setup
 
-The first time you run `lantern` at a terminal it walks you through setup: which agent CLIs to read,
-where they keep their logs, which port and address to bind, and whether to enable the in-app
-terminal. Every question arrives with the answer already detected, so the fast path is Enter a few
-times.
+Setup is optional. Everything Lantern needs has a default, so `lantern browse` goes straight to the
+board on a fresh machine and never stops to ask a question.
+
+What the offer covers is the web UI, which has more to decide: the first time you run `lantern` with
+no command at a terminal it walks you through which agent CLIs to read, where they keep their logs,
+which port and address to bind, and whether to enable the in-app terminal. Every question arrives
+with the answer already detected, so the fast path is Enter a few times.
 
 The answers go in `~/.lantern/config.json` (and the CLI selection in `~/.lantern/sources/sources.json`,
-the same file the settings panel writes). Run `lantern init` again at any point to change them.
+the same file the settings panel writes). Run `lantern init` at any point to change them — or to
+answer the questions up front, before ever starting the server.
 
 Settings sit **below** environment variables in the [options](#options) table: a flag beats an
 environment variable, which beats the file, which beats the built-in default. So a container's `PORT`
