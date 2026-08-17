@@ -4,29 +4,29 @@
 
 **Language**:
 
-- Code, comments, and commit messages should be in English
+- Code, comments, commits in English
 
 **NEVER**:
 
-- Use `as` type casting in ANY context including test code (explain the problem to the user instead)
+- Use `as` type casting anywhere, tests included (explain problem to user instead)
 - Use raw `fetch` or bypass TanStack Query for API calls
 - Run `pnpm dev` or `pnpm start` (dev servers)
 - Use `node:fs`, `node:path`, etc. directly (use Effect-TS equivalents)
 
 **ALWAYS**:
 
-- Use Effect-TS for all backend side effects
-- Use Hono RPC + TanStack Query for all API calls
-- Follow TDD: write tests first, then implement
-- Run `pnpm typecheck` and `pnpm fix` before committing
+- Effect-TS for all backend side effects
+- Hono RPC + TanStack Query for all API calls
+- TDD: tests first, then implement
+- Run `pnpm typecheck` and `pnpm fix` before commit
 
 ## Commit Message Rules
 
-Conventional Commits format: `type: description`
+Conventional Commits: `type: description`
 
 **Release Note Awareness**:
 
-- Commit messages are included in release notes; write for users.
+- Commit messages ship in release notes. Write for users.
 
 **Type Selection**:
 
@@ -36,7 +36,7 @@ Conventional Commits format: `type: description`
 | `fix`                              | Bug Fixes    | User-impacting bug fix  |
 | `chore`, `ci`, `build`, `refactor` | Excluded     | Internal changes        |
 
-**Critical**: Use `fix` only for user-facing bugs. Internal fixes (linter errors, type errors, build scripts) must use `chore`.
+**Critical**: `fix` only for user-facing bugs. Internal fixes (linter errors, type errors, build scripts) use `chore`.
 
 **Message Quality Examples**:
 
@@ -48,32 +48,32 @@ Conventional Commits format: `type: description`
 
 ## Project Overview
 
-Lantern reads Claude Code session logs directly from JSONL files (`~/.claude/projects/`) with zero data loss. It's a web-based client built as a CLI tool serving a Vite application.
+Lantern read Claude Code session logs straight from JSONL files (`~/.claude/projects/`), zero data loss. Web client shipped as CLI tool serving Vite app.
 
 **Core Architecture**:
 
 - Frontend: Vite + TanStack Router + React 19 + TanStack Query
 - Backend: Hono (standalone server) + Effect-TS (all business logic)
-- Data: Direct JSONL reads with strict Zod validation
+- Data: Direct JSONL reads, strict Zod validation
 - Real-time: Server-Sent Events (SSE) for live updates
 
 ## Recommended Coding Process
 
-This project is designed with the philosophy of achieving both rapid feedback and code quality maintenance (passing checks = nearly guaranteed runtime correctness) by leveraging:
+Project aims for fast feedback plus quality (checks pass = runtime correctness near-guaranteed) via:
 
 - Strict typing with Effect-TS and ADT
-- Constraints for maintaining code quality configured in Lint as much as possible
-- Dependency injection and effective testing with Effect-TS
+- Quality constraints pushed into Lint where possible
+- Dependency injection and testing with Effect-TS
 
-For development, we recommend implementing with t-wada's TDD development style.
+Implement in t-wada TDD style.
 
-For checks, you can run `pnpm gatecheck check` to execute all the above checks against the diff at once, so proceed with implementation in a loop of problem detection and fixing with gatecheck.
+`pnpm gatecheck check` run all above checks against diff at once. Loop: detect problem, fix, repeat.
 
-By utilizing this, you can quickly inspect code with static checks and unit tests.
+Gives fast static checks plus unit tests.
 
 ## Quality Gate (MUST follow)
 
-After changing source code, always run before committing:
+After source change, always run before commit:
 
 ```bash
 pnpm gatecheck check
@@ -82,32 +82,32 @@ pnpm gatecheck check
 
 ## Key Directory Patterns
 
-- `src/server/hono/route.ts` - Hono API routes definition (all routes defined here)
+- `src/server/hono/route.ts` - Hono API routes (all routes here)
 - `src/server/core/` - Effect-TS business logic (domain modules: session, project, git, etc.)
 - `src/lib/conversation-schema/` - Zod schemas for JSONL validation
-- `src/testing/layers/` - Reusable Effect test layers (`testPlatformLayer` is the foundation)
+- `src/testing/layers/` - Reusable Effect test layers (`testPlatformLayer` is foundation)
 - `src/routes/` - TanStack Router routes
-- `src/cli/` - The interactive CLI: the `init` wizard and the `browse` board
+- `src/cli/` - Interactive CLI: `init` wizard and `browse` board
 
 ### The CLI (`src/cli/`)
 
-`lantern init` and `lantern browse` render a terminal UI with Ink (React) while driving the backend's
-Effect services directly, so they belong to neither `src/server` nor `src/web`. They sit outside both,
-which is also what the module-boundary lint rule expects — it classifies a file by whether its path
-contains `src/server` or `src/web`, and gives up on anything else, so `src/cli/**` may import from
-either side. Two rules still apply: no `@/` alias outside `src/web`, and tests colocated.
+`lantern init` and `lantern browse` render terminal UI with Ink (React) while driving backend
+Effect services directly, so belong to neither `src/server` nor `src/web`. Sit outside both —
+also what module-boundary lint rule expects: it classifies file by whether path contains
+`src/server` or `src/web`, gives up otherwise, so `src/cli/**` may import from either side.
+Two rules still apply: no `@/` alias outside `src/web`, and tests colocated.
 
-Three things are worth knowing before changing it:
+Three things worth knowing before changing it:
 
 - **Behaviour lives in pure functions**, under `browse/functions/`, `actions/planAction.ts` and
-  `init/steps.ts`. The components are wiring. A change to what a key does, which question comes next
-  or how an emulator is launched belongs in one of those, with a test, not in a `.tsx`.
-- **The read-only layer stack** in `runtime.ts` is the subset of `startServer.ts`'s graph that answers
-  questions about conversations, with nothing that listens, watches or schedules.
+  `init/steps.ts`. Components are wiring. Change to what key does, which question comes next
+  or how emulator launches belongs in one of those, with test, not in `.tsx`.
+- **The read-only layer stack** in `runtime.ts` is subset of `startServer.ts` graph that answers
+  questions about conversations, minus anything that listens, watches or schedules.
 - **Options must be loaded before the layers are built**, via `LanternOptionsService.withOptions`.
-  Services that resolve a path while being constructed — the source roots, the cache file — would
-  otherwise never see `--claude-dir`. The server can get away with loading them afterwards because it
-  reads them per request; a command that asks one question and exits cannot.
+  Services resolving path during construction — source roots, cache file — would otherwise never
+  see `--claude-dir`. Server gets away loading them after because it reads per request; command
+  that asks one question and exits cannot.
 
 ## Coding Standards
 
@@ -115,15 +115,15 @@ Three things are worth knowing before changing it:
 
 **Prioritize Pure Functions**:
 
-- Extract logic into pure, testable functions whenever possible
-- Pure functions are easier to test, reason about, and maintain
-- Only use Effect-TS when side effects or state management is required
+- Extract logic into pure, testable functions when possible
+- Pure functions easier to test, reason about, maintain
+- Use Effect-TS only when side effects or state needed
 
 **Use Effect-TS for Side Effects and State**:
 
-- Mandatory for I/O operations, async code, and stateful logic
-- Avoid class-based implementations or mutable variables for state
-- Use Effect-TS's functional patterns for state management
+- Mandatory for I/O, async code, stateful logic
+- No class-based implementations or mutable variables for state
+- Use Effect-TS functional patterns for state
 - Reference: https://effect.website/llms.txt
 
 **Testing with Layers**:
@@ -142,16 +142,16 @@ test("example", async () => {
 
 **Avoid Node.js Built-ins**:
 
-- Use `FileSystem.FileSystem` instead of `node:fs`
-- Use `Path.Path` instead of `node:path`
-- Use `Command.string` instead of `child_process`
+- `FileSystem.FileSystem` not `node:fs`
+- `Path.Path` not `node:path`
+- `Command.string` not `child_process`
 
-This enables dependency injection and proper testing.
+Enables dependency injection and proper testing.
 
 **Type Safety - NO `as` Casting**:
 
-- `as` casting is **strictly prohibited**
-- If types seem unsolvable without `as`, explain the problem to the user and ask for guidance
+- `as` casting **strictly prohibited**
+- If types seem unsolvable without `as`, explain problem to user and ask for guidance
 - Valid alternatives: type guards, assertion functions, Zod schema validation
 
 ### Frontend: API Access
@@ -168,7 +168,7 @@ const { data } = useQuery({
 });
 ```
 
-Raw `fetch` and direct requests are prohibited.
+Raw `fetch` and direct requests prohibited.
 
 ### Tech Standards
 
@@ -182,9 +182,9 @@ Raw `fetch` and direct requests are prohibited.
 
 **When to Use SSE**:
 
-- Delivering session log updates to frontend
-- Notifying clients of background process state changes
-- **Never** for request-response patterns (use Hono RPC instead)
+- Deliver session log updates to frontend
+- Notify clients of background process state changes
+- **Never** for request-response (use Hono RPC instead)
 
 **Implementation**:
 
@@ -195,14 +195,14 @@ Raw `fetch` and direct requests are prohibited.
 
 - **Single Source of Truth**: `~/.claude/projects/*.jsonl`
 - **Cache**: `~/.lantern/` (invalidated via SSE when source changes)
-- **Validation**: Strict Zod schemas ensure every field is captured
+- **Validation**: Strict Zod schemas capture every field
 
 ### Session Process Management
 
-Claude Code processes remain alive in the background (unless aborted), allowing session continuation without changing session-id.
+Claude Code processes stay alive in background (unless aborted), so session continues without changing session-id.
 
 ## Development Tips
 
-1. **Session Logs**: Examine `~/.claude/projects/` JSONL files to understand data structures
-2. **Fixtures**: `fixtures/claude-home/` is a fake `~/.claude` directory — demo sessions plus one project per JSONL entry shape. Unit tests read it, and `--claude-dir ./fixtures/claude-home` runs the app against it.
+1. **Session Logs**: Read `~/.claude/projects/` JSONL files to learn data structures
+2. **Fixtures**: `fixtures/claude-home/` is fake `~/.claude` dir — demo sessions plus one project per JSONL entry shape. Unit tests read it, and `--claude-dir ./fixtures/claude-home` runs app against it.
 3. **Effect-TS Help**: https://effect.website/llms.txt

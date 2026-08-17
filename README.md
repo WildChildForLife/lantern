@@ -42,8 +42,8 @@ when a terminal is the wrong shape for what you are doing. See [The web UI](#the
 ## Contents
 
 - [Quick start](#quick-start)
-- [Install](#install) · [macOS](#macos) · [Linux](#linux) · [Windows](#windows) ·
-  [npm](#npm-any-platform) · [Docker](#docker) · [From source](#from-source) ·
+- [Install](#install) · [npm](#npm-any-platform) · [macOS](#macos) · [Linux](#linux) ·
+  [Windows](#windows) · [Docker](#docker) · [From source](#from-source) ·
   [Platform support](#platform-support)
 - [Commands](#commands)
 - [The board in your terminal](#the-board-in-your-terminal) · [Setup](#setup) · [Options](#options)
@@ -67,12 +67,28 @@ install — npm, Homebrew, Docker — see [Install](#install).
 
 ## Install
 
-Lantern is one npm package, installed three ways: with npm itself, through Homebrew, or as a
-container. Homebrew brings Node with it; npm needs Node 24 already there, and Docker ships its own.
-Whichever you pick, `lantern upgrade` keeps it current afterwards.
+One npm package behind three front doors, all kept current by `lantern upgrade`:
 
-Claude Code itself must be installed and signed in for the optional AI topic naming — everything
-else works without it.
+- **npm** — needs Node 24 already installed
+- **Homebrew** — brings Node with it
+- **Docker** — ships its own
+
+Only the optional AI topic naming needs Claude Code installed and signed in. There is no setup step
+to run afterwards — `lantern browse` works straight out of the box.
+
+### npm (any platform)
+
+Needs Node.js 24 or newer already present:
+
+```bash
+npm install -g lantern-viewer       # permanent, upgradeable with `lantern upgrade`
+lantern browse
+
+npx lantern-viewer browse           # or run once, without installing
+npx lantern-viewer --port 3400
+```
+
+`pnpm`, `yarn` and `bun` work too; `lantern upgrade` uses whichever one put it there.
 
 ### macOS
 
@@ -83,16 +99,14 @@ brew install lantern-viewer
 lantern browse                      # or: lantern --port 3400 for the web UI
 ```
 
-The formula is `lantern-viewer` because homebrew-cask already ships an unrelated
-`lantern`. The command it installs is still `lantern`.
-
-Sessions are read from `~/.claude/projects`. Everything works here, the in-app terminal included, on
-both Intel and Apple Silicon.
+The formula is `lantern-viewer` — homebrew-cask already ships an unrelated `lantern` — but the
+command it installs is `lantern`. Reads `~/.claude/projects`. Everything works on Intel and Apple
+Silicon, in-app terminal included.
 
 ### Linux
 
-npm, once Node 24 is there. Most distributions still ship something older — Ubuntu 24.04 has 18,
-Debian 12 has 18, Fedora 41 has 22 — and Lantern refuses to start on any of them, so check first:
+Node 24 first: Ubuntu 24.04 and Debian 12 ship 18, Fedora 41 ships 22, and Lantern will not start
+on those.
 
 ```bash
 node --version                                                      # skip the next two lines if this is v24 or newer
@@ -103,32 +117,26 @@ npm install -g lantern-viewer
 lantern browse
 ```
 
-Or through [linuxbrew](https://docs.brew.sh/Homebrew-on-Linux), which brings its own Node:
+Or [linuxbrew](https://docs.brew.sh/Homebrew-on-Linux), which brings its own Node:
 
 ```bash
 brew install wildchildforlife/tap/lantern-viewer
 ```
 
-Sessions are read from `~/.claude/projects`. On `x86_64` everything works. On `aarch64` the web UI's
-in-app terminal is unavailable — see [Platform support](#platform-support).
+Reads `~/.claude/projects`. On `aarch64` the web UI's in-app terminal is unavailable — see
+[Platform support](#platform-support).
 
 #### Coming from the `.deb` or `.rpm`?
 
-Those packages were retired after v0.4.0, and no newer version is published as one. They were meant
-to save you installing Node by hand and did the opposite: `apt` enforces the `nodejs (>= 24)`
-dependency that no current release can satisfy, so the install failed outright.
-
-Moving to npm gets you the same build, and something the packages never had — `lantern upgrade`:
+Retired after v0.3.0, along with the AUR recipe. `apt` enforced a `nodejs (>= 24)` dependency no
+current release satisfies, so the install failed outright. Same build, from npm:
 
 ```bash
 sudo apt remove lantern      # or: sudo dnf remove lantern
 npm install -g lantern-viewer
 ```
 
-Your settings and cache in `~/.lantern` survive both steps. `lantern upgrade` on a package install
-prints exactly this, so there is nothing to remember.
-
-The AUR recipe is gone too; it was never published to the AUR itself.
+`~/.lantern` survives both steps, and `lantern upgrade` prints these two lines on a package install.
 
 ### Windows
 
@@ -137,32 +145,15 @@ winget install OpenJS.NodeJS
 npx lantern-viewer browse
 ```
 
-`npx` runs Lantern without installing it. For a permanent install that `lantern upgrade` can keep
-current, `npm install -g lantern-viewer` once Node is there. [Docker](#docker) avoids Node
-altogether, for the web UI.
+`npm install -g lantern-viewer` instead, for an install `lantern upgrade` can keep current.
+[Docker](#docker) skips Node altogether, for the web UI.
 
-Sessions are read from `%USERPROFILE%\.claude\projects`, and Lantern's own cache from
-`%USERPROFILE%\.lantern`. The `claude` executable is found on `PATH` with `where`, so if
-`where claude` finds nothing, pass `--executable` with the full path.
+Reads `%USERPROFILE%\.claude\projects`, caches in `%USERPROFILE%\.lantern`. `claude` is found with
+`where`; if that finds nothing, pass `--executable`.
 
-The web UI's in-app terminal is unavailable on Windows — see
-[Platform support](#platform-support). If you want it, run Lantern inside **WSL2** instead and treat
-it as a Linux install; sessions written by a Windows Claude Code are then reachable at
-`/mnt/c/Users/<you>/.claude`, which you can point at with `--claude-dir`.
-
-### npm (any platform)
-
-Needs Node.js 24 or newer already present:
-
-```bash
-npm install -g lantern-viewer       # a permanent install, upgradeable with `lantern upgrade`
-lantern browse
-
-npx lantern-viewer browse           # or run it once, without installing
-npx lantern-viewer --port 3400
-```
-
-`npm`, `pnpm`, `yarn` and `bun` all work, and `lantern upgrade` uses whichever one put it there.
+The in-app terminal is unavailable here — see [Platform support](#platform-support). For it, run
+Lantern in **WSL2** as a Linux install and point `--claude-dir` at
+`/mnt/c/Users/<you>/.claude`.
 
 ### Docker
 
@@ -234,21 +225,19 @@ from either are welcome.
 
 ```bash
 lantern browse             # the board, in your terminal
-lantern init               # set Lantern up, and remember the answers
+lantern init               # optional: set Lantern up, and remember the answers
 lantern upgrade            # move to the latest release
 lantern [options]          # start the web UI
 ```
 
-`browse` has a short alias: `lantern b`, and takes `--claude-dir`, `--executable`, `--source` and
-`--verbose` from the [options](#options) table. `init` takes `--claude-dir`. Either works on both
-sides of the command name — `lantern browse --claude-dir …` and `lantern --claude-dir … browse` mean
-the same thing.
-
-`upgrade` works out how Lantern was installed and runs your package manager's own install command —
-`npm`, `pnpm`, `yarn` or `bun`, whichever put it there. Anything it did not install itself it leaves
-alone and prints the command that would upgrade it: Homebrew, Docker, a git checkout, a `.deb` or
-`.rpm`, or a global prefix this user cannot write to. `--check` reports what is available and
-`--dry-run` shows the command without running it; neither changes anything.
+- **`browse`** — alias `b`. Takes `--claude-dir`, `--executable`, `--source`, `--verbose` from the
+  [options](#options) table, on either side of the command name.
+- **`init`** — takes `--claude-dir`. Never required: every setting it writes has a working default,
+  and `browse` never stops to ask for one. Run it when you want a different port, bind address or
+  set of agent CLIs remembered.
+- **`upgrade`** — runs the package manager that installed Lantern. Anything it did not install —
+  Homebrew, Docker, a git checkout, a `.deb`, a prefix it cannot write to — is left alone with the
+  right command printed instead. `--check` and `--dry-run` change nothing.
 
 ## The board in your terminal
 
@@ -313,13 +302,17 @@ right; the keys are unchanged.
 
 ## Setup
 
-The first time you run `lantern` at a terminal it walks you through setup: which agent CLIs to read,
-where they keep their logs, which port and address to bind, and whether to enable the in-app
-terminal. Every question arrives with the answer already detected, so the fast path is Enter a few
-times.
+Setup is optional. Everything Lantern needs has a default, so `lantern browse` goes straight to the
+board on a fresh machine and never stops to ask a question.
+
+What the offer covers is the web UI, which has more to decide: the first time you run `lantern` with
+no command at a terminal it walks you through which agent CLIs to read, where they keep their logs,
+which port and address to bind, and whether to enable the in-app terminal. Every question arrives
+with the answer already detected, so the fast path is Enter a few times.
 
 The answers go in `~/.lantern/config.json` (and the CLI selection in `~/.lantern/sources/sources.json`,
-the same file the settings panel writes). Run `lantern init` again at any point to change them.
+the same file the settings panel writes). Run `lantern init` at any point to change them — or to
+answer the questions up front, before ever starting the server.
 
 Settings sit **below** environment variables in the [options](#options) table: a flag beats an
 environment variable, which beats the file, which beats the built-in default. So a container's `PORT`
@@ -337,12 +330,13 @@ Lantern says so in one line at startup, and nothing more:
 Lantern 0.4.0 is available (you have 0.3.0). Run `lantern upgrade`.
 ```
 
-The line comes from a cached answer, so it never delays a launch, and the check behind it asks the
-npm registry at most once a day. It stays quiet with no terminal attached, in CI, in Docker, for a
-`.deb`/`.rpm` install and for a git checkout — anywhere the answer would not be something you could
-act on. `NO_UPDATE_NOTIFIER=1`, `LANTERN_NO_UPDATE_NOTIFIER=1`, or `"updateNotifier": false` in
-`~/.lantern/config.json` turn it off entirely, registry request included. The cache itself lives in
-`~/.lantern/update-check.json`.
+- Read from a cache, so it never delays a launch. The registry is asked at most once a day, in the
+  background.
+- Silent where you could not act on it: no terminal attached, CI, Docker, a `.deb`/`.rpm` install, a
+  git checkout.
+- Off entirely — line and request — with `NO_UPDATE_NOTIFIER=1`, `LANTERN_NO_UPDATE_NOTIFIER=1`, or
+  `"updateNotifier": false` in `~/.lantern/config.json`.
+- Cached in `~/.lantern/update-check.json`.
 
 ## Options
 
