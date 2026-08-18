@@ -87,7 +87,7 @@ describe("ConversationSchema", () => {
       timestamp: "2026-04-10T02:29:29.982Z",
       userType: "external",
       entrypoint: "sdk-cli",
-      cwd: "/Users/zhoudi/Projects/GitHub/ClaudeAssistant",
+      cwd: "/path/to/project",
       sessionId: "163cbdad-1134-4111-afc8-56056143a581",
       version: "2.1.98",
       gitBranch: "main",
