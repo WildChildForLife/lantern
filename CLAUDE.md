@@ -197,3 +197,5 @@ Project conventions and procedures. Progressive Disclosure: **read only referenc
 | `docs/guidelines/definition_of_done.md` | Before marking task done                                                                       |
 | `docs/guidelines/qa_guideline.md`       | Verifying implemented features. Delegate to QA or general-purpose subagent with this file path |
 | `docs/guidelines/internal_review.md`    | Requesting code review                                                                         |
+| `docs/dev.md`                           | Build pipeline, test strategy, data layer and release flow in depth                            |
+| `docs/README.md`                        | Index of every user-facing and contributor doc                                                 |

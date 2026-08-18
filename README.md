@@ -11,8 +11,8 @@
 > Find the conversation you forgot you started.
 
 Lantern reads the logs your agent CLIs already write — Claude Code's `~/.claude/projects/`, and
-optionally [five others](#supported-agents) — and groups every conversation by **what it is about**,
-not by which folder it happened to start in. It runs where you already are: a terminal.
+optionally [five others](docs/agents.md) — and groups every conversation by **what it is about**, not
+by which folder it happened to start in. It runs where you already are: a terminal.
 
 ```console
 $ lantern browse
@@ -35,24 +35,14 @@ $ lantern browse
 
 One column per topic, conversations as rows, newest topic first. Press `R` to resume a conversation
 in place and come back to the board when you leave it. No server, no port, no browser.
+[The board](docs/board.md) has the rest of the keys.
 
-There is a web UI too — the same data, with a full session viewer, search and cost breakdowns — for
-when a terminal is the wrong shape for what you are doing. See [The web UI](#the-web-ui).
+There is a [web UI](docs/web-ui.md) too — the same data, with a full session viewer, search and cost
+breakdowns — for when a terminal is the wrong shape for what you are doing.
 
-## Contents
-
-- [Quick start](#quick-start)
-- [Install](#install) · [npm](#npm-any-platform) · [macOS](#macos) · [Linux](#linux) ·
-  [Windows](#windows) · [Docker](#docker) · [From source](#from-source) ·
-  [Platform support](#platform-support)
-- [Commands](#commands)
-- [The board in your terminal](#the-board-in-your-terminal) · [Setup](#setup) · [Options](#options)
-- [The web UI](#the-web-ui) · [Security](#security)
-- [Supported agents](#supported-agents) · [Reading other agent CLIs](#reading-other-agent-clis) ·
-  [Reading logs from more than one machine](#reading-logs-from-more-than-one-machine)
-- [How grouping works](#how-grouping-works)
-- [Development](#development) · [Contributing](#contributing) · [Support](#support)
-- [Privacy](#privacy) · [Licence](#licence)
+<p align="center">
+  <img src="docs/screenshots/topics.jpg" alt="Topics grouped by subject, each with an icon and a conversation count" width="100%">
+</p>
 
 ## Quick start
 
@@ -62,164 +52,20 @@ With Node.js 24 or newer already present, nothing to install:
 npx lantern-viewer browse
 ```
 
-On a first run Lantern reads your logs into its own cache, then draws the board. For a permanent
-install — npm, Homebrew, Docker — see [Install](#install).
+On a first run Lantern reads your logs into its own cache, then draws the board.
 
 ## Install
 
-One npm package behind three front doors, all kept current by `lantern upgrade`:
-
-- **npm** — needs Node 24 already installed
-- **Homebrew** — brings Node with it
-- **Docker** — ships its own
-
-Only the optional AI topic naming needs Claude Code installed and signed in. There is no setup step
-to run afterwards — `lantern browse` works straight out of the box.
-
-### npm (any platform)
-
-Needs Node.js 24 or newer already present:
-
 ```bash
-npm install -g lantern-viewer       # permanent, upgradeable with `lantern upgrade`
-lantern browse
-
-npx lantern-viewer browse           # or run once, without installing
-npx lantern-viewer --port 3400
+npm install -g lantern-viewer                       # any platform, needs Node 24
+brew install wildchildforlife/tap/lantern-viewer    # macOS or linuxbrew, brings Node
 ```
 
-`pnpm`, `yarn` and `bun` work too; `lantern upgrade` uses whichever one put it there.
+For Docker, Windows, `aarch64`, building from source, or which platforms support the web UI's in-app
+terminal, see [Install](docs/install.md).
 
-### macOS
-
-```bash
-brew tap wildchildforlife/tap
-brew trust wildchildforlife/tap     # Homebrew gates third-party taps
-brew install lantern-viewer
-lantern browse                      # or: lantern --port 3400 for the web UI
-```
-
-The formula is `lantern-viewer` — homebrew-cask already ships an unrelated `lantern` — but the
-command it installs is `lantern`. Reads `~/.claude/projects`. Everything works on Intel and Apple
-Silicon, in-app terminal included.
-
-### Linux
-
-Node 24 first: Ubuntu 24.04 and Debian 12 ship 18, Fedora 41 ships 22, and Lantern will not start
-on those.
-
-```bash
-node --version                                                      # skip the next two lines if this is v24 or newer
-curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -   # or rpm.nodesource.com/setup_24.x for dnf
-sudo apt install -y nodejs
-
-npm install -g lantern-viewer
-lantern browse
-```
-
-Or [linuxbrew](https://docs.brew.sh/Homebrew-on-Linux), which brings its own Node:
-
-```bash
-brew install wildchildforlife/tap/lantern-viewer
-```
-
-Reads `~/.claude/projects`. On `aarch64` the web UI's in-app terminal is unavailable — see
-[Platform support](#platform-support).
-
-#### Coming from the `.deb` or `.rpm`?
-
-Retired after v0.3.0, along with the AUR recipe. `apt` enforced a `nodejs (>= 24)` dependency no
-current release satisfies, so the install failed outright. Same build, from npm:
-
-```bash
-sudo apt remove lantern      # or: sudo dnf remove lantern
-npm install -g lantern-viewer
-```
-
-`~/.lantern` survives both steps, and `lantern upgrade` prints these two lines on a package install.
-
-### Windows
-
-```powershell
-winget install OpenJS.NodeJS
-npx lantern-viewer browse
-```
-
-`npm install -g lantern-viewer` instead, for an install `lantern upgrade` can keep current.
-[Docker](#docker) skips Node altogether, for the web UI.
-
-Reads `%USERPROFILE%\.claude\projects`, caches in `%USERPROFILE%\.lantern`. `claude` is found with
-`where`; if that finds nothing, pass `--executable`.
-
-The in-app terminal is unavailable here — see [Platform support](#platform-support). For it, run
-Lantern in **WSL2** as a Linux install and point `--claude-dir` at
-`/mnt/c/Users/<you>/.claude`.
-
-### Docker
-
-For the web UI. `lantern browse` wants a terminal, which is not what a detached container has.
-Identical on macOS, Linux and Windows apart from the volume syntax.
-
-```bash
-docker run -d --name lantern \
-  -p 127.0.0.1:3400:3400 \
-  -v "$HOME/.claude:/root/.claude:ro" \
-  -v lantern_cache:/root/.lantern \
-  ghcr.io/wildchildforlife/lantern:latest
-```
-
-On Windows PowerShell, swap `$HOME` for `$env:USERPROFILE` and the line continuations for backticks:
-
-```powershell
-docker run -d --name lantern `
-  -p 127.0.0.1:3400:3400 `
-  -v "${env:USERPROFILE}\.claude:/root/.claude:ro" `
-  -v lantern_cache:/root/.lantern `
-  ghcr.io/wildchildforlife/lantern:latest
-```
-
-Or with Compose, which is the same thing plus a password:
-
-```bash
-curl -O https://raw.githubusercontent.com/WildChildForLife/lantern/main/docker-compose.yml
-echo "LANTERN_PASSWORD=pick-something" > .env
-docker compose up -d
-```
-
-That mounts Claude Code's logs only. To read Codex or opencode as well, see
-[Reading other agent CLIs](#reading-other-agent-clis).
-
-Images are published for `linux/amd64` and `linux/arm64`, so a Raspberry Pi or an Apple Silicon
-machine works the same way — except the in-app terminal, which is unavailable on the `arm64` image.
-
-### From source
-
-Any platform, once Node 24 and pnpm are present:
-
-```bash
-git clone https://github.com/WildChildForLife/lantern.git
-cd lantern
-pnpm install
-pnpm build
-node dist/main.js browse             # or: node dist/main.js --port 3400
-```
-
-### Platform support
-
-Everything works everywhere except the web UI's in-app terminal, which needs a prebuilt PTY binary
-that `@replit/ruspty` does not publish for every target. Where it is missing, Lantern disables the
-terminal and says so in its startup log; nothing else is affected, and `lantern browse` does not use
-it.
-
-| Platform                       | Supported | In-app terminal |
-| ------------------------------ | --------- | --------------- |
-| macOS (Apple Silicon or Intel) | yes       | yes             |
-| Linux `x86_64`                 | yes       | yes             |
-| Linux `aarch64`                | yes       | no              |
-| Windows                        | yes       | no — use WSL2   |
-
-CI runs on Linux only, so macOS and Windows are verified by hand rather than on every commit. Reports
-from either are welcome.
+Nothing to configure afterwards — `lantern browse` works out of the box. Only the optional AI topic
+naming needs Claude Code installed and signed in.
 
 ## Commands
 
@@ -230,200 +76,38 @@ lantern upgrade            # move to the latest release
 lantern [options]          # start the web UI
 ```
 
-- **`browse`** — alias `b`. Takes `--claude-dir`, `--executable`, `--source`, `--verbose` from the
-  [options](#options) table, on either side of the command name.
-- **`init`** — takes `--claude-dir`. Never required: every setting it writes has a working default,
-  and `browse` never stops to ask for one. Run it when you want a different port, bind address or
-  set of agent CLIs remembered.
-- **`upgrade`** — runs the package manager that installed Lantern. Anything it did not install —
-  Homebrew, Docker, a git checkout, a `.deb`, a prefix it cannot write to — is left alone with the
-  right command printed instead. `--check` and `--dry-run` change nothing.
+- **`browse`** — alias `b`. Takes `--claude-dir`, `--executable`, `--source` and `--verbose`, on
+  either side of the command name.
+- **`init`** — never required: every setting it writes has a working default, and `browse` never stops
+  to ask for one. Run it to change the port, bind address or set of agent CLIs.
+- **`upgrade`** — runs the package manager that installed Lantern. Anything it did not install is left
+  alone with the right command printed instead.
 
-## The board in your terminal
+Every flag and environment variable is in [Configuration](docs/configuration.md).
 
-`lantern browse` draws the same board the web UI does, without starting a server or opening a
-browser. It takes the whole terminal while it is up, on the same alternate screen `less` and `vim`
-use, and gives your scrollback back when you quit.
+## Agent CLIs
 
-| Key     | Does                                                       |
-| ------- | ---------------------------------------------------------- |
-| `← →`   | move between topics (`h` `l` also work)                    |
-| `↑ ↓`   | move between conversations (`j` `k`), `g`/`G` for the ends |
-| `/`     | filter by topic, title or project                          |
-| `enter` | what to do with this conversation                          |
-| `R`     | resume here, and come back to the board after              |
-| `p`     | show the resume command, without leaving                   |
-| `c`     | copy the conversation id                                   |
-| `t`     | sort the conversations with no topic yet                   |
-| `T`     | throw every topic away and sort again (asks first)         |
-| `r`     | re-read the logs · `?` the key list · `q` quit             |
+| Agent CLI       | History Lantern reads       | Verified against | Mode                      |
+| --------------- | --------------------------- | ---------------- | ------------------------- |
+| **Claude Code** | `~/.claude/projects/`       | `2.1.221`        | Read **and** drive a turn |
+| **Codex CLI**   | `~/.codex/sessions/`        | `0.146.0`        | Read-only                 |
+| **opencode**    | `~/.local/share/opencode/`  | `1.18.13`        | Read-only                 |
+| **Qwen Code**   | `~/.qwen/projects/`         | `0.21.6`         | Read-only                 |
+| **Copilot CLI** | `~/.copilot/session-state/` | `1.0.78`         | Read-only                 |
+| **goose**       | `~/.local/share/goose/`     | `1.45.0`         | Read-only                 |
 
-### Resuming
+Sessions from every enabled CLI sit in the same topics, the same searchable list and the same board,
+and are grouped into one workspace when they ran in the same repo. Claude Code stays the only
+interactive one. "Verified against" means that exact version was run and its history read back — see
+[Agent CLIs](docs/agents.md) for where each one stores history, how to enable them, and what is not
+read yet.
 
-`R` lends the terminal to the session rather than giving it away: when you leave `claude`, the same
-board comes back — same topic, same conversation, same filter — with the logs re-read, so you can
-resume something else without starting `lantern browse` again.
+## Grouping
 
-A conversation is always resumed **in the directory it ran in** — `claude --resume` looks a session
-up by that directory, so anywhere else it reports the conversation as missing. If that folder has
-since been deleted, Lantern says so rather than resuming somewhere wrong.
-
-Resuming is Claude Code only, as everywhere else in Lantern — conversations from the other five CLIs
-show those actions greyed out, and copying the id still works. Copying uses the terminal's own
-clipboard escape sequence first, so it reaches your machine's clipboard even over SSH.
-
-### Showing the command instead
-
-`p` shows the command under the board instead of quitting. Pressing `p` on another conversation
-replaces it and blinks so you can see that it changed, and whatever is on show is printed once more
-on the way out, so `p` then `q` leaves something behind to paste.
-
-### Sorting into topics
-
-`t` sorts conversations into topics with the configured agent CLI — the same pass the web UI's
-buttons start, run against the same local cache. It has a row of its own above the key line, because
-it is the one key on the board that spends a CLI call, and it says how many conversations are waiting
-so you can see whether there is anything to sort before finding out the expensive way. The board
-re-reads the logs when the pass ends, so the new topics appear without pressing `r`.
-
-`T` is the terminal's "Redo all": every stored topic thrown away and everything filed again. It asks
-first — only `y` goes ahead — because it spends a pass on conversations that were already filed. When
-nothing is waiting to be sorted the row says so and offers `T`, rather than disappearing: a key that
-only shows up on the day it becomes relevant is a key nobody knows is there.
-
-### What Enter does
-
-The header shows what `enter` will do; `e` cycles through resuming here, showing the command and
-copying the id, and remembers the choice for next time. Enter then does exactly that — there is no
-menu in between, and each of the three has its own key as well.
-
-Below about ninety columns the board becomes a topic list on the left and its conversations on the
-right; the keys are unchanged.
-
-## Setup
-
-Setup is optional. Everything Lantern needs has a default, so `lantern browse` goes straight to the
-board on a fresh machine and never stops to ask a question.
-
-What the offer covers is the web UI, which has more to decide: the first time you run `lantern` with
-no command at a terminal it walks you through which agent CLIs to read, where they keep their logs,
-which port and address to bind, and whether to enable the in-app terminal. Every question arrives
-with the answer already detected, so the fast path is Enter a few times.
-
-The answers go in `~/.lantern/config.json` (and the CLI selection in `~/.lantern/sources/sources.json`,
-the same file the settings panel writes). Run `lantern init` at any point to change them — or to
-answer the questions up front, before ever starting the server.
-
-Settings sit **below** environment variables in the [options](#options) table: a flag beats an
-environment variable, which beats the file, which beats the built-in default. So a container's `PORT`
-still wins, and a flag typed on the spot wins over both. Your password is deliberately never written
-to the file — set `LANTERN_PASSWORD` or pass `--password`.
-
-Nothing prompts without a terminal attached, so Docker, CI and `npx … | tee` start straight up.
-`--no-init` or `LANTERN_NO_INIT=1` turns the offer off for good.
-
-### When a new version appears
-
-Lantern says so in one line at startup, and nothing more:
-
-```text
-Lantern 0.4.0 is available (you have 0.3.0). Run `lantern upgrade`.
-```
-
-- Read from a cache, so it never delays a launch. The registry is asked at most once a day, in the
-  background.
-- Silent where you could not act on it: no terminal attached, CI, Docker, a `.deb`/`.rpm` install, a
-  git checkout.
-- Off entirely — line and request — with `NO_UPDATE_NOTIFIER=1`, `LANTERN_NO_UPDATE_NOTIFIER=1`, or
-  `"updateNotifier": false` in `~/.lantern/config.json`.
-- Cached in `~/.lantern/update-check.json`.
-
-## Options
-
-| Option                      | Environment                     | Description                                                 | Default     |
-| --------------------------- | ------------------------------- | ----------------------------------------------------------- | ----------- |
-| `-p, --port <port>`         | `PORT`                          | Port to listen on                                           | `3000`      |
-| `-h, --hostname <hostname>` | `LANTERN_HOSTNAME`              | Address to bind                                             | `127.0.0.1` |
-| `-P, --password <password>` | `LANTERN_PASSWORD`              | Require a password. **Set this if you bind to `0.0.0.0`**   | (none)      |
-| `--claude-dir <path>`       | `LANTERN_CLAUDE_DIR`            | Path to the Claude directory to read                        | `~/.claude` |
-| `-e, --executable <path>`   | `LANTERN_CLAUDE_EXECUTABLE`     | Path to the `claude` executable                             | auto        |
-| `--terminal-disabled`       | `LANTERN_TERMINAL_DISABLED`     | Turn off the in-app terminal                                | enabled     |
-| `--terminal-shell <path>`   | `LANTERN_TERMINAL_SHELL`        | Shell used by terminal sessions                             | login shell |
-| `--terminal-unrestricted`   | `LANTERN_TERMINAL_UNRESTRICTED` | Drop the restricted shell flags from bash terminal sessions | restricted  |
-| `--api-only`                | `LANTERN_API_ONLY`              | Serve the API without the web UI                            | off         |
-| `-v, --verbose`             | `LANTERN_VERBOSE`               | Verbose debug logging                                       | off         |
-| `--source <id>`             | `LANTERN_SOURCES`               | Agent CLI to read; repeat for more. Scopes one run          | stored      |
-| `--no-init`                 | `LANTERN_NO_INIT`               | Never offer the setup wizard on a first launch              | offered     |
-| (none)                      | `NO_UPDATE_NOTIFIER`            | Never mention that a new version exists                     | mentioned   |
-| (none)                      | `LANTERN_NO_UPDATE_NOTIFIER`    | The same thing, under Lantern's own name                    | mentioned   |
-
-`lantern browse` reads `--claude-dir`, `--executable`, `--source` and `--verbose`; the rest belong to
-the server. The port and bind address are ignored by the board, which listens on nothing.
-
-Rows the wizard writes — port, hostname, `--claude-dir`, `--executable` and the three terminal
-options — resolve in this order: the flag, then the environment variable, then
-`~/.lantern/config.json`, then the default. An environment variable exported as empty counts as
-unset, so it does not shadow the file.
-
-`--password`, `--verbose`, `--source` and `--no-init` have no stored tier: they resolve from the flag
-or the environment variable only. Password is deliberate — the wizard never writes one down. The two
-update-notifier variables are the other way around: no flag, and the stored form is
-`"updateNotifier": false` in `~/.lantern/config.json`. Any non-empty value turns them on.
-
-Valid `--source` ids are `claude-code`, `codex`, `opencode`, `qwen-code`, `copilot` and `goose`. Repeat
-the flag
-for more than one
-(`--source claude-code --source codex`), or set `LANTERN_SOURCES` to a comma-separated list. Passing it
-scopes a single run without changing what is stored in settings.
-
-Flag-style environment variables are on for `1` or `true` and off otherwise.
-
-Lantern binds `127.0.0.1` by default. `localhost` is treated the same way, because
-Node resolves it to `::1` first on a dual-stack machine and that leaves `127.0.0.1`
-refused. Pass `::1` for IPv6 loopback, `::` for both, or `0.0.0.0` for every
-interface — and read [Security](#security) before you do the last one.
-
-The bind address is **not** read from `HOSTNAME`. Docker and Kubernetes set that
-to the container id, so honouring it would leave a container serving on an address
-nothing can reach.
-
-## The web UI
-
-`lantern` with no command starts a server and serves the same conversations as a web app, for the
-work a terminal is the wrong shape for — reading a long session back, searching message text, or
-picking through a cost breakdown.
-
-```bash
-lantern --port 3400
-```
-
-<p align="center">
-  <img src="docs/screenshots/topics.jpg" alt="Topics grouped by subject, each with an icon and a conversation count" width="100%">
-</p>
-
-- **Topics instead of folders.** Conversations are clustered by subject, each topic with its own icon,
-  colour and count. Grouping is local and deterministic by default: no model call, no network, no cost.
-- **Optional AI naming.** One button hands the conversation titles to the Claude Code CLI you are
-  already signed in to and gets back proper topic names like _Home Network_ or _Orders API_. Results
-  are cached per session, nothing runs in the background, and each pass reports the usage it drew.
-  This is the same pass `t` runs on the board.
-- **Every session in one place.** A flat, filterable list across every project — and every machine, if
-  you point Lantern at more than one log directory.
-- **More than one CLI.** Claude Code, Codex CLI, opencode, Qwen Code, GitHub Copilot CLI and goose sessions sit side by side,
-  grouped into the same workspace when they ran in the same repo. Pick which CLIs to read in settings.
-  Claude Code stays the interactive one; other sources are read-only. See
-  [Supported agents](#supported-agents).
-- **Honest costs.** A CLI that records what a turn cost is believed; one that does not is estimated
-  and marked `~`; a model with no price table reads `—` rather than `$0.00`.
-- **Three layouts.** Rows, cards, or a full-width board with one column per topic, newest first.
-- **Six languages.** English, Spanish, French, Portuguese, Japanese and Simplified Chinese. Picked up
-  from your browser on first load, and changeable in settings. The terminal board is English only.
-- **A full session viewer.** Live conversation log viewing, search, cost and token breakdowns, git
-  integration, an in-app terminal, and PWA support for phones.
-
-<p align="center">
-  <img src="docs/screenshots/topic-table.jpg" alt="Board view with one column per topic" width="100%">
-</p>
+Grouping is local and deterministic by default: Lantern clusters conversations on the words in their
+titles, at no cost and with no network. Press `t` on the board to hand the titles to your existing
+Claude Code login for better topic names instead. Nothing runs automatically.
+[How grouping works](docs/grouping.md).
 
 ## Security
 
@@ -434,176 +118,30 @@ lantern --port 3400
 
 None of that applies to `lantern browse`, which opens no port and serves nothing.
 
-The threat model, what a running instance exposes, and how to report a vulnerability privately are all
-in [SECURITY.md](SECURITY.md). Please use
-[GitHub Security Advisories](https://github.com/WildChildForLife/lantern/security/advisories/new)
+The threat model and how to report a vulnerability privately are in [SECURITY.md](SECURITY.md). Please
+use [GitHub Security Advisories](https://github.com/WildChildForLife/lantern/security/advisories/new)
 rather than a public issue.
 
-Lantern keeps its cache, push keys and schedules in `~/.lantern/` (`%USERPROFILE%\.lantern` on
-Windows). Deleting that directory costs nothing but a rebuild on the next start.
+## Privacy
 
-## Supported agents
+Lantern reads your session logs locally and sends them nowhere. The only outbound traffic is the
+optional topic classification, which goes through your own Claude Code CLI when you ask for it. See
+[PRIVACY.md](PRIVACY.md).
 
-<table>
-  <tr>
-    <td align="center" width="120">
-      <img src="docs/icons/claude-code.svg" width="30" height="30" alt=""><br>
-      <b>Claude Code</b>
-    </td>
-    <td align="center" width="120">
-      <img src="docs/icons/codex.svg" width="30" height="30" alt=""><br>
-      <b>Codex CLI</b>
-    </td>
-    <td align="center" width="120">
-      <img src="docs/icons/opencode.svg" width="30" height="30" alt=""><br>
-      <b>opencode</b>
-    </td>
-    <td align="center" width="120">
-      <img src="docs/icons/qwen-code.svg" width="30" height="30" alt=""><br>
-      <b>Qwen Code</b>
-    </td>
-    <td align="center" width="120">
-      <img src="docs/icons/copilot.svg" width="30" height="30" alt=""><br>
-      <b>Copilot CLI</b>
-    </td>
-    <td align="center" width="120">
-      <b>G</b><br>
-      <b>goose</b>
-    </td>
-  </tr>
-</table>
+## Documentation
 
-| Agent CLI       | History Lantern reads       | Verified against | Mode                      |
-| --------------- | --------------------------- | ---------------- | ------------------------- |
-| **Claude Code** | `~/.claude/projects/`       | `2.1.221`        | Read **and** drive a turn |
-| **Codex CLI**   | `~/.codex/sessions/`        | `0.146.0`        | Read-only                 |
-| **opencode**    | `~/.local/share/opencode/`  | `1.18.13`        | Read-only — see the note  |
-| **Qwen Code**   | `~/.qwen/projects/`         | `0.21.6`         | Read-only                 |
-| **Copilot CLI** | `~/.copilot/session-state/` | `1.0.78`         | Read-only                 |
-
-Sessions from every enabled CLI sit in the same topics, the same searchable list and the same board,
-and are grouped into one workspace when they ran in the same repo. Pick which to read in settings.
-Claude Code stays the only interactive one — starting, resuming and approving a turn go through the
-Agent SDK, which the others have no equivalent for.
-
-"Verified against" means that exact version was run and the history it wrote was read back, rather
-than inferred from a format description. [`docker/compatibility.md`](docker/compatibility.md) records
-how, and what each run turned up. Both of opencode's storage layouts are read: the JSON tree and
-the SQLite database a current install writes, and goose's own database. Gemini CLI and cursor-agent are
-not read yet.
-
-## Reading other agent CLIs
-
-Codex, opencode, Qwen Code, Copilot CLI and goose are read from wherever those CLIs themselves keep their
-history, so pointing Lantern at them is the same gesture as pointing the CLI at them:
-
-| Source        | Default location          | Moved by                              |
-| ------------- | ------------------------- | ------------------------------------- |
-| `claude-code` | `~/.claude`               | `--claude-dir` / `LANTERN_CLAUDE_DIR` |
-| `codex`       | `~/.codex`                | `CODEX_HOME`                          |
-| `opencode`    | `~/.local/share/opencode` | `XDG_DATA_HOME`                       |
-| `qwen-code`   | `~/.qwen`                 | `HOME` only — see below               |
-| `copilot`     | `~/.copilot`              | `HOME` only — see below               |
-| `goose`       | `~/.local/share/goose`    | `XDG_DATA_HOME`                       |
-
-`~` here is `$HOME`, or `%USERPROFILE%` on Windows shells that do not set `HOME`. Each row names the
-variable that CLI honours itself, so moving its history moves Lantern's view of it. Qwen Code and
-Copilot CLI have no such variable — they always write under `$HOME` — so in Docker it is the mount
-that moves them.
-
-Enable the ones you want in settings, or scope a single run with `--source`:
-
-```bash
-lantern browse --source claude-code --source codex
-```
-
-In Docker each one needs its own mount, since only `~/.claude` is mounted by default:
-
-```bash
-docker run -d --name lantern \
-  -p 127.0.0.1:3400:3400 \
-  -v "$HOME/.claude:/root/.claude:ro" \
-  -v "$HOME/.codex:/root/.codex:ro" \
-  -v "$HOME/.local/share/opencode:/root/.local/share/opencode:ro" \
-  -v "$HOME/.qwen:/root/.qwen:ro" \
-  -v "$HOME/.copilot:/root/.copilot:ro" \
-  -v "$HOME/.local/share/goose:/root/.local/share/goose:ro" \
-  -v lantern_cache:/root/.lantern \
-  ghcr.io/wildchildforlife/lantern:latest
-```
-
-Read-only mounts are deliberate: Lantern only ever reads these directories.
-
-## Reading logs from more than one machine
-
-Lantern lists whatever lives under the Claude directory it reads. To pull in sessions from another
-machine, symlink or mount that machine's project directories into `~/.claude/projects/`:
-
-```bash
-ln -s /mnt/c/Users/you/.claude/projects/my-project ~/.claude/projects/win-my-project
-```
-
-Directories on filesystems without inotify (a Windows drive mounted into WSL, for instance) are picked
-up on restart rather than live.
-
-<p align="center">
-  <img src="docs/screenshots/conversations.jpg" alt="Every conversation across every project, newest first" width="100%">
-</p>
-
-## How grouping works
-
-**By default, locally.** Lantern takes the title the agent wrote for each conversation, whichever CLI it
-came from, drops the words that say nothing (`fix`, `add`, `error`, `the`), and repeatedly carves off the
-largest group of conversations sharing a word. Leftovers fall back to the folder they were started in,
-then to any topic they mention, and anything still homeless lands in _Uncategorized_. It costs nothing
-and re-runs on every request, so new conversations are grouped as they appear.
-
-**Optionally, with Claude Code.** Keyword clustering names topics after words, which is sometimes
-clumsy. Press `t` on the board — or **Sort N unsorted** in the web UI — and Lantern batches the titles
-through `claude -p` and stores the answer per session. It reuses your existing Claude Code login:
-there is no API key to configure and no separate bill. Nothing runs automatically.
-
-That pass only ever touches conversations with no topic at all, so it never pays to re-file one it has
-already filed — not even when the title changes later. To redo everything, press `T` on the board or
-**Redo all** on the web UI's topics page. The web UI can also redo a hand-picked selection: tick them
-in the list and press **Sort selected into topics**, which is also how conversations are marked done
-in bulk.
-
-This pass is the one Claude Code-specific feature, because `claude` is the CLI Lantern shells out to.
-It names topics for conversations from every source, not only Claude Code's own.
-
-## Development
-
-```bash
-pnpm install
-pnpm gatecheck check   # format, lint, typecheck and tests over the diff
-pnpm test
-pnpm build
-```
-
-To work against the bundled fixtures instead of your own conversations:
-
-```bash
-node dist/main.js browse --claude-dir ./fixtures/claude-home
-node dist/main.js --port 4100 --claude-dir ./fixtures/claude-home
-```
-
-The fixture conversations record invented working directories, so `lantern browse` will refuse to
-resume any of them — that refusal is the correct behaviour, not a fault. Point it at your own
-history to exercise resuming.
-
-`browse` and `init` are built with React, so their sources are `.tsx` and Node cannot run them
-directly: `node src/server/main.ts browse` fails on the file extension. Build first —
-`pnpm build:backend` is enough for both commands and takes about a second.
-
-[AGENTS.md](AGENTS.md) describes the architecture: a Hono + Effect-TS backend, a Vite + TanStack Router
-frontend, an Ink + React terminal UI in `src/cli/`, and a SQLite cache.
+Everything else lives in [docs/](docs/README.md): [install](docs/install.md),
+[the board](docs/board.md), [the web UI](docs/web-ui.md), [configuration](docs/configuration.md),
+[agent CLIs](docs/agents.md), [grouping](docs/grouping.md) and
+[developing Lantern](docs/dev.md).
 
 ## Contributing
 
 Bug reports, ideas and pull requests are all welcome. [CONTRIBUTING.md](CONTRIBUTING.md) covers the
 setup, the quality gate to run before opening a pull request, and the house rules — no `as` casting,
 Effect-TS for backend side effects, Hono RPC for API calls, and a preference for pure functions.
+[docs/dev.md](docs/dev.md) describes the architecture: a Hono + Effect-TS backend, a Vite + TanStack
+Router frontend, an Ink + React terminal UI in `src/cli/`, and a SQLite cache.
 
 By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
@@ -612,12 +150,6 @@ By taking part you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 - **Something broken, or an idea?** Open an [issue](https://github.com/WildChildForLife/lantern/issues).
 - **A vulnerability?** Report it privately — see [Security](#security).
 - **What changed?** See the [releases](https://github.com/WildChildForLife/lantern/releases).
-
-## Privacy
-
-Lantern reads your session logs locally and sends them nowhere. The only outbound traffic is the
-optional topic classification, which goes through your own Claude Code CLI when you ask for it. See
-[PRIVACY.md](PRIVACY.md).
 
 ## Licence
 

@@ -206,3 +206,5 @@ Claude Code processes stay alive in background (unless aborted), so session cont
 1. **Session Logs**: Read `~/.claude/projects/` JSONL files to learn data structures
 2. **Fixtures**: `fixtures/claude-home/` is fake `~/.claude` dir — demo sessions plus one project per JSONL entry shape. Unit tests read it, and `--claude-dir ./fixtures/claude-home` runs app against it.
 3. **Effect-TS Help**: https://effect.website/llms.txt
+4. **Deeper detail**: `docs/dev.md` covers the build pipeline, test strategy, data layer and release
+   flow. `docs/README.md` indexes every other doc.
