@@ -11,6 +11,7 @@ import { ClaudeCodeController } from "./core/claude-code/presentation/ClaudeCode
 import { ClaudeCodePermissionController } from "./core/claude-code/presentation/ClaudeCodePermissionController.ts";
 import { ClaudeCodeSessionProcessController } from "./core/claude-code/presentation/ClaudeCodeSessionProcessController.ts";
 import { AskUserQuestionService } from "./core/claude-code/services/AskUserQuestionService.ts";
+import { BillingModeService } from "./core/claude-code/services/BillingModeService.ts";
 import { ClaudeCodeLifeCycleService } from "./core/claude-code/services/ClaudeCodeLifeCycleService.ts";
 import { ClaudeCodePermissionService } from "./core/claude-code/services/ClaudeCodePermissionService.ts";
 import { ClaudeCodeService } from "./core/claude-code/services/ClaudeCodeService.ts";
@@ -166,6 +167,7 @@ const DomainBase = Layer.mergeAll(
   ClaudeCodePermissionService.Live,
   ClaudeCodeSessionProcessService.Live,
   ClaudeCodeService.Live,
+  BillingModeService.Live,
   GitService.Live,
   NotificationService.Live,
   SchedulerService.Live,

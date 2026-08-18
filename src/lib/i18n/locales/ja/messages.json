@@ -623,7 +623,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        734
+        788
       ]
     ],
     "translation": "最近のセッション"
@@ -638,11 +638,11 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        416
+        418
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        722
+        776
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -1198,7 +1198,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        565
+        567
       ]
     ],
     "translation": "ブランチ"
@@ -1209,7 +1209,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        546
+        548
       ]
     ],
     "translation": "メタデータ"
@@ -1220,7 +1220,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        592
+        594
       ]
     ],
     "translation": "モデル"
@@ -1254,7 +1254,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        552
+        554
       ]
     ],
     "translation": "プロジェクトパス"
@@ -1289,7 +1289,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        579
+        581
       ]
     ],
     "translation": "セッションID"
@@ -3445,7 +3445,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        658
+        656
+      ],
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        712
       ]
     ],
     "translation": "キャッシュ作成"
@@ -3456,10 +3460,26 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        672
+        664
+      ],
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        726
       ]
     ],
     "translation": "キャッシュ読込"
+  },
+  "session.cost.included_in_plan": {
+    "message": "Included in your plan",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        619
+      ]
+    ],
+    "translation": "プランに含まれています"
   },
   "session.cost.input_tokens": {
     "placeholders": {},
@@ -3467,7 +3487,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        630
+        640
+      ],
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        684
       ]
     ],
     "translation": "入力トークン"
@@ -3478,7 +3502,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        605
+        607
       ]
     ],
     "translation": "セッションコスト"
@@ -3489,7 +3513,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        644
+        648
+      ],
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        698
       ]
     ],
     "translation": "出力トークン"
@@ -3500,7 +3528,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        612
+        625
       ]
     ],
     "translation": "合計"
@@ -3550,7 +3578,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        539
+        541
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/DeleteSessionDialog.tsx",
@@ -3569,7 +3597,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        725
+        779
       ]
     ],
     "translation": "新しいチャットを開始して会話を始めましょう"
@@ -3580,7 +3608,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        507
+        509
       ]
     ],
     "translation": "セッションファイルのパスをコピー"
@@ -3591,7 +3619,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        485
+        487
       ]
     ],
     "translation": "HTML をエクスポート"
@@ -3602,7 +3630,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        494
+        496
       ]
     ],
     "translation": "JSONL をエクスポート"
@@ -3613,7 +3641,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        527
+        529
       ]
     ],
     "translation": "技術的な詳細を隠す"
@@ -3624,7 +3652,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        529
+        531
       ]
     ],
     "translation": "技術的な詳細を表示"
@@ -3635,7 +3663,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        814
+        868
       ]
     ],
     "translation": "Claude Codeが処理中..."
@@ -3683,7 +3711,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        779
+        833
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -3702,7 +3730,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        777
+        831
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -4196,7 +4224,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        111
+        122
       ]
     ],
     "translation": "エージェント CLI"
@@ -4316,7 +4344,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        100
+        111
       ]
     ],
     "translation": "エージェント CLI"
@@ -4328,7 +4356,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        102
+        113
       ]
     ],
     "translation": "Lantern が使う CLI と、その支払い方法です。"
@@ -4340,7 +4368,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        244
+        271
       ]
     ],
     "translation": "外観"
@@ -4352,7 +4380,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        203
+        230
       ]
     ],
     "translation": "自動化"
@@ -4364,7 +4392,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        205
+        232
       ]
     ],
     "translation": "Lantern が自動で行うことです。"
@@ -4376,7 +4404,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        153
+        180
       ]
     ],
     "translation": "会話"
@@ -4388,7 +4416,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        155
+        182
       ]
     ],
     "translation": "一覧に表示される内容です。"
@@ -4400,7 +4428,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        233
+        260
       ]
     ],
     "translation": "キーボードとモデル"
@@ -4412,7 +4440,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        235
+        262
       ]
     ],
     "translation": "ショートカットと、セッションツールバーに表示するモデルです。"
@@ -4472,7 +4500,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        220
+        247
       ]
     ],
     "translation": "レート制限時に自動的に継続をスケジュール"
@@ -4483,7 +4511,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        226
+        253
       ]
     ],
     "translation": "Claude がレート制限に達した際に、自動的に継続メッセージをスケジュール実行します"
@@ -4505,7 +4533,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        170
+        197
       ]
     ],
     "translation": "ユーザーメッセージのないセッションを非表示"
@@ -4516,7 +4544,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        176
+        203
       ]
     ],
     "translation": "ユーザーコマンドまたはメッセージを含むセッションのみを表示"
@@ -4527,7 +4555,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        190
+        217
       ]
     ],
     "translation": "同じタイトルのセッションを統合"
@@ -4538,7 +4566,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        196
+        223
       ]
     ],
     "translation": "同じタイトルの複数のセッションがある場合、最新のセッションのみを表示"
@@ -4656,7 +4684,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        121
+        132
       ]
     ],
     "translation": "利用モード"
@@ -4668,22 +4696,50 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        136
+        150
       ]
     ],
     "translation": "API"
   },
   "settings.usage_mode.description": {
-    "message": "Select how you use Claude Code. This only affects how session costs are reported; every feature works either way.",
+    "message": "How you pay for Claude Code. This only affects whether session costs are shown in dollars; every feature works either way.",
     "placeholders": {},
     "comments": [],
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        142
+        157
       ]
     ],
-    "translation": "Claude Codeの使い方を選びます。これはセッション費用の表示方法のみに影響し、機能はどちらでも同じように使えます。"
+    "translation": "Claude Codeの支払い方法です。セッション費用をドルで表示するかどうかだけに影響し、機能はどちらでも同じように使えます。"
+  },
+  "settings.usage_mode.detect": {
+    "message": "Detect automatically",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        141
+      ]
+    ],
+    "translation": "自動検出"
+  },
+  "settings.usage_mode.detected": {
+    "message": "Detected on this machine: {detectedLabel}. A subscription is flat-rate, so sessions show tokens rather than dollars.",
+    "placeholders": {
+      "detectedLabel": [
+        "detected === \"subscription\"\n                          ? (subscriptionType ?? \"subscription\")\n                          : \"API key\""
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        162
+      ]
+    ],
+    "translation": "このマシンで検出: {detectedLabel}。サブスクリプションは定額のため、セッションはドルではなくトークン数を表示します。"
   },
   "settings.usage_mode.subscription": {
     "message": "Subscription (Max, Pro, etc.)",
@@ -4692,7 +4748,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        130
+        144
       ]
     ],
     "translation": "サブスクリプション (Max, Proなど)"
@@ -4704,7 +4760,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        76
+        85
       ]
     ],
     "translation": "Lantern はこの CLI の会話を読み取り、トピック名の生成も依頼します。後から設定で変更できます。"
@@ -4716,7 +4772,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        103
+        112
       ]
     ],
     "translation": "検出済み"
@@ -4728,7 +4784,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        86
+        95
       ]
     ],
     "translation": "インストール済みの CLI を検索中…"
@@ -4744,7 +4800,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        109
+        118
       ]
     ],
     "translation": "{count} 件の会話が見つかりました"
@@ -4756,7 +4812,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        73
+        82
       ]
     ],
     "translation": "Lantern で使うエージェント CLI はどれですか？"
@@ -4768,7 +4824,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        115
+        124
       ]
     ],
     "translation": "このマシンでは利用できません"
@@ -5566,7 +5622,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        172
+        181
       ]
     ],
     "translation": "APIキーでClaude Codeを使っています。Lanternは各セッションの費用を表示します。"
@@ -5578,7 +5634,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        168
+        177
       ]
     ],
     "translation": "API"
@@ -5590,7 +5646,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        133
+        142
       ]
     ],
     "translation": "利用モードを選択してください。この設定は後から変更できます。"
@@ -5602,7 +5658,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        130
+        139
       ]
     ],
     "translation": "Claude Codeの利用方法は？"
@@ -5614,7 +5670,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        153
+        162
       ]
     ],
     "translation": "サブスクリプションプラン（Max、Proなど）でClaude Codeを使っています。Lanternは既にログイン済みのCLIを動かすため、すべての機能が使えます。"
@@ -5626,7 +5682,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        149
+        158
       ]
     ],
     "translation": "サブスクリプション"

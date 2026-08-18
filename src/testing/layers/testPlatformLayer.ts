@@ -65,6 +65,12 @@ export const testPlatformLayer = (overrides?: {
             return overrides?.env?.USERPROFILE ?? undefined;
           case "LANTERN_HOSTNAME":
             return overrides?.env?.LANTERN_HOSTNAME ?? undefined;
+          // Unset unless a test says otherwise: a real key in the ambient
+          // environment must never make billing detection look metered here.
+          case "ANTHROPIC_API_KEY":
+            return overrides?.env?.ANTHROPIC_API_KEY ?? undefined;
+          case "ANTHROPIC_AUTH_TOKEN":
+            return overrides?.env?.ANTHROPIC_AUTH_TOKEN ?? undefined;
           case "LANTERN_PASSWORD":
             return overrides?.env?.LANTERN_PASSWORD ?? undefined;
           case "PATH":

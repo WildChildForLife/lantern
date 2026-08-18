@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/web/components/ui/select";
+import { useUsageMode } from "@/web/hooks/useUsageMode";
 import { projectDetailQuery, projectListQuery } from "@/web/lib/api/queries";
 
 type SettingsControlsProps = {
@@ -49,11 +50,21 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
 
   const { config, updateConfig } = useConfig();
   const queryClient = useQueryClient();
+  const { detected, subscriptionType } = useUsageMode();
 
   const isUsageMode = (value: string): value is "subscription" | "api" =>
     value === "subscription" || value === "api";
 
+  /**
+   * `detect` clears the stored answer rather than storing one, so the setting
+   * follows the machine from then on - signing out of a subscription or
+   * exporting a key changes it without anyone revisiting this panel.
+   */
   const changeUsageMode = (value: string) => {
+    if (value === "detect") {
+      updateConfig({ ...config, usageMode: undefined });
+      return;
+    }
     if (!isUsageMode(value)) return;
     updateConfig({ ...config, usageMode: value });
   };
@@ -121,11 +132,14 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
                 <Trans id="settings.usage_mode" message="Usage Mode" />
               </label>
             )}
-            <Select value={config?.usageMode ?? ""} onValueChange={changeUsageMode}>
+            <Select value={config?.usageMode ?? "detect"} onValueChange={changeUsageMode}>
               <SelectTrigger id={usageModeId} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="detect">
+                  <Trans id="settings.usage_mode.detect" message="Detect automatically" />
+                </SelectItem>
                 <SelectItem value="subscription">
                   <Trans
                     id="settings.usage_mode.subscription"
@@ -139,10 +153,23 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
             </Select>
             {showDescriptions && (
               <p className="text-xs text-muted-foreground mt-1">
-                <Trans
-                  id="settings.usage_mode.description"
-                  message="Select how you use Claude Code. This only affects how session costs are reported; every feature works either way."
-                />
+                {detected === null ? (
+                  <Trans
+                    id="settings.usage_mode.description"
+                    message="How you pay for Claude Code. This only affects whether session costs are shown in dollars; every feature works either way."
+                  />
+                ) : (
+                  <Trans
+                    id="settings.usage_mode.detected"
+                    message="Detected on this machine: {detectedLabel}. A subscription is flat-rate, so sessions show tokens rather than dollars."
+                    values={{
+                      detectedLabel:
+                        detected === "subscription"
+                          ? (subscriptionType ?? "subscription")
+                          : "API key",
+                    }}
+                  />
+                )}
               </p>
             )}
           </div>

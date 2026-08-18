@@ -41,6 +41,13 @@ export const envSchema = z.object({
   PNPM_HOME: z.string().optional(),
   /** Windows names the per-user application directory here. */
   APPDATA: z.string().optional(),
+  /**
+   * Read only to tell how Claude Code is billed - either of these means a
+   * metered key is in use, whatever login is stored on disk. The values
+   * themselves are credentials and are never read, logged or sent anywhere.
+   */
+  ANTHROPIC_API_KEY: z.string().optional(),
+  ANTHROPIC_AUTH_TOKEN: z.string().optional(),
 });
 
 export type EnvSchema = z.infer<typeof envSchema>;

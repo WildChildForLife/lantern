@@ -623,7 +623,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        734
+        788
       ]
     ],
     "translation": "Sesiones recientes"
@@ -638,11 +638,11 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        416
+        418
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        722
+        776
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -1198,7 +1198,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        565
+        567
       ]
     ],
     "translation": "Rama"
@@ -1209,7 +1209,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        546
+        548
       ]
     ],
     "translation": "Metadatos"
@@ -1220,7 +1220,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        592
+        594
       ]
     ],
     "translation": "Modelo"
@@ -1254,7 +1254,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        552
+        554
       ]
     ],
     "translation": "Ruta del proyecto"
@@ -1289,7 +1289,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        579
+        581
       ]
     ],
     "translation": "ID de sesión"
@@ -3445,7 +3445,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        658
+        656
+      ],
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        712
       ]
     ],
     "translation": "Creación de caché"
@@ -3456,10 +3460,26 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        672
+        664
+      ],
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        726
       ]
     ],
     "translation": "Lectura de caché"
+  },
+  "session.cost.included_in_plan": {
+    "message": "Included in your plan",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        619
+      ]
+    ],
+    "translation": "Incluido en tu plan"
   },
   "session.cost.input_tokens": {
     "placeholders": {},
@@ -3467,7 +3487,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        630
+        640
+      ],
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        684
       ]
     ],
     "translation": "Fichas de entrada"
@@ -3478,7 +3502,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        605
+        607
       ]
     ],
     "translation": "Costo de sesión"
@@ -3489,7 +3513,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        644
+        648
+      ],
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        698
       ]
     ],
     "translation": "Fichas de salida"
@@ -3500,7 +3528,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        612
+        625
       ]
     ],
     "translation": "Total"
@@ -3550,7 +3578,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        539
+        541
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/DeleteSessionDialog.tsx",
@@ -3569,7 +3597,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        725
+        779
       ]
     ],
     "translation": "Inicie un nuevo chat para comenzar la conversación"
@@ -3580,7 +3608,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        507
+        509
       ]
     ],
     "translation": "Copiar ruta de archivo de sesión"
@@ -3591,7 +3619,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        485
+        487
       ]
     ],
     "translation": "Exportar a HTML"
@@ -3602,7 +3630,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        494
+        496
       ]
     ],
     "translation": "Exportar a JSONL"
@@ -3613,7 +3641,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        527
+        529
       ]
     ],
     "translation": "Ocultar detalles técnicos"
@@ -3624,7 +3652,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        529
+        531
       ]
     ],
     "translation": "Mostrar detalles técnicos"
@@ -3635,7 +3663,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        814
+        868
       ]
     ],
     "translation": "Claude Code está procesando…"
@@ -3683,7 +3711,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        779
+        833
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -3702,7 +3730,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        777
+        831
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -4196,7 +4224,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        111
+        122
       ]
     ],
     "translation": "CLI de agente"
@@ -4316,7 +4344,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        100
+        111
       ]
     ],
     "translation": "CLI de agente"
@@ -4328,7 +4356,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        102
+        113
       ]
     ],
     "translation": "Con cuál CLI funciona Lantern y cómo se paga."
@@ -4340,7 +4368,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        244
+        271
       ]
     ],
     "translation": "Apariencia"
@@ -4352,7 +4380,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        203
+        230
       ]
     ],
     "translation": "Automatización"
@@ -4364,7 +4392,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        205
+        232
       ]
     ],
     "translation": "Lo que Lantern hace por su cuenta."
@@ -4376,7 +4404,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        153
+        180
       ]
     ],
     "translation": "Conversaciones"
@@ -4388,7 +4416,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        155
+        182
       ]
     ],
     "translation": "Lo que aparece en las listas."
@@ -4400,7 +4428,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        233
+        260
       ]
     ],
     "translation": "Teclado y modelos"
@@ -4412,7 +4440,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        235
+        262
       ]
     ],
     "translation": "Atajos y los modelos ofrecidos en la barra de herramientas de sesión."
@@ -4472,7 +4500,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        220
+        247
       ]
     ],
     "translation": "Programación automática de continuación en límite de velocidad"
@@ -4483,7 +4511,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        226
+        253
       ]
     ],
     "translation": "Programar automáticamente un mensaje de continuación cuando Claude alcanza los límites de velocidad"
@@ -4505,7 +4533,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        170
+        197
       ]
     ],
     "translation": "Ocultar sesiones sin mensajes de usuario"
@@ -4516,7 +4544,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        176
+        203
       ]
     ],
     "translation": "Mostrar solo sesiones que contienen comandos o mensajes del usuario"
@@ -4527,7 +4555,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        190
+        217
       ]
     ],
     "translation": "Unificar sesiones con el mismo título"
@@ -4538,7 +4566,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        196
+        223
       ]
     ],
     "translation": "Cuando múltiples sesiones tienen el mismo título, mostrar solo la sesión más reciente"
@@ -4656,7 +4684,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        121
+        132
       ]
     ],
     "translation": "Modo de uso"
@@ -4668,22 +4696,50 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        136
+        150
       ]
     ],
     "translation": "API"
   },
   "settings.usage_mode.description": {
-    "message": "Select how you use Claude Code. This only affects how session costs are reported; every feature works either way.",
+    "message": "How you pay for Claude Code. This only affects whether session costs are shown in dollars; every feature works either way.",
     "placeholders": {},
     "comments": [],
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        142
+        157
       ]
     ],
-    "translation": "Elige cómo usas Claude Code. Solo afecta a cómo se informan los costes de las sesiones; todo funciona en ambos casos."
+    "translation": "Cómo pagas Claude Code. Solo determina si el coste de las sesiones se muestra en dólares; todo funciona en ambos casos."
+  },
+  "settings.usage_mode.detect": {
+    "message": "Detect automatically",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        141
+      ]
+    ],
+    "translation": "Detectar automáticamente"
+  },
+  "settings.usage_mode.detected": {
+    "message": "Detected on this machine: {detectedLabel}. A subscription is flat-rate, so sessions show tokens rather than dollars.",
+    "placeholders": {
+      "detectedLabel": [
+        "detected === \"subscription\"\n                          ? (subscriptionType ?? \"subscription\")\n                          : \"API key\""
+      ]
+    },
+    "comments": [],
+    "origin": [
+      [
+        "src/web/components/SettingsControls.tsx",
+        162
+      ]
+    ],
+    "translation": "Detectado en esta máquina: {detectedLabel}. Una suscripción es de tarifa plana, así que las sesiones muestran tokens en vez de dólares."
   },
   "settings.usage_mode.subscription": {
     "message": "Subscription (Max, Pro, etc.)",
@@ -4692,7 +4748,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        130
+        144
       ]
     ],
     "translation": "Suscripción (Max, Pro, etc.)"
@@ -4704,7 +4760,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        76
+        85
       ]
     ],
     "translation": "Lantern lee las conversaciones de este CLI y le pide que nombre temas. Puede cambiar esto más tarde en la configuración."
@@ -4716,7 +4772,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        103
+        112
       ]
     ],
     "translation": "Detectado"
@@ -4728,7 +4784,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        86
+        95
       ]
     ],
     "translation": "Buscando CLI instalados…"
@@ -4744,7 +4800,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        109
+        118
       ]
     ],
     "translation": "{count} conversaciones encontradas"
@@ -4756,7 +4812,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        73
+        82
       ]
     ],
     "translation": "¿Cuál CLI de agente debe usar Lantern?"
@@ -4768,7 +4824,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        115
+        124
       ]
     ],
     "translation": "No disponible en esta máquina"
@@ -5566,7 +5622,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        172
+        181
       ]
     ],
     "translation": "Usas Claude Code con claves de API. Lantern informa cuánto costó cada sesión."
@@ -5578,7 +5634,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        168
+        177
       ]
     ],
     "translation": "API"
@@ -5590,7 +5646,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        133
+        142
       ]
     ],
     "translation": "Seleccione su modo de uso. Puede cambiar esto más tarde en la configuración."
@@ -5602,7 +5658,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        130
+        139
       ]
     ],
     "translation": "¿Cómo usa Claude Code?"
@@ -5614,7 +5670,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        153
+        162
       ]
     ],
     "translation": "Usas Claude Code con un plan de suscripción (Max, Pro, etc.). Lantern controla la CLI en la que ya iniciaste sesión, así que todo funciona."
@@ -5626,7 +5682,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        149
+        158
       ]
     ],
     "translation": "Suscripción"

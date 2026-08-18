@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/web/components/ui/dialog";
+import { useUsageMode } from "@/web/hooks/useUsageMode";
 import { sourcesQuery } from "@/web/lib/api/queries";
 
 /** The CLI Lantern drives interactively, and the only one usage mode applies to. */
@@ -19,9 +20,10 @@ const CLAUDE_CODE = "claude-code";
 /**
  * First-run setup.
  *
- * Two questions, and the second only sometimes. Which agent CLI Lantern works
- * with is asked of everyone; how that CLI is paid for is a Claude Code question
- * and is skipped for anything else, where it means nothing.
+ * Two questions, and the second rarely. Which agent CLI Lantern works with is
+ * asked of everyone; how that CLI is paid for is a Claude Code question, and is
+ * skipped both for anything else and whenever the machine already answered it -
+ * a stored subscription login or a key in the environment says which it is.
  *
  * Sources are offered as the server detected them. A CLI that is installed and
  * has sessions is marked as found; one that is not is shown anyway, disabled
@@ -32,14 +34,21 @@ export const UsageModeDialog: FC = () => {
   const { i18n } = useLingui();
   const { config, updateConfig, isConfigLoaded } = useConfig();
   const { data, isPending } = useQuery(sourcesQuery);
+  const { detected } = useUsageMode();
 
   const [picked, setPicked] = useState<string | null>(null);
 
   const needsSource = isConfigLoaded && config.primarySource === undefined;
-  // Only asked once a CLI is chosen, and only for the one it applies to.
+  // Only asked once a CLI is chosen, only for the one it applies to, and only
+  // when the machine could not answer it: a stored subscription login or a key
+  // in the environment settles this without anyone being asked.
   const chosen = picked ?? config.primarySource;
   const needsUsageMode =
-    isConfigLoaded && !needsSource && chosen === CLAUDE_CODE && config.usageMode === undefined;
+    isConfigLoaded &&
+    !needsSource &&
+    chosen === CLAUDE_CODE &&
+    config.usageMode === undefined &&
+    detected === null;
 
   const isOpen = needsSource || needsUsageMode;
 
