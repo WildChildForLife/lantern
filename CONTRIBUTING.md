@@ -10,13 +10,17 @@ pnpm build
 node dist/main.js --port 3400
 ```
 
-You need Node.js 24 or newer and pnpm. `pnpm dev` exists but is not the recommended loop — see below.
+You need Node.js 24 or newer and pnpm. `pnpm dev` exists but is not the recommended loop, because
+session process management shares memory between processes and needs a real build to verify — see
+[docs/dev.md](docs/dev.md#the-development-loop).
 
 To work against fake data instead of your own conversations:
 
 ```bash
 node dist/main.js --port 4100 --claude-dir ./fixtures/claude-home
 ```
+
+[docs/dev.md](docs/dev.md) covers the architecture, the build, testing and releasing in more depth.
 
 ## Before you open a pull request
 
@@ -64,11 +68,12 @@ rather than the diff.
 
 ## Releasing
 
-Push a `v*` tag and the workflow does the rest: container images, the npm package, Debian and RPM
-packages attached to the release, the release notes, and the Homebrew formula. The tag has to match
-the `version` in `package.json` or the build refuses to run.
+Push a `v*` tag and the workflow does the rest: container images, the npm package, the release notes,
+and the Homebrew formula. The tag has to match the `version` in `package.json` or the build refuses to
+run.
 
-`packaging/README.md` covers the parts that need a human, and which secrets each channel needs.
+[`packaging/README.md`](packaging/README.md) covers the parts that need a human, and which secrets
+each channel needs. The Debian, RPM and AUR channels were retired after v0.3.0.
 
 ## Scope
 
