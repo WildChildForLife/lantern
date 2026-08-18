@@ -9,7 +9,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/web/components/ui/tooltip";
-import { useIsSubscriptionMode } from "@/web/hooks/useIsSubscriptionMode";
 import { useLeftPanelActions, useLeftPanelState } from "@/web/hooks/useLayoutPanels";
 import { cn } from "@/web/utils";
 import { Loading } from "../../../../../../../components/Loading";
@@ -27,7 +26,6 @@ export const SessionSidebar: FC<{
 }> = ({ currentSessionId, projectId, className, initialTab }) => {
   const { isLeftPanelOpen } = useLeftPanelState();
   const { toggleLeftPanel } = useLeftPanelActions();
-  const isSubscriptionMode = useIsSubscriptionMode();
   const activeSessionId = currentSessionId ?? "";
   const additionalTabs: SidebarTab[] = useMemo(
     () => [
@@ -53,18 +51,14 @@ export const SessionSidebar: FC<{
         title: <Trans id="sidebar.show.task.list" />,
         content: <TasksTab projectId={projectId} sessionId={activeSessionId} />,
       },
-      ...(isSubscriptionMode
-        ? []
-        : [
-            {
-              id: "scheduler",
-              icon: CalendarClockIcon,
-              title: <Trans id="sidebar.show.scheduler.jobs" />,
-              content: <SchedulerTab projectId={projectId} sessionId={activeSessionId} />,
-            },
-          ]),
+      {
+        id: "scheduler",
+        icon: CalendarClockIcon,
+        title: <Trans id="sidebar.show.scheduler.jobs" />,
+        content: <SchedulerTab projectId={projectId} sessionId={activeSessionId} />,
+      },
     ],
-    [activeSessionId, projectId, isSubscriptionMode],
+    [activeSessionId, projectId],
   );
 
   return (

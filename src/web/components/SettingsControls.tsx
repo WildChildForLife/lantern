@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/web/components/ui/select";
-import { useIsSubscriptionMode } from "@/web/hooks/useIsSubscriptionMode";
 import { projectDetailQuery, projectListQuery } from "@/web/lib/api/queries";
 
 type SettingsControlsProps = {
@@ -50,7 +49,6 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
 
   const { config, updateConfig } = useConfig();
   const queryClient = useQueryClient();
-  const isSubscriptionMode = useIsSubscriptionMode();
 
   const isUsageMode = (value: string): value is "subscription" | "api" =>
     value === "subscription" || value === "api";
@@ -143,7 +141,7 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
               <p className="text-xs text-muted-foreground mt-1">
                 <Trans
                   id="settings.usage_mode.description"
-                  message="Select how you use Claude Code. Subscription mode restricts features that require the Agent SDK."
+                  message="Select how you use Claude Code. This only affects how session costs are reported; every feature works either way."
                 />
               </p>
             )}
@@ -201,39 +199,35 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
         </div>
       </SettingsSection>
 
-      {/* Driving a turn needs the Agent SDK, which a subscription plan does not
-          reach — so the option is absent rather than present and broken. */}
-      {isSubscriptionMode ? null : (
-        <SettingsSection
-          title={<Trans id="settings.section.automation" message="Automation" />}
-          description={
-            <Trans
-              id="settings.section.automation.description"
-              message="What Lantern does on its own."
+      <SettingsSection
+        title={<Trans id="settings.section.automation" message="Automation" />}
+        description={
+          <Trans
+            id="settings.section.automation.description"
+            message="What Lantern does on its own."
+          />
+        }
+      >
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id={autoScheduleId}
+              checked={config?.autoScheduleContinueOnRateLimit}
+              onCheckedChange={toggleAutoSchedule}
             />
-          }
-        >
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id={autoScheduleId}
-                checked={config?.autoScheduleContinueOnRateLimit}
-                onCheckedChange={toggleAutoSchedule}
-              />
-              {showLabels && (
-                <label htmlFor={autoScheduleId} className="text-sm font-medium leading-none">
-                  <Trans id="settings.session.auto_schedule_continue_on_rate_limit" />
-                </label>
-              )}
-            </div>
-            {showDescriptions && (
-              <p className="text-xs text-muted-foreground ml-6">
-                <Trans id="settings.session.auto_schedule_continue_on_rate_limit.description" />
-              </p>
+            {showLabels && (
+              <label htmlFor={autoScheduleId} className="text-sm font-medium leading-none">
+                <Trans id="settings.session.auto_schedule_continue_on_rate_limit" />
+              </label>
             )}
           </div>
-        </SettingsSection>
-      )}
+          {showDescriptions && (
+            <p className="text-xs text-muted-foreground ml-6">
+              <Trans id="settings.session.auto_schedule_continue_on_rate_limit.description" />
+            </p>
+          )}
+        </div>
+      </SettingsSection>
 
       <SettingsSection
         title={<Trans id="settings.section.input" message="Keyboard & models" />}

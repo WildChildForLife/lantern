@@ -1,7 +1,6 @@
 import { Trans, useLingui } from "@lingui/react";
 import type { FC } from "react";
 import type { CCOptionsSchema } from "@/server/core/claude-code/schema";
-import { useIsSubscriptionMode } from "@/web/hooks/useIsSubscriptionMode";
 import { useConfig } from "../../../../../../hooks/useConfig";
 import {
   ChatInput,
@@ -21,7 +20,6 @@ export const StartNewChat: FC<StartNewChatProps> = ({
   onCCOptionsChange,
 }) => {
   const { i18n } = useLingui();
-  const isSubscriptionMode = useIsSubscriptionMode();
   const createSessionProcess = useCreateSessionProcessMutation(projectId);
   const { config } = useConfig();
 
@@ -61,11 +59,11 @@ export const StartNewChat: FC<StartNewChatProps> = ({
         buttonText={<Trans id="chat.button.start" />}
         containerClassName=""
         buttonSize="default"
-        enableScheduledSend={!isSubscriptionMode}
+        enableScheduledSend
         enableCCOptions={true}
         ccOptions={ccOptions}
         onCCOptionsChange={onCCOptionsChange}
-        copyCommandMode={isSubscriptionMode}
+        offerCopyCommand
       />
     </div>
   );

@@ -152,7 +152,7 @@ export const UsageModeDialog: FC = () => {
                 <p className="text-muted-foreground text-xs font-normal leading-relaxed">
                   <Trans
                     id="usage_mode.subscription.description"
-                    message="You use Claude Code with a subscription plan (Max, Pro, etc.). Some features that require the Agent SDK will be restricted."
+                    message="You use Claude Code with a subscription plan (Max, Pro, etc.). Lantern drives the CLI you are already signed in to, so every feature works."
                   />
                 </p>
               </Button>
@@ -171,7 +171,7 @@ export const UsageModeDialog: FC = () => {
                 <p className="text-muted-foreground text-xs font-normal leading-relaxed">
                   <Trans
                     id="usage_mode.api.description"
-                    message="You use Claude Code with API keys. All features are available."
+                    message="You use Claude Code with API keys. Lantern reports what each session cost."
                   />
                 </p>
               </Button>
