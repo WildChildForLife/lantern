@@ -25,7 +25,7 @@ describe("RateLimitAutoScheduleService", () => {
     parentUuid: "7a75ca65-bfe3-45f2-8107-5abb1c91e12e",
     isSidechain: false,
     userType: "external",
-    cwd: "/home/kaito/repos/agent-bridge",
+    cwd: "/home/demo/repos/demo-project",
     sessionId: "9112408c-3585-4a39-a13f-11045828d870",
     version: "2.1.0",
     gitBranch: "main",
