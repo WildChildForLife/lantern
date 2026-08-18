@@ -15,12 +15,16 @@ describe("LastPromptEntrySchema", () => {
     expect(data?.sessionId).toBe("28fc793f-fbe6-4062-8b4a-3d6e28f65b8b");
   });
 
-  test("rejects missing lastPrompt", () => {
+  test("accepts the newer shape that points at the leaf message instead", () => {
     const result = LastPromptEntrySchema.safeParse({
       type: "last-prompt",
+      leafUuid: "8a2cf61c-78a5-4ad6-ad08-4b2956870066",
       sessionId: "28fc793f-fbe6-4062-8b4a-3d6e28f65b8b",
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
+    const data = result.success ? result.data : undefined;
+    expect(data?.leafUuid).toBe("8a2cf61c-78a5-4ad6-ad08-4b2956870066");
+    expect(data?.lastPrompt).toBeUndefined();
   });
 
   test("rejects missing sessionId", () => {

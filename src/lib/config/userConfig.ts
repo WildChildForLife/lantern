@@ -13,6 +13,12 @@ export const userConfigSchema = z.object({
   searchHotkey: z.enum(["ctrl-k", "command-k"]).optional().default("command-k"),
   findHotkey: z.enum(["ctrl-f", "command-f"]).optional().default("command-f"),
   autoScheduleContinueOnRateLimit: z.boolean().optional().default(false),
+  /**
+   * Show the rows a session log keeps for its own sake - hook summaries,
+   * queued prompts, file backups. Off by default: a transcript should read
+   * like what the person saw, not like the file it was recovered from.
+   */
+  showTechnicalDetails: z.boolean().optional().default(false),
   modelChoices: z.array(z.string()).optional().default(["default", "haiku", "sonnet", "opus"]),
   usageMode: z.enum(["subscription", "api"]).optional(),
   /**

@@ -6,6 +6,8 @@ import {
   CopyIcon,
   DownloadIcon,
   EllipsisVertical as EllipsisVerticalIcon,
+  EyeIcon,
+  EyeOffIcon,
   GitBranchIcon,
   LoaderIcon,
   MenuIcon,
@@ -110,7 +112,7 @@ const SessionPageMainContent: FC<
   const { data: projectData } = useProject(projectId);
   const sessionProcesses = useAtomValue(sessionProcessesAtom);
   const virtualMessages = useAtomValue(virtualMessagesAtom);
-  const { config } = useConfig();
+  const { config, updateConfig } = useConfig();
 
   // CC Options state - lifted here to share between ChatActionMenu and ChatInput
   const [savedOptions, setSavedOptions] = useProjectSessionOptions(projectId);
@@ -508,6 +510,28 @@ const SessionPageMainContent: FC<
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="justify-start"
+                          onClick={() =>
+                            updateConfig({
+                              ...config,
+                              showTechnicalDetails: !config.showTechnicalDetails,
+                            })
+                          }
+                        >
+                          {config.showTechnicalDetails ? (
+                            <EyeOffIcon className="w-4 h-4 mr-2" />
+                          ) : (
+                            <EyeIcon className="w-4 h-4 mr-2" />
+                          )}
+                          {config.showTechnicalDetails ? (
+                            <Trans id="session.menu.hide_technical_details" />
+                          ) : (
+                            <Trans id="session.menu.show_technical_details" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="justify-start text-destructive hover:text-destructive"
                           onClick={() => setIsDeleteDialogOpen(true)}
                         >
@@ -685,6 +709,7 @@ const SessionPageMainContent: FC<
               scheduledJobs={sessionScheduledJobs}
               scrollContainerRef={scrollContainerRef}
               enableInPageSearch
+              showTechnicalDetails={config.showTechnicalDetails}
             />
             {!isExistingSession && (
               <div className="space-y-6">

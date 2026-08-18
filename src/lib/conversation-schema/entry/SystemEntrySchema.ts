@@ -74,7 +74,7 @@ const InformationalEntrySchema = BaseEntrySchema.extend({
   type: z.literal("system"),
   subtype: z.literal("informational"),
   content: z.string(),
-  level: z.enum(["info", "warning", "error"]).optional(),
+  level: z.enum(["info", "notice", "warning", "error"]).optional(),
 });
 
 // API error entry (tracks API errors and retries).

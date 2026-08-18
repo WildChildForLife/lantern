@@ -1,5 +1,9 @@
 import { Effect } from "effect";
 import type { ToolResultContent } from "../../../../lib/conversation-schema/content/ToolResultContentSchema.ts";
+import {
+  getConversationVisibility,
+  isMessageEntry,
+} from "../../../../lib/conversation-schema/entryVisibility.ts";
 import type { Conversation } from "../../../../lib/conversation-schema/index.ts";
 import type { IAgentSessionRepository } from "../../agent-session/infrastructure/AgentSessionRepository.ts";
 import type { SessionDetail } from "../../types.ts";
@@ -374,22 +378,9 @@ const hasAgentId = (toolUseResult: unknown): toolUseResult is { agentId: string 
  */
 const buildSidechainData = (conversations: Array<Conversation>): SidechainData => {
   // Filter sidechain conversations
-  // oxlint-disable-next-line typescript-eslint/no-unsafe-type-assertion -- type narrowing via filter conditions is safe here
-  const sidechainConversations = conversations.filter(
-    (conv) =>
-      conv.type !== "summary" &&
-      conv.type !== "file-history-snapshot" &&
-      conv.type !== "queue-operation" &&
-      conv.type !== "progress" &&
-      conv.type !== "custom-title" &&
-      conv.type !== "ai-title" &&
-      conv.type !== "agent-name" &&
-      conv.type !== "agent-setting" &&
-      conv.type !== "pr-link" &&
-      conv.type !== "last-prompt" &&
-      conv.type !== "permission-mode" &&
-      conv.isSidechain === true,
-  ) as Array<Extract<Conversation, { type: "user" | "assistant" | "system" }>>;
+  const sidechainConversations = conversations
+    .filter(isMessageEntry)
+    .filter((conv) => conv.isSidechain === true);
 
   // Build uuid -> conversation map for parent lookup
   const uuidMap = new Map(sidechainConversations.map((conv) => [conv.uuid, conv] as const));
@@ -1011,21 +1002,7 @@ export const generateSessionHtml = (
     const existingAgentIds = new Set<string>();
     for (const conv of session.conversations) {
       if (conv.type === "x-error") continue;
-      if (
-        conv.type !== "summary" &&
-        conv.type !== "file-history-snapshot" &&
-        conv.type !== "queue-operation" &&
-        conv.type !== "progress" &&
-        conv.type !== "custom-title" &&
-        conv.type !== "ai-title" &&
-        conv.type !== "agent-name" &&
-        conv.type !== "agent-setting" &&
-        conv.type !== "pr-link" &&
-        conv.type !== "last-prompt" &&
-        conv.type !== "permission-mode" &&
-        conv.isSidechain === true &&
-        conv.agentId !== undefined
-      ) {
+      if (isMessageEntry(conv) && conv.isSidechain === true && conv.agentId !== undefined) {
         existingAgentIds.add(conv.agentId);
       }
     }
@@ -1118,7 +1095,9 @@ export const generateSessionHtml = (
           return renderAssistantEntry(conv, toolResultMap, sidechainData);
         }
         if (conv.type === "system") {
-          return renderSystemEntry(conv);
+          // An export is the transcript, so it leaves out the rows the person
+          // never saw - turn timings and hook bookkeeping.
+          return getConversationVisibility(conv) === "transcript" ? renderSystemEntry(conv) : "";
         }
         return "";
       })

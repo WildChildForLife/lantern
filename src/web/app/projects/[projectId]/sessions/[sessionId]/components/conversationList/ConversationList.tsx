@@ -11,6 +11,7 @@ import { type FC, type RefObject, useCallback, useEffect, useMemo, useRef, useSt
 import { parseUserMessage } from "@/lib/claude-code/parseUserMessage";
 import type { Conversation } from "@/lib/conversation-schema";
 import type { ToolResultContent } from "@/lib/conversation-schema/content/ToolResultContentSchema";
+import { isMessageEntry } from "@/lib/conversation-schema/entryVisibility";
 import type { AssistantMessageContent } from "@/lib/conversation-schema/message/AssistantMessageSchema";
 import { calculateDuration } from "@/lib/date/formatDuration";
 import type { SchedulerJob } from "@/server/core/scheduler/schema";
@@ -27,7 +28,7 @@ import { Input } from "@/web/components/ui/input";
 import { TaskStateProvider } from "@/web/contexts/TaskStateContext";
 import { useSidechain } from "../../hooks/useSidechain";
 import { ConversationItem } from "./ConversationItem";
-import { buildRenderableConversationRows } from "./conversationRows";
+import { buildRenderableConversationRows, shouldRenderInTranscript } from "./conversationRows";
 import { ScheduledMessageNotice } from "./ScheduledMessageNotice";
 
 const searchInputId = "conversation-in-page-search";
@@ -114,7 +115,7 @@ const getSearchableText = (conversation: Conversation | ErrorJsonl): string => {
   }
 
   if (conversation.type === "last-prompt") {
-    return conversation.lastPrompt;
+    return conversation.lastPrompt ?? "";
   }
 
   return "";
@@ -232,6 +233,11 @@ type ConversationListProps = {
   scheduledJobs: SchedulerJob[];
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   enableInPageSearch?: boolean;
+  /**
+   * Show the plumbing rows - hook summaries, queued prompts, file backups -
+   * that the person running the session never saw on screen.
+   */
+  showTechnicalDetails?: boolean;
 };
 
 export const ConversationList: FC<ConversationListProps> = ({
@@ -242,6 +248,7 @@ export const ConversationList: FC<ConversationListProps> = ({
   scheduledJobs,
   scrollContainerRef,
   enableInPageSearch = false,
+  showTechnicalDetails = false,
 }) => {
   const { config } = useConfig();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -381,42 +388,17 @@ export const ConversationList: FC<ConversationListProps> = ({
     [toolUseIdToToolUseResultMap],
   );
 
-  const isOnlyToolResult = useCallback((conv: Conversation): boolean => {
-    if (conv.type !== "user") return false;
-    const content = conv.message.content;
-    if (typeof content === "string") return false;
-
-    return content.every((item) => typeof item !== "string" && item.type === "tool_result");
-  }, []);
-
   const shouldRenderConversation = useCallback(
     (conv: Conversation | ErrorJsonl): boolean => {
-      if (conv.type === "x-error") return true;
-
-      if (conv.type === "progress") return false;
-      if (conv.type === "custom-title") return false;
-      if (conv.type === "ai-title") return false;
-      if (conv.type === "agent-name") return false;
-      if (conv.type === "agent-setting") return false;
-      if (conv.type === "pr-link") return false;
-      if (conv.type === "last-prompt") return false;
-      if (conv.type === "permission-mode") return false;
-
-      const isSidechain =
-        conv.type !== "summary" &&
-        conv.type !== "file-history-snapshot" &&
-        conv.type !== "queue-operation" &&
-        conv.isSidechain;
-
-      if (isSidechain) return false;
-
-      if (conv.type === "user" && isOnlyToolResult(conv)) {
-        return false;
+      if (shouldRenderInTranscript(conv, { showTechnicalDetails })) {
+        return true;
       }
 
-      return true;
+      // An otherwise empty assistant entry still earns its row when it closes
+      // a turn: the row is where that turn's duration is drawn.
+      return conv.type === "assistant" && getTurnDuration(conv.uuid) !== undefined;
     },
-    [isOnlyToolResult],
+    [showTechnicalDetails, getTurnDuration],
   );
 
   const renderableRows = useMemo(() => {
@@ -630,19 +612,7 @@ export const ConversationList: FC<ConversationListProps> = ({
       typeof conversation.message.content === "string" &&
       parseUserMessage(conversation.message.content).kind === "local-command";
 
-    const isSidechain =
-      conversation.type !== "summary" &&
-      conversation.type !== "file-history-snapshot" &&
-      conversation.type !== "queue-operation" &&
-      conversation.type !== "progress" &&
-      conversation.type !== "custom-title" &&
-      conversation.type !== "ai-title" &&
-      conversation.type !== "agent-name" &&
-      conversation.type !== "agent-setting" &&
-      conversation.type !== "pr-link" &&
-      conversation.type !== "last-prompt" &&
-      conversation.type !== "permission-mode" &&
-      conversation.isSidechain;
+    const isSidechain = isMessageEntry(conversation) && conversation.isSidechain;
 
     return (
       <div

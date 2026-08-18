@@ -13,6 +13,7 @@ const LayerImpl = Effect.gen(function* () {
     searchHotkey: "command-k",
     findHotkey: "command-f",
     autoScheduleContinueOnRateLimit: false,
+    showTechnicalDetails: false,
     modelChoices: ["default", "haiku", "sonnet", "opus"],
   });
 
