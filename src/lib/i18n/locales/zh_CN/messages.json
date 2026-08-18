@@ -1480,7 +1480,7 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        101
+        92
       ]
     ],
     "translation": "按标题、首条消息或项目筛选…"
@@ -2171,11 +2171,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        125
+        116
       ],
       [
         "src/web/app/topics/page.tsx",
-        102
+        147
       ]
     ],
     "translation": "清除完成标记"
@@ -2191,11 +2191,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        116
+        107
       ],
       [
         "src/web/app/topics/page.tsx",
-        93
+        138
       ]
     ],
     "translation": "隐藏已完成 ({doneCount})"
@@ -2207,11 +2207,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        114
+        105
       ],
       [
         "src/web/app/topics/page.tsx",
-        91
+        136
       ]
     ],
     "translation": "仅显示未完成"
@@ -2259,47 +2259,23 @@
     "comments": [],
     "origin": [
       [
-        "src/web/app/projects/page.tsx",
-        85
-      ],
-      [
         "src/web/app/topics/page.tsx",
-        39
+        52
       ]
     ],
     "translation": "所有会话"
   },
-  "nav.projects": {
-    "message": "Projects",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/conversations/page.tsx",
-        54
-      ],
-      [
-        "src/web/app/topics/page.tsx",
-        48
-      ]
-    ],
-    "translation": "项目"
-  },
-  "nav.topics": {
-    "message": "Topics",
+  "nav.overview": {
+    "message": "Overview",
     "placeholders": {},
     "comments": [],
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
         45
-      ],
-      [
-        "src/web/app/projects/page.tsx",
-        76
       ]
     ],
-    "translation": "主题"
+    "translation": "总览"
   },
   "notfound.button.go_home": {
     "placeholders": {},
@@ -2846,27 +2822,21 @@
     ],
     "translation": "设置新项目"
   },
-  "project_list.last_modified": {
-    "placeholders": {},
+  "project_list.no_matches": {
+    "message": "No projects to show for \"{query}\".",
+    "placeholders": {
+      "query": [
+        "query"
+      ]
+    },
     "comments": [],
     "origin": [
       [
         "src/web/app/projects/components/ProjectList.tsx",
-        93
+        53
       ]
     ],
-    "translation": "最后修改时间:"
-  },
-  "project_list.messages": {
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/projects/components/ProjectList.tsx",
-        102
-      ]
-    ],
-    "translation": "消息数:"
+    "translation": "没有与\"{query}\"匹配的项目。"
   },
   "project_list.no_projects.description": {
     "placeholders": {},
@@ -2874,7 +2844,7 @@
     "origin": [
       [
         "src/web/app/projects/components/ProjectList.tsx",
-        33
+        43
       ]
     ],
     "translation": "在您的 ~/.claude/projects 目录中未找到 Claude Code 项目。与 Claude Code 开始对话以创建您的第一个项目。"
@@ -2885,21 +2855,10 @@
     "origin": [
       [
         "src/web/app/projects/components/ProjectList.tsx",
-        30
+        40
       ]
     ],
     "translation": "未找到项目"
-  },
-  "project_list.view_conversations": {
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/projects/components/ProjectList.tsx",
-        108
-      ]
-    ],
-    "translation": "查看对话"
   },
   "project_switcher.no_project": {
     "placeholders": {},
@@ -2923,13 +2882,25 @@
     ],
     "translation": "没有匹配的项目"
   },
+  "projects.filter.placeholder": {
+    "message": "Filter projects...",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        122
+      ]
+    ],
+    "translation": "筛选项目…"
+  },
   "projects.page.description": {
     "placeholders": {},
     "comments": [],
     "origin": [
       [
-        "src/web/app/projects/page.tsx",
-        59
+        "src/web/app/topics/page.tsx",
+        106
       ]
     ],
     "translation": "查看 Claude Code 对话历史和项目操作"
@@ -2939,8 +2910,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/app/projects/page.tsx",
-        96
+        "src/web/app/topics/page.tsx",
+        161
       ]
     ],
     "translation": "正在加载项目..."
@@ -2950,8 +2921,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/app/projects/page.tsx",
-        67
+        "src/web/app/topics/page.tsx",
+        99
       ]
     ],
     "translation": "项目"
@@ -5590,7 +5561,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        81
+        123
       ]
     ],
     "translation": "筛选主题…"
@@ -5602,7 +5573,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        70
+        108
       ]
     ],
     "translation": "会话按内容分组，而不是按最初启动的文件夹。"
@@ -5614,7 +5585,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        67
+        101
       ]
     ],
     "translation": "主题"

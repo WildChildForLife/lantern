@@ -1480,7 +1480,7 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        101
+        92
       ]
     ],
     "translation": "Filter by title, first message or project..."
@@ -2171,11 +2171,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        125
+        116
       ],
       [
         "src/web/app/topics/page.tsx",
-        102
+        147
       ]
     ],
     "translation": "Clear done"
@@ -2191,11 +2191,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        116
+        107
       ],
       [
         "src/web/app/topics/page.tsx",
-        93
+        138
       ]
     ],
     "translation": "Hide done ({doneCount})"
@@ -2207,11 +2207,11 @@
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
-        114
+        105
       ],
       [
         "src/web/app/topics/page.tsx",
-        91
+        136
       ]
     ],
     "translation": "Showing open only"
@@ -2259,47 +2259,23 @@
     "comments": [],
     "origin": [
       [
-        "src/web/app/projects/page.tsx",
-        85
-      ],
-      [
         "src/web/app/topics/page.tsx",
-        39
+        52
       ]
     ],
     "translation": "All conversations"
   },
-  "nav.projects": {
-    "message": "Projects",
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/conversations/page.tsx",
-        54
-      ],
-      [
-        "src/web/app/topics/page.tsx",
-        48
-      ]
-    ],
-    "translation": "Projects"
-  },
-  "nav.topics": {
-    "message": "Topics",
+  "nav.overview": {
+    "message": "Overview",
     "placeholders": {},
     "comments": [],
     "origin": [
       [
         "src/web/app/conversations/page.tsx",
         45
-      ],
-      [
-        "src/web/app/projects/page.tsx",
-        76
       ]
     ],
-    "translation": "Topics"
+    "translation": "Overview"
   },
   "notfound.button.go_home": {
     "placeholders": {},
@@ -2846,27 +2822,21 @@
     ],
     "translation": "Set Up New Project"
   },
-  "project_list.last_modified": {
-    "placeholders": {},
+  "project_list.no_matches": {
+    "message": "No projects to show for \"{query}\".",
+    "placeholders": {
+      "query": [
+        "query"
+      ]
+    },
     "comments": [],
     "origin": [
       [
         "src/web/app/projects/components/ProjectList.tsx",
-        93
+        53
       ]
     ],
-    "translation": "Last Modified: "
-  },
-  "project_list.messages": {
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/projects/components/ProjectList.tsx",
-        102
-      ]
-    ],
-    "translation": "Messages: "
+    "translation": "No projects to show for \"{query}\"."
   },
   "project_list.no_projects.description": {
     "placeholders": {},
@@ -2874,7 +2844,7 @@
     "origin": [
       [
         "src/web/app/projects/components/ProjectList.tsx",
-        33
+        43
       ]
     ],
     "translation": "No Claude Code projects found in your ~/.claude/projects directory. Start a conversation with Claude Code to set up your first project."
@@ -2885,21 +2855,10 @@
     "origin": [
       [
         "src/web/app/projects/components/ProjectList.tsx",
-        30
+        40
       ]
     ],
     "translation": "No Projects Found"
-  },
-  "project_list.view_conversations": {
-    "placeholders": {},
-    "comments": [],
-    "origin": [
-      [
-        "src/web/app/projects/components/ProjectList.tsx",
-        108
-      ]
-    ],
-    "translation": "View Conversations"
   },
   "project_switcher.no_project": {
     "placeholders": {},
@@ -2923,13 +2882,25 @@
     ],
     "translation": "No matching projects"
   },
+  "projects.filter.placeholder": {
+    "message": "Filter projects...",
+    "placeholders": {},
+    "comments": [],
+    "origin": [
+      [
+        "src/web/app/topics/page.tsx",
+        122
+      ]
+    ],
+    "translation": "Filter projects..."
+  },
   "projects.page.description": {
     "placeholders": {},
     "comments": [],
     "origin": [
       [
-        "src/web/app/projects/page.tsx",
-        59
+        "src/web/app/topics/page.tsx",
+        106
       ]
     ],
     "translation": "View Claude Code conversation history and project operations"
@@ -2939,8 +2910,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/app/projects/page.tsx",
-        96
+        "src/web/app/topics/page.tsx",
+        161
       ]
     ],
     "translation": "Loading projects..."
@@ -2950,8 +2921,8 @@
     "comments": [],
     "origin": [
       [
-        "src/web/app/projects/page.tsx",
-        67
+        "src/web/app/topics/page.tsx",
+        99
       ]
     ],
     "translation": "Projects"
@@ -5590,7 +5561,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        81
+        123
       ]
     ],
     "translation": "Filter topics..."
@@ -5602,7 +5573,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        70
+        108
       ]
     ],
     "translation": "Conversations grouped by what they are about, not by the folder they were started in."
@@ -5614,7 +5585,7 @@
     "origin": [
       [
         "src/web/app/topics/page.tsx",
-        67
+        101
       ]
     ],
     "translation": "Topics"

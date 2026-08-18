@@ -3,14 +3,15 @@ import { atomWithStorage } from "jotai/utils";
 import { z } from "zod";
 import { storageKey } from "./storageKey";
 
-export const viewModeSchema = z.enum(["grid", "list", "table"]);
+export const viewModeSchema = z.enum(["grid", "list", "table", "projects"]);
 
 export type ViewMode = z.infer<typeof viewModeSchema>;
 
 /**
- * How card collections (projects, conversations) are laid out. Persisted so the
- * choice survives reloads, and shared by every listing so the app feels
- * consistent.
+ * How the overview lays out its cards: conversations grouped by topic as rows,
+ * cards or one column per topic, or grouped by the project they belong to.
+ * Persisted so the choice survives reloads, and shared by every listing so the
+ * app feels consistent.
  */
 const viewModeAtom = atomWithStorage<ViewMode>(storageKey("view-mode"), "list");
 

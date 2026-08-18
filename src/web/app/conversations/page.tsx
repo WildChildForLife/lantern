@@ -1,7 +1,7 @@
 import { Trans, useLingui } from "@lingui/react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import { CheckCheckIcon, FolderIcon, LayoutGridIcon, XIcon } from "lucide-react";
+import { CheckCheckIcon, LayoutGridIcon, XIcon } from "lucide-react";
 import { type FC, useState } from "react";
 import { useDoneConversations } from "@/lib/atoms/doneConversations";
 import { NotificationBell } from "@/web/app/components/NotificationBell";
@@ -42,16 +42,7 @@ export const ConversationsPage: FC<Props> = ({ topic }) => {
           >
             <LayoutGridIcon className="w-3.5 h-3.5" />
             <span>
-              <Trans id="nav.topics" message="Topics" />
-            </span>
-          </Link>
-          <Link
-            to="/projects"
-            className="flex items-center gap-1.5 h-7 px-2 rounded transition-colors hover:bg-muted text-muted-foreground hover:text-foreground"
-          >
-            <FolderIcon className="w-3.5 h-3.5" />
-            <span>
-              <Trans id="nav.projects" message="Projects" />
+              <Trans id="nav.overview" message="Overview" />
             </span>
           </Link>
           <SortUnsortedTopicsButton />
