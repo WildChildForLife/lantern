@@ -726,7 +726,7 @@ export const ChatInput: FC<ChatInputProps> = ({
                         onClick={() => {
                           void handleCopyCommand();
                         }}
-                        disabled={!message.trim() || isPending || disabled}
+                        disabled={!message.trim() || isPending || disabled || sendDisabled}
                         className="h-9 px-2"
                       >
                         <CopyIcon className="w-4 h-4" />

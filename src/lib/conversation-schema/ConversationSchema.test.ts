@@ -160,4 +160,193 @@ describe("ConversationSchema", () => {
 
     expect(result.success).toBe(true);
   });
+
+  /**
+   * The entry kinds that used to have no schema at all, so every one of them
+   * rendered as a parse error. Each body below is a real line, copied verbatim
+   * from a session log rather than written to fit the schema.
+   */
+  test("accepts mode entries", () => {
+    const data = ConversationSchema.parse({
+      type: "mode",
+      mode: "normal",
+      sessionId: "9f54ce8c-7925-4746-97cd-c2c034de321f",
+    });
+
+    if (data.type !== "mode") {
+      throw new Error("Expected mode entry");
+    }
+    expect(data.mode).toBe("normal");
+  });
+
+  test("accepts relocated entries", () => {
+    const data = ConversationSchema.parse({
+      type: "relocated",
+      sessionId: "9f54ce8c-7925-4746-97cd-c2c034de321f",
+      relocatedCwd: "/path/to/project/.claude/worktrees/docs-readme",
+    });
+
+    if (data.type !== "relocated") {
+      throw new Error("Expected relocated entry");
+    }
+    expect(data.relocatedCwd).toBe("/path/to/project/.claude/worktrees/docs-readme");
+  });
+
+  test("accepts worktree-state entries", () => {
+    const data = ConversationSchema.parse({
+      type: "worktree-state",
+      worktreeSession: {
+        originalCwd: "/path/to/project",
+        preEnterOriginalCwd: "/path/to/project",
+        worktreePath: "/path/to/project/.claude/worktrees/docs-readme",
+        worktreeName: "docs-readme",
+        worktreeBranch: "worktree-docs-readme",
+        originalBranch: "docs/tighten-readme",
+        originalHeadCommit: "29baa26a86d77627e6b875e87008d83962a7b896",
+        sessionId: "9f54ce8c-7925-4746-97cd-c2c034de321f",
+      },
+      sessionId: "9f54ce8c-7925-4746-97cd-c2c034de321f",
+    });
+
+    if (data.type !== "worktree-state") {
+      throw new Error("Expected worktree-state entry");
+    }
+    expect(data.worktreeSession?.worktreeName).toBe("docs-readme");
+  });
+
+  test("accepts worktree-state entries that cleared the worktree", () => {
+    const data = ConversationSchema.parse({
+      type: "worktree-state",
+      worktreeSession: null,
+      sessionId: "9f54ce8c-7925-4746-97cd-c2c034de321f",
+    });
+
+    if (data.type !== "worktree-state") {
+      throw new Error("Expected worktree-state entry");
+    }
+    expect(data.worktreeSession).toBeNull();
+  });
+
+  test("accepts file-history-delta entries, including an unnamed backup", () => {
+    const data = ConversationSchema.parse({
+      type: "file-history-delta",
+      messageId: "7e388961-90c1-4ac9-a304-256cc209b9a7",
+      snapshotMessageId: "f2784bf7-9525-4aa2-a6e8-64d4b0e2f4bb",
+      trackingPath: "README.md",
+      backup: {
+        backupFileName: null,
+        version: 1,
+        backupTime: "2026-08-17T17:30:31.998Z",
+        realParentDir: "/path/to/project",
+      },
+      timestamp: "2026-08-17T17:30:31.999Z",
+    });
+
+    if (data.type !== "file-history-delta") {
+      throw new Error("Expected file-history-delta entry");
+    }
+    expect(data.trackingPath).toBe("README.md");
+  });
+
+  test("accepts frame-link entries", () => {
+    const data = ConversationSchema.parse({
+      type: "frame-link",
+      sessionId: "66a2bc95-e0a4-406f-b916-178d5b028b06",
+      path: "/tmp/scratchpad/prune-review.html",
+      frameUrl: "https://claude.ai/code/artifact/61da4ce6-3a8d-4a84-a7de-921b5214c418",
+      title: "Prune Review",
+      timestamp: "2026-08-07T20:34:57.229Z",
+    });
+
+    if (data.type !== "frame-link") {
+      throw new Error("Expected frame-link entry");
+    }
+    expect(data.frameUrl).toBe(
+      "https://claude.ai/code/artifact/61da4ce6-3a8d-4a84-a7de-921b5214c418",
+    );
+  });
+
+  test("accepts last-prompt entries that point at the leaf instead of the text", () => {
+    const data = ConversationSchema.parse({
+      type: "last-prompt",
+      leafUuid: "89254824-d2e5-42f9-b285-08a7d707d8fd",
+      sessionId: "9f54ce8c-7925-4746-97cd-c2c034de321f",
+    });
+
+    if (data.type !== "last-prompt") {
+      throw new Error("Expected last-prompt entry");
+    }
+    expect(data.leafUuid).toBe("89254824-d2e5-42f9-b285-08a7d707d8fd");
+    expect(data.lastPrompt).toBeUndefined();
+  });
+
+  test("accepts informational system entries at notice level", () => {
+    const data = ConversationSchema.parse({
+      parentUuid: "cc4192f3-a6fe-4b14-ae63-17c13f050a67",
+      isSidechain: false,
+      type: "system",
+      subtype: "informational",
+      content: "Continuing an interrupted response.",
+      isMeta: false,
+      timestamp: "2026-07-08T20:19:58.789Z",
+      uuid: "3766d157-5112-47ff-b12d-d9f36421a754",
+      level: "notice",
+      userType: "external",
+      cwd: "/path/to/project",
+      sessionId: "59e0177d-a6e2-49b9-ae5c-5c9e803c4af2",
+      version: "2.1.202",
+      gitBranch: "HEAD",
+    });
+
+    if (data.type !== "system") {
+      throw new Error("Expected system entry");
+    }
+    expect(data.subtype).toBe("informational");
+  });
+
+  /**
+   * Synthetic assistant messages - the rate-limit notice among them - report
+   * these usage fields as null. Rejecting the line hid the very message the
+   * reader needed.
+   */
+  test("accepts assistant messages whose usage fields came back null", () => {
+    const data = ConversationSchema.parse({
+      parentUuid: "29444f3a-e16b-4a71-a811-7b34de330946",
+      isSidechain: true,
+      type: "assistant",
+      uuid: "c64fb8a3-8a6d-45b9-b359-1f3b1aa31760",
+      timestamp: "2026-08-01T00:44:54.744Z",
+      userType: "external",
+      cwd: "/path/to/project",
+      sessionId: "59e0177d-a6e2-49b9-ae5c-5c9e803c4af2",
+      version: "2.1.202",
+      message: {
+        id: "c35955bf-5d73-4677-8c1f-e21d0a56744b",
+        container: null,
+        model: "<synthetic>",
+        role: "assistant",
+        stop_reason: "stop_sequence",
+        stop_sequence: "",
+        type: "message",
+        usage: {
+          input_tokens: 0,
+          output_tokens: 0,
+          cache_creation_input_tokens: 0,
+          cache_read_input_tokens: 0,
+          server_tool_use: { web_search_requests: 0, web_fetch_requests: 0 },
+          service_tier: null,
+          cache_creation: { ephemeral_1h_input_tokens: 0, ephemeral_5m_input_tokens: 0 },
+          inference_geo: null,
+          iterations: null,
+          speed: null,
+        },
+        content: [{ type: "text", text: "You've hit your session limit \u00b7 resets 4:30am" }],
+      },
+    });
+
+    if (data.type !== "assistant") {
+      throw new Error("Expected assistant entry");
+    }
+    expect(data.message.usage?.inference_geo).toBeNull();
+  });
 });

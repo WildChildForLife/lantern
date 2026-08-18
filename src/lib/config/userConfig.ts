@@ -20,7 +20,14 @@ export const userConfigSchema = z.object({
    */
   showTechnicalDetails: z.boolean().optional().default(false),
   modelChoices: z.array(z.string()).optional().default(["default", "haiku", "sonnet", "opus"]),
-  usageMode: z.enum(["subscription", "api"]).optional(),
+  /**
+   * How Claude Code is paid for, when someone has said so explicitly.
+   *
+   * `auto` is a real answer - "follow the machine" - and is why this is not
+   * merely absent: undefined means nobody has been asked yet, and only that
+   * state may raise the first-run question.
+   */
+  usageMode: z.enum(["subscription", "api", "auto"]).optional(),
   /**
    * The agent CLI Lantern works with: whose history it centres on, and which
    * one names topics. One at a time — these CLIs do not share a login, and

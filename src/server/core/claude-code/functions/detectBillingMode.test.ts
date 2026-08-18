@@ -4,6 +4,7 @@ import { type BillingSignals, detectBillingMode } from "./detectBillingMode.ts";
 const noSignals: BillingSignals = {
   apiKeyEnv: undefined,
   authTokenEnv: undefined,
+  cloudProviderEnv: undefined,
   hasApiKeyHelper: false,
   subscriptionType: null,
 };
@@ -45,6 +46,17 @@ test("an empty environment variable is not a credential", () => {
   });
 
   expect(detection.mode).toBe("subscription");
+});
+
+test("routing through a cloud provider is metered, whatever login is on disk", () => {
+  const detection = detectBillingMode({
+    ...noSignals,
+    cloudProviderEnv: "1",
+    subscriptionType: "max",
+  });
+
+  expect(detection.mode).toBe("api");
+  expect(detection.reason).toBe("cloud-provider-env");
 });
 
 test("saying nothing beats guessing when the machine gave no signal", () => {

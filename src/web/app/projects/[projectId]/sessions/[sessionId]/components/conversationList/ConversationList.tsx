@@ -233,11 +233,6 @@ type ConversationListProps = {
   scheduledJobs: SchedulerJob[];
   scrollContainerRef: RefObject<HTMLDivElement | null>;
   enableInPageSearch?: boolean;
-  /**
-   * Show the plumbing rows - hook summaries, queued prompts, file backups -
-   * that the person running the session never saw on screen.
-   */
-  showTechnicalDetails?: boolean;
 };
 
 export const ConversationList: FC<ConversationListProps> = ({
@@ -248,9 +243,14 @@ export const ConversationList: FC<ConversationListProps> = ({
   scheduledJobs,
   scrollContainerRef,
   enableInPageSearch = false,
-  showTechnicalDetails = false,
 }) => {
   const { config } = useConfig();
+  /**
+   * Read here rather than taken as a prop: this list is mounted in four places,
+   * and only one of them was passing it - so the same rows were hidden in the
+   * others with the toggle unable to bring them back.
+   */
+  const showTechnicalDetails = config.showTechnicalDetails;
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [committedSearchQuery, setCommittedSearchQuery] = useState("");
   const [activeMatchPosition, setActiveMatchPosition] = useState(0);

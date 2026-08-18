@@ -71,6 +71,10 @@ export const testPlatformLayer = (overrides?: {
             return overrides?.env?.ANTHROPIC_API_KEY ?? undefined;
           case "ANTHROPIC_AUTH_TOKEN":
             return overrides?.env?.ANTHROPIC_AUTH_TOKEN ?? undefined;
+          case "CLAUDE_CODE_USE_BEDROCK":
+            return overrides?.env?.CLAUDE_CODE_USE_BEDROCK ?? undefined;
+          case "CLAUDE_CODE_USE_VERTEX":
+            return overrides?.env?.CLAUDE_CODE_USE_VERTEX ?? undefined;
           case "LANTERN_PASSWORD":
             return overrides?.env?.LANTERN_PASSWORD ?? undefined;
           case "PATH":

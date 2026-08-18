@@ -48,6 +48,12 @@ export const envSchema = z.object({
    */
   ANTHROPIC_API_KEY: z.string().optional(),
   ANTHROPIC_AUTH_TOKEN: z.string().optional(),
+  /**
+   * Routing Claude Code through a cloud account is metered too, and sets
+   * neither variable above.
+   */
+  CLAUDE_CODE_USE_BEDROCK: z.string().optional(),
+  CLAUDE_CODE_USE_VERTEX: z.string().optional(),
 });
 
 export type EnvSchema = z.infer<typeof envSchema>;

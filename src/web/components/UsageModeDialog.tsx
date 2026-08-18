@@ -34,7 +34,7 @@ export const UsageModeDialog: FC = () => {
   const { i18n } = useLingui();
   const { config, updateConfig, isConfigLoaded } = useConfig();
   const { data, isPending } = useQuery(sourcesQuery);
-  const { detected } = useUsageMode();
+  const { detected, isSettled } = useUsageMode();
 
   const [picked, setPicked] = useState<string | null>(null);
 
@@ -48,19 +48,21 @@ export const UsageModeDialog: FC = () => {
     !needsSource &&
     chosen === CLAUDE_CODE &&
     config.usageMode === undefined &&
+    // Only once detection has actually answered. An in-flight query is not a
+    // "could not tell", and treating it as one opens this dialog - which
+    // cannot be dismissed - on every cold load.
+    isSettled &&
     detected === null;
 
   const isOpen = needsSource || needsUsageMode;
 
   const selectSource = (sourceId: string) => {
     setPicked(sourceId);
-    // Usage mode is a Claude Code concept. Choosing anything else answers it by
-    // making it irrelevant, rather than leaving a dialog the user cannot clear.
-    updateConfig({
-      ...config,
-      primarySource: sourceId,
-      ...(sourceId === CLAUDE_CODE ? {} : { usageMode: "api" as const }),
-    });
+    // Usage mode is a Claude Code concept, and for any other CLI it simply does
+    // not apply - `useUsageMode` returns nothing there. Storing an answer to
+    // dodge the dialog would outlive the choice and then quietly override
+    // detection if this machine ever switched back.
+    updateConfig({ ...config, primarySource: sourceId });
   };
 
   const selectUsageMode = (mode: "subscription" | "api") => {

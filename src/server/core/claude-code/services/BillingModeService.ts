@@ -7,16 +7,16 @@ import { EnvService } from "../../platform/services/EnvService.ts";
 import { type BillingDetection, detectBillingMode } from "../functions/detectBillingMode.ts";
 
 /**
- * Only the one field is described. The rest of the file is access and refresh
- * tokens, and a shape that does not mention them cannot carry them out by
- * accident.
+ * Only the one field is described, and deliberately without `.loose()`: the
+ * rest of this file is access and refresh tokens, and a plain object strips
+ * what it does not name. The parsed value therefore cannot carry a token out
+ * of here even if somebody later returns or logs the whole thing.
  */
 const credentialsSchema = z.object({
   claudeAiOauth: z
     .object({
       subscriptionType: z.string().optional(),
     })
-    .loose()
     .optional(),
 });
 
@@ -65,12 +65,24 @@ const LayerImpl = Effect.gen(function* () {
         path.join(claudeDirectory, ".credentials.json"),
         credentialsSchema,
       );
-      const settings = yield* readJson(path.join(claudeDirectory, "settings.json"), settingsSchema);
+      // Claude Code merges several settings files and any one of them can carry
+      // the helper. Reading only the global file reports a metered setup as a
+      // subscription, which is the more damaging way to be wrong.
+      const settingsFiles = yield* Effect.forEach(
+        ["settings.json", "settings.local.json"],
+        (fileName) => readJson(path.join(claudeDirectory, fileName), settingsSchema),
+      );
+
+      const bedrock = yield* envService.getEnv("CLAUDE_CODE_USE_BEDROCK");
+      const vertex = yield* envService.getEnv("CLAUDE_CODE_USE_VERTEX");
 
       return detectBillingMode({
         apiKeyEnv: yield* envService.getEnv("ANTHROPIC_API_KEY"),
         authTokenEnv: yield* envService.getEnv("ANTHROPIC_AUTH_TOKEN"),
-        hasApiKeyHelper: settings?.apiKeyHelper !== undefined && settings.apiKeyHelper !== "",
+        cloudProviderEnv: bedrock ?? vertex,
+        hasApiKeyHelper: settingsFiles.some(
+          (settings) => settings?.apiKeyHelper !== undefined && settings.apiKeyHelper !== "",
+        ),
         subscriptionType: credentials?.claudeAiOauth?.subscriptionType ?? null,
       });
     },

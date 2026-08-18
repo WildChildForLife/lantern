@@ -52,19 +52,16 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
   const queryClient = useQueryClient();
   const { detected, subscriptionType } = useUsageMode();
 
-  const isUsageMode = (value: string): value is "subscription" | "api" =>
-    value === "subscription" || value === "api";
+  const isUsageMode = (value: string): value is "subscription" | "api" | "auto" =>
+    value === "subscription" || value === "api" || value === "auto";
 
   /**
-   * `detect` clears the stored answer rather than storing one, so the setting
-   * follows the machine from then on - signing out of a subscription or
-   * exporting a key changes it without anyone revisiting this panel.
+   * `auto` is stored rather than cleared. Clearing would leave the config in
+   * the state that means "nobody has been asked", which is what raises the
+   * blocking first-run question - so choosing to follow the machine would
+   * summon the very dialog it answers whenever detection came back empty.
    */
   const changeUsageMode = (value: string) => {
-    if (value === "detect") {
-      updateConfig({ ...config, usageMode: undefined });
-      return;
-    }
     if (!isUsageMode(value)) return;
     updateConfig({ ...config, usageMode: value });
   };
@@ -132,12 +129,12 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
                 <Trans id="settings.usage_mode" message="Usage Mode" />
               </label>
             )}
-            <Select value={config?.usageMode ?? "detect"} onValueChange={changeUsageMode}>
+            <Select value={config?.usageMode ?? "auto"} onValueChange={changeUsageMode}>
               <SelectTrigger id={usageModeId} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="detect">
+                <SelectItem value="auto">
                   <Trans id="settings.usage_mode.detect" message="Detect automatically" />
                 </SelectItem>
                 <SelectItem value="subscription">

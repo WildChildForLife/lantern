@@ -114,7 +114,7 @@ const SessionPageMainContent: FC<
   const sessionProcesses = useAtomValue(sessionProcessesAtom);
   const virtualMessages = useAtomValue(virtualMessagesAtom);
   const { config, updateConfig } = useConfig();
-  const { mode: usageMode } = useUsageMode();
+  const { mode: usageMode, isSettled: isUsageModeSettled } = useUsageMode();
 
   // CC Options state - lifted here to share between ChatActionMenu and ChatInput
   const [savedOptions, setSavedOptions] = useProjectSessionOptions(projectId);
@@ -615,7 +615,9 @@ const SessionPageMainContent: FC<
                                 variant="secondary"
                                 className="h-7 text-xs flex items-center w-fit font-semibold"
                               >
-                                {usageMode === "subscription" ? (
+                                {!isUsageModeSettled ? (
+                                  <Trans id="session.cost.label" />
+                                ) : usageMode === "subscription" ? (
                                   <Trans
                                     id="session.cost.included_in_plan"
                                     message="Included in your plan"
@@ -633,7 +635,7 @@ const SessionPageMainContent: FC<
                               </Badge>
                               {/* The same four categories, counted rather than
                                   priced. What a plan actually meters is tokens. */}
-                              {usageMode === "subscription" && (
+                              {isUsageModeSettled && usageMode === "subscription" && (
                                 <div className="text-xs space-y-1 pl-2">
                                   <div className="flex justify-between gap-4">
                                     <span className="text-muted-foreground">
@@ -676,7 +678,8 @@ const SessionPageMainContent: FC<
                                   real total; an unpriced session has no dollars at
                                   all. Both show their token counts below instead,
                                   without pretending to know what they cost. */}
-                              {usageMode !== "subscription" &&
+                              {isUsageModeSettled &&
+                                usageMode !== "subscription" &&
                                 sessionData.session.meta.cost.confidence === "estimated" && (
                                   <div className="text-xs space-y-1 pl-2">
                                     <div className="flex justify-between gap-4">
@@ -763,7 +766,6 @@ const SessionPageMainContent: FC<
               scheduledJobs={sessionScheduledJobs}
               scrollContainerRef={scrollContainerRef}
               enableInPageSearch
-              showTechnicalDetails={config.showTechnicalDetails}
             />
             {!isExistingSession && (
               <div className="space-y-6">

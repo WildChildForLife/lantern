@@ -623,7 +623,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        788
+        790
       ]
     ],
     "translation": "Recent sessions"
@@ -642,7 +642,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        776
+        778
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -3445,11 +3445,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        656
+        658
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        712
+        715
       ]
     ],
     "translation": "Cache creation"
@@ -3460,11 +3460,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        664
+        666
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        726
+        729
       ]
     ],
     "translation": "Cache read"
@@ -3476,7 +3476,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        619
+        621
       ]
     ],
     "translation": "Included in your plan"
@@ -3487,11 +3487,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        640
+        642
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        684
+        687
       ]
     ],
     "translation": "Input tokens"
@@ -3503,6 +3503,10 @@
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
         607
+      ],
+      [
+        "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
+        619
       ]
     ],
     "translation": "Session Cost"
@@ -3513,11 +3517,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        648
+        650
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        698
+        701
       ]
     ],
     "translation": "Output tokens"
@@ -3528,7 +3532,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        625
+        627
       ]
     ],
     "translation": "Total"
@@ -3597,7 +3601,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        779
+        781
       ]
     ],
     "translation": "Start a new chat to begin the conversation"
@@ -3663,7 +3667,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        868
+        870
       ]
     ],
     "translation": "Claude Code is processing..."
@@ -3711,7 +3715,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        833
+        835
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -3730,7 +3734,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        831
+        833
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -4224,7 +4228,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        122
+        119
       ]
     ],
     "translation": "Agent CLI"
@@ -4344,7 +4348,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        111
+        108
       ]
     ],
     "translation": "Agent CLI"
@@ -4356,7 +4360,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        113
+        110
       ]
     ],
     "translation": "Which CLI Lantern works with, and how it is paid for."
@@ -4368,7 +4372,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        271
+        268
       ]
     ],
     "translation": "Appearance"
@@ -4380,7 +4384,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        230
+        227
       ]
     ],
     "translation": "Automation"
@@ -4392,7 +4396,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        232
+        229
       ]
     ],
     "translation": "What Lantern does on its own."
@@ -4404,7 +4408,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        180
+        177
       ]
     ],
     "translation": "Conversations"
@@ -4416,7 +4420,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        182
+        179
       ]
     ],
     "translation": "What appears in the lists."
@@ -4428,7 +4432,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        260
+        257
       ]
     ],
     "translation": "Keyboard & models"
@@ -4440,7 +4444,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        262
+        259
       ]
     ],
     "translation": "Shortcuts, and the models offered in the session toolbar."
@@ -4500,7 +4504,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        247
+        244
       ]
     ],
     "translation": "Auto-schedule Continue on Rate Limit"
@@ -4511,7 +4515,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        253
+        250
       ]
     ],
     "translation": "Automatically schedule a continue message when Claude hits rate limits"
@@ -4533,7 +4537,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        197
+        194
       ]
     ],
     "translation": "Hide Sessions Without User Messages"
@@ -4544,7 +4548,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        203
+        200
       ]
     ],
     "translation": "Show only sessions that contain user commands or messages"
@@ -4555,7 +4559,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        217
+        214
       ]
     ],
     "translation": "Unify Sessions with Same Title"
@@ -4566,7 +4570,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        223
+        220
       ]
     ],
     "translation": "When multiple sessions have the same title, show only the latest session"
@@ -4684,7 +4688,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        132
+        129
       ]
     ],
     "translation": "Usage Mode"
@@ -4696,7 +4700,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        150
+        147
       ]
     ],
     "translation": "API"
@@ -4708,7 +4712,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        157
+        154
       ]
     ],
     "translation": "How you pay for Claude Code. This only affects whether session costs are shown in dollars; every feature works either way."
@@ -4720,7 +4724,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        141
+        138
       ]
     ],
     "translation": "Detect automatically"
@@ -4736,7 +4740,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        162
+        159
       ]
     ],
     "translation": "Detected on this machine: {detectedLabel}. A subscription is flat-rate, so sessions show tokens rather than dollars."
@@ -4748,7 +4752,7 @@
     "origin": [
       [
         "src/web/components/SettingsControls.tsx",
-        144
+        141
       ]
     ],
     "translation": "Subscription (Max, Pro, etc.)"
@@ -4760,7 +4764,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        85
+        87
       ]
     ],
     "translation": "Lantern reads this CLI's conversations and asks it to name topics. You can change this later in settings."
@@ -4772,7 +4776,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        112
+        114
       ]
     ],
     "translation": "Detected"
@@ -4784,7 +4788,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        95
+        97
       ]
     ],
     "translation": "Looking for installed CLIs…"
@@ -4800,7 +4804,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        118
+        120
       ]
     ],
     "translation": "{count} conversations found"
@@ -4812,7 +4816,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        82
+        84
       ]
     ],
     "translation": "Which agent CLI should Lantern use?"
@@ -4824,7 +4828,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        124
+        126
       ]
     ],
     "translation": "Not available on this machine"
@@ -5622,7 +5626,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        181
+        183
       ]
     ],
     "translation": "You use Claude Code with API keys. Lantern reports what each session cost."
@@ -5634,7 +5638,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        177
+        179
       ]
     ],
     "translation": "API"
@@ -5646,7 +5650,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        142
+        144
       ]
     ],
     "translation": "Please select your usage mode. You can change this later in settings."
@@ -5658,7 +5662,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        139
+        141
       ]
     ],
     "translation": "How do you use Claude Code?"
@@ -5670,7 +5674,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        162
+        164
       ]
     ],
     "translation": "You use Claude Code with a subscription plan (Max, Pro, etc.). Lantern drives the CLI you are already signed in to, so every feature works."
@@ -5682,7 +5686,7 @@
     "origin": [
       [
         "src/web/components/UsageModeDialog.tsx",
-        158
+        160
       ]
     ],
     "translation": "Subscription"
