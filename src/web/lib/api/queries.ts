@@ -302,6 +302,23 @@ export const sourcesQuery = {
   },
 } as const;
 
+export const billingModeQuery = {
+  queryKey: ["claude-code", "billing-mode"],
+  // Reads two small files. Kept fresh-ish because signing in or exporting a key
+  // while Lantern runs changes the answer, and a stale one puts wrong money on
+  // the screen.
+  staleTime: 60_000,
+  queryFn: async () => {
+    const response = await honoClient.api["claude-code"]["billing-mode"].$get();
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch billing mode: ${response.statusText}`);
+    }
+
+    return await response.json();
+  },
+} as const;
+
 export const agentSessionListQuery = (projectId: string, sessionId: string) =>
   ({
     queryKey: ["projects", projectId, "sessions", sessionId, "agent-sessions"],

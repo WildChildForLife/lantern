@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/web/components/ui/dialog";
+import { useUsageMode } from "@/web/hooks/useUsageMode";
 import { sourcesQuery } from "@/web/lib/api/queries";
 
 /** The CLI Lantern drives interactively, and the only one usage mode applies to. */
@@ -19,9 +20,10 @@ const CLAUDE_CODE = "claude-code";
 /**
  * First-run setup.
  *
- * Two questions, and the second only sometimes. Which agent CLI Lantern works
- * with is asked of everyone; how that CLI is paid for is a Claude Code question
- * and is skipped for anything else, where it means nothing.
+ * Two questions, and the second rarely. Which agent CLI Lantern works with is
+ * asked of everyone; how that CLI is paid for is a Claude Code question, and is
+ * skipped both for anything else and whenever the machine already answered it -
+ * a stored subscription login or a key in the environment says which it is.
  *
  * Sources are offered as the server detected them. A CLI that is installed and
  * has sessions is marked as found; one that is not is shown anyway, disabled
@@ -32,26 +34,35 @@ export const UsageModeDialog: FC = () => {
   const { i18n } = useLingui();
   const { config, updateConfig, isConfigLoaded } = useConfig();
   const { data, isPending } = useQuery(sourcesQuery);
+  const { detected, isSettled } = useUsageMode();
 
   const [picked, setPicked] = useState<string | null>(null);
 
   const needsSource = isConfigLoaded && config.primarySource === undefined;
-  // Only asked once a CLI is chosen, and only for the one it applies to.
+  // Only asked once a CLI is chosen, only for the one it applies to, and only
+  // when the machine could not answer it: a stored subscription login or a key
+  // in the environment settles this without anyone being asked.
   const chosen = picked ?? config.primarySource;
   const needsUsageMode =
-    isConfigLoaded && !needsSource && chosen === CLAUDE_CODE && config.usageMode === undefined;
+    isConfigLoaded &&
+    !needsSource &&
+    chosen === CLAUDE_CODE &&
+    config.usageMode === undefined &&
+    // Only once detection has actually answered. An in-flight query is not a
+    // "could not tell", and treating it as one opens this dialog - which
+    // cannot be dismissed - on every cold load.
+    isSettled &&
+    detected === null;
 
   const isOpen = needsSource || needsUsageMode;
 
   const selectSource = (sourceId: string) => {
     setPicked(sourceId);
-    // Usage mode is a Claude Code concept. Choosing anything else answers it by
-    // making it irrelevant, rather than leaving a dialog the user cannot clear.
-    updateConfig({
-      ...config,
-      primarySource: sourceId,
-      ...(sourceId === CLAUDE_CODE ? {} : { usageMode: "api" as const }),
-    });
+    // Usage mode is a Claude Code concept, and for any other CLI it simply does
+    // not apply - `useUsageMode` returns nothing there. Storing an answer to
+    // dodge the dialog would outlive the choice and then quietly override
+    // detection if this machine ever switched back.
+    updateConfig({ ...config, primarySource: sourceId });
   };
 
   const selectUsageMode = (mode: "subscription" | "api") => {
@@ -152,7 +163,7 @@ export const UsageModeDialog: FC = () => {
                 <p className="text-muted-foreground text-xs font-normal leading-relaxed">
                   <Trans
                     id="usage_mode.subscription.description"
-                    message="You use Claude Code with a subscription plan (Max, Pro, etc.). Some features that require the Agent SDK will be restricted."
+                    message="You use Claude Code with a subscription plan (Max, Pro, etc.). Lantern drives the CLI you are already signed in to, so every feature works."
                   />
                 </p>
               </Button>
@@ -171,7 +182,7 @@ export const UsageModeDialog: FC = () => {
                 <p className="text-muted-foreground text-xs font-normal leading-relaxed">
                   <Trans
                     id="usage_mode.api.description"
-                    message="You use Claude Code with API keys. All features are available."
+                    message="You use Claude Code with API keys. Lantern reports what each session cost."
                   />
                 </p>
               </Button>

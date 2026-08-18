@@ -13,6 +13,7 @@ import { MetaConversationContent } from "./MetaConversationContent";
 import { QueueOperationConversationContent } from "./QueueOperationConversationContent";
 import { SummaryConversationContent } from "./SummaryConversationContent";
 import { SystemConversationContent } from "./SystemConversationContent";
+import { describeSystemEntry } from "./systemEntryPresentation";
 import { TurnDuration } from "./TurnDuration";
 import { UserConversationContent } from "./UserConversationContent";
 
@@ -30,77 +31,6 @@ type ConversationItemProps = {
   projectId: string;
   sessionId: string;
   showTimestamp?: boolean;
-};
-
-const formatSystemMessage = (conversation: Extract<Conversation, { type: "system" }>) => {
-  const lines: string[] = [];
-
-  if ("subtype" in conversation && conversation.subtype) {
-    lines.push(`[${conversation.subtype}]`);
-  }
-
-  if ("level" in conversation && conversation.level) {
-    lines.push(`Level: ${conversation.level}`);
-  }
-
-  if ("content" in conversation && typeof conversation.content === "string") {
-    lines.push(`\n${conversation.content}`);
-  }
-
-  if (conversation.subtype === "stop_hook_summary") {
-    lines.push(`Hook Count: ${conversation.hookCount}`);
-    lines.push(`Stop Reason: ${conversation.stopReason}`);
-    lines.push(`Prevented Continuation: ${conversation.preventedContinuation}`);
-    lines.push(`Has Output: ${conversation.hasOutput}`);
-    if (conversation.hookInfos.length > 0) {
-      lines.push(`Commands: ${conversation.hookInfos.map((hook) => hook.command).join(", ")}`);
-    }
-    if (conversation.hookErrors.length > 0) {
-      lines.push(`Errors: ${JSON.stringify(conversation.hookErrors, null, 2)}`);
-    }
-  }
-
-  if (conversation.subtype === "turn_duration") {
-    lines.push(`Duration: ${(conversation.durationMs / 1000).toFixed(2)}s`);
-  }
-
-  if (conversation.subtype === "compact_boundary" && conversation.compactMetadata) {
-    lines.push(`Trigger: ${conversation.compactMetadata.trigger}`);
-    lines.push(`Pre-Tokens: ${conversation.compactMetadata.preTokens}`);
-  }
-
-  if (conversation.subtype === "api_error" && "error" in conversation) {
-    const error = conversation.error;
-    if (error.status !== undefined) {
-      lines.push(`Status: ${error.status}`);
-    }
-    if (error.requestID !== undefined && error.requestID !== "") {
-      lines.push(`Request ID: ${error.requestID}`);
-    }
-    const errorMsg =
-      error?.error?.error?.message ??
-      error?.error?.message ??
-      (error?.error ? JSON.stringify(error.error, null, 2) : null);
-    if (errorMsg !== null && errorMsg !== "") {
-      lines.push(`Error: ${errorMsg}`);
-    }
-    if (conversation.retryAttempt !== undefined) {
-      lines.push(`Retry: ${conversation.retryAttempt}/${conversation.maxRetries}`);
-    }
-    if (conversation.retryInMs !== undefined) {
-      lines.push(`Retry In: ${(conversation.retryInMs / 1000).toFixed(2)}s`);
-    }
-  }
-
-  if ("toolUseID" in conversation && conversation.toolUseID) {
-    lines.push(`Tool Use ID: ${conversation.toolUseID}`);
-  }
-
-  if ("slug" in conversation && conversation.slug !== undefined && conversation.slug !== "") {
-    lines.push(`Slug: ${conversation.slug}`);
-  }
-
-  return lines.join("\n");
 };
 
 const ConversationItemComponent: FC<ConversationItemProps> = ({
@@ -125,9 +55,7 @@ const ConversationItemComponent: FC<ConversationItemProps> = ({
   }
 
   if (conversation.type === "system") {
-    return (
-      <SystemConversationContent>{formatSystemMessage(conversation)}</SystemConversationContent>
-    );
+    return <SystemConversationContent presentation={describeSystemEntry(conversation)} />;
   }
 
   if (conversation.type === "file-history-snapshot") {

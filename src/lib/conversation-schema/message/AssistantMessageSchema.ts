@@ -35,9 +35,11 @@ export const AssistantMessageSchema = z.object({
         .optional(),
       output_tokens: z.number(),
       service_tier: z.string().nullable().optional(),
-      inference_geo: z.string().optional(),
-      iterations: z.array(z.unknown()).optional(),
-      speed: z.string().optional(),
+      // Null on synthetic messages (rate-limit notices and the like), which is
+      // exactly the message a reader most wants to see - never reject on it.
+      inference_geo: z.string().nullish(),
+      iterations: z.array(z.unknown()).nullish(),
+      speed: z.string().nullish(),
       server_tool_use: z
         .object({
           web_search_requests: z.number().optional(),

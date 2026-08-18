@@ -1,4 +1,8 @@
 import type { Conversation } from "@/lib/conversation-schema";
+import {
+  getConversationVisibility,
+  isMessageEntry,
+} from "@/lib/conversation-schema/entryVisibility";
 import type { ErrorJsonl } from "@/server/core/types";
 
 export type RenderableConversationRow = {
@@ -17,6 +21,11 @@ const noTimestampConversationTypes = new Set<Conversation["type"]>([
   "agent-name",
   "agent-setting",
   "attachment",
+  "mode",
+  "relocated",
+  "worktree-state",
+  "file-history-delta",
+  "frame-link",
 ]);
 
 export const getConversationKey = (conversation: Conversation) => {
@@ -80,8 +89,93 @@ export const getConversationKey = (conversation: Conversation) => {
     return `attachment_${conversation.uuid}`;
   }
 
+  if (conversation.type === "mode") {
+    return `mode_${conversation.sessionId}_${conversation.mode}`;
+  }
+
+  if (conversation.type === "relocated") {
+    return `relocated_${conversation.sessionId}_${conversation.relocatedCwd}`;
+  }
+
+  if (conversation.type === "worktree-state") {
+    return `worktree-state_${conversation.sessionId}`;
+  }
+
+  if (conversation.type === "file-history-delta") {
+    return `file-history-delta_${conversation.messageId}_${conversation.trackingPath}`;
+  }
+
+  if (conversation.type === "frame-link") {
+    return `frame-link_${conversation.sessionId}_${conversation.path}`;
+  }
+
   conversation satisfies never;
   throw new Error("Unknown conversation type");
+};
+
+/**
+ * A user entry whose whole content is tool results. Claude Code files tool
+ * output under the user role, but nobody typed it - it belongs to the tool
+ * call above, which already draws it.
+ */
+const isOnlyToolResult = (conversation: Conversation): boolean => {
+  if (conversation.type !== "user") {
+    return false;
+  }
+
+  const content = conversation.message.content;
+  if (typeof content === "string") {
+    return false;
+  }
+
+  return content.every((item) => typeof item !== "string" && item.type === "tool_result");
+};
+
+/**
+ * An assistant entry with nothing left to draw once tool results and empty
+ * thinking blocks are set aside. Rendering it leaves a blank row, which reads
+ * as a gap in the conversation rather than the non-event it is.
+ */
+const hasNothingToDraw = (conversation: Conversation): boolean => {
+  if (conversation.type !== "assistant") {
+    return false;
+  }
+
+  return conversation.message.content.every(
+    (content) =>
+      content.type === "tool_result" || (content.type === "thinking" && content.thinking === ""),
+  );
+};
+
+/**
+ * Whether an entry earns a row of its own in the transcript.
+ *
+ * Parse failures always show - a line Lantern could not read is the one thing
+ * a reader most needs to know about.
+ */
+export const shouldRenderInTranscript = (
+  conversation: Conversation | ErrorJsonl,
+  options: { showTechnicalDetails: boolean },
+): boolean => {
+  if (conversation.type === "x-error") {
+    return true;
+  }
+
+  const visibility = getConversationVisibility(conversation);
+  if (visibility === "internal") {
+    return false;
+  }
+
+  if (visibility === "technical" && !options.showTechnicalDetails) {
+    return false;
+  }
+
+  // Sidechains are drawn inside the tool call that spawned them.
+  if (isMessageEntry(conversation) && conversation.isSidechain) {
+    return false;
+  }
+
+  return !isOnlyToolResult(conversation) && !hasNothingToDraw(conversation);
 };
 
 export const buildRenderableConversationRows = (

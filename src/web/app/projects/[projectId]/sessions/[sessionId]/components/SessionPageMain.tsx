@@ -6,6 +6,8 @@ import {
   CopyIcon,
   DownloadIcon,
   EllipsisVertical as EllipsisVerticalIcon,
+  EyeIcon,
+  EyeOffIcon,
   GitBranchIcon,
   LoaderIcon,
   MenuIcon,
@@ -32,6 +34,7 @@ import { usePermissionRequests } from "@/web/hooks/usePermissionRequests";
 import { useQuestionRequests } from "@/web/hooks/useQuestionRequests";
 import { useSchedulerJobs } from "@/web/hooks/useScheduler";
 import { useTaskNotifications } from "@/web/hooks/useTaskNotifications";
+import { useUsageMode } from "@/web/hooks/useUsageMode";
 import { honoClient } from "@/web/lib/api/client";
 import { cn } from "@/web/utils";
 import { useProject } from "../../../hooks/useProject";
@@ -110,7 +113,8 @@ const SessionPageMainContent: FC<
   const { data: projectData } = useProject(projectId);
   const sessionProcesses = useAtomValue(sessionProcessesAtom);
   const virtualMessages = useAtomValue(virtualMessagesAtom);
-  const { config } = useConfig();
+  const { config, updateConfig } = useConfig();
+  const { mode: usageMode, isSettled: isUsageModeSettled } = useUsageMode();
 
   // CC Options state - lifted here to share between ChatActionMenu and ChatInput
   const [savedOptions, setSavedOptions] = useProjectSessionOptions(projectId);
@@ -508,6 +512,28 @@ const SessionPageMainContent: FC<
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="justify-start"
+                          onClick={() =>
+                            updateConfig({
+                              ...config,
+                              showTechnicalDetails: !config.showTechnicalDetails,
+                            })
+                          }
+                        >
+                          {config.showTechnicalDetails ? (
+                            <EyeOffIcon className="w-4 h-4 mr-2" />
+                          ) : (
+                            <EyeIcon className="w-4 h-4 mr-2" />
+                          )}
+                          {config.showTechnicalDetails ? (
+                            <Trans id="session.menu.hide_technical_details" />
+                          ) : (
+                            <Trans id="session.menu.show_technical_details" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="justify-start text-destructive hover:text-destructive"
                           onClick={() => setIsDeleteDialogOpen(true)}
                         >
@@ -581,38 +607,42 @@ const SessionPageMainContent: FC<
                               <Trans id="session.cost.label" />
                             </span>
                             <div className="space-y-1.5">
+                              {/* A subscription is flat-rate: the plan was paid for
+                                  whether this session ran or not, so a per-token
+                                  dollar figure is money nobody was charged. The
+                                  tokens below are real and stay. */}
                               <Badge
                                 variant="secondary"
                                 className="h-7 text-xs flex items-center w-fit font-semibold"
                               >
-                                <Trans id="session.cost.total" />:{" "}
-                                {formatCost(
-                                  sessionData.session.meta.cost.totalUsd,
-                                  sessionData.session.meta.cost.confidence,
-                                  { fractionDigits: 3 },
+                                {!isUsageModeSettled ? (
+                                  <Trans id="session.cost.label" />
+                                ) : usageMode === "subscription" ? (
+                                  <Trans
+                                    id="session.cost.included_in_plan"
+                                    message="Included in your plan"
+                                  />
+                                ) : (
+                                  <>
+                                    <Trans id="session.cost.total" />:{" "}
+                                    {formatCost(
+                                      sessionData.session.meta.cost.totalUsd,
+                                      sessionData.session.meta.cost.confidence,
+                                      { fractionDigits: 3 },
+                                    )}
+                                  </>
                                 )}
                               </Badge>
-                              {/* Only an estimate has a per-category breakdown — it is
-                                  computed one category at a time. A source that
-                                  reported a total did not break it down, so showing
-                                  these rows would put four $0.000 line items under a
-                                  real total; an unpriced session has no dollars at
-                                  all. Both show their token counts below instead,
-                                  without pretending to know what they cost. */}
-                              {sessionData.session.meta.cost.confidence === "estimated" && (
+                              {/* The same four categories, counted rather than
+                                  priced. What a plan actually meters is tokens. */}
+                              {isUsageModeSettled && usageMode === "subscription" && (
                                 <div className="text-xs space-y-1 pl-2">
                                   <div className="flex justify-between gap-4">
                                     <span className="text-muted-foreground">
                                       <Trans id="session.cost.input_tokens" />:
                                     </span>
                                     <span>
-                                      $
-                                      {sessionData.session.meta.cost.breakdown.inputTokensUsd.toFixed(
-                                        3,
-                                      )}{" "}
-                                      (
                                       {sessionData.session.meta.cost.tokenUsage.inputTokens.toLocaleString()}
-                                      )
                                     </span>
                                   </div>
                                   <div className="flex justify-between gap-4">
@@ -620,13 +650,7 @@ const SessionPageMainContent: FC<
                                       <Trans id="session.cost.output_tokens" />:
                                     </span>
                                     <span>
-                                      $
-                                      {sessionData.session.meta.cost.breakdown.outputTokensUsd.toFixed(
-                                        3,
-                                      )}{" "}
-                                      (
                                       {sessionData.session.meta.cost.tokenUsage.outputTokens.toLocaleString()}
-                                      )
                                     </span>
                                   </div>
                                   <div className="flex justify-between gap-4">
@@ -634,13 +658,7 @@ const SessionPageMainContent: FC<
                                       <Trans id="session.cost.cache_creation" />:
                                     </span>
                                     <span>
-                                      $
-                                      {sessionData.session.meta.cost.breakdown.cacheCreationUsd.toFixed(
-                                        3,
-                                      )}{" "}
-                                      (
                                       {sessionData.session.meta.cost.tokenUsage.cacheCreationTokens.toLocaleString()}
-                                      )
                                     </span>
                                   </div>
                                   <div className="flex justify-between gap-4">
@@ -648,17 +666,80 @@ const SessionPageMainContent: FC<
                                       <Trans id="session.cost.cache_read" />:
                                     </span>
                                     <span>
-                                      $
-                                      {sessionData.session.meta.cost.breakdown.cacheReadUsd.toFixed(
-                                        3,
-                                      )}{" "}
-                                      (
                                       {sessionData.session.meta.cost.tokenUsage.cacheReadTokens.toLocaleString()}
-                                      )
                                     </span>
                                   </div>
                                 </div>
                               )}
+                              {/* Only an estimate has a per-category breakdown — it is
+                                  computed one category at a time. A source that
+                                  reported a total did not break it down, so showing
+                                  these rows would put four $0.000 line items under a
+                                  real total; an unpriced session has no dollars at
+                                  all. Both show their token counts below instead,
+                                  without pretending to know what they cost. */}
+                              {isUsageModeSettled &&
+                                usageMode !== "subscription" &&
+                                sessionData.session.meta.cost.confidence === "estimated" && (
+                                  <div className="text-xs space-y-1 pl-2">
+                                    <div className="flex justify-between gap-4">
+                                      <span className="text-muted-foreground">
+                                        <Trans id="session.cost.input_tokens" />:
+                                      </span>
+                                      <span>
+                                        $
+                                        {sessionData.session.meta.cost.breakdown.inputTokensUsd.toFixed(
+                                          3,
+                                        )}{" "}
+                                        (
+                                        {sessionData.session.meta.cost.tokenUsage.inputTokens.toLocaleString()}
+                                        )
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between gap-4">
+                                      <span className="text-muted-foreground">
+                                        <Trans id="session.cost.output_tokens" />:
+                                      </span>
+                                      <span>
+                                        $
+                                        {sessionData.session.meta.cost.breakdown.outputTokensUsd.toFixed(
+                                          3,
+                                        )}{" "}
+                                        (
+                                        {sessionData.session.meta.cost.tokenUsage.outputTokens.toLocaleString()}
+                                        )
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between gap-4">
+                                      <span className="text-muted-foreground">
+                                        <Trans id="session.cost.cache_creation" />:
+                                      </span>
+                                      <span>
+                                        $
+                                        {sessionData.session.meta.cost.breakdown.cacheCreationUsd.toFixed(
+                                          3,
+                                        )}{" "}
+                                        (
+                                        {sessionData.session.meta.cost.tokenUsage.cacheCreationTokens.toLocaleString()}
+                                        )
+                                      </span>
+                                    </div>
+                                    <div className="flex justify-between gap-4">
+                                      <span className="text-muted-foreground">
+                                        <Trans id="session.cost.cache_read" />:
+                                      </span>
+                                      <span>
+                                        $
+                                        {sessionData.session.meta.cost.breakdown.cacheReadUsd.toFixed(
+                                          3,
+                                        )}{" "}
+                                        (
+                                        {sessionData.session.meta.cost.tokenUsage.cacheReadTokens.toLocaleString()}
+                                        )
+                                      </span>
+                                    </div>
+                                  </div>
+                                )}
                             </div>
                           </div>
                         )}

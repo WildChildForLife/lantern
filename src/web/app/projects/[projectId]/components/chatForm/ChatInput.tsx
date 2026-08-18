@@ -66,8 +66,13 @@ export type ChatInputProps = {
   enableCCOptions?: boolean;
   ccOptions?: CCOptionsSchema;
   onCCOptionsChange?: (value: CCOptionsSchema | undefined) => void;
-  /** When true, the send button copies a CLI command to clipboard instead of submitting. */
-  copyCommandMode?: boolean;
+  /**
+   * Offer a second button that copies this message as a `claude` CLI command.
+   *
+   * An alternative to sending, never a replacement for it: useful when someone
+   * would rather continue the session in their own terminal.
+   */
+  offerCopyCommand?: boolean;
 };
 
 export const ChatInput: FC<ChatInputProps> = ({
@@ -87,7 +92,7 @@ export const ChatInput: FC<ChatInputProps> = ({
   enableCCOptions = false,
   ccOptions,
   onCCOptionsChange,
-  copyCommandMode = false,
+  offerCopyCommand = false,
 }) => {
   // Parse minHeight prop to get pixel value (default to 48px for 1.5 lines)
   // Supports both "200px" and Tailwind format like "min-h-[200px]"
@@ -215,11 +220,6 @@ export const ChatInput: FC<ChatInputProps> = ({
   };
 
   const handleSubmit = async () => {
-    if (copyCommandMode) {
-      await handleCopyCommand();
-      return;
-    }
-
     if (!message.trim() && attachedFiles.length === 0) return;
     if (isPending || disabled || sendDisabled) return;
 
@@ -716,14 +716,33 @@ export const ChatInput: FC<ChatInputProps> = ({
                     </Tooltip>
                   </div>
                 )}
+                {offerCopyCommand && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          void handleCopyCommand();
+                        }}
+                        disabled={!message.trim() || isPending || disabled || sendDisabled}
+                        className="h-9 px-2"
+                      >
+                        <CopyIcon className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <Trans id="chat.copy_command" />
+                    </TooltipContent>
+                  </Tooltip>
+                )}
                 <Button
                   onClick={() => {
                     void handleSubmit();
                   }}
                   disabled={
-                    (copyCommandMode
-                      ? !message.trim()
-                      : !message.trim() && attachedFiles.length === 0) ||
+                    (!message.trim() && attachedFiles.length === 0) ||
                     isPending ||
                     disabled ||
                     sendDisabled
@@ -733,8 +752,6 @@ export const ChatInput: FC<ChatInputProps> = ({
                 >
                   {isPending ? (
                     <LoaderIcon className="w-4 h-4 animate-spin" />
-                  ) : copyCommandMode ? (
-                    <CopyIcon className="w-4 h-4" />
                   ) : (
                     <SendIcon className="w-4 h-4" />
                   )}

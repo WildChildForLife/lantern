@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/web/components/ui/select";
-import { useIsSubscriptionMode } from "@/web/hooks/useIsSubscriptionMode";
+import { useUsageMode } from "@/web/hooks/useUsageMode";
 import { projectDetailQuery, projectListQuery } from "@/web/lib/api/queries";
 
 type SettingsControlsProps = {
@@ -50,11 +50,17 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
 
   const { config, updateConfig } = useConfig();
   const queryClient = useQueryClient();
-  const isSubscriptionMode = useIsSubscriptionMode();
+  const { detected, subscriptionType } = useUsageMode();
 
-  const isUsageMode = (value: string): value is "subscription" | "api" =>
-    value === "subscription" || value === "api";
+  const isUsageMode = (value: string): value is "subscription" | "api" | "auto" =>
+    value === "subscription" || value === "api" || value === "auto";
 
+  /**
+   * `auto` is stored rather than cleared. Clearing would leave the config in
+   * the state that means "nobody has been asked", which is what raises the
+   * blocking first-run question - so choosing to follow the machine would
+   * summon the very dialog it answers whenever detection came back empty.
+   */
   const changeUsageMode = (value: string) => {
     if (!isUsageMode(value)) return;
     updateConfig({ ...config, usageMode: value });
@@ -123,11 +129,14 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
                 <Trans id="settings.usage_mode" message="Usage Mode" />
               </label>
             )}
-            <Select value={config?.usageMode ?? ""} onValueChange={changeUsageMode}>
+            <Select value={config?.usageMode ?? "auto"} onValueChange={changeUsageMode}>
               <SelectTrigger id={usageModeId} className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="auto">
+                  <Trans id="settings.usage_mode.detect" message="Detect automatically" />
+                </SelectItem>
                 <SelectItem value="subscription">
                   <Trans
                     id="settings.usage_mode.subscription"
@@ -141,10 +150,23 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
             </Select>
             {showDescriptions && (
               <p className="text-xs text-muted-foreground mt-1">
-                <Trans
-                  id="settings.usage_mode.description"
-                  message="Select how you use Claude Code. Subscription mode restricts features that require the Agent SDK."
-                />
+                {detected === null ? (
+                  <Trans
+                    id="settings.usage_mode.description"
+                    message="How you pay for Claude Code. This only affects whether session costs are shown in dollars; every feature works either way."
+                  />
+                ) : (
+                  <Trans
+                    id="settings.usage_mode.detected"
+                    message="Detected on this machine: {detectedLabel}. A subscription is flat-rate, so sessions show tokens rather than dollars."
+                    values={{
+                      detectedLabel:
+                        detected === "subscription"
+                          ? (subscriptionType ?? "subscription")
+                          : "API key",
+                    }}
+                  />
+                )}
               </p>
             )}
           </div>
@@ -201,39 +223,35 @@ export const SettingsControls: FC<SettingsControlsProps> = ({
         </div>
       </SettingsSection>
 
-      {/* Driving a turn needs the Agent SDK, which a subscription plan does not
-          reach — so the option is absent rather than present and broken. */}
-      {isSubscriptionMode ? null : (
-        <SettingsSection
-          title={<Trans id="settings.section.automation" message="Automation" />}
-          description={
-            <Trans
-              id="settings.section.automation.description"
-              message="What Lantern does on its own."
+      <SettingsSection
+        title={<Trans id="settings.section.automation" message="Automation" />}
+        description={
+          <Trans
+            id="settings.section.automation.description"
+            message="What Lantern does on its own."
+          />
+        }
+      >
+        <div className="space-y-1">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id={autoScheduleId}
+              checked={config?.autoScheduleContinueOnRateLimit}
+              onCheckedChange={toggleAutoSchedule}
             />
-          }
-        >
-          <div className="space-y-1">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id={autoScheduleId}
-                checked={config?.autoScheduleContinueOnRateLimit}
-                onCheckedChange={toggleAutoSchedule}
-              />
-              {showLabels && (
-                <label htmlFor={autoScheduleId} className="text-sm font-medium leading-none">
-                  <Trans id="settings.session.auto_schedule_continue_on_rate_limit" />
-                </label>
-              )}
-            </div>
-            {showDescriptions && (
-              <p className="text-xs text-muted-foreground ml-6">
-                <Trans id="settings.session.auto_schedule_continue_on_rate_limit.description" />
-              </p>
+            {showLabels && (
+              <label htmlFor={autoScheduleId} className="text-sm font-medium leading-none">
+                <Trans id="settings.session.auto_schedule_continue_on_rate_limit" />
+              </label>
             )}
           </div>
-        </SettingsSection>
-      )}
+          {showDescriptions && (
+            <p className="text-xs text-muted-foreground ml-6">
+              <Trans id="settings.session.auto_schedule_continue_on_rate_limit.description" />
+            </p>
+          )}
+        </div>
+      </SettingsSection>
 
       <SettingsSection
         title={<Trans id="settings.section.input" message="Keyboard & models" />}

@@ -13,8 +13,21 @@ export const userConfigSchema = z.object({
   searchHotkey: z.enum(["ctrl-k", "command-k"]).optional().default("command-k"),
   findHotkey: z.enum(["ctrl-f", "command-f"]).optional().default("command-f"),
   autoScheduleContinueOnRateLimit: z.boolean().optional().default(false),
+  /**
+   * Show the rows a session log keeps for its own sake - hook summaries,
+   * queued prompts, file backups. Off by default: a transcript should read
+   * like what the person saw, not like the file it was recovered from.
+   */
+  showTechnicalDetails: z.boolean().optional().default(false),
   modelChoices: z.array(z.string()).optional().default(["default", "haiku", "sonnet", "opus"]),
-  usageMode: z.enum(["subscription", "api"]).optional(),
+  /**
+   * How Claude Code is paid for, when someone has said so explicitly.
+   *
+   * `auto` is a real answer - "follow the machine" - and is why this is not
+   * merely absent: undefined means nobody has been asked yet, and only that
+   * state may raise the first-run question.
+   */
+  usageMode: z.enum(["subscription", "api", "auto"]).optional(),
   /**
    * The agent CLI Lantern works with: whose history it centres on, and which
    * one names topics. One at a time — these CLIs do not share a login, and

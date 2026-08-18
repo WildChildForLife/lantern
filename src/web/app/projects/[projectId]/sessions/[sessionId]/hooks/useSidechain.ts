@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import type { Conversation, SidechainConversation } from "@/lib/conversation-schema";
+import { isMessageEntry } from "@/lib/conversation-schema/entryVisibility";
 import {
   SUBAGENT_TOOL_NAMES,
   taskToolInputSchema,
@@ -7,24 +8,7 @@ import {
 
 export const useSidechain = (conversations: Conversation[]) => {
   const sidechainConversations = useMemo(
-    () =>
-      conversations
-        .filter(
-          (conv) =>
-            conv.type !== "summary" &&
-            conv.type !== "file-history-snapshot" &&
-            conv.type !== "queue-operation" &&
-            conv.type !== "progress" &&
-            conv.type !== "custom-title" &&
-            conv.type !== "ai-title" &&
-            conv.type !== "agent-name" &&
-            conv.type !== "agent-setting" &&
-            conv.type !== "pr-link" &&
-            conv.type !== "last-prompt" &&
-            conv.type !== "permission-mode" &&
-            conv.type !== "attachment",
-        )
-        .filter((conv) => conv.isSidechain === true),
+    () => conversations.filter(isMessageEntry).filter((conv) => conv.isSidechain === true),
     [conversations],
   );
 
@@ -106,19 +90,7 @@ export const useSidechain = (conversations: Conversation[]) => {
 
   const isRootSidechain = useCallback(
     (conversation: Conversation) => {
-      if (
-        conversation.type === "summary" ||
-        conversation.type === "file-history-snapshot" ||
-        conversation.type === "queue-operation" ||
-        conversation.type === "custom-title" ||
-        conversation.type === "ai-title" ||
-        conversation.type === "agent-name" ||
-        conversation.type === "agent-setting" ||
-        conversation.type === "pr-link" ||
-        conversation.type === "last-prompt" ||
-        conversation.type === "permission-mode" ||
-        conversation.type === "attachment"
-      ) {
+      if (!isMessageEntry(conversation)) {
         return false;
       }
 
