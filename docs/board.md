@@ -1,8 +1,12 @@
 # The board in your terminal
 
-`lantern browse` draws the same board the web UI does, without starting a server or opening a
-browser. It takes the whole terminal while it is up, on the same alternate screen `less` and `vim`
-use, and gives your scrollback back when you quit.
+`lantern` draws the same board the web UI does, without opening a browser. It takes the whole
+terminal while it is up, on the same alternate screen `less` and `vim` use, and gives your scrollback
+back when you quit.
+
+A bare `lantern` starts the web server behind the board and prints its address before drawing, so one
+word gets you both and quitting the board stops both. `lantern --cli-only` — or `lantern browse`,
+which is the same thing — draws the board on its own, opening no port at all.
 
 ```text
  Lantern  6 topics · 69 conversations · enter: resume here
@@ -43,7 +47,7 @@ right; the keys are unchanged.
 
 `R` lends the terminal to the session rather than giving it away: when you leave `claude`, the same
 board comes back — same topic, same conversation, same filter — with the logs re-read, so you can
-resume something else without starting `lantern browse` again.
+resume something else without starting the board again.
 
 A conversation is always resumed **in the directory it ran in** — `claude --resume` looks a session
 up by that directory, so anywhere else it reports the conversation as missing. If that folder has
@@ -82,6 +86,7 @@ menu in between, and each of the three has its own key as well.
 
 ## Options the board reads
 
-`lantern browse` reads `--claude-dir`, `--executable`, `--source` and `--verbose`, on either side of
-the command name. The port and bind address are ignored: the board listens on nothing. See
+The board reads `--claude-dir`, `--executable`, `--source` and `--verbose` — on either side of the
+command name, when you spell it as `lantern browse`. The port and bind address mean nothing to the
+board itself; with `--cli-only` nothing listens on them at all. See
 [Configuration](configuration.md) for the full table.

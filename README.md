@@ -15,7 +15,7 @@ optionally [five others](docs/agents.md) — and groups every conversation by **
 by which folder it happened to start in. It runs where you already are: a terminal.
 
 ```console
-$ lantern browse
+$ lantern
 ```
 
 ```text
@@ -64,21 +64,25 @@ brew install wildchildforlife/tap/lantern-viewer    # macOS or linuxbrew, brings
 For Docker, Windows, `aarch64`, building from source, or which platforms support the web UI's in-app
 terminal, see [Install](docs/install.md).
 
-Nothing to configure afterwards — `lantern browse` works out of the box. Only the optional AI topic
+Nothing to configure afterwards — `lantern` works out of the box. Only the optional AI topic
 naming needs Claude Code installed and signed in.
 
 ## Commands
 
 ```bash
-lantern browse             # the board, in your terminal
+lantern                    # the board in your terminal, with the web UI behind it
+lantern --cli-only         # the board alone, no port opened
+lantern --server-only      # the web UI alone, for a container or a service file
 lantern init               # optional: set Lantern up, and remember the answers
 lantern upgrade            # move to the latest release
-lantern [options]          # start the web UI
 ```
 
-- **`browse`** — alias `b`. Takes `--claude-dir`, `--executable`, `--source` and `--verbose`, on
-  either side of the command name.
-- **`init`** — never required: every setting it writes has a working default, and `browse` never stops
+- **`lantern`** — starts the web server, prints its address, and draws the board over it. Quitting the
+  board stops both. `--cli-only` and `--server-only` ask for one half; passing both is an error. With
+  nothing to draw on — a container, a pipe, CI — it starts the server alone.
+- **`browse`** — alias `b`, and the same thing as `--cli-only`. Takes `--claude-dir`, `--executable`,
+  `--source` and `--verbose`, on either side of the command name.
+- **`init`** — never required: every setting it writes has a working default, and the board never stops
   to ask for one. Run it to change the port, bind address or set of agent CLIs.
 - **`upgrade`** — runs the package manager that installed Lantern. Anything it did not install is left
   alone with the right command printed instead.
@@ -116,7 +120,8 @@ Claude Code login for better topic names instead. Nothing runs automatically.
 > password, or keep it behind a VPN such as Tailscale. `--terminal-unrestricted` removes the guard
 > rails from bash sessions, so treat it as widening that same hole.
 
-None of that applies to `lantern browse`, which opens no port and serves nothing.
+None of that applies to `lantern --cli-only` (or `lantern browse`), which opens no port and serves
+nothing.
 
 The threat model and how to report a vulnerability privately are in [SECURITY.md](SECURITY.md). Please
 use [GitHub Security Advisories](https://github.com/WildChildForLife/lantern/security/advisories/new)

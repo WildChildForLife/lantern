@@ -1,12 +1,12 @@
 # Configuration
 
-Setup is optional. Everything Lantern needs has a default, so `lantern browse` goes straight to the
-board on a fresh machine and never stops to ask a question.
+Setup is optional. Everything Lantern needs has a default, so `lantern` goes straight to the board on
+a fresh machine and never stops to ask a question.
 
 ## The setup wizard
 
-What the offer covers is the web UI, which has more to decide: the first time you run `lantern` with
-no command at a terminal it walks you through which agent CLIs to read, where they keep their logs,
+What the offer covers is the web UI, which has more to decide: the first launch that both starts a
+server and has a terminal to ask at walks you through which agent CLIs to read, where they keep their logs,
 which port and address to bind, and whether to enable the in-app terminal. Every question arrives
 with the answer already detected, so the fast path is Enter a few times.
 
@@ -36,8 +36,9 @@ Nothing prompts without a terminal attached, so Docker, CI and `npx … | tee` s
 | (none)                      | `NO_UPDATE_NOTIFIER`            | Never mention that a new version exists                     | mentioned   |
 | (none)                      | `LANTERN_NO_UPDATE_NOTIFIER`    | The same thing, under Lantern's own name                    | mentioned   |
 
-`lantern browse` reads `--claude-dir`, `--executable`, `--source` and `--verbose`; the rest belong to
-the server. The port and bind address are ignored by the board, which listens on nothing.
+The board reads `--claude-dir`, `--executable`, `--source` and `--verbose`; the rest belong to the
+server. The port and bind address are ignored by the board itself, and with `--cli-only` — or
+`lantern browse` — nothing listens on them at all.
 
 Flag-style environment variables are on for `1` or `true` and off otherwise.
 

@@ -117,7 +117,7 @@ export const runBrowse = async (
   // beats the stack trace Ink would otherwise print.
   if (process.stdin.isTTY !== true) {
     process.stderr.write(
-      "lantern browse needs an interactive terminal. Run `lantern` for the web UI instead.\n",
+      "The Lantern board needs an interactive terminal. Run `lantern --server-only` for the web UI instead.\n",
     );
     return 1;
   }

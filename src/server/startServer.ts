@@ -1,6 +1,6 @@
 import { FileSystem, Path } from "@effect/platform";
 import { NodeContext } from "@effect/platform-node";
-import { createAdaptorServer } from "@hono/node-server";
+import { createAdaptorServer, type ServerType } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Effect, Layer } from "effect";
 import { AgentSessionLayer } from "./core/agent-session/index.ts";
@@ -62,14 +62,43 @@ import { platformLayer } from "./lib/effect/layers.ts";
 import { serverLoggerLayer, withServerLogLevel } from "./logging.ts";
 import { setupTerminalWebSocket } from "./terminal/terminalWebSocket.ts";
 
-export const startServer = async (options: CliOptions, stored?: StoredOptions) => {
+export type StartServerOptions = {
+  /**
+   * Whether something else owns the screen — see `resolveLogLevel`.
+   *
+   * Set by the bare `lantern`, which runs the terminal board in this same
+   * process the moment the server is up.
+   */
+  quiet?: boolean;
+};
+
+export type StartedServer = {
+  server: ServerType;
+  /** Where the server can be reached, port included, ready to print or open. */
+  url: string;
+};
+
+/**
+ * Starts the web server, and hands back the server it started.
+ *
+ * Resolves once the port is actually bound rather than once `listen` has been
+ * called, so a caller can print the URL — or draw a board over it — knowing the
+ * server behind it is answering. The returned server is what closes it again:
+ * a bare `lantern` shuts it down when the board quits.
+ */
+export const startServer = async (
+  options: CliOptions,
+  stored?: StoredOptions,
+  serverOptions?: StartServerOptions,
+): Promise<StartedServer> => {
   // Resolved once, here, so the port and bind address the server listens on and
   // the ones every service reads come from the same precedence rules.
   const resolved = toLanternOptions(options, stored);
+  const quiet = serverOptions?.quiet === true;
 
   const runWithLogger = <A, E>(effect: Effect.Effect<A, E, never>) =>
     Effect.runPromise(
-      effect.pipe(withServerLogLevel(resolved.verbose), Effect.provide(serverLoggerLayer)),
+      effect.pipe(withServerLogLevel(resolved.verbose, quiet), Effect.provide(serverLoggerLayer)),
     );
 
   // biome-ignore lint/style/noProcessEnv: allow only here
@@ -122,7 +151,11 @@ export const startServer = async (options: CliOptions, stored?: StoredOptions) =
     // Layers must be piped into the container from the shallowest dependency up
     .pipe(Effect.provide(MainLayer), Effect.scoped);
 
-  await Effect.runPromise(program);
+  // The level is set around the whole program, not only the two lines below:
+  // the background fibers the layers fork — the sync, the file watcher — copy
+  // it as they are forked, and they are the ones that would otherwise write
+  // over the board long after start-up is done.
+  await Effect.runPromise(program.pipe(withServerLogLevel(resolved.verbose, quiet)));
 
   const port = isDevelopment
     ? // biome-ignore lint/style/noProcessEnv: allow only here
@@ -130,15 +163,27 @@ export const startServer = async (options: CliOptions, stored?: StoredOptions) =
       Number.parseInt(process.env.DEV_BE_PORT ?? "3401", 10)
     : resolved.port;
 
-  server.listen(port, resolved.hostname, () => {
-    const info = server.address();
-    const serverPort = typeof info === "object" && info !== null ? info.port : port;
-    const mode = apiOnly ? " (API-only mode)" : "";
-    void runWithLogger(
-      Effect.logInfo(`Server is running on http://${resolved.hostname}:${serverPort}${mode}`),
-    );
+  const url = await new Promise<string>((resolve) => {
+    server.listen(port, resolved.hostname, () => {
+      const info = server.address();
+      const serverPort = typeof info === "object" && info !== null ? info.port : port;
+      const mode = apiOnly ? " (API-only mode)" : "";
+      const address = `http://${resolved.hostname}:${serverPort}`;
+      void runWithLogger(Effect.logInfo(`Server is running on ${address}${mode}`));
+      resolve(address);
+    });
   });
+
+  return { server, url };
 };
+
+/** Stops a server started by `startServer`, and waits for it to be stopped. */
+export const stopServer = (server: ServerType): Promise<void> =>
+  new Promise<void>((resolve) => {
+    server.close(() => {
+      resolve();
+    });
+  });
 
 const PlatformLayer = Layer.mergeAll(platformLayer, NodeContext.layer);
 

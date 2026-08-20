@@ -7,7 +7,7 @@ One npm package behind three front doors, all kept current by `lantern upgrade`:
 - **Docker** — ships its own
 
 Only the optional AI topic naming needs Claude Code installed and signed in. There is no setup step
-to run afterwards — `lantern browse` works straight out of the box.
+to run afterwards — `lantern` works straight out of the box.
 
 ## npm (any platform)
 
@@ -15,10 +15,10 @@ Needs Node.js 24 or newer already present:
 
 ```bash
 npm install -g lantern-viewer       # permanent, upgradeable with `lantern upgrade`
-lantern browse
+lantern
 
-npx lantern-viewer browse           # or run once, without installing
-npx lantern-viewer --port 3400
+npx lantern-viewer                  # or run once, without installing
+npx lantern-viewer --server-only --port 3400
 ```
 
 `pnpm`, `yarn` and `bun` work too; `lantern upgrade` uses whichever one put it there.
@@ -29,7 +29,7 @@ npx lantern-viewer --port 3400
 brew tap wildchildforlife/tap
 brew trust wildchildforlife/tap     # Homebrew gates third-party taps
 brew install lantern-viewer
-lantern browse                      # or: lantern --port 3400 for the web UI
+lantern                             # or: lantern --server-only --port 3400 for the web UI alone
 ```
 
 The formula is `lantern-viewer` — homebrew-cask already ships an unrelated `lantern` — but the
@@ -47,7 +47,7 @@ curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -   # or rpm.nod
 sudo apt install -y nodejs
 
 npm install -g lantern-viewer
-lantern browse
+lantern
 ```
 
 Or [linuxbrew](https://docs.brew.sh/Homebrew-on-Linux), which brings its own Node:
@@ -89,8 +89,9 @@ Lantern in **WSL2** as a Linux install and point `--claude-dir` at `/mnt/c/Users
 
 ## Docker
 
-For the web UI. `lantern browse` wants a terminal, which is not what a detached container has.
-Identical on macOS, Linux and Windows apart from the volume syntax.
+For the web UI. The board wants a terminal, which is not what a detached container has, so Lantern
+starts the server alone there without being told to. Identical on macOS, Linux and Windows apart from
+the volume syntax.
 
 ```bash
 docker run -d --name lantern \
@@ -142,8 +143,7 @@ See [dev.md](dev.md) if you intend to change anything.
 
 Everything works everywhere except the web UI's in-app terminal, which needs a prebuilt PTY binary
 that `@replit/ruspty` does not publish for every target. Where it is missing, Lantern disables the
-terminal and says so in its startup log; nothing else is affected, and `lantern browse` does not use
-it.
+terminal and says so in its startup log; nothing else is affected, and the board does not use it.
 
 | Platform                       | Supported | In-app terminal |
 | ------------------------------ | --------- | --------------- |

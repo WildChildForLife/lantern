@@ -7,7 +7,7 @@ Start at the [README](../README.md) for what Lantern is and how to install it.
 | Document                          | Covers                                                                      |
 | --------------------------------- | --------------------------------------------------------------------------- |
 | [Install](install.md)             | npm, Homebrew, Docker, Windows, from source, and per-platform support       |
-| [The board](board.md)             | `lantern browse` — keys, resuming, sorting into topics                      |
+| [The board](board.md)             | `lantern` in your terminal — keys, resuming, sorting into topics            |
 | [The web UI](web-ui.md)           | What the server gives you that the terminal does not                        |
 | [Configuration](configuration.md) | The setup wizard, every option, and how a setting is resolved               |
 | [Agent CLIs](agents.md)           | The six CLIs Lantern reads, where their history lives, multi-machine setups |

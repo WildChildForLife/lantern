@@ -71,7 +71,7 @@ that moves them.
 Enable the ones you want in settings, or scope a single run with `--source`:
 
 ```bash
-lantern browse --source claude-code --source codex
+lantern --source claude-code --source codex
 ```
 
 In Docker each one needs its own mount, since only `~/.claude` is mounted by default:

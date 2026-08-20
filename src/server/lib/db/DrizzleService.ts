@@ -17,6 +17,12 @@ const initDbAtPath = (cacheDbPath: string): { db: DrizzleDb; rawDb: DatabaseSync
   const sqlite = new DatabaseSync(cacheDbPath);
   sqlite.exec("PRAGMA journal_mode = WAL");
   sqlite.exec("PRAGMA foreign_keys = ON");
+  // A bare `lantern` runs the server and the board in one process, and each
+  // opens its own connection to this file. WAL lets them read past each other,
+  // but two syncs that write at the same moment still collide — without a
+  // timeout the second one is refused outright rather than waiting the
+  // millisecond the first needs.
+  sqlite.exec("PRAGMA busy_timeout = 5000");
 
   const db = drizzle({ client: sqlite, schema });
   migrate(db, { migrationsFolder });

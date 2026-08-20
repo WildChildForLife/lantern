@@ -22,12 +22,13 @@ The recommended loop is a build and run, not a dev server:
 
 ```bash
 pnpm build
-node dist/main.js --port 3400          # web UI
-node dist/main.js browse               # terminal board
+node dist/main.js --port 3400          # web UI and board together
+node dist/main.js --server-only        # web UI alone
+node dist/main.js --cli-only           # terminal board alone
 ```
 
 `pnpm dev` exists and runs both halves in parallel with `run-p` — Vite for the frontend on
-`DEV_FE_PORT` (3400), and `node --watch src/server/main.ts` for the backend on `DEV_BE_PORT` (3401),
+`DEV_FE_PORT` (3400), and `node --watch src/server/main.ts --server-only` for the backend on `DEV_BE_PORT` (3401),
 with `/api` proxied from the first to the second. It is fine for frontend work, but session process
 management shares memory between processes, so anything touching that needs verifying against a real
 build.
@@ -35,17 +36,18 @@ build.
 To work against the bundled fixtures instead of your own conversations:
 
 ```bash
-node dist/main.js browse --claude-dir ./fixtures/claude-home
-node dist/main.js --port 4100 --claude-dir ./fixtures/claude-home
+node dist/main.js --cli-only --claude-dir ./fixtures/claude-home
+node dist/main.js --server-only --port 4100 --claude-dir ./fixtures/claude-home
 ```
 
-The fixture conversations record invented working directories, so `lantern browse` will refuse to
-resume any of them — that refusal is correct behaviour, not a fault. Point it at your own history to
+The fixture conversations record invented working directories, so the board will refuse to resume
+any of them — that refusal is correct behaviour, not a fault. Point it at your own history to
 exercise resuming.
 
-`browse` and `init` are built with React (Ink), so their sources are `.tsx` and Node cannot run them
-directly: `node src/server/main.ts browse` fails on the file extension. Build first —
-`pnpm build:backend` is enough for both commands and takes about a second.
+The board and `init` are built with React (Ink), so their sources are `.tsx` and Node cannot run them
+directly: `node src/server/main.ts` fails on the file extension as soon as it reaches for the board.
+Build first — `pnpm build:backend` is enough and takes about a second. `--server-only` never loads
+Ink, so that one runs from source.
 
 ## The build
 
