@@ -28,10 +28,10 @@ node dist/main.js --cli-only           # terminal board alone
 ```
 
 `pnpm dev` exists and runs both halves in parallel with `run-p` — Vite for the frontend on
-`DEV_FE_PORT` (3400), and `node --watch src/server/main.ts --server-only` for the backend on `DEV_BE_PORT` (3401),
-with `/api` proxied from the first to the second. It is fine for frontend work, but session process
-management shares memory between processes, so anything touching that needs verifying against a real
-build.
+`DEV_FE_PORT` (3400), and `node --watch src/server/main.ts --server-only` for the backend on
+`DEV_BE_PORT` (3401), with `/api` proxied from the first to the second. It is fine for frontend
+work, but session process management shares memory between processes, so anything touching that
+needs verifying against a real build.
 
 To work against the bundled fixtures instead of your own conversations:
 
@@ -43,6 +43,12 @@ node dist/main.js --server-only --port 4100 --claude-dir ./fixtures/claude-home
 The fixture conversations record invented working directories, so the board will refuse to resume
 any of them — that refusal is correct behaviour, not a fault. Point it at your own history to
 exercise resuming.
+
+> `--claude-dir` moves what the **board** caches, but not what the **server** caches. The server
+> builds its database layer before it has read the flag, so `--server-only --claude-dir …` ingests the
+> fixtures into your own `~/.lantern/cache.db` and forgets the projects that were in it. The cache is
+> disposable — one normal launch rebuilds it from `~/.claude` — but do not be surprised by an empty
+> board afterwards. Use `--cli-only` for fixture work, which does honour the flag.
 
 The board and `init` are built with React (Ink), so their sources are `.tsx` and Node cannot run them
 directly: `node src/server/main.ts` fails on the file extension as soon as it reaches for the board.

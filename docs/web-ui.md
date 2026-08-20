@@ -61,6 +61,10 @@ lantern --server-only --port 3400
 None of that applies to `lantern --cli-only` (or `lantern browse`), which opens no port and serves
 nothing.
 
+If you have run `lantern init` and told it to bind beyond `localhost`, that answer is stored, and a
+bare `lantern` now starts a server where `lantern browse` started none. Check `~/.lantern/config.json`
+before the first run of a version with this in it, or use `--cli-only` to open no port at all.
+
 The threat model, what a running instance exposes, and how to report a vulnerability privately are all
 in [SECURITY.md](../SECURITY.md). Binding and password options are in
 [Configuration](configuration.md#binding).

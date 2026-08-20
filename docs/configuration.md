@@ -6,9 +6,9 @@ a fresh machine and never stops to ask a question.
 ## The setup wizard
 
 What the offer covers is the web UI, which has more to decide: the first launch that both starts a
-server and has a terminal to ask at walks you through which agent CLIs to read, where they keep their logs,
-which port and address to bind, and whether to enable the in-app terminal. Every question arrives
-with the answer already detected, so the fast path is Enter a few times.
+server and has a terminal to ask at walks you through which agent CLIs to read, where they keep
+their logs, which port and address to bind, and whether to enable the in-app terminal. Every question
+arrives with the answer already detected, so the fast path is Enter a few times.
 
 The answers go in `~/.lantern/config.json` (and the CLI selection in
 `~/.lantern/sources/sources.json`, the same file the settings panel writes). Run `lantern init` at any

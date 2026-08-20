@@ -177,12 +177,28 @@ export const startServer = async (
   return { server, url };
 };
 
-/** Stops a server started by `startServer`, and waits for it to be stopped. */
+/**
+ * Stops a server started by `startServer`, and waits for it to be stopped.
+ *
+ * `close` on its own only stops new connections arriving: it waits for every
+ * open one to end first, and the two this server holds longest never end on
+ * their own — an SSE stream stays open for as long as the page is, and so does
+ * a terminal WebSocket. A bare `lantern` waits on this before it exits, so
+ * without dropping those connections a browser tab left open on the web UI
+ * means `q` never gives the terminal back.
+ *
+ * Narrowed rather than cast: `ServerType` is a union, and `closeAllConnections`
+ * belongs to the HTTP/1 server that `createAdaptorServer` actually returns.
+ */
 export const stopServer = (server: ServerType): Promise<void> =>
   new Promise<void>((resolve) => {
     server.close(() => {
       resolve();
     });
+
+    if ("closeAllConnections" in server) {
+      server.closeAllConnections();
+    }
   });
 
 const PlatformLayer = Layer.mergeAll(platformLayer, NodeContext.layer);

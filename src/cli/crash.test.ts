@@ -43,4 +43,19 @@ describe("describeCrash", () => {
     expect(describeCrash("just a string", false)).toContain("just a string");
     expect(describeCrash(undefined, false)).toContain("Lantern stopped unexpectedly");
   });
+
+  /** `String({})` is "[object Object]", which describes nothing. */
+  it("describes a thrown object by its shape rather than its type", () => {
+    const message = describeCrash({ code: "EACCES", path: "/root/.lantern" }, false);
+
+    expect(message).toContain("EACCES");
+    expect(message).not.toContain("[object Object]");
+  });
+
+  it("says only that it stopped when the thrown thing cannot be described", () => {
+    const circular: { self?: unknown } = {};
+    circular.self = circular;
+
+    expect(describeCrash(circular, false)).toContain("Lantern stopped unexpectedly");
+  });
 });

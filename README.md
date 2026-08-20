@@ -34,11 +34,12 @@ $ lantern
 ```
 
 One column per topic, conversations as rows, newest topic first. Press `R` to resume a conversation
-in place and come back to the board when you leave it. No server, no port, no browser.
-[The board](docs/board.md) has the rest of the keys.
+in place and come back to the board when you leave it. [The board](docs/board.md) has the rest of the
+keys.
 
-There is a [web UI](docs/web-ui.md) too — the same data, with a full session viewer, search and cost
-breakdowns — for when a terminal is the wrong shape for what you are doing.
+The [web UI](docs/web-ui.md) starts behind it and prints its address — the same data, with a full
+session viewer, search and cost breakdowns, for when a terminal is the wrong shape for what you are
+doing. `lantern --cli-only` leaves it out: no server, no port, no browser.
 
 <p align="center">
   <img src="docs/screenshots/topics.jpg" alt="Topics grouped by subject, each with an icon and a conversation count" width="100%">
@@ -49,7 +50,7 @@ breakdowns — for when a terminal is the wrong shape for what you are doing.
 With Node.js 24 or newer already present, nothing to install:
 
 ```bash
-npx lantern-viewer browse
+npx lantern-viewer
 ```
 
 On a first run Lantern reads your logs into its own cache, then draws the board.
@@ -77,9 +78,9 @@ lantern init               # optional: set Lantern up, and remember the answers
 lantern upgrade            # move to the latest release
 ```
 
-- **`lantern`** — starts the web server, prints its address, and draws the board over it. Quitting the
-  board stops both. `--cli-only` and `--server-only` ask for one half; passing both is an error. With
-  nothing to draw on — a container, a pipe, CI — it starts the server alone.
+- **`lantern`** — starts the web server, prints its address, and draws the board over it. Quitting
+  the board stops both. `--cli-only` and `--server-only` ask for one half; asking for both is
+  refused. With nothing to draw on — a container, a pipe, CI — it starts the server alone.
 - **`browse`** — alias `b`, and the same thing as `--cli-only`. Takes `--claude-dir`, `--executable`,
   `--source` and `--verbose`, on either side of the command name.
 - **`init`** — never required: every setting it writes has a working default, and the board never stops
@@ -122,6 +123,10 @@ Claude Code login for better topic names instead. Nothing runs automatically.
 
 None of that applies to `lantern --cli-only` (or `lantern browse`), which opens no port and serves
 nothing.
+
+If you have run `lantern init` and told it to bind beyond `localhost`, that answer is stored, and a
+bare `lantern` now starts a server where `lantern browse` started none. Check `~/.lantern/config.json`
+before the first run of a version with this in it, or use `--cli-only` to open no port at all.
 
 The threat model and how to report a vulnerability privately are in [SECURITY.md](SECURITY.md). Please
 use [GitHub Security Advisories](https://github.com/WildChildForLife/lantern/security/advisories/new)

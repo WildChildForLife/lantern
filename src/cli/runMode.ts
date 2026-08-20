@@ -10,7 +10,11 @@ export type RunMode = "both" | "cli" | "server" | "conflict";
 export type RunModeInput = {
   cliOnly: boolean;
   serverOnly: boolean;
-  /** Whether stdin is a terminal, which is the one thing the board needs. */
+  /**
+   * Whether there is a terminal on both stdin and stdout.
+   *
+   * Both, because the board reads keys from one and draws on the other.
+   */
   interactive: boolean;
 };
 

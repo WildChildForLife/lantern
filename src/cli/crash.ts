@@ -12,9 +12,28 @@ const statement = (error: unknown): string | null => {
     return error.message === "" ? null : error.message;
   }
 
-  const text = String(error);
+  // Narrowed one type at a time rather than handed to `String`, which answers
+  // "[object Object]" for the case that most needs describing — and says so
+  // just as confidently as it reports a real message.
+  if (typeof error === "string") {
+    return error === "" ? null : error;
+  }
 
-  return text === "" || text === "undefined" || text === "null" ? null : text;
+  if (typeof error === "number" || typeof error === "boolean" || typeof error === "bigint") {
+    return error.toString();
+  }
+
+  if (typeof error === "object" && error !== null) {
+    try {
+      return JSON.stringify(error) ?? null;
+    } catch {
+      // Circular, or something that throws from its own `toJSON`. The heading
+      // above already says Lantern stopped; a placeholder adds nothing.
+      return null;
+    }
+  }
+
+  return null;
 };
 
 /**
