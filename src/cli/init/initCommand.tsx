@@ -50,7 +50,10 @@ const persist = (answers: WizardAnswers, existing: CliConfig) =>
  */
 export const runInit = async (options: SharedCommandOptions): Promise<CliConfig | null> => {
   if (process.stdin.isTTY !== true) {
-    process.stderr.write("lantern init needs an interactive terminal.\n");
+    process.stderr.write(
+      "`lantern init` asks questions, so it needs an interactive terminal.\n" +
+        "Every setting it writes has a working default, so Lantern runs without it.\n",
+    );
     return null;
   }
 
