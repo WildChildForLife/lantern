@@ -74,3 +74,8 @@ docker/workspace/.git/
 # Build output from scripts/build-packages.sh
 packaging/staging/
 packaging/dist/
+
+# Worktrees the Claude Code harness checks out inside the repo. A second copy of
+# the tree is not part of this one, and lint and the test run pick it up as
+# though it were.
+.claude/worktrees/

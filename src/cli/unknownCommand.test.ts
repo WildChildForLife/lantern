@@ -56,30 +56,35 @@ describe("describeUnknownCommand", () => {
   it("names what was typed, and what it probably meant", () => {
     const message = describeUnknownCommand(["brows"], known, "lantern");
 
-    expect(message).toContain("unknown command 'brows'");
+    expect(message).toContain("`lantern brows`");
     expect(message).toContain("`lantern browse`");
   });
 
   it("still lists the commands when it has nothing to suggest", () => {
     const message = describeUnknownCommand(["sessions"], known, "lantern");
 
-    expect(message).toContain("unknown command 'sessions'");
+    expect(message).toContain("`lantern sessions`");
     expect(message).not.toContain("Did you mean");
     expect(message).toContain("browse, init, upgrade");
   });
 
-  it("says how to start the web UI, which is the command that is not one", () => {
+  it("says what a plain `lantern` does, which is the command that is not one", () => {
     const message = describeUnknownCommand(["sessions"], known, "lantern");
 
     expect(message).toContain("`lantern` on its own");
     expect(message).toContain("`lantern --help`");
   });
 
+  /** A mistyped command is a typo, and Lantern never calls a typo an error. */
+  it("never opens by calling it an error", () => {
+    expect(describeUnknownCommand(["sessions"], known, "lantern")).not.toContain("error");
+  });
+
   /** Only the first word is the command; the rest were meant as its arguments. */
   it("reports the first word alone when several follow", () => {
     const message = describeUnknownCommand(["brows", "orders-api"], known, "lantern");
 
-    expect(message).toContain("unknown command 'brows'");
+    expect(message).toContain("`lantern brows`");
     expect(message).not.toContain("orders-api");
   });
 

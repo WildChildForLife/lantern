@@ -13,4 +13,12 @@ describe("resolveLogLevel", () => {
   it("returns Info when verbose is undefined", () => {
     expect(resolveLogLevel(undefined).label).toBe("INFO");
   });
+
+  it("returns Warning when the server is sharing the screen with the board", () => {
+    expect(resolveLogLevel(undefined, true).label).toBe("WARN");
+  });
+
+  it("still returns Debug when verbose was asked for as well", () => {
+    expect(resolveLogLevel(true, true).label).toBe("DEBUG");
+  });
 });

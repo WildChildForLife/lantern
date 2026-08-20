@@ -1,4 +1,5 @@
 import type { Command } from "commander";
+import { launchBoard } from "./browse/launchBoard.ts";
 import { parseSharedOptions } from "./commandOptions.ts";
 import { loadStoredOptions } from "./config/loadStoredOptions.ts";
 import { describeExcessArguments } from "./excessArguments.ts";
@@ -35,8 +36,8 @@ const rejectExcessArguments = (program: Command, command: Command): boolean => {
  * a terminal UI with React, but they drive the backend's Effect services
  * directly, so neither module boundary fits them.
  *
- * Both are loaded on demand. Ink and React are a megabyte of bundle that
- * `lantern` on its own has no use for, and the server's start-up time is the
+ * Each is loaded on demand. Ink and React are a megabyte of bundle that
+ * `lantern --server-only` has no use for, and the server's start-up time is the
  * one people wait on.
  */
 export const registerCliCommands = (program: Command): void => {
@@ -55,10 +56,13 @@ export const registerCliCommands = (program: Command): void => {
       process.exitCode = config === null ? 1 : 0;
     });
 
+  // Kept as its own name now that a bare `lantern` browses too: it is what
+  // every existing script, README and muscle memory types, and it is still the
+  // shortest way to ask for the board alone without reaching for a flag.
   program
     .command("browse")
     .alias("b")
-    .description("browse conversations by topic, without leaving the terminal")
+    .description("browse conversations by topic, without starting the web server")
     .option("--claude-dir <claude-dir>", "path to the claude directory to read")
     .option("-e, --executable <executable>", "path to the claude code executable")
     .option("-v, --verbose", "enable verbose debug logging")
@@ -73,12 +77,10 @@ export const registerCliCommands = (program: Command): void => {
         return;
       }
 
-      const { runBrowse } = await import("./browse/browseCommand.tsx");
-      const exitCode = await runBrowse(
+      process.exitCode = await launchBoard(
         parseSharedOptions(command.optsWithGlobals()),
         await loadStoredOptions(),
       );
-      process.exitCode = exitCode;
     });
 
   program

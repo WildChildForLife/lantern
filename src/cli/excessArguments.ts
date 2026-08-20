@@ -20,7 +20,7 @@ export const describeExcessArguments = (
   const stray = given.map((word) => `'${word}'`).join(", ");
 
   return [
-    `error: \`${commandPath}\` takes no arguments, but got ${stray}.`,
+    `\`${commandPath}\` takes no arguments, but got ${stray}.`,
     "",
     `Run \`${commandPath} --help\` for the options it does take.`,
   ].join("\n");

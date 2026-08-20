@@ -13,6 +13,11 @@ describe("describeExcessArguments", () => {
     expect(message).toContain("'orders-api'");
   });
 
+  /** Handing a command a word too many is a mistake, not an error. */
+  it("does not open by calling it an error", () => {
+    expect(describeExcessArguments(["orders-api"], "lantern browse")).not.toContain("error");
+  });
+
   it("names every stray word, not only the first", () => {
     const message = describeExcessArguments(["orders-api", "webhooks"], "lantern browse");
 

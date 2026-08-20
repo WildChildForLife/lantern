@@ -2,10 +2,20 @@
 
 `lantern` with no command starts a server and serves the same conversations as a web app, for the
 work a terminal is the wrong shape for — reading a long session back, searching message text, or
-picking through a cost breakdown.
+picking through a cost breakdown. It prints the address and then draws
+[the board](board.md) over it, so both are running from the one word; quitting the board stops the
+server too.
 
 ```bash
 lantern --port 3400
+```
+
+`--server-only` leaves the board out, which is what a container, a service file or anything else
+without a terminal wants. Lantern falls back to it on its own when there is no terminal to draw on,
+so a plain `lantern` still works unattended.
+
+```bash
+lantern --server-only --port 3400
 ```
 
 <p align="center">
@@ -48,7 +58,12 @@ lantern --port 3400
 > password, or keep it behind a VPN such as Tailscale. `--terminal-unrestricted` removes the guard
 > rails from bash sessions, so treat it as widening that same hole.
 
-None of that applies to `lantern browse`, which opens no port and serves nothing.
+None of that applies to `lantern --cli-only` (or `lantern browse`), which opens no port and serves
+nothing.
+
+If you have run `lantern init` and told it to bind beyond `localhost`, that answer is stored, and a
+bare `lantern` now starts a server where `lantern browse` started none. Check `~/.lantern/config.json`
+before the first run of a version with this in it, or use `--cli-only` to open no port at all.
 
 The threat model, what a running instance exposes, and how to report a vulnerability privately are all
 in [SECURITY.md](../SECURITY.md). Binding and password options are in

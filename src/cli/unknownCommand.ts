@@ -72,11 +72,12 @@ export const nearestCommand = (typed: string, known: readonly KnownCommand[]): s
 /**
  * What to print when the arguments name no command Lantern has.
  *
- * Commander's own answer is "too many arguments. Expected 0 arguments but got
- * 1", because a plain `lantern` starts the web UI and so the root command has
- * an action of its own: a mistyped subcommand arrives as one argument too many
- * rather than as an unknown command. That message describes the parser's
- * problem rather than the reader's, and never mentions the word it choked on.
+ * Commander's own answer is "error: too many arguments. Expected 0 arguments
+ * but got 1", because a plain `lantern` starts Lantern and so the root command
+ * has an action of its own: a mistyped subcommand arrives as one argument too
+ * many rather than as an unknown command. That message describes the parser's
+ * problem rather than the reader's, never mentions the word it choked on, and
+ * opens by calling a typo an error.
  *
  * Returns `null` when there is nothing to complain about, which is every launch
  * that meant to start the server.
@@ -100,13 +101,13 @@ export const describeUnknownCommand = (
 
   const opening =
     suggestion === null
-      ? `error: unknown command '${typed}'`
-      : `error: unknown command '${typed}'. Did you mean \`${programName} ${suggestion}\`?`;
+      ? `There is no \`${programName} ${typed}\` command.`
+      : `There is no \`${programName} ${typed}\` command. Did you mean \`${programName} ${suggestion}\`?`;
 
   return [
     opening,
     "",
-    `Commands: ${names}. \`${programName}\` on its own starts the web UI, and`,
-    `\`${programName} --help\` lists the options.`,
+    `Commands: ${names}. \`${programName}\` on its own starts the board with the web`,
+    `UI behind it, and \`${programName} --help\` lists the options.`,
   ].join("\n");
 };
