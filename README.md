@@ -31,7 +31,7 @@ session viewer, search and cost breakdowns, for when a terminal is the wrong sha
 doing. `lantern --cli-only` leaves it out: no server, no port, no browser.
 
 <p align="center">
-  <img src="docs/screenshots/topics.jpg" alt="Topics grouped by subject, each with an icon and a conversation count" width="100%">
+  <img src="docs/screenshots/web-table.png" alt="The web UI in table view: one column per topic, each conversation a row with its message count and last activity" width="100%">
 </p>
 
 ## Quick start
