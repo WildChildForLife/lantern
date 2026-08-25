@@ -18,20 +18,9 @@ by which folder it happened to start in. It runs where you already are: a termin
 $ lantern
 ```
 
-```text
- Lantern  6 topics · 69 conversations · enter: resume here
-
- ⌁ Orders API 12                ≋ Home Network 6              ▣ Deploy Pipeline 5
- ─────────────────────────────  ────────────────────────────  ───────────────────
- ❯ Add refunds to checkout  2h     Router DHCP leases    1d      Cache the build 3h
-   Fix the webhook retry    5h     Split the VLANs       2d      Pin the runner  1d
-   Rename the price field   1d     Static leases for NAS 4d
-
-  t  sort 4 conversations into topics with the AI · T redoes every topic
-
- /home/you/work/orders-api · claude-code · sonnet · ~$0.42 · 24 messages · 4f2ab8c1
- ←→ topics · ↑↓ rows · / filter · e change · r reload · ? keys · q quit
-```
+<p align="center">
+  <img src="docs/screenshots/cli-board.png" alt="The Lantern board in a terminal: six topic columns, each with an icon, a conversation count and its rows, over the hint bar and the status line" width="100%">
+</p>
 
 One column per topic, conversations as rows, newest topic first. Press `R` to resume a conversation
 in place and come back to the board when you leave it. [The board](docs/board.md) has the rest of the
