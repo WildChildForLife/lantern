@@ -9,11 +9,18 @@ import { maybeRunFirstRunWizard } from "../cli/firstRunWizard.ts";
 import { registerCliCommands } from "../cli/index.ts";
 import { describeParseProblem } from "../cli/parseProblem.ts";
 import { describeRunModeConflict, resolveRunMode } from "../cli/runMode.ts";
+import {
+  describeAlreadyServing,
+  describePortOccupied,
+  describePortTaken,
+  resolveServerPlan,
+} from "../cli/serverPlan.ts";
+import { probeServerPresence, serverUrl } from "../cli/serverPresence.ts";
 import { describeUnknownCommand } from "../cli/unknownCommand.ts";
 import { maybeNotifyUpdate } from "../cli/update/notifyUpdate.ts";
 import type { CliOptions } from "./core/platform/services/LanternOptionsService.ts";
 import { checkNodeVersion } from "./nodeVersionCheck.ts";
-import { startServer, stopServer } from "./startServer.ts";
+import { isPortInUse, resolveServerAddress, startServer, stopServer } from "./startServer.ts";
 
 checkNodeVersion();
 
@@ -109,15 +116,82 @@ program
       // terminal — a container, CI, a pipe — skips it silently.
       const stored = await maybeRunFirstRunWizard(options.claudeDir, options.init !== false);
 
+      // One web server at a time. A second `lantern` in a second terminal used
+      // to reach `listen` and fall over on the port the first one holds; now it
+      // asks what is there first, and the board it opens reads the cache
+      // directly, so it never wanted a server of its own.
+      const { hostname, port } = resolveServerAddress(options, stored);
+      const presence = await probeServerPresence(hostname, port);
+
+      if (resolveServerPlan({ mode, presence }) === "blocked") {
+        process.stderr.write(
+          `${
+            presence === "lantern"
+              ? describeAlreadyServing(hostname, port, command.name())
+              : describePortOccupied(hostname, port, command.name())
+          }\n`,
+        );
+        process.exitCode = 1;
+        return;
+      }
+
+      if (resolveServerPlan({ mode, presence }) === "attach") {
+        // Said the same way a launch that started one says it, because from
+        // here on this is the same Lantern: the board is about to draw, and the
+        // address is what the scrollback keeps.
+        process.stderr.write(`Web UI: ${serverUrl(hostname, port)} (already running)\n`);
+
+        // Exited rather than returned for the same reason the both-mode path
+        // below exits: the board's own cache connection would keep the process
+        // alive with nothing left to do. No `stopServer` — the server belongs
+        // to the terminal that started it, and quitting this board must leave
+        // it serving.
+        process.exit(await launchBoard(parseSharedOptions(options), stored));
+      }
+
+      // Between the question above and the bind below, somebody else can take
+      // the port — and only the bind can prove the port is held, so this is
+      // where a wrong answer above is caught.
+      const started = await startServer(options, stored, {
+        quiet: mode === "both",
+      }).catch(async (error: unknown) => {
+        if (!isPortInUse(error)) {
+          throw error;
+        }
+
+        // Asked again, because two seconds have passed and the first answer is
+        // now known to have been wrong about something. A `free` that a failed
+        // bind has just disproved is not evidence of anything, so it gets the
+        // message that claims nothing about the tenant.
+        const found = await probeServerPresence(hostname, port);
+
+        process.stderr.write(
+          `${
+            found === "lantern"
+              ? describeAlreadyServing(hostname, port, command.name())
+              : found === "occupied"
+                ? describePortOccupied(hostname, port, command.name())
+                : describePortTaken(hostname, port, command.name())
+          }\n`,
+        );
+
+        // Exit rather than return. `startServer` builds its layers before it
+        // binds, so by the time the bind fails the file watchers, the scheduler
+        // and the cache connection are all running: returning here would print
+        // the message and then sit there with nothing left to do, which is
+        // worse than the crash this replaced. Nothing bound, so nothing to
+        // stop.
+        process.exit(1);
+      });
+
       if (mode === "server") {
-        await startServer(options, stored);
         return;
       }
 
       // Both. The server's own start-up line is silenced — the board is about
       // to draw over the row it would land on — so the address is printed here
       // instead, once, into the scrollback the board hands back on the way out.
-      const { server, url } = await startServer(options, stored, { quiet: true });
+      const { server, url } = started;
       process.stderr.write(`Web UI: ${url}\n`);
 
       const exitCode = await launchBoard(parseSharedOptions(options), stored);

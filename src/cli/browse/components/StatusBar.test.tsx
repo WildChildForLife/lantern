@@ -1,8 +1,12 @@
 import { render } from "ink-testing-library";
 import { describe, expect, it } from "vitest";
+import { stripAnsiColors } from "../../../server/core/git/functions/text.ts";
 import type { ConversationListEntry } from "../../../server/core/types.ts";
 import type { BoardRow } from "../functions/buildColumns.ts";
 import { StatusBar } from "./StatusBar.tsx";
+
+/** The bar paints a colour per fact, so the text only reads back uncoloured. */
+const plain = (frame: string | undefined): string => stripAnsiColors(frame ?? "");
 
 const row = (overrides?: Partial<ConversationListEntry>): BoardRow => ({
   sessionId: "s-refund",
@@ -26,7 +30,7 @@ describe("StatusBar", () => {
   it("draws every fact on one line, separated, whatever the colours", () => {
     const { lastFrame } = render(<StatusBar row={row()} status={null} width={120} />);
 
-    expect(lastFrame()).toContain(
+    expect(plain(lastFrame())).toContain(
       "/home/dev/lantern · claude-code · sonnet · ~$0.42 · 4 messages · s-refund",
     );
   });
@@ -40,7 +44,7 @@ describe("StatusBar", () => {
       />,
     );
 
-    expect(lastFrame()).toContain("unknown project · claude-code · unknown model");
+    expect(plain(lastFrame())).toContain("unknown project · claude-code · unknown model");
   });
 
   it("shows a status instead of the detail while there is one", () => {

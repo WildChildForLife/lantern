@@ -8,6 +8,7 @@ import {
   CliConfigBaseDir,
   cliConfigExists,
   readCliConfig,
+  readCliConfigResult,
   writeCliConfig,
 } from "./cliConfigStore.ts";
 
@@ -103,6 +104,102 @@ describe("cliConfigStore", () => {
         expect(yield* readCliConfig.pipe(Effect.provide(withBaseDir(baseDir)))).toStrictEqual(
           defaultCliConfig,
         );
+      }),
+    ),
+  );
+
+  /** What tells `loadStoredOptions` there is something worth mentioning. */
+  it.live("reports an unreadable file, and where it is", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const configPath = path.join(baseDir, "config.json");
+        yield* fs.writeFileString(configPath, "{ not json");
+
+        const result = yield* readCliConfigResult.pipe(Effect.provide(withBaseDir(baseDir)));
+
+        expect(result.unreadable).toBe(true);
+        expect(result.configPath).toBe(configPath);
+        expect(result.config).toStrictEqual(defaultCliConfig);
+      }),
+    ),
+  );
+
+  /** A first launch has no file, which is not a problem to report. */
+  it.live("does not call a missing file unreadable", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        const result = yield* readCliConfigResult.pipe(Effect.provide(withBaseDir(baseDir)));
+
+        expect(result.unreadable).toBe(false);
+      }),
+    ),
+  );
+
+  /**
+   * The case that used to pass for a first launch on every single launch: the
+   * file is there, `exists` says so, and opening it fails. Their settings are
+   * gone and nothing said a word.
+   */
+  it.live("reports a file that is there and will not open", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        // A directory where the file belongs: it exists, and it cannot be read.
+        yield* fs.makeDirectory(path.join(baseDir, "config.json"));
+
+        const result = yield* readCliConfigResult.pipe(Effect.provide(withBaseDir(baseDir)));
+
+        expect(result.unreadable).toBe(true);
+        expect(result.config).toStrictEqual(defaultCliConfig);
+      }),
+    ),
+  );
+
+  /** An interrupted write, or a bare `touch`. Nothing was lost. */
+  it.live("does not call an empty file unreadable", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        yield* fs.writeFileString(path.join(baseDir, "config.json"), "\n  \n");
+
+        const result = yield* readCliConfigResult.pipe(Effect.provide(withBaseDir(baseDir)));
+
+        expect(result.unreadable).toBe(false);
+        expect(result.config).toStrictEqual(defaultCliConfig);
+      }),
+    ),
+  );
+
+  /** Valid JSON that the schema turns away is just as lost as broken JSON. */
+  it.live("reports a file whose settings do not fit the schema", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        yield* fs.writeFileString(path.join(baseDir, "config.json"), `{"port":70000}`);
+
+        const result = yield* readCliConfigResult.pipe(Effect.provide(withBaseDir(baseDir)));
+
+        expect(result.unreadable).toBe(true);
+      }),
+    ),
+  );
+
+  it.live("does not call a file it understood unreadable", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        yield* fs.writeFileString(path.join(baseDir, "config.json"), `{"port":3400}`);
+
+        const result = yield* readCliConfigResult.pipe(Effect.provide(withBaseDir(baseDir)));
+
+        expect(result.unreadable).toBe(false);
+        expect(result.config.port).toBe(3400);
       }),
     ),
   );
