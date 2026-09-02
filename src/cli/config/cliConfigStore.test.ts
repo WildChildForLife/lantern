@@ -8,6 +8,7 @@ import {
   CliConfigBaseDir,
   cliConfigExists,
   readCliConfig,
+  readCliConfigResult,
   writeCliConfig,
 } from "./cliConfigStore.ts";
 
@@ -103,6 +104,50 @@ describe("cliConfigStore", () => {
         expect(yield* readCliConfig.pipe(Effect.provide(withBaseDir(baseDir)))).toStrictEqual(
           defaultCliConfig,
         );
+      }),
+    ),
+  );
+
+  /** What tells `loadStoredOptions` there is something worth mentioning. */
+  it.live("reports an unreadable file, and where it is", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        const configPath = path.join(baseDir, "config.json");
+        yield* fs.writeFileString(configPath, "{ not json");
+
+        const result = yield* readCliConfigResult.pipe(Effect.provide(withBaseDir(baseDir)));
+
+        expect(result.unreadable).toBe(true);
+        expect(result.configPath).toBe(configPath);
+        expect(result.config).toStrictEqual(defaultCliConfig);
+      }),
+    ),
+  );
+
+  /** A first launch has no file, which is not a problem to report. */
+  it.live("does not call a missing file unreadable", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        const result = yield* readCliConfigResult.pipe(Effect.provide(withBaseDir(baseDir)));
+
+        expect(result.unreadable).toBe(false);
+      }),
+    ),
+  );
+
+  it.live("does not call a file it understood unreadable", () =>
+    withTempBaseDir((baseDir) =>
+      Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem;
+        const path = yield* Path.Path;
+        yield* fs.writeFileString(path.join(baseDir, "config.json"), `{"port":3400}`);
+
+        const result = yield* readCliConfigResult.pipe(Effect.provide(withBaseDir(baseDir)));
+
+        expect(result.unreadable).toBe(false);
+        expect(result.config.port).toBe(3400);
       }),
     ),
   );

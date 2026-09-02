@@ -1,17 +1,22 @@
 import { NodeContext } from "@effect/platform-node";
 import { Effect } from "effect";
 import { EnvService } from "../server/core/platform/services/EnvService.ts";
+import { serverLoggerLayer } from "../server/logging.ts";
 import type { CliConfig } from "./config/cliConfig.ts";
 import { CliConfigBaseDir, cliConfigExists } from "./config/cliConfigStore.ts";
 import { loadStoredOptions } from "./config/loadStoredOptions.ts";
 import { shouldRunWizard } from "./firstRun.ts";
 
+// The logger is provided here as it is everywhere else that runs before the
+// server's layers exist: anything that logs from one of these standalone reads
+// would otherwise print Effect's raw `timestamp=… level=… fiber=…` frame.
 const configExists = (): Promise<boolean> =>
   Effect.runPromise(
     cliConfigExists.pipe(
       Effect.provide(CliConfigBaseDir.Live),
       Effect.provide(EnvService.Live),
       Effect.provide(NodeContext.layer),
+      Effect.provide(serverLoggerLayer),
     ),
   );
 

@@ -73,3 +73,14 @@ in [SECURITY.md](../SECURITY.md). Binding and password options are in
 
 Lantern binds `127.0.0.1:3000` by default. See [Configuration](configuration.md) for the full options
 table, how a setting is resolved, and why the bind address is not read from `HOSTNAME`.
+
+## More than one terminal
+
+One web server serves them all. A second `lantern` sees the one already listening, opens its board
+against it and starts no server of its own — so you can run as many as you have terminals, and
+quitting one leaves the rest alone. The board reads the cache directly rather than over HTTP, so it
+loses nothing by not having a server behind it.
+
+`lantern --server-only` is the exception: it asked for a server, has no board to fall back to, and
+says so rather than starting a second one. Pass `--port` if a genuinely separate web UI is what you
+want.
