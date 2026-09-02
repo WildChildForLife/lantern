@@ -265,7 +265,7 @@ export const DiffModal: FC<DiffModalProps> = ({
   // Commit handler
   const handleCommit = async () => {
     const selected = Array.from(selectedFiles.entries())
-      .filter(([_, isSelected]) => isSelected)
+      .filter(([, isSelected]) => isSelected)
       .map(([path]) => path);
 
     console.log("[DiffModal.handleCommit] Selected files state:", selectedFiles);
@@ -315,7 +315,7 @@ export const DiffModal: FC<DiffModalProps> = ({
   // Commit and Push handler
   const handleCommitAndPush = async () => {
     const selected = Array.from(selectedFiles.entries())
-      .filter(([_, isSelected]) => isSelected)
+      .filter(([, isSelected]) => isSelected)
       .map(([path]) => path);
 
     console.log("[DiffModal.handleCommitAndPush] Selected files:", selected);
