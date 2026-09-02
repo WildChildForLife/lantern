@@ -2,6 +2,7 @@ import { NodeContext } from "@effect/platform-node";
 import { Effect } from "effect";
 import packageJson from "../../../package.json" with { type: "json" };
 import { EnvService } from "../../server/core/platform/services/EnvService.ts";
+import { serverLoggerLayer } from "../../server/logging.ts";
 import { CliConfigBaseDir, readCliConfig } from "../config/cliConfigStore.ts";
 import { detectInstallSource } from "../upgrade/detectInstall.ts";
 import { fetchLatestVersion } from "./latestVersion.ts";
@@ -25,6 +26,10 @@ const runQuietly = <A>(
       Effect.provide(CliConfigBaseDir.Live),
       Effect.provide(EnvService.Live),
       Effect.provide(NodeContext.layer),
+      // As everywhere else that runs before the server's layers exist: without
+      // this, anything logged here arrives as Effect's raw
+      // `timestamp=… level=… fiber=…` frame.
+      Effect.provide(serverLoggerLayer),
     ),
   );
 

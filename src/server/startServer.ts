@@ -78,6 +78,65 @@ export type StartedServer = {
   url: string;
 };
 
+/** Where the web server will listen. */
+export type ServerAddress = {
+  readonly hostname: string;
+  readonly port: number;
+};
+
+/** The dev server's port when `DEV_BE_PORT` says nothing usable. */
+const DEV_PORT = 3401;
+
+/**
+ * The development port, or the fallback for anything that is not one.
+ *
+ * `Number.parseInt` answers `NaN` for an unset-but-present or mistyped
+ * variable, and `NaN` is not a port: it reaches `listen`, and it reaches the
+ * URL the check is sent to. Everything the settings file offers is validated by
+ * its schema, so this is the one port that arrives unchecked.
+ */
+export const resolveDevPort = (raw: string | undefined): number => {
+  const parsed = Number.parseInt(raw ?? "", 10);
+
+  return Number.isInteger(parsed) && parsed >= 1 && parsed <= 65535 ? parsed : DEV_PORT;
+};
+
+/**
+ * Resolves the address the server will bind, without binding it.
+ *
+ * Exported so the check for what is already on that port and the bind that
+ * follows it can never disagree about which port that is — including under
+ * `DEV_BE_PORT`, where the port the options resolve to is not the one `listen`
+ * is given.
+ */
+export const resolveServerAddress = (
+  options: CliOptions,
+  stored?: StoredOptions,
+): ServerAddress => {
+  const resolved = toLanternOptions(options, stored);
+  // biome-ignore lint/style/noProcessEnv: allow only here
+  // oxlint-disable-next-line node/no-process-env -- configuration boundary
+  const isDevelopment = isDevelopmentEnv(process.env.LANTERN_ENV);
+
+  return {
+    hostname: resolved.hostname,
+    port: isDevelopment
+      ? // biome-ignore lint/style/noProcessEnv: allow only here
+        // oxlint-disable-next-line node/no-process-env -- configuration boundary
+        resolveDevPort(process.env.DEV_BE_PORT)
+      : resolved.port,
+  };
+};
+
+/**
+ * Whether a failure is the port already being taken.
+ *
+ * Narrowed rather than cast: `code` is Node's, not something the `Error` type
+ * knows about, and `in` is what proves it is there before it is read.
+ */
+export const isPortInUse = (error: unknown): boolean =>
+  error instanceof Error && "code" in error && error.code === "EADDRINUSE";
+
 /**
  * Starts the web server, and hands back the server it started.
  *
@@ -151,20 +210,35 @@ export const startServer = async (
     // Layers must be piped into the container from the shallowest dependency up
     .pipe(Effect.provide(MainLayer), Effect.scoped);
 
-  // The level is set around the whole program, not only the two lines below:
-  // the background fibers the layers fork — the sync, the file watcher — copy
-  // it as they are forked, and they are the ones that would otherwise write
-  // over the board long after start-up is done.
-  await Effect.runPromise(program.pipe(withServerLogLevel(resolved.verbose, quiet)));
+  // The level and the logger are both set around the whole program, not only
+  // the two lines below: the background fibers the layers fork — the sync, the
+  // file watcher — copy both as they are forked. The level is what stops them
+  // writing over the board long after start-up is done, and the logger is what
+  // keeps them printing the same way the lines here do, rather than dropping
+  // into Effect's raw `timestamp=… level=… fiber=…` frame halfway down the
+  // start-up output.
+  await Effect.runPromise(
+    program.pipe(withServerLogLevel(resolved.verbose, quiet), Effect.provide(serverLoggerLayer)),
+  );
 
-  const port = isDevelopment
-    ? // biome-ignore lint/style/noProcessEnv: allow only here
-      // oxlint-disable-next-line node/no-process-env -- configuration boundary
-      Number.parseInt(process.env.DEV_BE_PORT ?? "3401", 10)
-    : resolved.port;
+  const { port } = resolveServerAddress(options, stored);
 
-  const url = await new Promise<string>((resolve) => {
+  const url = await new Promise<string>((resolve, reject) => {
+    // A port already taken arrives here, on the server, not as a rejected
+    // promise — and an `error` nothing listens for is one Node rethrows as an
+    // uncaught exception, which used to mean a bare stack trace and a promise
+    // that never settled. Handed to the caller instead, so it can say something
+    // worth reading; dropped again once the port is bound, so a later failure
+    // is still nobody's here to swallow.
+    const onError = (error: Error) => {
+      reject(error);
+    };
+
+    server.once("error", onError);
+
     server.listen(port, resolved.hostname, () => {
+      server.off("error", onError);
+
       const info = server.address();
       const serverPort = typeof info === "object" && info !== null ? info.port : port;
       const mode = apiOnly ? " (API-only mode)" : "";

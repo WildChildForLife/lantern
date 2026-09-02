@@ -1,8 +1,11 @@
 import { NodeContext } from "@effect/platform-node";
 import { Effect } from "effect";
 import { EnvService } from "../../server/core/platform/services/EnvService.ts";
+import { serverLoggerLayer } from "../../server/logging.ts";
+import { noticeOnce } from "../notice.ts";
 import type { CliConfig } from "./cliConfig.ts";
-import { CliConfigBaseDir, readCliConfig } from "./cliConfigStore.ts";
+import { CliConfigBaseDir, readCliConfigResult } from "./cliConfigStore.ts";
+import { describeUnreadableSettings } from "./describeUnreadableSettings.ts";
 
 /**
  * Reads `~/.lantern/config.json` on its own, before any of Lantern's layers
@@ -11,12 +14,32 @@ import { CliConfigBaseDir, readCliConfig } from "./cliConfigStore.ts";
  * The settings decide the port the server binds and the directory the cache
  * lives in, both of which are needed to build those layers — so this one read
  * has to stand outside them.
+ *
+ * It is also where a file that could not be read is mentioned, because this is
+ * the read whose answer is actually used. Said through `noticeOnce`, so the
+ * launches that load settings more than once — the wizard reads them, and a
+ * wizard somebody backed out of is followed by another read — still only say it
+ * the once.
+ *
+ * The logger is provided as a net, not because anything below logs today.
+ * Nothing this far up the launch has the server's layers yet, so anything that
+ * did log would land as Effect's raw `timestamp=… level=… fiber=…` frame, which
+ * is not a thing to show somebody who typed one word.
  */
 export const loadStoredOptions = (): Promise<CliConfig> =>
   Effect.runPromise(
-    readCliConfig.pipe(
+    Effect.gen(function* () {
+      const result = yield* readCliConfigResult;
+
+      if (result.unreadable) {
+        yield* Effect.sync(() => noticeOnce(describeUnreadableSettings(result.configPath)));
+      }
+
+      return result.config;
+    }).pipe(
       Effect.provide(CliConfigBaseDir.Live),
       Effect.provide(EnvService.Live),
       Effect.provide(NodeContext.layer),
+      Effect.provide(serverLoggerLayer),
     ),
   );
