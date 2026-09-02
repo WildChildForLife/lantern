@@ -93,6 +93,13 @@ export const routes = (app: HonoAppType, options: CliOptions, stored?: StoredOpt
 
         /**
          * Auth un-necessary Routes
+         *
+         * `/api/version` has to stay above `authRequiredMiddleware`. A second
+         * `lantern` asks this route what is on the port before it binds one, and
+         * it has no password to offer — see `probeUrl` in
+         * `src/cli/serverPresence.ts`. Behind auth it would answer 401, and the
+         * second launch would report a stranger on the port rather than opening
+         * a board against the Lantern that is there.
          */
         .get("/api/version", (c) => {
           return c.json({

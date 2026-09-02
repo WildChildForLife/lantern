@@ -1,4 +1,5 @@
-import type { ServerPresence } from "./serverPresence.ts";
+import type { RunMode } from "./runMode.ts";
+import { type ServerPresence, serverUrl } from "./serverPresence.ts";
 
 /**
  * What this launch does about the web server.
@@ -11,10 +12,20 @@ import type { ServerPresence } from "./serverPresence.ts";
  */
 export type ServerPlan = "start" | "attach" | "blocked";
 
+/**
+ * The run modes that want a web server.
+ *
+ * `Extract` rather than a hand-written pair, so this names members of `RunMode`
+ * and a rename over there breaks here. Deliberately not `Exclude`, which would
+ * silently widen to admit any mode added later — the whole point is that a new
+ * mode has to come and say what it wants from a server.
+ */
+export type ServerRunMode = Extract<RunMode, "both" | "server">;
+
 export type ServerPlanInput = {
-  /** Only the two modes that want a server ever get this far. */
-  mode: "both" | "server";
-  presence: ServerPresence;
+  /** Only the modes that want a server ever get this far. */
+  readonly mode: ServerRunMode;
+  readonly presence: ServerPresence;
 };
 
 /**
@@ -38,10 +49,15 @@ export const resolveServerPlan = ({ mode, presence }: ServerPlanInput): ServerPl
   return "blocked";
 };
 
-/** The two ways on, printed together because either may be the one wanted. */
-const waysOn = (programName: string): readonly string[] => {
+/**
+ * The two ways on, printed together because either may be the one wanted.
+ *
+ * The port offered is the one next to the port that failed, rather than a fixed
+ * 3001, so the advice is never to retry the port that just turned them away.
+ */
+const waysOn = (programName: string, port: number): readonly string[] => {
   const routes: readonly (readonly [string, string])[] = [
-    [`${programName} --port 3001`, "to run a second web UI of your own"],
+    [`${programName} --port ${port + 1}`, "to run a second web UI of your own"],
     [`${programName} --cli-only`, "to browse here, without a web UI"],
   ];
   const column = Math.max(...routes.map(([command]) => command.length));
@@ -50,18 +66,24 @@ const waysOn = (programName: string): readonly string[] => {
 };
 
 /**
- * What `--server-only` is told when a Lantern already holds the port.
+ * What a launch is told when a Lantern already holds the port and this one
+ * cannot use it — `--server-only`, which has no board to fall back to, or a
+ * bare `lantern` that lost the port between the check and the bind.
  *
  * The running one is left alone and its address is printed, because "already
  * serving" is nine times out of ten good news badly timed — the web UI that was
  * wanted is up, in another terminal, and the reader only needs to be pointed at
  * it.
  */
-export const describeAlreadyServing = (url: string, programName: string): string =>
+export const describeAlreadyServing = (
+  hostname: string,
+  port: number,
+  programName: string,
+): string =>
   [
-    `Lantern is already serving the web UI at ${url}.`,
+    `Lantern is already serving the web UI at ${serverUrl(hostname, port)}.`,
     "",
-    ...waysOn(programName),
+    ...waysOn(programName, port),
     "",
     "The one already running has not been touched.",
   ].join("\n");
@@ -77,7 +99,27 @@ export const describePortOccupied = (hostname: string, port: number, programName
   [
     `Something that is not Lantern is already listening on ${hostname}:${port}.`,
     "",
-    ...waysOn(programName),
+    ...waysOn(programName, port),
     "",
     `Set "port" in your Lantern settings to make a different choice stick.`,
+  ].join("\n");
+
+/**
+ * What to print when the port is taken but nothing on it would say by what.
+ *
+ * The bind is what proves the port is held; the check before it only ever
+ * proves what answered. When the two disagree — a process that accepts
+ * connections and never replies, a Lantern too busy to answer inside the
+ * check's budget — the honest thing is to say the port is taken and stop, not
+ * to guess at the tenant. Naming the wrong one sends the reader to fix a
+ * machine that has nothing wrong with it.
+ */
+export const describePortTaken = (hostname: string, port: number, programName: string): string =>
+  [
+    `Lantern could not bind ${hostname}:${port}, because something else is holding it.`,
+    "",
+    ...waysOn(programName, port),
+    "",
+    "Whatever is on that port did not answer, so Lantern cannot say whether it",
+    "is another Lantern or something unrelated.",
   ].join("\n");

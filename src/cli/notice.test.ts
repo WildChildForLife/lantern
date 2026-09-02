@@ -11,7 +11,7 @@ describe("makeNoticeOnce", () => {
     expect(written).toEqual(["Settings could not be read.\n"]);
   });
 
-  /** The settings file is read two or three times on a single launch. */
+  /** A launch that offers the wizard and is refused loads settings twice. */
   it("says the same message once, however many times it is asked", () => {
     const written: string[] = [];
     const notice = makeNoticeOnce((line) => written.push(line));

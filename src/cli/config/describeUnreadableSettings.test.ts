@@ -18,7 +18,18 @@ describe("describeUnreadableSettings", () => {
   it("says how to get back to a working file", () => {
     const message = describeUnreadableSettings("/root/.lantern/config.json");
 
-    expect(message).toContain("delete");
+    expect(message).toContain("Deleting it");
+  });
+
+  /**
+   * Both ways in reach this message, and naming only one would send half the
+   * readers looking in the wrong place.
+   */
+  it("does not blame the JSON, which is only one of the two ways here", () => {
+    const message = describeUnreadableSettings("/root/.lantern/config.json");
+
+    expect(message).toContain("not allowed to");
+    expect(message).not.toMatch(/^Fix the JSON/mu);
   });
 
   /** The raw log frame this replaced read as a crash. This is not one. */

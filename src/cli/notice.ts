@@ -1,11 +1,17 @@
 /**
  * Says something to the reader once, however many times it comes up.
  *
- * The settings file is opened two or three times on a single launch — the
- * update notice reads it, the wizard asks whether it exists, the options are
- * loaded from it — and each read is entitled to complain about a file it could
- * not parse. One launch is one problem, so the first complaint is the one that
- * gets printed and the rest are dropped.
+ * Settings are loaded more than once on some launches — the wizard reads them,
+ * and a wizard somebody backed out of is followed by another read — and each of
+ * those reads finds the same broken file and has the same thing to say about
+ * it. One launch is one problem, so the first telling is the one that gets
+ * printed and the rest are dropped.
+ *
+ * Deduplicated on the finished message, which carries the path, so two
+ * different files are still two different notices. That does mean two genuinely
+ * separate problems that happen to read identically would collapse into one —
+ * fine while every caller says something naming what it is about, and the
+ * reason this is not the right tool for anything that legitimately repeats.
  *
  * The writer is a parameter so the remembering can be tested without a process
  * to write to; `noticeOnce` below is the one that talks to a terminal.

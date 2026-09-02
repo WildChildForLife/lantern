@@ -77,10 +77,13 @@ table, how a setting is resolved, and why the bind address is not read from `HOS
 ## More than one terminal
 
 One web server serves them all. A second `lantern` sees the one already listening, opens its board
-against it and starts no server of its own — so you can run as many as you have terminals, and
-quitting one leaves the rest alone. The board reads the cache directly rather than over HTTP, so it
-loses nothing by not having a server behind it.
+against it and starts no server of its own, so you can run as many as you have terminals. The board
+reads the cache directly rather than over HTTP, so it loses nothing by not having a server behind it.
 
-`lantern --server-only` is the exception: it asked for a server, has no board to fall back to, and
-says so rather than starting a second one. Pass `--port` if a genuinely separate web UI is what you
-want.
+The web server belongs to the terminal that started it. Quitting an attached board leaves everything
+else running; quitting the first one takes the web UI down, and the boards still open carry on
+browsing without it.
+
+`lantern --server-only` is the exception to attaching: it asked for a server, has no board to fall
+back to, and says so rather than starting a second one. Pass `--port` if a genuinely separate web UI
+is what you want.

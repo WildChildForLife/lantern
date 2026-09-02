@@ -17,11 +17,14 @@ import { describeUnreadableSettings } from "./describeUnreadableSettings.ts";
  *
  * It is also where a file that could not be read is mentioned, because this is
  * the read whose answer is actually used. Said through `noticeOnce`, so the
- * launches that load settings more than once still only say it the once.
+ * launches that load settings more than once — the wizard reads them, and a
+ * wizard somebody backed out of is followed by another read — still only say it
+ * the once.
  *
- * The logger is provided even though nothing here logs on purpose: without it
- * anything that did would land as Effect's raw `timestamp=… level=… fiber=…`
- * frame, which is not a thing to show somebody who typed one word.
+ * The logger is provided as a net, not because anything below logs today.
+ * Nothing this far up the launch has the server's layers yet, so anything that
+ * did log would land as Effect's raw `timestamp=… level=… fiber=…` frame, which
+ * is not a thing to show somebody who typed one word.
  */
 export const loadStoredOptions = (): Promise<CliConfig> =>
   Effect.runPromise(

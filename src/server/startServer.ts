@@ -80,8 +80,25 @@ export type StartedServer = {
 
 /** Where the web server will listen. */
 export type ServerAddress = {
-  hostname: string;
-  port: number;
+  readonly hostname: string;
+  readonly port: number;
+};
+
+/** The dev server's port when `DEV_BE_PORT` says nothing usable. */
+const DEV_PORT = 3401;
+
+/**
+ * The development port, or the fallback for anything that is not one.
+ *
+ * `Number.parseInt` answers `NaN` for an unset-but-present or mistyped
+ * variable, and `NaN` is not a port: it reaches `listen`, and it reaches the
+ * URL the check is sent to. Everything the settings file offers is validated by
+ * its schema, so this is the one port that arrives unchecked.
+ */
+export const resolveDevPort = (raw: string | undefined): number => {
+  const parsed = Number.parseInt(raw ?? "", 10);
+
+  return Number.isInteger(parsed) && parsed >= 1 && parsed <= 65535 ? parsed : DEV_PORT;
 };
 
 /**
@@ -106,7 +123,7 @@ export const resolveServerAddress = (
     port: isDevelopment
       ? // biome-ignore lint/style/noProcessEnv: allow only here
         // oxlint-disable-next-line node/no-process-env -- configuration boundary
-        Number.parseInt(process.env.DEV_BE_PORT ?? "3401", 10)
+        resolveDevPort(process.env.DEV_BE_PORT)
       : resolved.port,
   };
 };
