@@ -95,22 +95,35 @@ beforeAll(async () => {
   );
 
   const oxlint = path.join(root, "node_modules", ".bin", "oxlint");
+  // `--format json`, not the default, because oxlint recognises CI and switches
+  // to GitHub's annotation format on its own. Reading the human format meant
+  // this passed here and matched nothing on a runner.
+  //
   // A run that finds violations exits non-zero, which is the expected case
   // here, so the rejection carries the report rather than a problem.
   const { stdout, stderr } = await execFileAsync(
     oxlint,
-    ["--config", configPath, "--no-ignore", fixtureRoot],
+    ["--config", configPath, "--format", "json", "--no-ignore", fixtureRoot],
     { cwd: root },
   ).catch((error) => ({ stdout: String(error.stdout ?? ""), stderr: String(error.stderr ?? "") }));
 
-  for (const line of stdout.split("\n")) {
-    const match = /^(\S+?):\d+:\d+: \w+ conventions\(([\w-]+)\)/u.exec(line);
-    if (match === null) {
+  const diagnostics = (() => {
+    try {
+      return JSON.parse(stdout).diagnostics ?? [];
+    } catch {
+      return [];
+    }
+  })();
+
+  for (const diagnostic of diagnostics) {
+    const rule = /^conventions\(([\w-]+)\)$/u.exec(diagnostic.code ?? "")?.[1];
+    if (rule === undefined) {
       continue;
     }
 
-    const [, filePath = "", rule = ""] = match;
-    const fixture = path.relative(fixtureRoot, path.resolve(root, filePath)).replaceAll("\\", "/");
+    const fixture = path
+      .relative(fixtureRoot, path.resolve(root, diagnostic.filename ?? ""))
+      .replaceAll("\\", "/");
     reported.set(fixture, [...(reported.get(fixture) ?? []), rule]);
   }
 
