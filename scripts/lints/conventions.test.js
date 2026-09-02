@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,31 +14,27 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
  * barrel file, a `__tests__` directory, the web importing the server, or `@/`
  * outside `src/web`. The plugin itself is linted by nothing and typechecked by
  * nothing — `scripts/**` is ignored by oxlint and tsconfig only includes `src`
- * — so a regex that quietly stops matching would disable a rule with nothing to
- * show for it.
+ * — so a regex that quietly stopped matching would disable a rule with nothing
+ * to show for it.
  *
- * Driving the real binary against real files is what catches that. It covers
- * the wiring as well as the logic: the plugin path in `.oxlintrc.json`, the
- * rules being switched on, and the reports coming back under the names the
- * config uses. Calling `create()` with a hand-made context would test none of
- * those, and all of them have been wrong at some point.
+ * Two halves, because they fail for different reasons and a single check would
+ * confuse them: the rules are run against fixtures under a config written here,
+ * and the repository's own config is read to confirm it still points at the
+ * plugin and still switches every rule on.
  */
 
 const execFileAsync = promisify(execFile);
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
+const pluginPath = path.join(root, "scripts", "lints", "conventions.js");
+const projectConfigPath = path.join(root, ".oxlintrc.json");
 
-/**
- * Fixtures live outside the repository, and oxlint runs from inside it.
- *
- * They are deliberate violations, so writing them into the tree would mean
- * `pnpm lint` failing for as long as they existed, and git-ignoring them to
- * avoid that would hide them from oxlint too — it reads `.gitignore` by
- * default, and `--no-ignore` does not override that. A temp directory has
- * neither problem and leaves nothing behind. The working directory stays at the
- * repo root so the config resolves, and with it the plugin path inside it.
- */
-let fixtureRoot = "";
+const RULES = [
+  "no-barrel-file",
+  "colocated-tests",
+  "module-boundaries",
+  "no-project-alias-outside-web",
+];
 
 /**
  * Paths carry the meaning here — three of the four rules decide what to do from
@@ -57,6 +53,22 @@ const FIXTURES = {
   "src/web/usesAlias.ts": 'import { a } from "@/lib/a";\n\nexport const b = a;\n',
 };
 
+/**
+ * Everything lives outside the repository, and oxlint runs from inside it.
+ *
+ * The fixtures are deliberate violations, so writing them into the tree would
+ * mean `pnpm lint` failing for as long as they existed — and git-ignoring them
+ * to avoid that would hide them from oxlint too, which reads `.gitignore` by
+ * default and does not stop at `--no-ignore`.
+ *
+ * The config is written here rather than reusing the project's so that this
+ * loads the plugin and nothing else. The real one turns on type-aware linting,
+ * which wants a tsconfig covering the files being linted; pointing it at a tree
+ * outside the project made the whole run produce nothing, and every assertion
+ * below read that silence as a pass.
+ */
+let fixtureRoot = "";
+
 /** file path (as reported) -> the conventions rules that fired on it */
 const reported = new Map();
 
@@ -71,16 +83,27 @@ beforeAll(async () => {
     await writeFile(absolutePath, source);
   }
 
-  const oxlint = path.join(root, "node_modules", ".bin", "oxlint");
-  const output = await execFileAsync(oxlint, ["--config", ".oxlintrc.json", fixtureRoot], {
-    cwd: root,
-  })
-    // A run that finds violations exits non-zero, which is the expected case
-    // here; the report is on stdout either way.
-    .then((result) => result.stdout)
-    .catch((error) => String(error.stdout ?? ""));
+  const configPath = path.join(fixtureRoot, "oxlintrc.json");
+  await writeFile(
+    configPath,
+    JSON.stringify({
+      plugins: [],
+      jsPlugins: [pluginPath],
+      categories: {},
+      rules: Object.fromEntries(RULES.map((rule) => [`conventions/${rule}`, "error"])),
+    }),
+  );
 
-  for (const line of output.split("\n")) {
+  const oxlint = path.join(root, "node_modules", ".bin", "oxlint");
+  // A run that finds violations exits non-zero, which is the expected case
+  // here, so the rejection carries the report rather than a problem.
+  const { stdout, stderr } = await execFileAsync(
+    oxlint,
+    ["--config", configPath, "--no-ignore", fixtureRoot],
+    { cwd: root },
+  ).catch((error) => ({ stdout: String(error.stdout ?? ""), stderr: String(error.stderr ?? "") }));
+
+  for (const line of stdout.split("\n")) {
     const match = /^(\S+?):\d+:\d+: \w+ conventions\(([\w-]+)\)/u.exec(line);
     if (match === null) {
       continue;
@@ -90,20 +113,22 @@ beforeAll(async () => {
     const fixture = path.relative(fixtureRoot, path.resolve(root, filePath)).replaceAll("\\", "/");
     reported.set(fixture, [...(reported.get(fixture) ?? []), rule]);
   }
+
+  // Loudly, rather than leaving every assertion below to pass on an empty map.
+  // The first version of this swallowed whatever oxlint said and the failure
+  // read as "the rules do not work" in CI, which was not the problem.
+  if (reported.size === 0) {
+    throw new Error(
+      `oxlint reported no conventions violations, so something upstream of the rules failed.\n` +
+        `stdout:\n${stdout}\nstderr:\n${stderr}`,
+    );
+  }
 }, 60_000);
 
 afterAll(async () => {
-  await rm(fixtureRoot, { recursive: true, force: true });
-});
-
-describe("conventions plugin", () => {
-  /**
-   * If this fails, every assertion below would pass by reporting nothing, so it
-   * is checked on its own: the plugin has to have loaded at all.
-   */
-  it("is loaded by oxlint and reports under the conventions name", () => {
-    expect(reported.size).toBeGreaterThan(0);
-  });
+  if (fixtureRoot !== "") {
+    await rm(fixtureRoot, { recursive: true, force: true });
+  }
 });
 
 describe("no-barrel-file", () => {
@@ -150,5 +175,87 @@ describe("no-project-alias-outside-web", () => {
 
   it("allows an @/ import from the web", () => {
     expect(rulesFor("src/web/usesAlias.ts")).not.toContain("no-project-alias-outside-web");
+  });
+});
+
+/**
+ * The rules above are run under a config written for them, so none of it proves
+ * the repository is actually using the plugin. That is what this checks, and it
+ * is the half that breaks when a path is renamed or a rule is dropped.
+ */
+describe("the project's own oxlint config", () => {
+  /**
+   * JSONC: the file is heavily commented.
+   *
+   * Character by character rather than by regex, because the comment markers
+   * also appear inside string values — `typescript/no-unsafe-type-assertion`
+   * and friends — and a regex that cannot see it is inside a string cuts the
+   * string in half.
+   */
+  const stripJsonComments = (source) => {
+    let output = "";
+    let inString = false;
+    let escaped = false;
+
+    for (let index = 0; index < source.length; index += 1) {
+      const char = source[index];
+
+      if (inString) {
+        output += char;
+        inString = escaped ? inString : char !== '"';
+        escaped = !escaped && char === "\\";
+        continue;
+      }
+
+      if (char === '"') {
+        inString = true;
+        output += char;
+        continue;
+      }
+
+      if (char === "/" && source[index + 1] === "/") {
+        const end = source.indexOf("\n", index);
+        index = end === -1 ? source.length : end - 1;
+        continue;
+      }
+
+      if (char === "/" && source[index + 1] === "*") {
+        const end = source.indexOf("*/", index + 2);
+        index = end === -1 ? source.length : end + 1;
+        continue;
+      }
+
+      output += char;
+    }
+
+    return output;
+  };
+
+  const readProjectConfig = async () =>
+    JSON.parse(stripJsonComments(await readFile(projectConfigPath, "utf8")));
+
+  it("loads the plugin from a path that exists", async () => {
+    const config = await readProjectConfig();
+    const declared = config.jsPlugins ?? [];
+
+    expect(declared).toHaveLength(1);
+
+    const [declaredPath = ""] = declared;
+    await expect(access(path.resolve(root, declaredPath))).resolves.toBeUndefined();
+  });
+
+  it("switches every rule the plugin defines on", async () => {
+    const config = await readProjectConfig();
+
+    for (const rule of RULES) {
+      expect(config.rules?.[`conventions/${rule}`]).toBe("error");
+    }
+  });
+
+  /** A rule added to the plugin but never enabled would do nothing. */
+  it("enables every rule the plugin exports, and no more", async () => {
+    const { default: plugin } = await import(pluginPath);
+
+    expect(Object.keys(plugin.rules).sort()).toStrictEqual([...RULES].sort());
   });
 });
