@@ -26,17 +26,23 @@ overrides:
   # override per major keeps each line on its own patched release.
   "brace-expansion@2": ">=2.1.2 <3"
   "brace-expansion@5": ">=5.0.7"
-  # Bounded below 4: both advisories are fixed in 3.1.4, and ajv — the only thing
+  # Bounded below 4: the advisories are fixed in 3.1.6, and ajv — the only thing
   # that pulls this in — declares a 3.x range, so an unbounded floor would force
-  # a major it does not support.
-  fast-uri: ">=3.1.4 <4"
+  # a major it does not support. Raised from 3.1.4 when two further advisories
+  # landed against the versions between.
+  fast-uri: ">=3.1.6 <4"
   postcss: ">=8.5.18"
   # Bounded below 4: the advisory is fixed in the 3.x line, and postcss — which is
   # what drags this in, through vite — declares a 3.x range, so an unbounded floor
   # would force an ESM-only major it cannot load.
   nanoid: ">=3.3.17 <4"
   ip-address: ">=10.3.1"
-  qs: ">=6.15.2"
+  # Raised from 6.15.2 by a later advisory that covers the whole line below
+  # 6.16.0, so the previous floor no longer clears it.
+  qs: ">=6.16.0"
+  # Build-time only, through vite and babel, but the advisory covers everything
+  # up to 4.28.6 and one copy in the tree was still below it.
+  browserslist: ">=4.28.7"
   body-parser: ">=2.3.0"
   valibot: ">=1.4.2"
   # Held below 8 on purpose: the advisory is fixed in the 7.x line, and the
