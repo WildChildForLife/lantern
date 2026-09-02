@@ -18,11 +18,27 @@ const listening = (server: Server): Promise<number> =>
  *
  * Resolves once the response has started, so the connection is established and
  * unfinished by the time the test asks the server to stop.
+ *
+ * Retried rather than attempted once, because what this test is about is
+ * `stopServer`, not the first TCP handshake. Some loopback stacks refuse the
+ * first connection a process makes to a listener it started itself — reproduced
+ * on WSL2, where a plain `net.connect` to an own-process server is refused every
+ * time while the attempt after it succeeds. Without this the test failed there
+ * on a connection that had nothing to do with what it asserts.
  */
-const openStream = (port: number): Promise<void> =>
-  new Promise((resolve) => {
-    get({ host: "127.0.0.1", port, path: "/" }, () => {
+const openStream = (port: number, attemptsLeft = 5): Promise<void> =>
+  new Promise((resolve, reject) => {
+    const request = get({ host: "127.0.0.1", port, path: "/" }, () => {
       resolve();
+    });
+
+    request.on("error", (error) => {
+      if (attemptsLeft <= 1) {
+        reject(error);
+        return;
+      }
+
+      openStream(port, attemptsLeft - 1).then(resolve, reject);
     });
   });
 
