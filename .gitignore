@@ -47,6 +47,12 @@ dist/*
 # playwright
 .user-data/
 
+# editors
+# Editor configuration is local setup. The settings that matter to the project
+# are the ones the tools read for themselves — .oxlintrc.json, tsconfig.json —
+# and those apply whatever anybody writes code in.
+.vscode/
+
 # claude code
 # Whatever the harness leaves in here is one person's local setup, not part of
 # the project. CLAUDE.md at the root is the shared instruction file.
