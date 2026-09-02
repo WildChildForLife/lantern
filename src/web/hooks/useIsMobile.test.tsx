@@ -95,7 +95,7 @@ describe("useIsMobile", () => {
       },
     } satisfies MediaQueryList;
 
-    const matchMedia = vi.fn((_: string): MediaQueryList => mediaQuery);
+    const matchMedia = vi.fn((): MediaQueryList => mediaQuery);
 
     return { matchMedia, listeners, matches };
   };

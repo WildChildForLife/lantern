@@ -259,17 +259,31 @@
       }
     },
     {
-      "files": ["**/*.{test,spec}.?([mc])[jt]s?(x)"],
+      "files": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.test.js",
+        "**/*.test.jsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx",
+        "**/*.spec.js",
+        "**/*.spec.jsx"
+      ],
       "rules": {
         "no-restricted-imports": "off",
-        "jest/expect-expect": "error", // a test must assert something
+        // a test must assert something — `expect*` covers the helpers that hold
+        // the assertions for a table of cases, which the rule cannot see into
+        "jest/expect-expect": ["error", { "assertFunctionNames": ["expect", "expect*"] }],
         "jest/no-conditional-expect": "error", // no expect inside a conditional
         "jest/no-disabled-tests": "off", // skipping tests is a project decision
         "jest/no-export": "error", // no exports from a test file
         "jest/no-focused-tests": "error", // no test.only, so it cannot be committed
         "jest/require-to-throw-message": "off", // asserting on error messages is a project decision
         "jest/valid-describe-callback": "error", // validate describe callbacks, no async and so on
-        "jest/valid-expect": "error", // expect must be followed by an assertion
+        // expect must be followed by an assertion; two arguments because Vitest
+        // takes a message as the second, which is how a loop over adapters says
+        // which one failed
+        "jest/valid-expect": ["error", { "maxArgs": 2 }],
         "jest/valid-title": "error" // test and describe titles must not be empty
 
         // unsafe `as` is banned in tests too, see CONTRIBUTING.md

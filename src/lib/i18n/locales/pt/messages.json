@@ -16,7 +16,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/FileCompletion.tsx",
-        254
+        259
       ]
     ],
     "translation": "Arquivos e diretórios disponíveis"
@@ -27,7 +27,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        222
+        226
       ]
     ],
     "translation": "Fechar barra lateral"
@@ -42,7 +42,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        376
+        382
       ]
     ],
     "translation": "Comparar de"
@@ -57,7 +57,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        382
+        388
       ]
     ],
     "translation": "Comparar com"
@@ -79,11 +79,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        464
+        472
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        293
+        299
       ]
     ],
     "translation": "Falha ao fazer commit"
@@ -94,11 +94,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        519
+        527
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        361
+        367
       ]
     ],
     "translation": "Falha ao fazer commit e enviar"
@@ -109,11 +109,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        478
+        486
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        311
+        317
       ]
     ],
     "translation": "Falha ao enviar"
@@ -146,7 +146,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        211
+        215
       ]
     ],
     "translation": "Nova conversa"
@@ -168,11 +168,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        506
+        514
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        346
+        352
       ]
     ],
     "translation": "Tentar envio novamente"
@@ -264,7 +264,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/conversationList/AssistantConversationContent.tsx",
-        273
+        278
       ]
     ],
     "translation": "Pensando"
@@ -346,7 +346,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/conversationList/AssistantConversationContent.tsx",
-        168
+        173
       ]
     ],
     "translation": "Parâmetros de entrada"
@@ -458,7 +458,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/conversationList/AssistantConversationContent.tsx",
-        182
+        187
       ]
     ],
     "translation": "Resultado da ferramenta"
@@ -623,7 +623,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        790
+        798
       ]
     ],
     "translation": "Sessões recentes"
@@ -638,11 +638,11 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        418
+        426
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        778
+        786
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -1070,7 +1070,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        314
+        329
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/DeleteSessionDialog.tsx",
@@ -1089,7 +1089,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        322
+        337
       ]
     ],
     "translation": "Criar"
@@ -1149,7 +1149,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        396
+        402
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -1176,7 +1176,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        318
+        333
       ]
     ],
     "translation": "Salvando..."
@@ -1187,7 +1187,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        320
+        335
       ]
     ],
     "translation": "Atualizar"
@@ -1198,7 +1198,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        567
+        575
       ]
     ],
     "translation": "Ramo"
@@ -1209,7 +1209,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        548
+        556
       ]
     ],
     "translation": "Metadados"
@@ -1220,7 +1220,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        594
+        602
       ]
     ],
     "translation": "Modelo"
@@ -1254,7 +1254,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        554
+        562
       ]
     ],
     "translation": "Caminho do projeto"
@@ -1289,7 +1289,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        581
+        589
       ]
     ],
     "translation": "ID da sessão"
@@ -1619,7 +1619,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        346
+        353
       ]
     ],
     "translation": "Expressão Cron"
@@ -1630,7 +1630,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        257
+        264
       ]
     ],
     "translation": "Personalizado"
@@ -1641,7 +1641,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        251
+        258
       ]
     ],
     "translation": "Diário"
@@ -1652,7 +1652,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        296
+        303
       ]
     ],
     "translation": "Dia da semana"
@@ -1663,7 +1663,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        368
+        375
       ]
     ],
     "translation": "Expressão Cron"
@@ -1685,11 +1685,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        267
+        274
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        317
+        324
       ]
     ],
     "translation": "Hora (0-23)"
@@ -1700,7 +1700,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        248
+        255
       ]
     ],
     "translation": "Por hora"
@@ -1711,11 +1711,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        279
+        286
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        329
+        336
       ]
     ],
     "translation": "Minuto (0-59)"
@@ -1737,7 +1737,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        358
+        365
       ]
     ],
     "translation": "Visualizar"
@@ -1759,7 +1759,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        240
+        247
       ]
     ],
     "translation": "Tipo de agendamento"
@@ -1814,7 +1814,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/CronExpressionBuilder.tsx",
-        254
+        261
       ]
     ],
     "translation": "Semanal"
@@ -1825,11 +1825,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        625
+        633
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        533
+        539
       ]
     ],
     "translation": "Commit"
@@ -1840,11 +1840,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        554
+        562
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        442
+        448
       ]
     ],
     "translation": "Confirmar alterações"
@@ -1855,11 +1855,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        596
+        604
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        505
+        511
       ]
     ],
     "translation": "Mensagem do commit"
@@ -1870,11 +1870,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        661
+        669
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        567
+        573
       ]
     ],
     "translation": "Commit e enviar"
@@ -1885,11 +1885,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        622
+        630
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        530
+        536
       ]
     ],
     "translation": "Fazendo commit..."
@@ -1900,11 +1900,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        658
+        666
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        564
+        570
       ]
     ],
     "translation": "Fazendo commit e enviando..."
@@ -1915,11 +1915,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        583
+        591
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        471
+        477
       ]
     ],
     "translation": "Desselecionar tudo"
@@ -1930,7 +1930,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        577
+        583
       ]
     ],
     "translation": "Digite uma mensagem de commit"
@@ -1971,7 +1971,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        613
+        619
       ]
     ],
     "translation": "Carregando diff..."
@@ -1982,11 +1982,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        643
+        651
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        550
+        556
       ]
     ],
     "translation": "Enviar"
@@ -1997,11 +1997,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        640
+        648
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        547
+        553
       ]
     ],
     "translation": "Enviando..."
@@ -2012,11 +2012,11 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        574
+        582
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        463
+        469
       ]
     ],
     "translation": "Selecionar tudo"
@@ -2027,7 +2027,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/diffModal/DiffModal.tsx",
-        575
+        581
       ]
     ],
     "translation": "Selecione pelo menos um arquivo"
@@ -2082,7 +2082,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        536
+        542
       ]
     ],
     "translation": "Exemplo: 1.00"
@@ -2093,7 +2093,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        492
+        498
       ]
     ],
     "translation": "Exemplo: 10"
@@ -2104,7 +2104,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        513
+        519
       ]
     ],
     "translation": "Exemplo: 10000"
@@ -2115,7 +2115,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        424
+        430
       ]
     ],
     "translation": "Exemplo: api.example.com, cdn.example.com"
@@ -2663,7 +2663,7 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        536
+        544
       ]
     ],
     "translation": "Sem alterações Git"
@@ -2674,7 +2674,7 @@
     "origin": [
       [
         "src/web/app/components/rightPanel/GitTabContent.tsx",
-        754
+        762
       ]
     ],
     "translation": "Solicitações de pull"
@@ -3059,7 +3059,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        158
+        173
       ]
     ],
     "translation": "Configure uma tarefa agendada para enviar mensagens ao Claude Code"
@@ -3070,7 +3070,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        154
+        169
       ]
     ],
     "translation": "Criar tarefa agendada"
@@ -3081,7 +3081,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        152
+        167
       ]
     ],
     "translation": "Editar tarefa agendada"
@@ -3107,7 +3107,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        289
+        304
       ]
     ],
     "translation": "Política de concorrência"
@@ -3118,7 +3118,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        304
+        319
       ]
     ],
     "translation": "Executar mesmo se já estiver em execução"
@@ -3129,7 +3129,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        301
+        316
       ]
     ],
     "translation": "Pular se já estiver em execução"
@@ -3140,7 +3140,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        167
+        182
       ]
     ],
     "translation": "Ativar"
@@ -3151,7 +3151,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        170
+        185
       ]
     ],
     "translation": "Ativar ou desativar esta tarefa agendada"
@@ -3162,7 +3162,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        246
+        261
       ]
     ],
     "translation": "Conteúdo da mensagem"
@@ -3174,7 +3174,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        262
+        277
       ]
     ],
     "translation": "Entrada de mensagem com suporte a preenchimento automático (/ para comandos, @ para arquivos)"
@@ -3185,7 +3185,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        281
+        296
       ]
     ],
     "translation": "/ para conclusão de comando, @ para conclusão de arquivo"
@@ -3197,7 +3197,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        255
+        270
       ]
     ],
     "translation": "Digite mensagem para enviar ao Claude Code... (/ para comandos, @ para arquivos)"
@@ -3208,7 +3208,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        184
+        199
       ]
     ],
     "translation": "Nome da tarefa"
@@ -3219,7 +3219,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        228
+        243
       ]
     ],
     "translation": "Tempo de execução agendado"
@@ -3230,7 +3230,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        238
+        253
       ]
     ],
     "translation": "Será executado uma vez na data e hora especificadas e depois excluído automaticamente"
@@ -3241,7 +3241,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        201
+        216
       ]
     ],
     "translation": "Tipo de agendamento"
@@ -3252,7 +3252,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        213
+        228
       ]
     ],
     "translation": "Recorrente (Cron)"
@@ -3263,7 +3263,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/scheduler/SchedulerJobDialog.tsx",
-        216
+        231
       ]
     ],
     "translation": "Execução única"
@@ -3416,11 +3416,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        658
+        666
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        715
+        723
       ]
     ],
     "translation": "Criação de cache"
@@ -3431,11 +3431,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        666
+        674
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        729
+        737
       ]
     ],
     "translation": "Leitura de cache"
@@ -3447,7 +3447,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        621
+        629
       ]
     ],
     "translation": "Incluído no seu plano"
@@ -3458,11 +3458,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        642
+        650
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        687
+        695
       ]
     ],
     "translation": "Tokens de entrada"
@@ -3473,11 +3473,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        607
+        615
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        619
+        627
       ]
     ],
     "translation": "Custo da sessão"
@@ -3488,11 +3488,11 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        650
+        658
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        701
+        709
       ]
     ],
     "translation": "Tokens de saída"
@@ -3503,7 +3503,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        627
+        635
       ]
     ],
     "translation": "Total"
@@ -3553,7 +3553,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        541
+        549
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/DeleteSessionDialog.tsx",
@@ -3572,7 +3572,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        781
+        789
       ]
     ],
     "translation": "Inicie um novo chat para começar a conversa"
@@ -3583,7 +3583,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        509
+        517
       ]
     ],
     "translation": "Copiar caminho do arquivo de sessão"
@@ -3594,7 +3594,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        487
+        495
       ]
     ],
     "translation": "Exportar para HTML"
@@ -3605,7 +3605,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        496
+        504
       ]
     ],
     "translation": "Exportar para JSONL"
@@ -3616,7 +3616,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        529
+        537
       ]
     ],
     "translation": "Ocultar detalhes técnicos"
@@ -3627,7 +3627,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        531
+        539
       ]
     ],
     "translation": "Mostrar detalhes técnicos"
@@ -3638,7 +3638,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        870
+        878
       ]
     ],
     "translation": "Claude Code está processando..."
@@ -3686,7 +3686,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        835
+        843
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -3705,7 +3705,7 @@
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/SessionPageMain.tsx",
-        833
+        841
       ],
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/SessionsTab.tsx",
@@ -3762,7 +3762,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        440
+        446
       ]
     ],
     "translation": "Configurações avançadas"
@@ -3832,7 +3832,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        287
+        293
       ]
     ],
     "translation": "Ferramentas desativadas"
@@ -3855,7 +3855,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        302
+        308
       ]
     ],
     "translation": "Variáveis de ambiente"
@@ -4009,7 +4009,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        126
+        130
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
@@ -4116,7 +4116,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        526
+        532
       ]
     ],
     "translation": "Orçamento máximo (USD)"
@@ -4128,7 +4128,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        504
+        510
       ]
     ],
     "translation": "Tokens de pensamento máximos"
@@ -4140,7 +4140,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        483
+        489
       ]
     ],
     "translation": "Voltas máximas"
@@ -4187,7 +4187,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        148
+        152
       ]
     ],
     "translation": "Notificações"
@@ -4247,7 +4247,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        367
+        373
       ]
     ],
     "translation": "Permitir comandos não isolados"
@@ -4259,7 +4259,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        347
+        353
       ]
     ],
     "translation": "Auto permitir Bash se isolado"
@@ -4271,7 +4271,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        318
+        324
       ]
     ],
     "translation": "Sandbox"
@@ -4283,7 +4283,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        399
+        405
       ]
     ],
     "translation": "Permitir ligação local"
@@ -4295,7 +4295,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        408
+        414
       ]
     ],
     "translation": "Domínios permitidos (separados por vírgula)"
@@ -4307,7 +4307,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        377
+        383
       ]
     ],
     "translation": "Configurações de rede"
@@ -4449,7 +4449,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        134
+        138
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
@@ -4497,7 +4497,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        141
+        145
       ]
     ],
     "translation": "Exibição de sessão"
@@ -4553,7 +4553,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        446
+        452
       ]
     ],
     "translation": "Fontes de configuração"
@@ -4565,7 +4565,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        276
+        282
       ]
     ],
     "translation": "Incluir prompt padrão do Claude Code"
@@ -4643,7 +4643,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/components/chatForm/ClaudeCodeSettingsForm.tsx",
-        579
+        585
       ],
       [
         "src/web/components/GlobalSidebar.tsx",
@@ -4940,7 +4940,7 @@
     "origin": [
       [
         "src/web/app/projects/[projectId]/sessions/[sessionId]/components/sessionSidebar/MobileSidebar.tsx",
-        190
+        194
       ]
     ],
     "translation": "Projetos"

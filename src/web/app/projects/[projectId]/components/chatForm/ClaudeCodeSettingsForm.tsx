@@ -242,6 +242,12 @@ export const ClaudeCodeSettingsForm: FC<ClaudeCodeSettingsFormProps> = ({
     defaultValues: transformSchemaToForm(value),
   });
 
+  // `watch()` hands back a fresh object on every render, so this memo can never
+  // hit and React Compiler says as much. Left alone deliberately: the fix is
+  // react-hook-form's `useWatch`, which changes when this form re-renders and
+  // therefore when it reports settings back to its parent — not a thing to
+  // change for a memo that only saves a small transform.
+  // oxlint-disable-next-line react/incompatible-library
   const formData = watch();
   const transformed = useMemo(() => transformFormToSchema(formData), [formData]);
   const lastSerialized = useRef<string | null>(null);

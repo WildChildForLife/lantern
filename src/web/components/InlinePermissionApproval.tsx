@@ -276,6 +276,10 @@ const formatParamValue = (value: unknown): string => {
 const ToolPreview: FC<{
   permissionRequest: PermissionRequest;
 }> = ({ permissionRequest }) => {
+  // Looked up from a static table keyed by tool name, so it is the same
+  // reference on every render — nothing is being defined here. The rule cannot
+  // see that through the lookup.
+  /* oxlint-disable react/static-components */
   const Visualizer = getToolVisualizer(permissionRequest.toolName);
 
   if (Visualizer !== undefined) {
@@ -290,6 +294,7 @@ const ToolPreview: FC<{
       </div>
     );
   }
+  /* oxlint-enable react/static-components */
 
   // Inline parameters — no collapsible, max-height for overflow
   const entries = Object.entries(permissionRequest.toolInput);

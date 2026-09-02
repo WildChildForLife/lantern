@@ -222,13 +222,19 @@ export const DiffModal: FC<DiffModalProps> = ({
     }
   }, [compareFrom, compareTo, getDiff, projectId]);
 
-  // Initialize file selection when diff data changes (FR-002: all selected by default)
-  useEffect(() => {
+  // Initialize file selection when diff data changes (FR-002: all selected by
+  // default). Adjusted during render rather than in an effect, so a new diff is
+  // never drawn with the previous diff's selection still on it.
+  // Seeded empty rather than with the current diff: a cached result is already
+  // there on the very first render, and seeding with it would mean the first
+  // diff a reader ever sees is the one whose files never got selected.
+  const [selectionDiff, setSelectionDiff] = useState<typeof diffResult>(undefined);
+  if (selectionDiff !== diffResult) {
+    setSelectionDiff(diffResult);
     if (diffResult !== undefined && diffResult.files.length > 0) {
-      const initialSelection = new Map(diffResult.files.map((file) => [file.filePath, true]));
-      setSelectedFiles(initialSelection);
+      setSelectedFiles(new Map(diffResult.files.map((file) => [file.filePath, true])));
     }
-  }, [diffResult]);
+  }
 
   useEffect(() => {
     if (isOpen && compareFrom.length > 0 && compareTo.length > 0) {
@@ -265,7 +271,7 @@ export const DiffModal: FC<DiffModalProps> = ({
   // Commit handler
   const handleCommit = async () => {
     const selected = Array.from(selectedFiles.entries())
-      .filter(([_, isSelected]) => isSelected)
+      .filter(([, isSelected]) => isSelected)
       .map(([path]) => path);
 
     console.log("[DiffModal.handleCommit] Selected files state:", selectedFiles);
@@ -315,7 +321,7 @@ export const DiffModal: FC<DiffModalProps> = ({
   // Commit and Push handler
   const handleCommitAndPush = async () => {
     const selected = Array.from(selectedFiles.entries())
-      .filter(([_, isSelected]) => isSelected)
+      .filter(([, isSelected]) => isSelected)
       .map(([path]) => path);
 
     console.log("[DiffModal.handleCommitAndPush] Selected files:", selected);

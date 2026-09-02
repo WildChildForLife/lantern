@@ -56,18 +56,23 @@ export const useSidechain = (conversations: Conversation[]) => {
     );
   }, [conversations]);
 
+  // The walk is a function of its own rather than the callback calling itself:
+  // a `const` that refers to itself is only defined by the time it runs, which
+  // is true here but is not something a reader — or the compiler — can see
+  // locally.
   const getRootConversationRecursive = useCallback(
     (conversation: SidechainConversation): SidechainConversation => {
-      if (conversation.parentUuid === null) {
-        return conversation;
-      }
+      const walkToRoot = (current: SidechainConversation): SidechainConversation => {
+        if (current.parentUuid === null) {
+          return current;
+        }
 
-      const parent = conversationMap.get(conversation.parentUuid);
-      if (parent === undefined) {
-        return conversation;
-      }
+        const parent = conversationMap.get(current.parentUuid);
 
-      return getRootConversationRecursive(parent);
+        return parent === undefined ? current : walkToRoot(parent);
+      };
+
+      return walkToRoot(conversation);
     },
     [conversationMap],
   );

@@ -93,8 +93,13 @@ export const TerminalPanel = forwardRef<TerminalHandle, TerminalPanelProps>(
     const sessionIdRef = useRef<string | undefined>(undefined);
     const lastSeqRef = useRef<number>(0);
     const refreshRequestedRef = useRef(false);
+    // Written after the commit rather than during render: it is only ever read
+    // from the socket's own events, which cannot run before this has.
     const onProcessExitRef = useRef(onProcessExit);
-    onProcessExitRef.current = onProcessExit;
+
+    useEffect(() => {
+      onProcessExitRef.current = onProcessExit;
+    }, [onProcessExit]);
     const sendJsonRef = useRef<((payload: object) => void) | undefined>(undefined);
 
     useImperativeHandle(ref, () => ({

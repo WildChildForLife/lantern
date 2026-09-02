@@ -106,18 +106,24 @@ export const FlickArrowButton: FC<FlickArrowButtonProps> = ({ onSendData }) => {
 
   // --- Touch events for flick gesture ---
 
-  const handleTouchStart = useCallback((e: TouchEvent) => {
-    const touch = e.touches[0];
-    if (!touch) return;
-    startPosRef.current = { x: touch.clientX, y: touch.clientY };
-    setFlickDirection(null);
+  const handleTouchStart = useCallback(
+    (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      startPosRef.current = { x: touch.clientX, y: touch.clientY };
+      setFlickDirection(null);
 
-    longPressTimerRef.current = setTimeout(() => {
-      isFlickModeRef.current = true;
-      setIsFlickMode(true);
-      setIsPopupOpen(false);
-    }, LONG_PRESS_MS);
-  }, []);
+      longPressTimerRef.current = setTimeout(() => {
+        isFlickModeRef.current = true;
+        // Measured as flick mode begins, so the indicator has somewhere to be
+        // without the render reading the button's box back out of the DOM.
+        updatePopupPos();
+        setIsFlickMode(true);
+        setIsPopupOpen(false);
+      }, LONG_PRESS_MS);
+    },
+    [updatePopupPos],
+  );
 
   const handleTouchMove = useCallback(
     (e: TouchEvent) => {
@@ -225,15 +231,13 @@ export const FlickArrowButton: FC<FlickArrowButtonProps> = ({ onSendData }) => {
       {/* Flick direction indicator (portal) */}
       {isFlickMode &&
         flickDirection !== null &&
-        buttonRef.current &&
+        popupPos !== null &&
         createPortal(
           <div
             className="fixed bg-primary text-primary-foreground text-xs font-mono px-2 py-0.5 rounded pointer-events-none whitespace-nowrap z-[9999]"
             style={{
-              left:
-                buttonRef.current.getBoundingClientRect().left +
-                buttonRef.current.getBoundingClientRect().width / 2,
-              top: buttonRef.current.getBoundingClientRect().top - 32,
+              left: popupPos.x,
+              top: popupPos.y - 32,
               transform: "translateX(-50%)",
             }}
           >

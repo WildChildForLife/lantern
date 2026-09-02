@@ -54,10 +54,14 @@ export const MobileSidebar: FC<MobileSidebarProps> = ({
     "system-info": i18n._({ id: "sidebar.tab.system_info" }),
   };
 
-  // Sync tab only when initialTab changes (e.g. opened from a specific tab trigger)
-  useEffect(() => {
+  // Follow initialTab when it changes — the sidebar was opened from a specific
+  // tab trigger. Adjusted during render rather than in an effect, so the panel
+  // is never painted on the tab the last opening left behind.
+  const [openedOnTab, setOpenedOnTab] = useState<Tab>(initialTab);
+  if (openedOnTab !== initialTab) {
+    setOpenedOnTab(initialTab);
     setActiveTab(initialTab);
-  }, [initialTab]);
+  }
 
   // Handle escape key and prevent background scroll
   useEffect(() => {

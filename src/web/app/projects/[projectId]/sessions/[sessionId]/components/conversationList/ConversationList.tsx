@@ -453,9 +453,15 @@ export const ConversationList: FC<ConversationListProps> = ({
     };
   }, [enableInPageSearch, isSearchOpen, config?.findHotkey]);
 
-  useEffect(() => {
+  // A new search starts at its first match, and a position that no longer fits
+  // the matches wraps back to the first. Both adjusted during render rather than
+  // in an effect: they are corrections to state that is about to be drawn, and
+  // an effect would paint the stale position once before fixing it.
+  const [positionedForQuery, setPositionedForQuery] = useState(committedSearchQuery);
+  if (positionedForQuery !== committedSearchQuery) {
+    setPositionedForQuery(committedSearchQuery);
     setActiveMatchPosition(0);
-  }, [committedSearchQuery]);
+  }
 
   useEffect(() => {
     if (!isSearchOpen) {
@@ -477,13 +483,14 @@ export const ConversationList: FC<ConversationListProps> = ({
     setActiveMatchPosition(0);
   }, []);
 
-  useEffect(() => {
-    if (matchedRowIndices.length === 0) {
-      return;
-    }
+  if (matchedRowIndices.length > 0 && activeMatchPosition >= matchedRowIndices.length) {
+    setActiveMatchPosition(0);
+  }
 
-    if (activeMatchPosition >= matchedRowIndices.length) {
-      setActiveMatchPosition(0);
+  // Scrolling only. The position it scrolls to is corrected above, before this
+  // ever sees it.
+  useEffect(() => {
+    if (matchedRowIndices.length === 0 || activeMatchPosition >= matchedRowIndices.length) {
       return;
     }
 
