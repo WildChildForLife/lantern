@@ -12,7 +12,7 @@
     "react",
     "jsx-a11y"
   ],
-  "jsPlugins": ["./dev/lints/conventions.js"],
+  "jsPlugins": ["./scripts/lints/conventions.js"],
   "categories": {},
   "rules": {
     /* Correctness: rules whose violations turn into runtime errors, safe to apply everywhere */
@@ -390,8 +390,6 @@
     "src/routeTree.gen.ts",
     "e2e/**",
     "scripts/**",
-    "dev/lints/**",
-    "dev/lints/**",
     "**/*.config.*"
   ],
   "options": {
