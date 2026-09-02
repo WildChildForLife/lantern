@@ -209,6 +209,12 @@ export const CronExpressionBuilder = ({ value, onChange }: CronExpressionBuilder
   const [customExpression, setCustomExpression] = useState(value);
   const [error, setError] = useState<string | null>(null);
 
+  // Deliberately an effect, not a correction made during render: every branch
+  // reports the expression back to the caller through `onChange`, and a parent
+  // callback run during this component's render is free to set state in the
+  // parent. Moving this would mean lifting the builder's fields to the caller,
+  // which is a larger change than the warning is worth.
+  /* oxlint-disable react/set-state-in-effect */
   useEffect(() => {
     if (mode === "custom") {
       if (validateCronExpression(customExpression)) {
@@ -224,6 +230,7 @@ export const CronExpressionBuilder = ({ value, onChange }: CronExpressionBuilder
       setError(null);
     }
   }, [mode, hour, minute, dayOfWeek, customExpression, onChange]);
+  /* oxlint-enable react/set-state-in-effect */
 
   const handleModeChange = (newMode: CronMode) => {
     setMode(newMode);

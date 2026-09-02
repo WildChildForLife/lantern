@@ -84,8 +84,13 @@ export const useSwipeGesture = ({
 }: UseSwipeGestureOptions): ((element: HTMLElement | null) => void) => {
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
+  // Written after the commit rather than during render: it is only ever read
+  // from a pointer event, which cannot fire before this has run.
   const onSwipeRef = useRef(onSwipe);
-  onSwipeRef.current = onSwipe;
+
+  useEffect(() => {
+    onSwipeRef.current = onSwipe;
+  }, [onSwipe]);
 
   const callbackRef = useCallback(
     (element: HTMLElement | null) => {

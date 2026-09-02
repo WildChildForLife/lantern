@@ -231,22 +231,30 @@ const SessionPageMainContent: FC<
   const isNearBottomRef = useRef(true);
   const hadVirtualMessageRef = useRef(false);
 
+  // The frame loop is a function of its own rather than the callback calling
+  // itself: a `const` that refers to itself is only defined by the time it runs,
+  // which is true here but is not something a reader — or the compiler — can see
+  // locally.
   const scrollToBottomSettled = useCallback((frames: number) => {
-    const scrollContainer = scrollContainerRef.current;
-    if (scrollContainer === null) {
-      return;
-    }
+    const settle = (remaining: number) => {
+      const scrollContainer = scrollContainerRef.current;
+      if (scrollContainer === null) {
+        return;
+      }
 
-    scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: "auto" });
+      scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: "auto" });
 
-    if (frames <= 0) {
-      scrollSettleRafIdRef.current = null;
-      return;
-    }
+      if (remaining <= 0) {
+        scrollSettleRafIdRef.current = null;
+        return;
+      }
 
-    scrollSettleRafIdRef.current = window.requestAnimationFrame(() => {
-      scrollToBottomSettled(frames - 1);
-    });
+      scrollSettleRafIdRef.current = window.requestAnimationFrame(() => {
+        settle(remaining - 1);
+      });
+    };
+
+    settle(frames);
   }, []);
 
   const abortTask = useMutation({

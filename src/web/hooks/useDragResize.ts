@@ -58,6 +58,11 @@ export const useDragResize = ({
 
   useEffect(() => {
     if (!enabled) {
+      // Deliberately an effect, not a correction made during render.
+      // `stopResizing` calls the caller's `onResizeEnd`, and a parent callback
+      // run during this component's render is free to set state in the parent —
+      // which is a worse thing than the extra render this costs.
+      // oxlint-disable-next-line react/set-state-in-effect
       stopResizing();
       return;
     }

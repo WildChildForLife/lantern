@@ -14,7 +14,7 @@ import {
   Loader2,
   RefreshCwIcon,
 } from "lucide-react";
-import { type FC, Suspense, useCallback, useEffect, useId, useMemo, useState } from "react";
+import { type FC, Suspense, useCallback, useId, useMemo, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { oneDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { toast } from "sonner";
@@ -410,11 +410,19 @@ const GitFileListWithCommit: FC<{ projectId: string }> = ({ projectId }) => {
     return map;
   }, [diffResult]);
 
-  useEffect(() => {
+  // Every file in a new diff starts selected. Adjusted during render rather than
+  // in an effect, so a new diff is never drawn with the previous diff's
+  // selection still on it.
+  // Seeded empty rather than with the current diff: a cached result is already
+  // there on the very first render, and seeding with it would mean the first
+  // diff a reader ever sees is the one whose files never got selected.
+  const [selectionDiff, setSelectionDiff] = useState<typeof diffResult>(undefined);
+  if (selectionDiff !== diffResult) {
+    setSelectionDiff(diffResult);
     if (diffResult !== undefined && diffResult.files.length > 0) {
       setSelectedFiles(new Map(diffResult.files.map((file) => [file.filePath, true])));
     }
-  }, [diffResult]);
+  }
 
   const handleToggleFile = (filePath: string) => {
     setSelectedFiles((prev) => {

@@ -60,6 +60,10 @@ const ToolUseContent: FC<ToolUseContentProps> = ({
   const toolResult = getToolResult(content.id);
   const toolUseResult = getToolUseResult(content.id);
 
+  // `Visualizer` is looked up from a static table keyed by tool name, so it is
+  // the same reference on every render — nothing is being defined here. The
+  // rule cannot see that through the lookup.
+  /* oxlint-disable react/static-components */
   const visualizerElement = useMemo(() => {
     if (!Visualizer || viewMode !== "visual") return null;
     return (
@@ -71,6 +75,7 @@ const ToolUseContent: FC<ToolUseContentProps> = ({
       />
     );
   }, [Visualizer, viewMode, content.id, content.input, toolResult, toolUseResult]);
+  /* oxlint-enable react/static-components */
 
   // If visualizer returned null (validation failed), force raw mode
   const effectiveMode =

@@ -1,5 +1,5 @@
 import { Trans, useLingui } from "@lingui/react";
-import { type FC, useEffect, useState } from "react";
+import { type FC, useState } from "react";
 import type { NewSchedulerJob, SchedulerJob } from "@/server/core/scheduler/schema";
 import { InlineCompletion } from "@/web/app/projects/[projectId]/components/chatForm/InlineCompletion";
 import { useMessageCompletion } from "@/web/app/projects/[projectId]/components/chatForm/useMessageCompletion";
@@ -57,11 +57,26 @@ export const SchedulerJobDialog: FC<SchedulerJobDialogProps> = ({
   const [enabled, setEnabled] = useState(true);
   const [concurrencyPolicy, setConcurrencyPolicy] = useState<"skip" | "run">("skip");
 
-  // Message completion hook
+  // Message completion hook. The refs and the cursor are pulled out here rather
+  // than reached for through `completion` in the markup below: read as a member
+  // of a hook's return value they cannot be told apart from a ref being
+  // dereferenced during render, which is a thing worth being warned about.
   const completion = useMessageCompletion();
+  const { containerRef, textareaRef, commandCompletionRef, fileCompletionRef, cursorPosition } =
+    completion;
 
-  // Initialize form with job data when editing
-  useEffect(() => {
+  // Load the job being edited into the form, or clear it for a new one.
+  // Adjusted during render rather than in an effect, and rather than by keying
+  // the dialog to remount: a remount would reset the fields while the close
+  // animation is still running, and an effect would paint the previous job's
+  // values once before replacing them.
+  // Seeded `undefined`, which is neither a job nor the `null` that means "a new
+  // one": whatever this mounts with then counts as a change and gets loaded,
+  // rather than the form sitting empty in front of a job it was opened on.
+  const [loadedJob, setLoadedJob] = useState<SchedulerJob | null | undefined>(undefined);
+  if (loadedJob !== job) {
+    setLoadedJob(job);
+
     if (job) {
       setName(job.name);
       setScheduleType(job.schedule.type);
@@ -97,7 +112,7 @@ export const SchedulerJobDialog: FC<SchedulerJobDialogProps> = ({
       setEnabled(true);
       setConcurrencyPolicy("skip");
     }
-  }, [job]);
+  }
 
   const handleSubmit = () => {
     const newJob: NewSchedulerJob = {
@@ -245,9 +260,9 @@ export const SchedulerJobDialog: FC<SchedulerJobDialogProps> = ({
             <Label htmlFor="message-content">
               <Trans id="scheduler.form.message" />
             </Label>
-            <div className="relative" ref={completion.containerRef}>
+            <div className="relative" ref={containerRef}>
               <Textarea
-                ref={completion.textareaRef}
+                ref={textareaRef}
                 id="message-content"
                 value={messageContent}
                 onChange={(e) => completion.handleChange(e.target.value, setMessageContent)}
@@ -268,13 +283,13 @@ export const SchedulerJobDialog: FC<SchedulerJobDialogProps> = ({
               <InlineCompletion
                 projectId={projectId}
                 message={messageContent}
-                commandCompletionRef={completion.commandCompletionRef}
-                fileCompletionRef={completion.fileCompletionRef}
+                commandCompletionRef={commandCompletionRef}
+                fileCompletionRef={fileCompletionRef}
                 handleCommandSelect={(cmd) =>
                   completion.handleCommandSelect(cmd, setMessageContent)
                 }
                 handleFileSelect={(file) => completion.handleFileSelect(file, setMessageContent)}
-                cursorPosition={completion.cursorPosition}
+                cursorPosition={cursorPosition}
               />
             </div>
             <p className="text-xs text-muted-foreground">

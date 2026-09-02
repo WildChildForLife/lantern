@@ -39,11 +39,16 @@ export const useSpeechRecognition = ({
   const mediaStreamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // Use refs for callbacks to avoid re-creating recognition on every render
+  // Use refs for callbacks to avoid re-creating recognition on every render.
+  // Written after the commit rather than during render: both are only ever read
+  // from recognition's own events, which cannot run before this has.
   const onTranscriptRef = useRef(onTranscript);
-  onTranscriptRef.current = onTranscript;
   const onInterimTranscriptRef = useRef(onInterimTranscript);
-  onInterimTranscriptRef.current = onInterimTranscript;
+
+  useEffect(() => {
+    onTranscriptRef.current = onTranscript;
+    onInterimTranscriptRef.current = onInterimTranscript;
+  }, [onTranscript, onInterimTranscript]);
 
   const isSupported = getSpeechRecognitionAPI() !== undefined;
 

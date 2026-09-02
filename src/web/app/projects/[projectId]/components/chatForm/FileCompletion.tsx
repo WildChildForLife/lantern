@@ -104,7 +104,12 @@ export const FileCompletion = forwardRef<FileCompletionRef, FileCompletionProps>
       return completionData.entries.filter((entry) =>
         entry.name.toLowerCase().includes(filterTerm.toLowerCase()),
       );
-    }, [completionData?.entries, filterTerm]);
+      // Depends on the whole `completionData` rather than on
+      // `completionData?.entries`: an optional access cannot be narrowed to a
+      // dependency, so the narrower list claimed to track something it does
+      // not. Recomputing whenever the query result changes is the honest
+      // version, and this only filters a list.
+    }, [completionData, filterTerm]);
 
     // Determine if completion should be shown
     const shouldBeOpen = shouldShow && !isLoading && filteredEntries.length > 0;

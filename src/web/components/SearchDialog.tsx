@@ -34,15 +34,27 @@ export const SearchDialog = ({ open, onOpenChange, projectId }: SearchDialogProp
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Reset state when dialog opens/closes
-  useEffect(() => {
+  // Every opening starts from an empty search. The fields are cleared during
+  // render so the dialog is never painted holding the last search; the focus is
+  // left to an effect, because there is nothing to focus until it is on screen.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (wasOpen !== open) {
+    setWasOpen(open);
     if (open) {
       setQuery("");
       setDebouncedQuery("");
       setSelectedIndex(0);
       setSearchAllProjects(false);
-      setTimeout(() => inputRef.current?.focus(), 0);
     }
+  }
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const timer = setTimeout(() => inputRef.current?.focus(), 0);
+    return () => clearTimeout(timer);
   }, [open]);
 
   const { data, isLoading } = useQuery({
@@ -53,11 +65,15 @@ export const SearchDialog = ({ open, onOpenChange, projectId }: SearchDialogProp
   const results = useMemo(() => data?.results ?? [], [data?.results]);
   const resultsLength = results.length;
 
-  // Reset selection when query changes
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional re-run on query change
-  useEffect(() => {
+  // Reset selection when the query changes. Adjusted during render rather than
+  // in an effect: a new set of results makes the old highlight meaningless, and
+  // doing it here means the list is never painted with a selection that belongs
+  // to the previous query.
+  const [selectionQuery, setSelectionQuery] = useState(debouncedQuery);
+  if (selectionQuery !== debouncedQuery) {
+    setSelectionQuery(debouncedQuery);
     setSelectedIndex(0);
-  }, [debouncedQuery]);
+  }
 
   // Scroll selected item into view
   useEffect(() => {

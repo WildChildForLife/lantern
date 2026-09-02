@@ -1,5 +1,5 @@
 import { AlertCircle, Home, RefreshCw } from "lucide-react";
-import type { FC, PropsWithChildren } from "react";
+import { type FC, type PropsWithChildren, useEffect } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { Alert, AlertDescription, AlertTitle } from "@/web/components/ui/alert";
 import { Button } from "@/web/components/ui/button";
@@ -19,13 +19,28 @@ const errorToString = (error: unknown): string => {
   return String(error);
 };
 
+/**
+ * Sends an unauthenticated visitor to the login page.
+ *
+ * A component of its own so the navigation happens after this has been
+ * committed rather than while the fallback is still being rendered. Assigning
+ * to `location` during render leaves React mid-render of a tree it is then
+ * asked to throw away.
+ */
+const RedirectToLogin: FC = () => {
+  useEffect(() => {
+    window.location.href = "/login";
+  }, []);
+
+  return null;
+};
+
 export const RootErrorBoundary: FC<PropsWithChildren> = ({ children }) => {
   return (
     <ErrorBoundary
       FallbackComponent={({ error, resetErrorBoundary }) => {
         if (error instanceof HttpError && error.status === 401) {
-          window.location.href = "/login";
-          return null;
+          return <RedirectToLogin />;
         }
 
         return (
