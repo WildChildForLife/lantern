@@ -7,7 +7,7 @@
 # against anything else.
 FROM node:24-slim
 
-ARG CODEX_VERSION=0.146.0
+ARG CODEX_VERSION=0.152.1
 RUN apt-get update \
   && apt-get install -y --no-install-recommends git ca-certificates gosu \
   && rm -rf /var/lib/apt/lists/* \

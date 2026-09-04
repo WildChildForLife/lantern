@@ -10,7 +10,7 @@
 # being tested, and the on-disk shape is exactly what is under test.
 FROM node:24-slim
 
-ARG QWEN_CODE_VERSION=0.21.6
+ARG QWEN_CODE_VERSION=0.22.3
 RUN apt-get update \
   && apt-get install -y --no-install-recommends git ca-certificates gosu \
   && rm -rf /var/lib/apt/lists/* \

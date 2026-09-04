@@ -7,7 +7,7 @@
 # exists to answer.
 FROM node:24-slim
 
-ARG OPENCODE_VERSION=1.18.13
+ARG OPENCODE_VERSION=1.18.27
 RUN apt-get update \
   && apt-get install -y --no-install-recommends git ca-certificates gosu \
   && rm -rf /var/lib/apt/lists/* \
