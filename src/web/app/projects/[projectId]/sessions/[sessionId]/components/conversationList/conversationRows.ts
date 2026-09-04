@@ -26,6 +26,7 @@ const noTimestampConversationTypes = new Set<Conversation["type"]>([
   "worktree-state",
   "file-history-delta",
   "frame-link",
+  "atis-latch",
 ]);
 
 export const getConversationKey = (conversation: Conversation) => {
@@ -110,7 +111,7 @@ export const getConversationKey = (conversation: Conversation) => {
   }
 
   if (conversation.type === "atis-latch") {
-    return `atis-latch_${conversation.sessionId}_${conversation.atis}`;
+    return `atis-latch_${conversation.sessionId}`;
   }
 
   conversation satisfies never;

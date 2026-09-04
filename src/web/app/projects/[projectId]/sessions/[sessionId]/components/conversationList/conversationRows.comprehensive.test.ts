@@ -126,6 +126,12 @@ const makeLastPrompt = (sessionId: string): Extract<Conversation, { type: "last-
   lastPrompt: "What is the meaning of life?",
 });
 
+const makeAtisLatch = (sessionId: string): Extract<Conversation, { type: "atis-latch" }> => ({
+  type: "atis-latch",
+  atis: "",
+  sessionId,
+});
+
 const makeError = (lineNumber: number): ErrorJsonl => ({
   type: "x-error",
   line: "{ invalid json",
@@ -190,6 +196,14 @@ describe("getConversationKey", () => {
   it("returns last-prompt key with sessionId", () => {
     const conv = makeLastPrompt("session-1");
     expect(getConversationKey(conv)).toBe("last-prompt_session-1");
+  });
+
+  // Every observed atis-latch carried an empty string, so keying on it would
+  // promise a uniqueness it does not have. The sessionId alone is the honest
+  // key, and repeats are numbered by createUniqueRowKey like any other.
+  it("returns atis-latch key with sessionId", () => {
+    const conv = makeAtisLatch("session-1");
+    expect(getConversationKey(conv)).toBe("atis-latch_session-1");
   });
 });
 

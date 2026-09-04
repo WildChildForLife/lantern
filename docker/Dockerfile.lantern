@@ -10,11 +10,11 @@
 ARG LANTERN_IMAGE=lantern-harness-lantern
 FROM ${LANTERN_IMAGE}
 
-ARG CLAUDE_CODE_VERSION=2.1.221
-ARG CODEX_VERSION=0.146.0
-ARG OPENCODE_VERSION=1.18.13
-ARG QWEN_CODE_VERSION=0.21.6
-ARG COPILOT_VERSION=1.0.78
+ARG CLAUDE_CODE_VERSION=2.1.258
+ARG CODEX_VERSION=0.152.1
+ARG OPENCODE_VERSION=1.18.27
+ARG QWEN_CODE_VERSION=0.22.3
+ARG COPILOT_VERSION=1.0.82
 
 RUN npm install -g \
       "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
@@ -31,11 +31,16 @@ RUN npm install -g \
 # release tag and the installer's own version input; the installer now rejects
 # anything that is not semver, so a build that asked for `stable` failed with
 # "invalid version 'stable'" after downloading the script that said so.
-ARG GOOSE_VERSION=v1.45.0
+#
+# The repository moved from block/goose to aaif-goose/goose. The old path still
+# redirects, but a redirect stops being a guarantee the moment someone claims
+# the vacated name, so the new one is used directly.
+ARG GOOSE_VERSION=v1.48.0
 RUN apt-get update \
   && apt-get install -y --no-install-recommends curl bzip2 ca-certificates \
   && rm -rf /var/lib/apt/lists/* \
-  && curl -fsSL "https://github.com/block/goose/releases/download/${GOOSE_VERSION}/download_cli.sh" \
+  && curl -fsSL "https://github.com/aaif-goose/goose/releases/download/${GOOSE_VERSION}/download_cli.sh" \
      | GOOSE_VERSION="${GOOSE_VERSION}" CONFIGURE=false bash \
   && mv /root/.local/bin/goose /usr/local/bin/goose \
-  && chmod 0755 /usr/local/bin/goose
+  && chmod 0755 /usr/local/bin/goose \
+  && goose --version | grep -q "${GOOSE_VERSION#v}"

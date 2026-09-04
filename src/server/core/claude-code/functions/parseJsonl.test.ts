@@ -566,7 +566,7 @@ describe("parseJsonl", () => {
   });
 
   describe("atis-latch entries", () => {
-    // Claude Code 2.1.258 writes these several times per session. Before they
+    // Claude Code 2.1.258 writes these more than once per session. Before they
     // were in the union they became x-error, so a current install rendered
     // parse errors in a session that was otherwise fine. Observed by the
     // harness in docker/, not inferred.

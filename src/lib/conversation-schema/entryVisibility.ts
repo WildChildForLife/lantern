@@ -42,8 +42,8 @@ export const getConversationVisibility = (conversation: Conversation): Conversat
       return "technical";
 
     // Bookkeeping: session titles, agent names, permission and input modes,
-    // worktree moves, per-file backups, published-artifact links, the resume
-    // latch, and the context attachments the CLI injects but never shows.
+    // worktree moves, per-file backups, published-artifact links, `atis-latch`
+    // lines, and the context attachments the CLI injects but never shows.
     case "attachment":
     case "progress":
     case "custom-title":

@@ -120,6 +120,15 @@ describe("shouldRenderInTranscript", () => {
     expect(shouldRenderInTranscript(worktreeState, on)).toBe(false);
   });
 
+  // Claude Code writes several of these per session. Drawing them would put a
+  // row carrying nothing but a session id between the messages someone came to
+  // read, so the transcript has to drop them at both settings.
+  it("never renders atis-latch entries, at either setting", () => {
+    const atisLatch: Conversation = { type: "atis-latch", atis: "", sessionId: "session-1" };
+    expect(shouldRenderInTranscript(atisLatch, off)).toBe(false);
+    expect(shouldRenderInTranscript(atisLatch, on)).toBe(false);
+  });
+
   it("leaves tool results to the tool call that produced them", () => {
     const toolResultOnly: UserConversation = {
       ...createUserConversation("uuid-2"),

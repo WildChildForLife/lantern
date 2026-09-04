@@ -24,28 +24,35 @@ written by whatever was installed then, and a reader that only handles the
 newest release quietly drops all of them.
 
 So the old sessions were kept in the harness volumes rather than discarded,
-and every one was parsed again after the bump. **51 sessions across both
-generations, every one with zero unparsed lines and zero parse errors:**
+and every one was parsed again after the bump. **55 sessions across both
+generations, every one with zero unparsed lines and — once `AtisLatchEntrySchema`
+was added, below — zero parse errors:**
 
-| Source      | old sessions            | new sessions          |
-| ----------- | ----------------------- | --------------------- |
-| Claude Code | 4 × `2.1.221`           | 1 × `2.1.258`         |
-| Codex       | 12 × `0.146.0`          | 4 × `0.152.1`         |
-| opencode    | 3 × `1.18.13`           | 4 × `1.18.27`         |
-| Qwen Code   | 8 × `0.21.6`            | 4 × `0.22.3`          |
-| Copilot CLI | 4 × `1.0.78`            | 3 × `1.0.82`          |
-| goose       | 4 × `1.45.0`            | 4 × `1.48.0`          |
+| Source      | old sessions   | new sessions  |
+| ----------- | -------------- | ------------- |
+| Claude Code | 4 × `2.1.221`  | 1 × `2.1.258` |
+| Codex       | 12 × `0.146.0` | 4 × `0.152.1` |
+| opencode    | 3 × `1.18.13`  | 4 × `1.18.27` |
+| Qwen Code   | 8 × `0.21.6`   | 4 × `0.22.3`  |
+| Copilot CLI | 4 × `1.0.78`   | 3 × `1.0.82`  |
+| goose       | 4 × `1.45.0`   | 4 × `1.48.0`  |
 
 opencode and goose are the sharper cases of the six, because there both
-generations live in *one* database that the newer CLI migrated in place — the
+generations live in _one_ database that the newer CLI migrated in place — the
 old rows are read through the new schema, not from an old file left alongside.
 
 Re-checking this is a matter of pointing each adapter's parser at the volumes
-and asserting `unparsed == 0` while requiring both version stamps to be present,
-so the check cannot pass by finding nothing. The standing regression cover is
-`fixtures/`, which holds captures from the older versions and is read by the
-unit suite on every run — keeping those fixtures is what makes the claim
-above cheap to keep true.
+and asserting `unparsed == 0` while requiring both generations to be present, so
+the check cannot pass by finding nothing. Four of the six stamp the version
+inside the session, so the split is read straight off the data; goose stamps
+nothing, and its two generations are told apart by run date and by the
+`schema_version` row, which went 15 → 16 between them.
+
+The volumes are the regression cover here, which is why step 4 below says to
+keep them. `fixtures/` is not: it holds captures from _earlier_ releases
+(Claude Code `2.0.28`, Codex `0.141.0`, Qwen Code `0.21.6`), which is worth
+having and is read by the unit suite on every run, but it is a different set of
+versions from the row above.
 
 Cannot be driven here at all:
 
@@ -291,7 +298,7 @@ to already be handling.
 
 ### Claude Code `2.1.258` writes an entry type the schema union rejected
 
-`{"type":"atis-latch","atis":"","sessionId":"…"}`, several times per session.
+`{"type":"atis-latch","atis":"","sessionId":"…"}`, more than once per session.
 `ConversationSchema` is a closed union, so those lines failed to parse and
 `parseJsonl` returned them as `x-error` — which the transcript renders, on
 purpose, because a line Lantern could not read is the thing a reader most needs
@@ -305,6 +312,13 @@ classified `internal`, so it is read and never drawn.
 Worth being precise about why a fixture could not have caught this: a fixture
 only contains entry types its author already knew about. The 2.1.221 capture
 from the previous run has no `atis-latch` line anywhere in it.
+
+No fixture was added for it either, which is the standing practice for entries
+filed as `internal` — none of `mode`, `last-prompt`, `queue-operation`,
+`worktree-state` or `frame-link` has one, because a fixture asserts what
+renders and these render nothing. The cover is in the unit tests instead:
+`AtisLatchEntrySchema.test.ts` for the shape, `parseJsonl.test.ts` for the
+symptom that was reported, and `conversationRows.test.ts` for the filtering.
 
 ### The same release injects companion `user` turns, and those were already handled
 
@@ -379,14 +393,18 @@ row, so a migration did run; it did not touch `sessions`, `messages` or
 
 ## When a CLI releases
 
-1. Bump the `ARG *_VERSION` in `cli/Dockerfile.*` to the new exact version.
-   Pin it — never `latest`. A floating tag means this table describes something
-   other than what ran.
+1. Bump the `ARG *_VERSION` in `cli/Dockerfile.*` **and in `Dockerfile.lantern`**
+   to the new exact version. Pin it — never `latest`. A floating tag means this
+   table describes something other than what ran. `Dockerfile.lantern` installs
+   the same CLIs alongside Lantern for the topic-naming path, and it is the one
+   that gets forgotten: the September 2026 bump missed it and left this table
+   claiming six versions that image did not install.
 2. `./run.sh`.
 3. If a source drops to `supported: false`, or sessions render empty, the format
    moved. Fix the adapter, add a fixture for the new shape, and **keep the old
-   fixture**: both versions are in the wild.
-4. Re-read the sessions the *previous* version wrote, which are still in the
+   fixture**: both versions are in the wild. A shape that renders nothing —
+   bookkeeping filed as `internal` — takes unit tests instead of a fixture.
+4. Re-read the sessions the _previous_ version wrote, which are still in the
    volumes, and check they parse too. A bump that gains the new shape and loses
    the old one looks like a pass from the new sessions alone — and a user
    upgrading has a disk full of the old ones.
