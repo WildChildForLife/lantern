@@ -565,6 +565,49 @@ describe("parseJsonl", () => {
     });
   });
 
+  describe("atis-latch entries", () => {
+    // Claude Code 2.1.258 writes these several times per session. Before they
+    // were in the union they became x-error, so a current install rendered
+    // parse errors in a session that was otherwise fine. Observed by the
+    // harness in docker/, not inferred.
+    it("atis-latch entry parses instead of becoming an x-error", () => {
+      const jsonl = JSON.stringify({
+        type: "atis-latch",
+        atis: "",
+        sessionId: "b3f136a7-5d62-494d-b630-d103919f82e2",
+      });
+
+      const result = parseJsonl(jsonl);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toHaveProperty("type", "atis-latch");
+    });
+
+    it("atis-latch mixed with regular entries parses without x-error", () => {
+      const jsonl = [
+        JSON.stringify({
+          type: "user",
+          uuid: "550e8400-e29b-41d4-a716-446655440000",
+          timestamp: "2024-01-01T00:00:00.000Z",
+          message: { role: "user", content: "Hello" },
+          isSidechain: false,
+          userType: "external",
+          cwd: "/test",
+          sessionId: "session-1",
+          version: "2.1.258",
+          parentUuid: null,
+        }),
+        JSON.stringify({ type: "atis-latch", atis: "", sessionId: "session-1" }),
+      ].join("\n");
+
+      const result = parseJsonl(jsonl);
+
+      expect(result).toHaveLength(2);
+      expect(result[1]).toHaveProperty("type", "atis-latch");
+      expect(result.every((entry) => entry.type !== "x-error")).toBe(true);
+    });
+  });
+
   describe("ConversationSchemaのバリエーション", () => {
     it("オプショナルフィールドを含むUserエントリをパースできる", () => {
       const jsonl = JSON.stringify({

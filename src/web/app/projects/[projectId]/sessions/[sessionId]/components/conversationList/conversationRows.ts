@@ -109,6 +109,10 @@ export const getConversationKey = (conversation: Conversation) => {
     return `frame-link_${conversation.sessionId}_${conversation.path}`;
   }
 
+  if (conversation.type === "atis-latch") {
+    return `atis-latch_${conversation.sessionId}_${conversation.atis}`;
+  }
+
   conversation satisfies never;
   throw new Error("Unknown conversation type");
 };

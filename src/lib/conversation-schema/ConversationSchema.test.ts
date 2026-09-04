@@ -15,6 +15,19 @@ describe("ConversationSchema", () => {
     expect(data.aiTitle).toBe("macro-dashboard のフォントと UI デザイン修正");
   });
 
+  test("accepts atis-latch entries", () => {
+    const data = ConversationSchema.parse({
+      type: "atis-latch",
+      atis: "",
+      sessionId: "b3f136a7-5d62-494d-b630-d103919f82e2",
+    });
+
+    if (data.type !== "atis-latch") {
+      throw new Error("Expected atis-latch entry");
+    }
+    expect(data.atis).toBe("");
+  });
+
   test("accepts away_summary system entries with entrypoint and slug", () => {
     const data = ConversationSchema.parse({
       parentUuid: "bde9c218-c40b-4d1c-9f2d-643d5fb22bc9",
