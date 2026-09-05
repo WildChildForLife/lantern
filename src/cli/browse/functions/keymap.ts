@@ -52,14 +52,16 @@ const isQuit = (key: KeyInput): boolean =>
   (key.ctrl === true && key.input === "c") || key.input === "q" || key.input === "Q";
 
 const resolveBoardAction = (key: KeyInput): BrowseAction | null => {
-  // Checked before the letter keys, so Ctrl-D is a page down rather than
-  // whatever `d` would otherwise have meant.
+  // Checked before the letter keys, so the modifier is read before the letter
+  // under it.
   if (key.pageUp === true || (key.ctrl === true && key.input === "u")) {
     return { type: "move-row-page", direction: -1 };
   }
   if (key.pageDown === true || (key.ctrl === true && key.input === "d")) {
     return { type: "move-row-page", direction: 1 };
   }
+  // Every other Ctrl combination means nothing here, and must not fall through to
+  // the letter on the key: Ctrl-P is not `p`, and it should not print.
   if (key.ctrl === true) return null;
 
   if (key.leftArrow === true || key.input === "h") return { type: "move-column", delta: -1 };
@@ -69,8 +71,9 @@ const resolveBoardAction = (key: KeyInput): BrowseAction | null => {
   if (key.input === "g") return { type: "row-edge", edge: "first" };
   if (key.input === "G") return { type: "row-edge", edge: "last" };
   if (key.input === "/") return { type: "open-filter" };
-  // Nothing is open on the board, so the board takes it to mean the search — the
-  // only state a key can leave behind now that a query outlives the bar.
+  // Nothing is open on the board, so escape is free to mean the search — the one
+  // piece of state it has anything to say about, now that a query outlives the
+  // bar it was typed into.
   if (key.escape === true) return { type: "close-overlay" };
   if (key.input === "?") return { type: "toggle-help" };
   if (key.input === "r") return { type: "refresh" };

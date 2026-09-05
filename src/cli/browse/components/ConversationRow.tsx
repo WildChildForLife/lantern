@@ -17,7 +17,7 @@ const AGE_WIDTH = 5;
 export const ConversationRow = ({ row, width, selected, now }: ConversationRowProps) => {
   const age = formatRelativeTime(row.lastModifiedAt, now);
   const titleWidth = Math.max(1, width - AGE_WIDTH - 2);
-  const segments = highlightSpans(row.displayTitle, row.titleSpans, titleWidth);
+  const segments = highlightSpans(row.display.title, row.display.spans, titleWidth);
 
   return (
     <Box width={width}>
@@ -31,10 +31,10 @@ export const ConversationRow = ({ row, width, selected, now }: ConversationRowPr
           own — which puts the tail of a long title on a second line and takes the
           column's grid with it.
 
-          Underlined as well as coloured, because the selected row is already
-          bold and inverted: accent on an inverted background is the one
-          combination that disappears, and bold inside bold is no difference at
-          all. The underline is what survives both.
+          Underlined, and coloured too on every row but the selected one. That
+          row is already bold and inverted, where accent on an inverted background
+          is the one combination that disappears and bold inside bold is no
+          difference at all — so there the underline carries it alone.
         */}
         <Text bold={selected} inverse={selected} wrap="truncate">
           {segments.map((segment, index) => (

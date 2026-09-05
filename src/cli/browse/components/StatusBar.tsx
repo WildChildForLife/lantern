@@ -74,9 +74,9 @@ export const StatusBar = ({ row, status, width }: StatusBarProps) => (
         move around — it has its own row above, in its own colour.
       */}
       {/*
-        `/` is the one key here that is left its colour. Dimmed in with the rest
-        it was a word in a list of eight; the search is the thing on this board
-        most worth knowing about, and the bar above it says so too.
+        `/` is the one key here left its colour. Dimmed in with the rest it was
+        one word among eight; the search is the thing on this board most worth
+        knowing about, and the bar above it says so too.
       */}
       <Text wrap="truncate">
         <Text dimColor>←→ topics · ↑↓ rows · </Text>

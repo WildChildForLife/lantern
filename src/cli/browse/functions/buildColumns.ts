@@ -2,11 +2,23 @@ import { resolveSessionTitle, toConciseTitle } from "../../../lib/session/sessio
 import type { ConversationListEntry, TopicGroup } from "../../../server/core/types.ts";
 import { mergeSpans, type MatchSpan, parseQuery, type Query, scoreMatch } from "./searchMatch.ts";
 
-/** A conversation with the one string the board actually draws. */
+/**
+ * A conversation with the one string the board actually draws.
+ *
+ * The title and its spans are nested together rather than sitting as two fields
+ * beside `ConversationListEntry`'s own `title`. The spans index `display.title`
+ * and nothing else — they are offsets into a string that has already been
+ * shortened — and as a loose `titleSpans` they could be reached for a keystroke
+ * away from `row.title`, which would highlight the wrong characters on every row
+ * the shortening touched. Nested, you cannot take the spans without taking the
+ * string they belong to.
+ */
 export type BoardRow = ConversationListEntry & {
-  displayTitle: string;
-  /** Where the search matched the title, for the row to pick out. Empty otherwise. */
-  titleSpans: MatchSpan[];
+  display: {
+    title: string;
+    /** Where the search matched, in code points. Empty when nothing was searched for. */
+    spans: MatchSpan[];
+  };
 };
 
 export type BoardColumn = {
@@ -19,11 +31,17 @@ const TITLE_LIMIT = 120;
 
 const toBoardRow = (conversation: ConversationListEntry): BoardRow => ({
   ...conversation,
-  displayTitle: toConciseTitle(
-    resolveSessionTitle(conversation.title, conversation.firstUserMessage, conversation.sessionId),
-    TITLE_LIMIT,
-  ),
-  titleSpans: [],
+  display: {
+    title: toConciseTitle(
+      resolveSessionTitle(
+        conversation.title,
+        conversation.firstUserMessage,
+        conversation.sessionId,
+      ),
+      TITLE_LIMIT,
+    ),
+    spans: [],
+  },
 });
 
 /**
@@ -31,7 +49,8 @@ const toBoardRow = (conversation: ConversationListEntry): BoardRow => ({
  *
  * A conversation whose title is what was typed is the one being looked for; the
  * same characters found in the path every conversation in the project shares are
- * barely evidence at all, but they are still worth showing below the rest.
+ * barely evidence at all. The weights bias the order rather than fixing it — a
+ * title matched only loosely can still fall below a path matched squarely.
  *
  * The topic is not among them on purpose. It is matched once per column, in one
  * piece, and scoring it per row as well let a scattered match on the heading
@@ -49,16 +68,16 @@ type Scored = { row: BoardRow; score: number };
 /**
  * Scores one conversation against every term, or rejects it.
  *
- * Every term has to find a field of its own to match — `refund lantern` may match
- * the title with one word and the project with the other — but a term nothing
- * matches takes the whole row out.
+ * Every term has to find some field to match — not a different one each, though
+ * it may work out that way: `refund lantern` can take the title with one word and
+ * the project with the other. A term that matches nothing takes the whole row out.
  */
 const scoreRow = (row: BoardRow, query: Query): Scored | null => {
   const spans: MatchSpan[] = [];
   let total = 0;
 
   for (const term of query.terms) {
-    const title = scoreMatch(row.displayTitle, term, query.caseSensitive);
+    const title = scoreMatch(row.display.title, term, query.caseSensitive);
     const fields = [
       { match: title, weight: FIELD_WEIGHT.title },
       {
@@ -91,7 +110,7 @@ const scoreRow = (row: BoardRow, query: Query): Scored | null => {
     }
   }
 
-  return { row: { ...row, titleSpans: mergeSpans(spans) }, score: total };
+  return { row: { ...row, display: { ...row.display, spans: mergeSpans(spans) } }, score: total };
 };
 
 /** The one place the topic heading itself is matched, and always in one piece. */

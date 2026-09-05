@@ -7,7 +7,7 @@ import { ConversationRow } from "./ConversationRow.tsx";
 
 type TwoPaneProps = {
   columns: BoardColumn[];
-  layout: Layout;
+  layout: Extract<Layout, { mode: "two-pane" }>;
   columnIndex: number;
   rowIndex: number;
   /** Where the conversation pane has been scrolled to. */
@@ -39,8 +39,8 @@ export const TwoPane = ({
   });
 
   // The pane is the list being moved through, so it scrolls from a remembered
-  // position like the board's focused column does. The rail beside it has no
-  // cursor of its own and is drawn cold.
+  // position like the board's focused column does. The rail beside it has a
+  // cursor but no anchor: it is re-centred on the chosen topic each time.
   const total = active?.rows.length ?? 0;
   const start = Math.min(Math.max(0, rowStart), Math.max(0, total - layout.visibleRows));
   const end = Math.min(total, start + Math.max(0, layout.visibleRows));

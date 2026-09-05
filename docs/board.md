@@ -18,7 +18,7 @@ which is the same thing — draws the board on its own, opening no port at all.
    ❯ Add refunds to checkout  2h     Router DHCP leases    1d      Cache the build 3h
      Fix the webhook retry    5h     Split the VLANs       2d      Pin the runner  1d
      Rename the price field   1d     Static leases for NAS 4d
-    ↓ 9 more
+    ↓ 9 more                        ↓ 3 more                      ↓ 2 more
 
     t  sort 4 conversations into topics with the AI · T redoes every topic
 
@@ -45,6 +45,7 @@ far down the column you are, not just how long it is. The key line never moves o
 | `/`           | search titles, projects and topics                         |
 | `esc`         | clear the search                                           |
 | `enter`       | what to do with this conversation                          |
+| `e`           | change what `enter` does                                   |
 | `R`           | resume here, and come back to the board after              |
 | `p`           | show the resume command, without leaving                   |
 | `c`           | copy the conversation id                                   |
@@ -52,17 +53,22 @@ far down the column you are, not just how long it is. The key line never moves o
 | `T`           | throw every topic away and sort again (asks first)         |
 | `r`           | re-read the logs · `?` the key list · `q` quit             |
 
-Below about ninety columns the board becomes a topic list on the left and its conversations on the
-right; the keys are unchanged.
+Below about ninety-four columns — ninety inside the gutter — the board becomes a topic list on the
+left and its conversations on the right; the keys are unchanged.
 
 ## Searching
 
-The search bar is always on screen, under the header. `/` puts the cursor in it, `enter` goes back to
-the board with the query still showing and still in force, and `esc` clears it.
+The search bar sits under the header whenever the board is up — only the key list takes the screen
+from it. `/` puts the cursor in it, `enter` goes back to the board with the query still showing and
+still in force, and `esc` clears it.
 
-Naming a topic keeps that whole column — `/network` reads as "show me that one". Anything else
-narrows to the conversations that match it, wherever they live, and the matched characters are picked
-out in the row.
+Naming a topic keeps that whole column — `/network` reads as "show me that one". It does not hide the
+rest of the board: every other column is narrowed to the conversations matching what you typed, so a
+named column arrives whole and the stragglers elsewhere come with it. The matched characters are
+picked out in the row.
+
+A topic name has to be typed in one piece to count. `/netw` names the Home Network column; `/netwk`
+does not, and searches the conversations instead.
 
 Matching does more than look for the query inside the title:
 
@@ -71,9 +77,10 @@ Matching does more than look for the query inside the title:
 - **Characters in order**, not only whole words: `rdhcp` finds "Router DHCP leases".
 - **Case is ignored** until the query mixes it. `api` and `API` both find either spelling; `Api` asks
   for that spelling exactly.
-- **The closest match goes first.** A whole word beats the same letters scattered about, the start of
-  a word beats the middle of one, and a hit in the title counts for more than one in the project path
-  every conversation there shares. Recency settles ties.
+- **The closest match goes first.** Within one field, the query found in one piece beats the same
+  letters scattered about, and the start of a word beats the middle of one. Across fields the title
+  counts for more than the project path every conversation there shares — enough that a loose match
+  in a title can outrank a tidy one in a path. Recency settles ties.
 
 ## Resuming
 

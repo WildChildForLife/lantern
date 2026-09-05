@@ -5,7 +5,7 @@ import { TopicColumn } from "./TopicColumn.tsx";
 
 type BoardProps = {
   columns: BoardColumn[];
-  layout: Layout;
+  layout: Extract<Layout, { mode: "board" }>;
   columnIndex: number;
   rowIndex: number;
   /** Where the focused column has been scrolled to. */

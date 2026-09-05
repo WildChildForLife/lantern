@@ -12,9 +12,9 @@ type ClassifyCalloutProps = {
   /**
    * The width to stay inside.
    *
-   * The row costs the board a conversation, and it costs it exactly one — so a
-   * narrow terminal has to lose the tail of the sentence rather than take a
-   * second row the board has not budgeted for.
+   * The board sets aside one row for this and a blank line under it, and nothing
+   * more — so a narrow terminal has to lose the tail of the sentence rather than
+   * take a second row that would come out of the conversations.
    */
   width: number;
 };

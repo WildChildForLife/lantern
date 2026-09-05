@@ -3,15 +3,22 @@ import { TextInput } from "../../ui/prompts/TextInput.tsx";
 import { theme } from "../../ui/theme.ts";
 import { truncateToWidth } from "../functions/formatRow.ts";
 
-/** The bar, plus the blank line under it. Drawn in every mode, so always spent. */
+/**
+ * The bar, plus the blank line under it.
+ *
+ * Spent in every mode though it is only drawn in all but help, where the key
+ * list has the middle of the screen. Reserving it unconditionally is the point:
+ * the board keeps the same height as the search opens and closes.
+ */
 export const SEARCH_BAR_HEIGHT = 2;
 
 /** Below this the bar is the badge and the query, and nothing else fits beside them. */
 const HINT_MIN_WIDTH = 64;
 
 const BADGE = " ⌕ SEARCH ";
-/** The badge, the space after it, and the field's own `❯ ` and caret. */
+/** The badge and the single space after it. */
 const BADGE_WIDTH = BADGE.length + 1;
+/** The field's own `❯ ` prompt and the caret at the end of it. */
 const FIELD_CHROME_WIDTH = 3;
 
 type SearchBarProps = {

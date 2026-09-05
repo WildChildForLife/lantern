@@ -1,4 +1,8 @@
-/** Width below which columns stop being worth drawing side by side. */
+/**
+ * Width inside the frame below which columns stop being worth drawing side by
+ * side. Measured against the padded width, so the switch happens a gutter's
+ * worth earlier than the terminal's own column count suggests.
+ */
 const BOARD_MIN_WIDTH = 90;
 
 /** Narrowest a column can get and still show a recognisable title. */
@@ -36,10 +40,10 @@ export const OUTER_SPARE_HEIGHT = 1;
 /**
  * The gutter the frame keeps between itself and the terminal.
  *
- * Exported rather than written into the root box, because padding is not
- * decoration here: every padded row is a conversation the board cannot draw and
- * every padded column is width the topics do not get, and both sums are made
- * below. A literal in the component and a literal here is how they drift.
+ * Named here rather than written as a number into the root box, because the
+ * padding is not only decoration: every padded column is width the topics do not
+ * get, and the sum that takes it off is made below. A literal in the component
+ * and a literal here is how the two drift apart.
  */
 export const FRAME_PADDING_X = 2;
 
@@ -49,10 +53,11 @@ const PADDED_MIN_HEIGHT = 24;
 /**
  * The gutter's height, which a short terminal does not get.
  *
- * Twenty rows is a split pane or a phone, and there the two rows are the
- * difference between the board showing the question it just asked and the board
- * pushing its own status bar off the screen. Breathing room is worth having
- * where there is room to breathe.
+ * The cut is at twenty-four rows, the traditional default: below it a terminal
+ * is a split pane or a phone, and there the two rows are the difference between
+ * the board showing the question it just asked and the board pushing its own
+ * status bar off the screen. Breathing room is worth having where there is room
+ * to breathe.
  */
 export const framePaddingY = (height: number): number => (height >= PADDED_MIN_HEIGHT ? 1 : 0);
 
@@ -79,16 +84,34 @@ export const boardRowBudget = ({
   reservedRows?: number | undefined;
 }): number => height - CHROME_HEIGHT - framePaddingY(height) * 2 - Math.max(0, reservedRows);
 
-export type Layout = {
-  mode: "board" | "two-pane";
+type SharedLayout = {
   /** Width of one topic column, or of the conversation pane in two-pane mode. */
   columnWidth: number;
-  railWidth: number;
-  /** How many topic columns fit at once. Zero when there are no topics. */
-  visibleColumns: number;
   /** How many conversations fit in a column before it has to scroll. */
   visibleRows: number;
 };
+
+/**
+ * How the board fits the terminal, in one of the two shapes it comes in.
+ *
+ * A union rather than one record with every field, because the record had two
+ * fields that were only ever read in one of the modes and invented in the other:
+ * `railWidth` was set to a constant nothing on the wide board ever asked for, and
+ * `visibleColumns` was set to 1 in two-pane mode, where the rail draws as many
+ * topics as it has rows for and nothing reads the field at all. A value invented
+ * to satisfy a shape is a value the next reader will believe.
+ */
+export type Layout =
+  | (SharedLayout & {
+      mode: "board";
+      /** How many topic columns fit side by side. Zero when there are no topics. */
+      visibleColumns: number;
+    })
+  | (SharedLayout & {
+      mode: "two-pane";
+      /** Width of the topic rail down the left-hand side. */
+      railWidth: number;
+    });
 
 /**
  * Decides how the board fits into the terminal it was given.
@@ -123,15 +146,15 @@ export const resolveLayout = ({
   if (inner < BOARD_MIN_WIDTH) {
     // The rail gives way on a very narrow terminal rather than holding its width
     // and pushing the conversations off the right-hand edge. A floor of 26 columns
-    // for the pane plus a fixed 24-column rail needs 52 columns to draw, so below
-    // that the old sums overflowed a split pane or a phone SSH client silently.
+    // for the pane plus a fixed 24-column rail needs 50 inside the frame, and the
+    // gutter puts that at 54 of the terminal's own — below which the old sums
+    // overflowed a split pane or a phone SSH client silently.
     const railWidth = Math.min(RAIL_WIDTH, Math.max(TOPIC_RAIL_MIN_WIDTH, Math.floor(inner / 3)));
 
     return {
       mode: "two-pane",
       columnWidth: Math.max(1, inner - railWidth - TWO_PANE_GAP),
       railWidth,
-      visibleColumns: Math.min(topicCount, 1),
       visibleRows,
     };
   }
@@ -146,7 +169,6 @@ export const resolveLayout = ({
   return {
     mode: "board",
     columnWidth: Math.max(MIN_COLUMN_WIDTH, columnWidth),
-    railWidth: RAIL_WIDTH,
     visibleColumns,
     visibleRows,
   };
@@ -157,9 +179,14 @@ export const resolveLayout = ({
  * window was last time.
  *
  * Centres the cursor whenever the list overflows, so it is right for a list
- * being drawn cold — an unfocused column, or the topic rail. For the column the
- * user is actually moving through, use `advanceWindow`: centring there moves the
- * whole list under a stationary cursor on every keypress.
+ * being drawn cold — an unfocused column, or the topic rail. For a list the user
+ * moves through one step at a time, use `advanceWindow`: centring there slides
+ * the whole list under a stationary cursor on every keypress.
+ *
+ * The strip of topic columns is the deliberate exception. It is moved through,
+ * but a step of it is a whole column rather than a row, and it holds one cursor
+ * for the lot — so there is no anchor to remember and centring is what keeps the
+ * chosen column in view.
  */
 export const resolveWindow = ({
   index,

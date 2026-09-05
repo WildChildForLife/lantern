@@ -40,9 +40,10 @@ export const TopicColumn = ({
   const hiddenBelow = total - end;
   /**
    * Where you are, not just how many there are. A column that scrolls hides most
-   * of itself, and `12/40` is the only thing on screen that says how far down it
-   * the cursor has got. The label is clipped around it rather than to a fixed
-   * width, so the count never falls off the end of a narrow column.
+   * of itself, and the markers above and below only say how much is hidden —
+   * `12/40` is what says where in the column the cursor actually is. The label is
+   * clipped around it rather than to a fixed width, so the count never falls off
+   * the end of a narrow column.
    */
   const counter =
     selectedRow === null ? `${total}` : `${Math.min(selectedRow + 1, total)}/${total}`;

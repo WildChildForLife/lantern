@@ -121,7 +121,7 @@ describe("buildColumns", () => {
       filter: "checkout",
     });
 
-    expect(columns[0]?.rows[0]?.displayTitle).toBe("please fix the checkout flow");
+    expect(columns[0]?.rows[0]?.display.title).toBe("please fix the checkout flow");
   });
 
   it("falls back to the session id when there is nothing to title it with", () => {
@@ -131,7 +131,7 @@ describe("buildColumns", () => {
       filter: "",
     });
 
-    expect(columns[0]?.rows[0]?.displayTitle).toBe("abc-123");
+    expect(columns[0]?.rows[0]?.display.title).toBe("abc-123");
   });
 });
 
@@ -229,7 +229,7 @@ describe("buildColumns, searching", () => {
       filter: "refund",
     });
 
-    expect(columns[0]?.rows[0]?.titleSpans).toStrictEqual([{ start: 4, end: 10 }]);
+    expect(columns[0]?.rows[0]?.display.spans).toStrictEqual([{ start: 4, end: 10 }]);
   });
 
   it("folds two words that matched the same part of the title into one span", () => {
@@ -239,7 +239,7 @@ describe("buildColumns, searching", () => {
       filter: "refund refunds",
     });
 
-    expect(columns[0]?.rows[0]?.titleSpans).toStrictEqual([{ start: 4, end: 11 }]);
+    expect(columns[0]?.rows[0]?.display.spans).toStrictEqual([{ start: 4, end: 11 }]);
   });
 
   it("marks nothing when nothing was searched for", () => {
@@ -249,7 +249,7 @@ describe("buildColumns, searching", () => {
       filter: "",
     });
 
-    expect(columns[0]?.rows[0]?.titleSpans).toStrictEqual([]);
+    expect(columns[0]?.rows[0]?.display.spans).toStrictEqual([]);
   });
 
   /**
@@ -267,7 +267,7 @@ describe("buildColumns, searching", () => {
     });
 
     expect(columns[0]?.rows.map((row) => row.sessionId)).toStrictEqual(["newer", "older"]);
-    expect(columns[0]?.rows[0]?.titleSpans).toStrictEqual([]);
+    expect(columns[0]?.rows[0]?.display.spans).toStrictEqual([]);
   });
 
   /** Fuzzy matching must not be so loose that a topic swallows the whole board. */

@@ -40,8 +40,13 @@ export type TitleSegment = { text: string; matched: boolean };
  * its tail with the rest. The ellipsis is never part of a match — it stands for
  * the characters that are not there.
  *
- * Always returns at least one segment for a non-empty title, so the caller draws
- * a row the same way whether or not a search is running.
+ * Returns at least one segment for a non-empty title at any width a caller
+ * passes, so a row is drawn the same way whether or not a search is running. A
+ * width of nought has nothing to draw and returns none.
+ *
+ * `spans` are expected in order and not overlapping, which is what `mergeSpans`
+ * guarantees; one out of order is skipped rather than allowed to corrupt the
+ * output.
  */
 export const highlightSpans = (text: string, spans: MatchSpan[], width: number): TitleSegment[] => {
   const clipped = truncateToWidth(text, width);

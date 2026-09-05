@@ -1,4 +1,11 @@
-/** Half-open range of characters that matched, for the row to highlight. */
+/**
+ * Half-open range of matched characters, for the row to highlight.
+ *
+ * Offsets are **code points** — positions in `Array.from(text)` — not UTF-16
+ * indices, and they belong to the exact string the match was scored against. A
+ * title with an emoji in it makes the two disagree, so `text.slice(start, end)`
+ * is the wrong way to read one; `highlightSpans` is the right way.
+ */
 export type MatchSpan = { start: number; end: number };
 
 export type MatchResult = {
@@ -13,9 +20,16 @@ export type Query = {
   caseSensitive: boolean;
 };
 
-/** A whole-word match, which is what most searches are and what they should win. */
+/** The term found in one piece, which is what most searches are and should win. */
 const SUBSTRING_BASE = 100;
-/** A scattered match. Below every substring match, above nothing. */
+/**
+ * The term found in order but broken up.
+ *
+ * Below any one-piece match of the same term against the same field — the bases
+ * are far enough apart that no run of bonuses closes the gap. Not below one from
+ * a different field: `buildColumns` weights the fields, and a scattered hit in a
+ * title routinely and deliberately outranks a contiguous one in a project path.
+ */
 const SUBSEQUENCE_BASE = 40;
 const PREFIX_BONUS = 16;
 const WORD_START_BONUS = 12;
@@ -83,7 +97,11 @@ const toSpans = (positions: number[]): MatchSpan[] => {
   return spans;
 };
 
-/** The best whole-word hit, or null when the term is not in there in one piece. */
+/**
+ * The best hit with the term's characters all in a row, or null when they are
+ * not. Any contiguous run counts, word boundary or not — `oar` is in `board`;
+ * what a word boundary buys is a bonus, not admission.
+ */
 const scoreSubstring = (
   characters: string[],
   folded: string[],
@@ -114,10 +132,10 @@ const scoreSubstring = (
  * The term's characters found in order but not together.
  *
  * Greedy left to right, then a pass back along the matches pulling each one
- * forward onto the heels of the next where the text allows it. Without that
- * second pass `bola` matches the `b` and `o` of "board" and then the first `l`
- * and `a` it can find, rather than the ones in "layout" that make it read as a
- * match at all.
+ * forward onto the heels of the next where the text allows it. The second pass
+ * earns its keep when a character of the term appears more than once in the
+ * text: `ab` against "a x ab" matches greedily at 0 and 5, and the pass pulls it
+ * to 4 and 5, which is the run a reader would have picked out.
  */
 const scoreSubsequence = (
   characters: string[],
@@ -214,7 +232,7 @@ export const parseQuery = (filter: string): Query => {
 /**
  * How well one term matches one piece of text, and where.
  *
- * A whole-word hit always beats a scattered one, and within each the bonuses
+ * A one-piece hit always beats a scattered one of the same term, and within each the bonuses
  * favour matches that start a word and characters that stayed together — which
  * between them are most of what makes one result feel more relevant than
  * another. Returns null when the characters are not in there in order at all.

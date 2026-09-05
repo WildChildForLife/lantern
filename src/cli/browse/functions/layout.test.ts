@@ -4,9 +4,33 @@ import {
   boardRowBudget,
   FRAME_PADDING_X,
   framePaddingY,
+  type Layout,
   resolveLayout,
   resolveWindow,
 } from "./layout.ts";
+
+/**
+ * Narrows a layout to the mode the assertion is about.
+ *
+ * The two modes carry different fields, so reading one is also a claim about
+ * which mode came back — these say that out loud, and fail on the claim rather
+ * than on a confusing `undefined` further down.
+ */
+const asBoard = (layout: Layout): Extract<Layout, { mode: "board" }> => {
+  if (layout.mode !== "board") {
+    throw new Error(`expected the board layout, got ${layout.mode}`);
+  }
+
+  return layout;
+};
+
+const asTwoPane = (layout: Layout): Extract<Layout, { mode: "two-pane" }> => {
+  if (layout.mode !== "two-pane") {
+    throw new Error(`expected the two-pane layout, got ${layout.mode}`);
+  }
+
+  return layout;
+};
 
 /**
  * The window's own memory, which is what makes scrolling read as scrolling.
@@ -99,9 +123,8 @@ describe("resolveWindow", () => {
 
 describe("resolveLayout", () => {
   it("shows the board when there is room for more than one column", () => {
-    const layout = resolveLayout({ width: 160, height: 40, topicCount: 8 });
+    const layout = asBoard(resolveLayout({ width: 160, height: 40, topicCount: 8 }));
 
-    expect(layout.mode).toBe("board");
     expect(layout.visibleColumns).toBeGreaterThan(1);
   });
 
@@ -111,7 +134,9 @@ describe("resolveLayout", () => {
   });
 
   it("never claims more columns than there are topics", () => {
-    expect(resolveLayout({ width: 400, height: 40, topicCount: 2 }).visibleColumns).toBe(2);
+    expect(asBoard(resolveLayout({ width: 400, height: 40, topicCount: 2 })).visibleColumns).toBe(
+      2,
+    );
   });
 
   it("leaves at least one row visible on a very short terminal", () => {
@@ -133,7 +158,7 @@ describe("resolveLayout", () => {
 
   /** Nothing to partition: the board has no columns to draw. */
   it("copes with no topics at all", () => {
-    const layout = resolveLayout({ width: 160, height: 40, topicCount: 0 });
+    const layout = asBoard(resolveLayout({ width: 160, height: 40, topicCount: 0 }));
 
     expect(layout.visibleColumns).toBe(0);
   });
@@ -191,27 +216,28 @@ describe("resolveLayout", () => {
    * the padding, and the rightmost column lost its last characters to it.
    */
   it("sizes the columns to the padded frame rather than the whole terminal", () => {
-    const layout = resolveLayout({ width: 160, height: 40, topicCount: 8 });
+    const layout = asBoard(resolveLayout({ width: 160, height: 40, topicCount: 8 }));
     const drawn = layout.visibleColumns * (layout.columnWidth + 1);
 
     expect(drawn).toBeLessThanOrEqual(160 - FRAME_PADDING_X * 2);
   });
 
   it("fits the two-pane layout inside the padding too", () => {
-    const layout = resolveLayout({ width: 70, height: 30, topicCount: 8 });
+    const layout = asTwoPane(resolveLayout({ width: 70, height: 30, topicCount: 8 }));
 
     expect(layout.railWidth + 2 + layout.columnWidth).toBeLessThanOrEqual(70 - FRAME_PADDING_X * 2);
   });
 
   /** Rail plus its margin plus the pane has to fit the terminal it was given. */
   it.each([[40], [45], [60], [70], [89]])("fits the two-pane layout into %i columns", (width) => {
-    const layout = resolveLayout({ width, height: 30, topicCount: 8 });
+    const layout = asTwoPane(resolveLayout({ width, height: 30, topicCount: 8 }));
 
-    expect(layout.mode).toBe("two-pane");
     expect(layout.railWidth + 2 + layout.columnWidth).toBeLessThanOrEqual(width);
   });
 
   it("keeps the rail wide enough to read a topic name at all", () => {
-    expect(resolveLayout({ width: 45, height: 30, topicCount: 8 }).railWidth).toBeGreaterThan(9);
+    expect(
+      asTwoPane(resolveLayout({ width: 45, height: 30, topicCount: 8 })).railWidth,
+    ).toBeGreaterThan(9);
   });
 });

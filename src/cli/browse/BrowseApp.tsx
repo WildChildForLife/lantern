@@ -145,7 +145,13 @@ export const BrowseApp = ({
   const width = terminal?.columns ?? stdout?.columns ?? 100;
   const height = terminal?.rows ?? stdout?.rows ?? 30;
 
-  /** The width inside the gutter, which is all anything drawn here actually gets. */
+  /**
+   * The width inside the gutter, which is what everything here is drawn against.
+   *
+   * Floored at twenty rather than at one: below that there is no laying anything
+   * out, only deciding what to let overflow, and a floor keeps the arithmetic
+   * above it honest.
+   */
   const innerWidth = Math.max(20, width - FRAME_PADDING_X * 2);
 
   /*
@@ -362,8 +368,8 @@ export const BrowseApp = ({
         return;
       case "close-overlay":
         // Escape on the board itself has nothing to close, so it drops the query
-        // instead — which is the only way back to the whole board now that a
-        // filter outlives the bar being open.
+        // instead. Escape inside the bar clears it too, by way of the field's own
+        // cancel; this is the way back once the bar has been left.
         if (mode === "board" && filter !== "") {
           applyFilter("");
         }
@@ -455,8 +461,8 @@ export const BrowseApp = ({
 
       {/*
         Stood down while the key list is up, along with the sort row below: the
-        list is twenty-odd rows and wants the whole middle of the screen, and
-        neither of these is any use behind it.
+        list is thirteen rows and wants the middle of the screen, and neither of
+        these is any use behind it.
       */}
       {mode === "help" ? null : (
         <Box flexShrink={0}>
@@ -490,9 +496,9 @@ export const BrowseApp = ({
       <Box flexDirection="column" flexShrink={1} overflowY="hidden">
         {/*
           The key list takes the board's place rather than stacking under it. It is
-          twenty-odd rows on its own: shown as well as the board, it pushed
-          everything below it off a twenty-four-row terminal, which is the size the
-          list is most wanted on.
+          thirteen rows on its own: shown as well as the board, it pushed everything
+          below it off a twenty-four-row terminal, which is the size the list is
+          most wanted on.
         */}
         {mode === "help" ? (
           <HelpOverlay width={innerWidth} />
