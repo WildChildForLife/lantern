@@ -154,9 +154,6 @@ importers:
       '@tsconfig/strictest':
         specifier: 2.0.8
         version: 2.0.8
-      '@types/inquirer':
-        specifier: 9.0.9
-        version: 9.0.9
       '@types/node':
         specifier: 25.6.2
         version: 25.6.2
@@ -4545,9 +4542,6 @@ packages:
   '@types/hast@3.0.4':
     resolution: {integrity: sha512-WPs+bbQw5aCj+x6laNGWLH3wviHtoCv/P3+otBhbOhJgG8qtpdAMlTCxLtsTWA7LH1Oh/bFCHsBn0TPS5m30EQ==}
 
-  '@types/inquirer@9.0.9':
-    resolution: {integrity: sha512-/mWx5136gts2Z2e5izdoRCo46lPp5TMs9R15GTSsgg/XnZyxDWVqoVU3R9lWnccKpqwsJLvRoxbCjoJtZB7DSw==}
-
   '@types/istanbul-lib-coverage@2.0.6':
     resolution: {integrity: sha512-2QF/t/auWm0lsy8XtKVPG19v3sSOQlJe/YHZgfjb/KBBHOGSV+J2q/S671rcq9uTBrLAXmZpqJiaQbMT+zNU1w==}
 
@@ -4597,9 +4591,6 @@ packages:
 
   '@types/resolve@1.20.2':
     resolution: {integrity: sha512-60BCwRFOZCQhDncwQdxxeOEEkbc5dIMccYLwbxsS4TUNeVECQ/pBJ0j09mrHOl/JJvpRPGwO9SvE4nR2Nb/a4Q==}
-
-  '@types/through@0.0.33':
-    resolution: {integrity: sha512-HsJ+z3QuETzP3cswwtzt2vEIiHBk/dCcHGhbmG5X3ecnwFD/lPrMpliGXxSCg03L9AhrdwA4Oz/qfspkDW+xGQ==}
 
   '@types/trusted-types@2.0.7':
     resolution: {integrity: sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==}
@@ -11935,11 +11926,6 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
 
-  '@types/inquirer@9.0.9':
-    dependencies:
-      '@types/through': 0.0.33
-      rxjs: 7.8.2
-
   '@types/istanbul-lib-coverage@2.0.6': {}
 
   '@types/istanbul-lib-report@3.0.3':
@@ -11993,10 +11979,6 @@ snapshots:
       '@types/node': 25.6.2
 
   '@types/resolve@1.20.2': {}
-
-  '@types/through@0.0.33':
-    dependencies:
-      '@types/node': 25.6.2
 
   '@types/trusted-types@2.0.7': {}
 
