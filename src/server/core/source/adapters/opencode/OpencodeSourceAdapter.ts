@@ -378,7 +378,7 @@ const makeAdapter = (): SourceAdapter => {
         } satisfies SourceDetection;
       }
 
-      // As of 1.18.13 — the current release — a normal install keeps its
+      // As of 1.18.13, and still true at 1.18.27, a normal install keeps its
       // sessions in SQLite rather than the tree, so this is the ordinary case
       // and not a fallback. It answers for itself, including when it cannot be
       // opened: only the database knows whether that is a moved schema or a

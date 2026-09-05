@@ -35,12 +35,16 @@ RUN npm install -g \
 # The repository moved from block/goose to aaif-goose/goose. The old path still
 # redirects, but a redirect stops being a guarantee the moment someone claims
 # the vacated name, so the new one is used directly.
-ARG GOOSE_VERSION=v1.48.0
+#
+# The bare version is what goes in the ARG, matching `cli/Dockerfile.goose` so
+# the same `--build-arg GOOSE_VERSION=` is correct for both; the `v` prefix the
+# release tag wants is added here rather than carried in the value.
+ARG GOOSE_VERSION=1.48.0
 RUN apt-get update \
   && apt-get install -y --no-install-recommends curl bzip2 ca-certificates \
   && rm -rf /var/lib/apt/lists/* \
-  && curl -fsSL "https://github.com/aaif-goose/goose/releases/download/${GOOSE_VERSION}/download_cli.sh" \
-     | GOOSE_VERSION="${GOOSE_VERSION}" CONFIGURE=false bash \
+  && curl -fsSL "https://github.com/aaif-goose/goose/releases/download/v${GOOSE_VERSION}/download_cli.sh" \
+     | GOOSE_VERSION="v${GOOSE_VERSION}" CONFIGURE=false bash \
   && mv /root/.local/bin/goose /usr/local/bin/goose \
   && chmod 0755 /usr/local/bin/goose \
-  && goose --version | grep -q "${GOOSE_VERSION#v}"
+  && goose --version | grep -q "${GOOSE_VERSION}"

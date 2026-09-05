@@ -198,9 +198,10 @@ describe("getConversationKey", () => {
     expect(getConversationKey(conv)).toBe("last-prompt_session-1");
   });
 
-  // Every observed atis-latch carried an empty string, so keying on it would
-  // promise a uniqueness it does not have. The sessionId alone is the honest
-  // key, and repeats are numbered by createUniqueRowKey like any other.
+  // atis-latch is internal, so this key never reaches a rendered row —
+  // getConversationKey is total over the union and needs an arm regardless.
+  // Keying on atis would promise a uniqueness it does not have: every observed
+  // one carried an empty string.
   it("returns atis-latch key with sessionId", () => {
     const conv = makeAtisLatch("session-1");
     expect(getConversationKey(conv)).toBe("atis-latch_session-1");

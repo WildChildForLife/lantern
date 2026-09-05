@@ -298,12 +298,12 @@ to already be handling.
 
 ### Claude Code `2.1.258` writes an entry type the schema union rejected
 
-`{"type":"atis-latch","atis":"","sessionId":"…"}`, more than once per session.
-`ConversationSchema` is a closed union, so those lines failed to parse and
-`parseJsonl` returned them as `x-error` — which the transcript renders, on
-purpose, because a line Lantern could not read is the thing a reader most needs
-to see. The captured session carried two of them, so it rendered two parse
-errors; the count is however many the CLI happens to write.
+`{"type":"atis-latch","atis":"","sessionId":"…"}`. `ConversationSchema` is a
+closed union, so those lines failed to parse and `parseJsonl` returned them as
+`x-error` — which the transcript renders, on purpose, because a line Lantern
+could not read is the thing a reader most needs to see. The one captured
+2.1.258 session held two of them, so it rendered two parse errors; how many a
+session carries is not known beyond that.
 
 Nothing was lost — the entry is bookkeeping, and the rest of the file parsed —
 but it rendered as damage. `AtisLatchEntrySchema` is now in the union and
@@ -314,9 +314,9 @@ only contains entry types its author already knew about. The 2.1.221 capture
 from the previous run has no `atis-latch` line anywhere in it.
 
 No fixture was added for it either, which is the standing practice for entries
-filed as `internal` — none of `mode`, `last-prompt`, `queue-operation`,
-`worktree-state` or `frame-link` has one, because a fixture asserts what
-renders and these render nothing. The cover is in the unit tests instead:
+filed as `internal` — none of `mode`, `last-prompt`, `worktree-state` or
+`frame-link` has one, because a fixture asserts what renders and these render
+nothing. The cover is in the unit tests instead:
 `AtisLatchEntrySchema.test.ts` for the shape, `parseJsonl.test.ts` for the
 symptom that was reported, and `conversationRows.test.ts` for the filtering.
 
@@ -411,7 +411,7 @@ row, so a migration did run; it did not touch `sessions`, `messages` or
 5. Update the row above and commit.
 
 The point of pinning is that this table means something. "Works with the latest
-version" is not checkable a month later; "works with 2.1.221" is.
+version" is not checkable a month later; "works with 2.1.258" is.
 
 ## Reading the results
 
