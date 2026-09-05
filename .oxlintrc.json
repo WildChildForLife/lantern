@@ -252,6 +252,17 @@
       }
     },
     {
+      // Build and release scripts are plain Node programs run by pnpm, not part
+      // of the Effect runtime, so the node: builtins they are steered away from
+      // in src/ are the correct tool here. They also talk to the operator on
+      // stdout, which is the whole point of a release script.
+      "files": ["scripts/**"],
+      "rules": {
+        "no-restricted-imports": "off",
+        "no-console": "off"
+      }
+    },
+    {
       "files": ["**/*.test.ts", "**/*.spec.ts", "**/*.test.tsx", "**/*.spec.tsx"],
       "rules": {
         "no-restricted-imports": "off",
@@ -389,7 +400,14 @@
     "src/lib/i18n/locales/*/messages.json",
     "src/routeTree.gen.ts",
     "e2e/**",
-    "scripts/**",
+    // The untyped JavaScript under scripts/ — every parameter is an implicit
+    // any, so the type-aware rules report a little over a hundred violations
+    // that are all the same missing annotation. Named one at a time rather than
+    // as `scripts/**`, so a new script is linted by default and this list is
+    // what shrinks as they gain JSDoc types.
+    "scripts/lints/**",
+    "scripts/lingui-sort.js",
+    "scripts/put-transtation.js",
     "**/*.config.*"
   ],
   "options": {
