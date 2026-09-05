@@ -103,6 +103,7 @@ test("bookkeeping the CLI never showed is never shown here either", () => {
     },
     { type: "permission-mode", permissionMode: "default", sessionId: "session-1" },
     { type: "last-prompt", sessionId: "session-1", leafUuid: "uuid-1" },
+    { type: "atis-latch", atis: "", sessionId: "session-1" },
   ];
 
   for (const entry of bookkeeping) {

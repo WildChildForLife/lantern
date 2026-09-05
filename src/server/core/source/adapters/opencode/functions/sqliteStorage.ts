@@ -32,7 +32,7 @@ import {
  * opencode's second storage mode, kept whole rather than as branches through
  * the adapter.
  *
- * As of 1.18.13 — the current release — this is what a normal install looks
+ * As of 1.18.13, and still true at 1.18.27, this is what a normal install looks
  * like: one `opencode.db` and no storage tree at all. The transcript dialect is
  * unchanged, so everything here ends at the same parser the file layout uses;
  * only where the documents live is different.

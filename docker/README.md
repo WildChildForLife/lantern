@@ -113,11 +113,15 @@ or has a recorded reason it cannot be.
 
 ## Known sharp edges
 
-- **opencode `1.18.13` writes SQLite, not JSON files.** Found by this harness on
-  its first run, contradicting every secondary description of the 1.x line.
-  Both layouts are read now. The database is asked first, because a migrated
-  install leaves its old directories behind and the tree would otherwise pin it
-  to the history it had on the day it migrated.
+- **opencode writes SQLite, not JSON files.** Found by this harness on its first
+  run against `1.18.13`, contradicting every secondary description of the 1.x
+  line, and still true of `1.18.27`. Both layouts are read now. The database is
+  asked first, because a migrated install leaves its old directories behind and
+  the tree would otherwise pin it to the history it had on the day it migrated.
+- **goose keeps its newest sessions in the write-ahead log.** On the `1.48.0`
+  run `sessions.db` was 4 KB and `sessions.db-wal` beside it was 3.4 MB. Copy
+  the `.db` on its own and you have an install with no history; the reader does
+  not use `immutable` for exactly this reason.
 - **Codex reserves the provider ids `openai`, `ollama` and `lmstudio`.** A
   `config.toml` block using one of them is _silently discarded_ and Codex keeps
   talking to `localhost` — which inside a container is nothing. The harness uses
