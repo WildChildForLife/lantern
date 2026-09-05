@@ -29,6 +29,6 @@
       }
     ]
   },
-  "include": ["src", "tsdown.config.ts"],
+  "include": ["src", "tsdown.config.ts", "scripts"],
   "exclude": ["node_modules"]
 }
