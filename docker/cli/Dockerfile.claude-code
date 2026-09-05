@@ -9,7 +9,7 @@
 # reusing them elsewhere is not permitted.
 FROM node:24-slim
 
-ARG CLAUDE_CODE_VERSION=2.1.221
+ARG CLAUDE_CODE_VERSION=2.1.258
 RUN apt-get update \
   && apt-get install -y --no-install-recommends git ca-certificates gosu \
   && rm -rf /var/lib/apt/lists/* \

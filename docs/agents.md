@@ -31,12 +31,12 @@
 
 | Agent CLI       | History Lantern reads       | Verified against | Mode                      |
 | --------------- | --------------------------- | ---------------- | ------------------------- |
-| **Claude Code** | `~/.claude/projects/`       | `2.1.221`        | Read **and** drive a turn |
-| **Codex CLI**   | `~/.codex/sessions/`        | `0.146.0`        | Read-only                 |
-| **opencode**    | `~/.local/share/opencode/`  | `1.18.13`        | Read-only — see the note  |
-| **Qwen Code**   | `~/.qwen/projects/`         | `0.21.6`         | Read-only                 |
-| **Copilot CLI** | `~/.copilot/session-state/` | `1.0.78`         | Read-only                 |
-| **goose**       | `~/.local/share/goose/`     | `1.45.0`         | Read-only                 |
+| **Claude Code** | `~/.claude/projects/`       | `2.1.258`        | Read **and** drive a turn |
+| **Codex CLI**   | `~/.codex/sessions/`        | `0.152.1`        | Read-only                 |
+| **opencode**    | `~/.local/share/opencode/`  | `1.18.27`        | Read-only — see the note  |
+| **Qwen Code**   | `~/.qwen/projects/`         | `0.22.3`         | Read-only                 |
+| **Copilot CLI** | `~/.copilot/session-state/` | `1.0.82`         | Read-only                 |
+| **goose**       | `~/.local/share/goose/`     | `1.48.0`         | Read-only                 |
 
 Sessions from every enabled CLI sit in the same topics, the same searchable list and the same board,
 and are grouped into one workspace when they ran in the same repo. Pick which to read in settings.

@@ -126,6 +126,12 @@ const makeLastPrompt = (sessionId: string): Extract<Conversation, { type: "last-
   lastPrompt: "What is the meaning of life?",
 });
 
+const makeAtisLatch = (sessionId: string): Extract<Conversation, { type: "atis-latch" }> => ({
+  type: "atis-latch",
+  atis: "",
+  sessionId,
+});
+
 const makeError = (lineNumber: number): ErrorJsonl => ({
   type: "x-error",
   line: "{ invalid json",
@@ -190,6 +196,15 @@ describe("getConversationKey", () => {
   it("returns last-prompt key with sessionId", () => {
     const conv = makeLastPrompt("session-1");
     expect(getConversationKey(conv)).toBe("last-prompt_session-1");
+  });
+
+  // atis-latch is internal, so this key never reaches a rendered row —
+  // getConversationKey is total over the union and needs an arm regardless.
+  // Keying on atis would promise a uniqueness it does not have: every observed
+  // one carried an empty string.
+  it("returns atis-latch key with sessionId", () => {
+    const conv = makeAtisLatch("session-1");
+    expect(getConversationKey(conv)).toBe("atis-latch_session-1");
   });
 });
 

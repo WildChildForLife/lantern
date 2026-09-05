@@ -9,7 +9,7 @@
 # being tested, and the on-disk shape is exactly what is under test.
 FROM node:24-slim
 
-ARG COPILOT_VERSION=1.0.78
+ARG COPILOT_VERSION=1.0.82
 RUN apt-get update \
   && apt-get install -y --no-install-recommends git ca-certificates gosu \
   && rm -rf /var/lib/apt/lists/* \
