@@ -1,9 +1,12 @@
 import { resolveSessionTitle, toConciseTitle } from "../../../lib/session/sessionTitle.ts";
 import type { ConversationListEntry, TopicGroup } from "../../../server/core/types.ts";
+import { mergeSpans, type MatchSpan, parseQuery, type Query, scoreMatch } from "./searchMatch.ts";
 
 /** A conversation with the one string the board actually draws. */
 export type BoardRow = ConversationListEntry & {
   displayTitle: string;
+  /** Where the search matched the title, for the row to pick out. Empty otherwise. */
+  titleSpans: MatchSpan[];
 };
 
 export type BoardColumn = {
@@ -20,12 +23,85 @@ const toBoardRow = (conversation: ConversationListEntry): BoardRow => ({
     resolveSessionTitle(conversation.title, conversation.firstUserMessage, conversation.sessionId),
     TITLE_LIMIT,
   ),
+  titleSpans: [],
 });
 
-const matches = (row: BoardRow, needle: string): boolean =>
-  row.displayTitle.toLowerCase().includes(needle) ||
-  (row.projectName?.toLowerCase().includes(needle) ?? false) ||
-  (row.projectPath?.toLowerCase().includes(needle) ?? false);
+/**
+ * How much a hit in each field counts towards the row's place in the results.
+ *
+ * A conversation whose title is what was typed is the one being looked for; the
+ * same characters found in the path every conversation in the project shares are
+ * barely evidence at all, but they are still worth showing below the rest.
+ *
+ * The topic is not among them on purpose. It is matched once per column, in one
+ * piece, and scoring it per row as well let a scattered match on the heading
+ * quietly keep every row underneath it — which is the column-wide rule again,
+ * without the deliberate spelling it asks for.
+ */
+const FIELD_WEIGHT = {
+  title: 3,
+  projectName: 2,
+  projectPath: 1,
+} as const;
+
+type Scored = { row: BoardRow; score: number };
+
+/**
+ * Scores one conversation against every term, or rejects it.
+ *
+ * Every term has to find a field of its own to match — `refund lantern` may match
+ * the title with one word and the project with the other — but a term nothing
+ * matches takes the whole row out.
+ */
+const scoreRow = (row: BoardRow, query: Query): Scored | null => {
+  const spans: MatchSpan[] = [];
+  let total = 0;
+
+  for (const term of query.terms) {
+    const title = scoreMatch(row.displayTitle, term, query.caseSensitive);
+    const fields = [
+      { match: title, weight: FIELD_WEIGHT.title },
+      {
+        match: scoreMatch(row.projectName ?? "", term, query.caseSensitive),
+        weight: FIELD_WEIGHT.projectName,
+      },
+      {
+        match: scoreMatch(row.projectPath ?? "", term, query.caseSensitive),
+        weight: FIELD_WEIGHT.projectPath,
+      },
+    ];
+
+    const best = fields.reduce(
+      (highest: number | null, field) =>
+        field.match === null
+          ? highest
+          : Math.max(highest ?? Number.NEGATIVE_INFINITY, field.match.score * field.weight),
+      null,
+    );
+
+    if (best === null) {
+      return null;
+    }
+
+    total += best;
+    // Highlighted whether or not the title was this term's best field: a match
+    // the row is showing is a match worth pointing at.
+    if (title !== null) {
+      spans.push(...title.spans);
+    }
+  }
+
+  return { row: { ...row, titleSpans: mergeSpans(spans) }, score: total };
+};
+
+/** The one place the topic heading itself is matched, and always in one piece. */
+const topicMatches = (label: string, query: Query): boolean => {
+  const haystack = query.caseSensitive ? label : label.toLowerCase();
+
+  return query.terms.every((term) =>
+    haystack.includes(query.caseSensitive ? term : term.toLowerCase()),
+  );
+};
 
 /**
  * Turns the flat conversation list into the board's columns.
@@ -38,6 +114,10 @@ const matches = (row: BoardRow, needle: string): boolean =>
  * conversations, so `/network` reads as "show me that column"; anything else
  * narrows to the conversations that match, so `/refund` finds one row wherever
  * it lives.
+ *
+ * A search reorders as well as narrows: the closest match to what was typed goes
+ * to the top of its column, and recency only settles ties. Naming a topic does
+ * not — that column was asked for whole, and it is still a column of history.
  */
 export const buildColumns = ({
   topics,
@@ -48,7 +128,7 @@ export const buildColumns = ({
   conversations: ConversationListEntry[];
   filter: string;
 }): BoardColumn[] => {
-  const needle = filter.trim().toLowerCase();
+  const query = parseQuery(filter);
 
   const rowsByTopic = new Map<string, BoardRow[]>();
   for (const conversation of conversations) {
@@ -75,11 +155,18 @@ export const buildColumns = ({
           new Date(right.lastModifiedAt).getTime() - new Date(left.lastModifiedAt).getTime(),
       );
 
-      if (needle === "" || topic.label.toLowerCase().includes(needle)) {
+      if (query.terms.length === 0 || topicMatches(topic.label, query)) {
         return { topic, rows };
       }
 
-      return { topic, rows: rows.filter((row) => matches(row, needle)) };
+      const scored = rows
+        .map((row) => scoreRow(row, query))
+        .filter((match) => match !== null)
+        // Recency is the tie-break rather than the order, so a column of equally
+        // good matches still reads newest first.
+        .toSorted((left, right) => right.score - left.score);
+
+      return { topic, rows: scored.map((match) => match.row) };
     })
     .filter((column) => column.rows.length > 0)
     .toSorted(

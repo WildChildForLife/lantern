@@ -8,11 +8,13 @@ type BoardProps = {
   layout: Layout;
   columnIndex: number;
   rowIndex: number;
+  /** Where the focused column has been scrolled to. */
+  rowStart: number;
   now: Date;
 };
 
 /** One column per topic, side by side, scrolling sideways past what fits. */
-export const Board = ({ columns, layout, columnIndex, rowIndex, now }: BoardProps) => {
+export const Board = ({ columns, layout, columnIndex, rowIndex, rowStart, now }: BoardProps) => {
   const { start, end } = resolveWindow({
     index: columnIndex,
     total: columns.length,
@@ -21,16 +23,21 @@ export const Board = ({ columns, layout, columnIndex, rowIndex, now }: BoardProp
 
   return (
     <Box flexDirection="row">
-      {columns.slice(start, end).map((column, offset) => (
-        <TopicColumn
-          key={column.topic.id}
-          column={column}
-          width={layout.columnWidth}
-          visibleRows={layout.visibleRows}
-          selectedRow={start + offset === columnIndex ? rowIndex : null}
-          now={now}
-        />
-      ))}
+      {columns.slice(start, end).map((column, offset) => {
+        const focused = start + offset === columnIndex;
+
+        return (
+          <TopicColumn
+            key={column.topic.id}
+            column={column}
+            width={layout.columnWidth}
+            visibleRows={layout.visibleRows}
+            selectedRow={focused ? rowIndex : null}
+            windowStart={focused ? rowStart : undefined}
+            now={now}
+          />
+        );
+      })}
     </Box>
   );
 };

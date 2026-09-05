@@ -18,6 +18,7 @@ const row = (overrides?: Partial<ConversationListEntry>): BoardRow => ({
   costConfidence: "estimated",
   topic: { id: "api", label: "API", icon: "plug" },
   displayTitle: "Add refunds",
+  titleSpans: [],
   ...overrides,
 });
 

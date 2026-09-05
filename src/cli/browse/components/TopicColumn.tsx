@@ -11,18 +11,41 @@ type TopicColumnProps = {
   visibleRows: number;
   /** Index of the highlighted row, or null when this column is not focused. */
   selectedRow: number | null;
+  /**
+   * Where the focused column's window has been scrolled to.
+   *
+   * Only the column being moved through has one. The others are drawn cold, from
+   * the top, because there is no cursor in them to keep on screen.
+   */
+  windowStart?: number | undefined;
   now: Date;
 };
 
-export const TopicColumn = ({ column, width, visibleRows, selectedRow, now }: TopicColumnProps) => {
+export const TopicColumn = ({
+  column,
+  width,
+  visibleRows,
+  selectedRow,
+  windowStart,
+  now,
+}: TopicColumnProps) => {
   const color = topicColor(column.topic.id);
-  const { start, end } = resolveWindow({
-    index: selectedRow ?? 0,
-    total: column.rows.length,
-    size: visibleRows,
-  });
+  const total = column.rows.length;
+  const start =
+    windowStart === undefined || selectedRow === null
+      ? resolveWindow({ index: selectedRow ?? 0, total, size: visibleRows }).start
+      : Math.min(Math.max(0, windowStart), Math.max(0, total - visibleRows));
+  const end = Math.min(total, start + Math.max(0, visibleRows));
   const hiddenAbove = start;
-  const hiddenBelow = column.rows.length - end;
+  const hiddenBelow = total - end;
+  /**
+   * Where you are, not just how many there are. A column that scrolls hides most
+   * of itself, and `12/40` is the only thing on screen that says how far down it
+   * the cursor has got. The label is clipped around it rather than to a fixed
+   * width, so the count never falls off the end of a narrow column.
+   */
+  const counter =
+    selectedRow === null ? `${total}` : `${Math.min(selectedRow + 1, total)}/${total}`;
 
   return (
     <Box flexDirection="column" width={width} marginRight={1}>
@@ -33,9 +56,10 @@ export const TopicColumn = ({ column, width, visibleRows, selectedRow, now }: To
       */}
       <Box>
         <Text color={color} bold={selectedRow !== null} wrap="truncate">
-          {topicGlyph(column.topic.icon)} {truncateToWidth(column.topic.label, width - 8)}
+          {topicGlyph(column.topic.icon)}{" "}
+          {truncateToWidth(column.topic.label, width - counter.length - 5)}
         </Text>
-        <Text dimColor> {column.rows.length}</Text>
+        <Text dimColor> {counter}</Text>
       </Box>
       <Box>
         <Text color={color} dimColor={selectedRow === null}>

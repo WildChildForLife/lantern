@@ -1,5 +1,72 @@
 import { describe, expect, it } from "vitest";
-import { resolveLayout, resolveWindow } from "./layout.ts";
+import {
+  advanceWindow,
+  boardRowBudget,
+  FRAME_PADDING_X,
+  framePaddingY,
+  resolveLayout,
+  resolveWindow,
+} from "./layout.ts";
+
+/**
+ * The window's own memory, which is what makes scrolling read as scrolling.
+ *
+ * `resolveWindow` centres the cursor, so every keypress moved the whole list
+ * under a stationary cursor. This keeps the list still and moves the cursor
+ * through it, until the cursor reaches an edge and the list has to give.
+ */
+describe("advanceWindow", () => {
+  it("stays at the top while everything fits", () => {
+    expect(advanceWindow({ start: 0, index: 3, total: 5, size: 10 })).toBe(0);
+  });
+
+  it("forgets a stale anchor once the list is short enough to fit", () => {
+    expect(advanceWindow({ start: 40, index: 1, total: 5, size: 10 })).toBe(0);
+  });
+
+  it("leaves the window alone while the cursor moves about inside it", () => {
+    expect(advanceWindow({ start: 10, index: 15, total: 100, size: 10 })).toBe(10);
+  });
+
+  it("scrolls by one when the cursor walks off the bottom", () => {
+    // Window 10..19, scrolloff 1, so row 18 is the last one drawn without moving.
+    expect(advanceWindow({ start: 10, index: 18, total: 100, size: 10 })).toBe(10);
+    expect(advanceWindow({ start: 10, index: 19, total: 100, size: 10 })).toBe(11);
+  });
+
+  it("scrolls by one when the cursor walks off the top", () => {
+    expect(advanceWindow({ start: 10, index: 11, total: 100, size: 10 })).toBe(10);
+    expect(advanceWindow({ start: 10, index: 10, total: 100, size: 10 })).toBe(9);
+  });
+
+  it("jumps far enough to catch a cursor that moved a whole page", () => {
+    expect(advanceWindow({ start: 0, index: 50, total: 100, size: 10 })).toBe(42);
+  });
+
+  it("stops at the top rather than scrolling past it", () => {
+    expect(advanceWindow({ start: 4, index: 0, total: 100, size: 10 })).toBe(0);
+  });
+
+  it("stops at the bottom rather than scrolling past it", () => {
+    expect(advanceWindow({ start: 95, index: 99, total: 100, size: 10 })).toBe(90);
+  });
+
+  /** A shorter column after a re-read must not leave the window off its end. */
+  it("pulls a stale anchor back inside a list that shrank", () => {
+    expect(advanceWindow({ start: 80, index: 0, total: 20, size: 10 })).toBe(0);
+    expect(advanceWindow({ start: 80, index: 19, total: 20, size: 10 })).toBe(10);
+  });
+
+  /** With one row on screen there is no margin to keep, only the cursor. */
+  it("drops the margin when the window is too small to hold one", () => {
+    expect(advanceWindow({ start: 5, index: 9, total: 100, size: 1 })).toBe(9);
+    expect(advanceWindow({ start: 5, index: 6, total: 100, size: 2 })).toBe(5);
+  });
+
+  it("draws nothing for an empty list", () => {
+    expect(advanceWindow({ start: 3, index: 0, total: 0, size: 10 })).toBe(0);
+  });
+});
 
 describe("resolveWindow", () => {
   it("shows everything when it all fits", () => {
@@ -89,14 +156,51 @@ describe("resolveLayout", () => {
   });
 
   /**
+   * The floor is right for drawing and wrong for deciding: a caller weighing up
+   * whether it can afford another panel has to be told it is already over.
+   */
+  it("reports the true budget, below nothing included", () => {
+    expect(boardRowBudget({ height: 10, reservedRows: 40 })).toBeLessThan(0);
+    expect(boardRowBudget({ height: 40, reservedRows: 6 })).toBe(
+      resolveLayout({ width: 160, height: 40, topicCount: 3, reservedRows: 6 }).visibleRows,
+    );
+  });
+
+  /**
    * The rows the board does not draw conversations into: two for the header, three
    * for the status bar, two for a column's label and divider, two for the scroll
-   * indicators, and one kept spare so the frame never scrolls the terminal. This
-   * was a single number that came to nine when the truth was eleven, and the
-   * status bar went off the bottom of every scrolling column.
+   * indicators, one kept spare so the frame never scrolls the terminal, and one
+   * top and bottom for the frame's own padding. This was a single number that came
+   * to nine when the truth was eleven, and the status bar went off the bottom of
+   * every scrolling column.
    */
   it("leaves room for everything drawn around the conversations", () => {
-    expect(resolveLayout({ width: 160, height: 40, topicCount: 3 }).visibleRows).toBe(30);
+    expect(resolveLayout({ width: 160, height: 40, topicCount: 3 }).visibleRows).toBe(28);
+  });
+
+  /** Twenty rows is a split pane: the gutter is the first thing it cannot afford. */
+  it("gives a short terminal back the rows the gutter would have taken", () => {
+    expect(framePaddingY(40)).toBe(1);
+    expect(framePaddingY(20)).toBe(0);
+    expect(resolveLayout({ width: 160, height: 20, topicCount: 3 }).visibleRows).toBe(10);
+  });
+
+  /**
+   * The frame is padded, so the columns have fewer columns to share than the
+   * terminal has. Sizing them from the raw width overflowed the frame by exactly
+   * the padding, and the rightmost column lost its last characters to it.
+   */
+  it("sizes the columns to the padded frame rather than the whole terminal", () => {
+    const layout = resolveLayout({ width: 160, height: 40, topicCount: 8 });
+    const drawn = layout.visibleColumns * (layout.columnWidth + 1);
+
+    expect(drawn).toBeLessThanOrEqual(160 - FRAME_PADDING_X * 2);
+  });
+
+  it("fits the two-pane layout inside the padding too", () => {
+    const layout = resolveLayout({ width: 70, height: 30, topicCount: 8 });
+
+    expect(layout.railWidth + 2 + layout.columnWidth).toBeLessThanOrEqual(70 - FRAME_PADDING_X * 2);
   });
 
   /** Rail plus its margin plus the pane has to fit the terminal it was given. */

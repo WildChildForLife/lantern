@@ -4,8 +4,10 @@ import { theme } from "../../ui/theme.ts";
 const KEYS: [string, string][] = [
   ["← → h l", "move between topics"],
   ["↑ ↓ j k", "move between conversations"],
+  ["PgUp PgDn", "a screenful at a time"],
   ["g G", "first / last conversation"],
-  ["/", "filter by topic, title or project"],
+  ["/", "search titles, projects, topics"],
+  ["esc", "clear the search"],
   ["enter", "do the action shown in the header"],
   ["e", "change which action that is"],
   ["R", "resume here, come back after"],
@@ -32,7 +34,7 @@ const KeyList = ({ entries }: { entries: [string, string][] }) => (
   <Box flexDirection="column" marginRight={2}>
     {entries.map(([key, description]) => (
       <Box key={key}>
-        <Box width={9}>
+        <Box width={10}>
           <Text color={theme.accent}>{key}</Text>
         </Box>
         <Text dimColor wrap="truncate">

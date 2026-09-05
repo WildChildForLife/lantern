@@ -134,3 +134,150 @@ describe("buildColumns", () => {
     expect(columns[0]?.rows[0]?.displayTitle).toBe("abc-123");
   });
 });
+
+describe("buildColumns, searching", () => {
+  const one = [topic("api", "Orders API", 4)];
+
+  const found = (filter: string, entries: ConversationListEntry[]): string[] =>
+    buildColumns({ topics: one, conversations: entries, filter })[0]?.rows.map(
+      (row) => row.sessionId,
+    ) ?? [];
+
+  const titled = (
+    sessionId: string,
+    title: string,
+    lastModifiedAt?: string,
+  ): ConversationListEntry =>
+    conversation({
+      sessionId,
+      topicId: "api",
+      title,
+      ...(lastModifiedAt === undefined ? {} : { lastModifiedAt }),
+    });
+
+  /** Two words, two places: the way anyone narrows a list they can nearly see. */
+  it("makes every word of the query count", () => {
+    const entries = [
+      titled("both", "Refund the checkout flow"),
+      titled("one", "Refund the order"),
+      titled("other", "Rewrite the checkout"),
+    ];
+
+    expect(found("refund checkout", entries)).toStrictEqual(["both"]);
+  });
+
+  it("lets the words match different things", () => {
+    const entries = [
+      titled("here", "Fix the router"),
+      conversation({
+        sessionId: "elsewhere",
+        topicId: "api",
+        title: "Fix the router",
+        projectName: "homelab",
+      }),
+    ];
+
+    expect(found("router homelab", entries)).toStrictEqual(["elsewhere"]);
+  });
+
+  it("finds a title by the characters of it that were typed", () => {
+    expect(found("rdhcp", [titled("a", "Router DHCP renewal")])).toStrictEqual(["a"]);
+  });
+
+  it("ignores case until the query mixes it", () => {
+    const entries = [titled("lower", "fix the api"), titled("upper", "Fix the Api")];
+
+    expect(found("api", entries)).toHaveLength(2);
+    expect(found("Api", entries)).toStrictEqual(["upper"]);
+  });
+
+  /**
+   * The whole point of ranking: the row the query describes is the top one,
+   * whether or not it is the one that was touched most recently.
+   */
+  it("puts the closest match first, however old it is", () => {
+    const entries = [
+      titled("mentions", "Rewrite everything about refunds later", "2026-08-09T00:00:00.000Z"),
+      titled("named", "Refunds", "2026-08-01T00:00:00.000Z"),
+    ];
+
+    expect(found("refunds", entries)).toStrictEqual(["named", "mentions"]);
+  });
+
+  it("prefers a title match to a match on the project everything shares", () => {
+    const entries = [
+      conversation({ sessionId: "path-only", topicId: "api", title: "Fix checkout" }),
+      titled("in-title", "Move lantern to the new host"),
+    ];
+
+    expect(found("lantern", entries)).toStrictEqual(["in-title", "path-only"]);
+  });
+
+  it("keeps the newest first among matches that are just as good", () => {
+    const entries = [
+      titled("older", "Refunds", "2026-08-01T00:00:00.000Z"),
+      titled("newer", "Refunds", "2026-08-09T00:00:00.000Z"),
+    ];
+
+    expect(found("refunds", entries)).toStrictEqual(["newer", "older"]);
+  });
+
+  it("says where it matched the title, so the row can show it", () => {
+    const columns = buildColumns({
+      topics: one,
+      conversations: [titled("a", "Add refunds")],
+      filter: "refund",
+    });
+
+    expect(columns[0]?.rows[0]?.titleSpans).toStrictEqual([{ start: 4, end: 10 }]);
+  });
+
+  it("folds two words that matched the same part of the title into one span", () => {
+    const columns = buildColumns({
+      topics: one,
+      conversations: [titled("a", "Add refunds")],
+      filter: "refund refunds",
+    });
+
+    expect(columns[0]?.rows[0]?.titleSpans).toStrictEqual([{ start: 4, end: 11 }]);
+  });
+
+  it("marks nothing when nothing was searched for", () => {
+    const columns = buildColumns({
+      topics: one,
+      conversations: [titled("a", "Add refunds")],
+      filter: "",
+    });
+
+    expect(columns[0]?.rows[0]?.titleSpans).toStrictEqual([]);
+  });
+
+  /**
+   * A column asked for by name is a column of history, not a set of results:
+   * reordering it would answer a question nobody asked.
+   */
+  it("leaves a column named by the query in its own order", () => {
+    const columns = buildColumns({
+      topics: one,
+      conversations: [
+        titled("older", "Orders", "2026-08-01T00:00:00.000Z"),
+        titled("newer", "Something else", "2026-08-09T00:00:00.000Z"),
+      ],
+      filter: "orders",
+    });
+
+    expect(columns[0]?.rows.map((row) => row.sessionId)).toStrictEqual(["newer", "older"]);
+    expect(columns[0]?.rows[0]?.titleSpans).toStrictEqual([]);
+  });
+
+  /** Fuzzy matching must not be so loose that a topic swallows the whole board. */
+  it("does not claim a whole column on a scattered match of its name", () => {
+    const columns = buildColumns({
+      topics: [topic("api", "Orders API", 2)],
+      conversations: [titled("a", "Orders API detail"), titled("b", "Unrelated")],
+      filter: "odi",
+    });
+
+    expect(columns[0]?.rows.map((row) => row.sessionId)).toStrictEqual(["a"]);
+  });
+});

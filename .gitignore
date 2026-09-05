@@ -81,3 +81,6 @@ docker/workspace/.git/
 # Build output from scripts/build-packages.sh
 packaging/staging/
 packaging/dist/
+
+# The cache `--claude-dir ./fixtures/claude-home` writes beside the fixtures
+fixtures/.lantern/
