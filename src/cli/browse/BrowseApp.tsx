@@ -148,34 +148,44 @@ export const BrowseApp = ({
   /** The width inside the gutter, which is all anything drawn here actually gets. */
   const innerWidth = Math.max(20, width - FRAME_PADDING_X * 2);
 
-  // Everything drawn around the board has to be counted, or the status bar goes
-  // off the bottom of a screen the board has already filled. The help overlay is
-  // absent from this sum because it replaces the board rather than joining it.
-  const claimedRows =
-    (printed === null || printed === undefined ? 0 : PRINTED_COMMAND_HEIGHT) +
-    // Always drawn, so always spent — which is the point: the board no longer
-    // changes height under the user as they open and close the search.
-    SEARCH_BAR_HEIGHT +
-    (mode === "confirm-resort" ? CONFIRM_RESORT_HEIGHT : 0);
-
   /*
-    Shown once the count is known, whatever the count is: a key that only appears
-    on the day it becomes relevant is a key nobody knows exists.
+    Everything drawn around the board has to be counted, or the status bar goes
+    off the bottom of a screen the board has already filled. The help overlay is
+    absent from this sum because it replaces the board rather than joining it.
 
-    It is the one thing here that gives way, and only when the alternative is
-    nothing to give way — a twenty-row terminal with the resort question open has
-    no rows left, and losing a line that advertises a key is better than losing
-    the row that says which keys there are.
+    The search bar is spent in every mode though it is not drawn in help, and
+    that constant reservation is the point: the board no longer changes height
+    under the user as the search opens and closes.
+
+    Two of these are askable-for and two are not. The question and the search bar
+    stay whatever it costs — a question with its answer off the screen is worse
+    than useless, and the bar is the board's own height contract. The callout and
+    the printed command are things the board is telling you, and on a screen with
+    no rows left, being told something is worth less than being able to see which
+    keys there are. So they give way in that order, and only when the row budget
+    has actually gone under.
   */
+  const fixedRows = SEARCH_BAR_HEIGHT + (mode === "confirm-resort" ? CONFIRM_RESORT_HEIGHT : 0);
+  const fits = (rows: number): boolean => boardRowBudget({ height, reservedRows: rows }) > 0;
+
+  // Shown once the count is known, whatever the count is: a key that only appears
+  // on the day it becomes relevant is a key nobody knows exists.
+  const calloutWanted = classifying || unclassified !== undefined;
+  const printedWanted = printed !== null && printed !== undefined;
+
+  const printedVisible = printedWanted && fits(fixedRows + PRINTED_COMMAND_HEIGHT);
   const calloutVisible =
-    (classifying || unclassified !== undefined) &&
-    boardRowBudget({ height, reservedRows: claimedRows + CLASSIFY_CALLOUT_HEIGHT }) > 0;
+    calloutWanted &&
+    fits(fixedRows + (printedVisible ? PRINTED_COMMAND_HEIGHT : 0) + CLASSIFY_CALLOUT_HEIGHT);
 
   const layout = resolveLayout({
     width,
     height,
     topicCount: columns.length,
-    reservedRows: claimedRows + (calloutVisible ? CLASSIFY_CALLOUT_HEIGHT : 0),
+    reservedRows:
+      fixedRows +
+      (printedVisible ? PRINTED_COMMAND_HEIGHT : 0) +
+      (calloutVisible ? CLASSIFY_CALLOUT_HEIGHT : 0),
   });
 
   const safeColumnIndex = clamp(columnIndex, columns.length - 1);
@@ -208,9 +218,17 @@ export const BrowseApp = ({
     [activeColumn, layout.visibleRows, safeRowStart],
   );
 
-  /** A new query is a new list; keeping a scroll position into the old one is not. */
+  /**
+   * A new query is a new list; keeping a place in the old one is not.
+   *
+   * The column goes back to the first as well as the row. A query that empties a
+   * column drops it (`buildColumns`), so every index after it shifts by one —
+   * which slid the cursor onto a different topic mid-keystroke, and left it
+   * there when the query was cleared again.
+   */
   const applyFilter = useCallback((value: string) => {
     setFilter(value);
+    setColumnIndex(0);
     setRowIndex(0);
     setRowStart(0);
   }, []);
@@ -477,11 +495,15 @@ export const BrowseApp = ({
           list is most wanted on.
         */}
         {mode === "help" ? (
-          <HelpOverlay />
+          <HelpOverlay width={innerWidth} />
         ) : columns.length === 0 ? (
-          <Text color={theme.muted}>
-            {filter === "" ? "No conversations found." : `Nothing matches "${filter}".`}
-          </Text>
+          // Bounded and clipped like every other line here: the query is echoed
+          // back into it, and a long one wrapped this to three rows.
+          <Box width={innerWidth}>
+            <Text color={theme.muted} wrap="truncate">
+              {filter === "" ? "No conversations found." : `Nothing matches "${filter}".`}
+            </Text>
+          </Box>
         ) : layout.mode === "board" ? (
           <Board
             columns={columns}
@@ -505,7 +527,7 @@ export const BrowseApp = ({
 
       {mode === "confirm-resort" ? (
         <Box marginTop={1} flexShrink={0}>
-          <ConfirmResort count={conversations.length} />
+          <ConfirmResort count={conversations.length} width={innerWidth} />
         </Box>
       ) : null}
 
@@ -520,7 +542,7 @@ export const BrowseApp = ({
         </Box>
       ) : null}
 
-      {printed === null || printed === undefined ? null : (
+      {!printedVisible || printed === null || printed === undefined ? null : (
         // A clear line between the board and the command, so the command does
         // not read as another row of the table.
         <Box marginTop={1} flexShrink={0}>

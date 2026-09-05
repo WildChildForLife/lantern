@@ -122,6 +122,48 @@ describe("the board keeps its status bar on screen", () => {
     expect(plain(frame)).toContain(tail);
   };
 
+  /**
+   * Panels are budgeted one at a time and drawn all at once.
+   *
+   * Every case above opens a single panel, which is how a combination that
+   * overspends got through: with the printed command and the resort question up
+   * together on a twenty-row terminal, the board went six rows over and the
+   * status bar left the screen entirely. The cross product is the only shape of
+   * test that asks the question the budget is actually answering.
+   */
+  const panels: [string, Partial<BrowseAppProps>, string | undefined][] = [
+    ["nothing", {}, undefined],
+    [
+      "the printed command",
+      { printed: { cwd: "/home/dev/lantern", text: "claude", token: 1 } },
+      undefined,
+    ],
+    ["the search open", {}, "/"],
+    ["the resort question", {}, "T"],
+    [
+      "the printed command and the resort question",
+      { printed: { cwd: "/home/dev/lantern", text: "claude", token: 1 } },
+      "T",
+    ],
+    [
+      "the printed command and the search",
+      { printed: { cwd: "/home/dev/lantern", text: "claude", token: 1 } },
+      "/",
+    ],
+  ];
+
+  for (const [what, overrides, keys] of panels) {
+    it.each(heights)(
+      `keeps the keys and stays in the frame with ${what}, on %i rows`,
+      async (rows) => {
+        const frame = await draw(rows, overrides, keys);
+
+        expect(drawnLines(frame).at(-1)).toContain("←→ topics");
+        expect(heightOf(frame)).toBeLessThanOrEqual(rows);
+      },
+    );
+  }
+
   it.each(heights)("with scrolling columns, on %i rows", async (rows) => {
     expectNothingClipped(await draw(rows));
   });
@@ -165,36 +207,46 @@ describe("the board keeps its status bar on screen", () => {
  * its declared height at every width, and nothing may overflow the frame.
  */
 describe("the board keeps its status bar on screen on a narrow terminal", () => {
-  const widths = [40, 50, 70, 89, 90, 120];
+  /*
+    Capped at 100 because `ink-testing-library` renders into a 100-column stdout
+    whatever the board was told to lay out for. A wider case here looks like
+    coverage and is not: the assertions pass against a frame Ink has already
+    mangled, because every line in it is comfortably under the width being
+    asserted.
+  */
+  const widths = [40, 50, 70, 89, 90, 100];
 
-  const expectFits = (frame: string | undefined, columns: number) => {
-    const lines = drawnLines(frame);
-
-    expect(lines.at(-1)).toContain("←→ topics");
+  const expectFits = (frame: string | undefined, columns: number, rows: number) => {
+    expect(drawnLines(frame).at(-1)).toContain("←→ topics");
+    // Height as well as width. Trailing blanks are stripped from the frame, so a
+    // frame that overflowed downwards still ends on the status bar — checking the
+    // last drawn line alone cannot see it.
+    expect(heightOf(frame)).toBeLessThanOrEqual(rows);
     for (const line of plain(frame).split("\n")) {
       expect(line.length, `overflowed ${columns} columns: ${line}`).toBeLessThanOrEqual(columns);
     }
   };
 
-  it.each(widths)("with the board as it comes, at %i columns", async (columns) => {
-    expectFits(await draw(24, undefined, undefined, columns), columns);
-  });
+  const cases: [string, number, Partial<BrowseAppProps>, string | undefined][] = [
+    ["the board as it comes", 24, {}, undefined],
+    ["the search open", 24, {}, "/"],
+    [
+      "the printed command shown",
+      30,
+      { printed: { cwd: "/home/dev/lantern", text: `claude --resume "s-refund"`, token: 1 } },
+      undefined,
+    ],
+    // Both of these draw a bordered box of their own, and neither was given a
+    // width until the box was found wrapping at forty columns.
+    ["the resort question open", 30, {}, "T"],
+    ["the key list open", 30, {}, "?"],
+  ];
 
-  it.each(widths)("with the search open, at %i columns", async (columns) => {
-    expectFits(await draw(24, undefined, "/", columns), columns);
-  });
-
-  it.each(widths)("with the printed command shown, at %i columns", async (columns) => {
-    expectFits(
-      await draw(
-        30,
-        { printed: { cwd: "/home/dev/lantern", text: `claude --resume "s-refund"`, token: 1 } },
-        undefined,
-        columns,
-      ),
-      columns,
-    );
-  });
+  for (const [what, rows, overrides, keys] of cases) {
+    it.each(widths)(`with ${what}, at %i columns`, async (columns) => {
+      expectFits(await draw(rows, overrides, keys, columns), columns, rows);
+    });
+  }
 
   /** The name of the thing is the last part of the header worth losing. */
   it.each(widths)("keeps its own name in the header, at %i columns", async (columns) => {
@@ -253,6 +305,12 @@ describe("the board sits in the middle of the window it was given", () => {
   });
 
   it("leaves the keys where they were once the column is scrolled", async () => {
-    expect(gutters(await draw(30, undefined, "[6~"), 30)[1]).toBe(framePaddingY(30));
+    // Spelled with the ESC constant rather than a literal escape byte: the raw
+    // character is invisible in an editor, and a press that silently does
+    // nothing makes this a copy of the case above it.
+    const scrolled = await draw(30, undefined, `${ESC}[6~`);
+
+    expect(plain(scrolled)).toContain("↑ ");
+    expect(gutters(scrolled, 30)[1]).toBe(framePaddingY(30));
   });
 });
