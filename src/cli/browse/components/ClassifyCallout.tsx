@@ -9,6 +9,14 @@ type ClassifyCalloutProps = {
   unclassified: number;
   /** Whether a pass is running right now. */
   classifying: boolean;
+  /**
+   * The width to stay inside.
+   *
+   * The board sets aside one row for this and a blank line under it, and nothing
+   * more — so a narrow terminal has to lose the tail of the sentence rather than
+   * take a second row that would come out of the conversations.
+   */
+  width: number;
 };
 
 /** The key, drawn as a key rather than as another word in a sentence. */
@@ -32,15 +40,22 @@ const Key = ({ label }: { label: string }) => (
  * with the state is which key it leads with — `t` when there is something to
  * sort, `T` when the only sort left to do is a re-sort of everything.
  */
-export const ClassifyCallout = ({ unclassified, classifying }: ClassifyCalloutProps) => {
+export const ClassifyCallout = ({ unclassified, classifying, width }: ClassifyCalloutProps) => {
+  /*
+    One truncating Text with the rest nested inside it, not a row of siblings.
+    Siblings are measured and wrapped one at a time, so on a narrow terminal this
+    row became two — and the second one came out of the board's budget, which is
+    counted to the row.
+  */
   if (classifying) {
     return (
-      <Box>
-        <Text color={theme.accent}>⟳ </Text>
-        <Text color={theme.accent} bold>
-          sorting into topics…
+      <Box width={width}>
+        <Text wrap="truncate">
+          <Text color={theme.accent} bold>
+            ⟳ sorting into topics…
+          </Text>
+          <Text dimColor> asking the configured agent CLI; this can take a while</Text>
         </Text>
-        <Text dimColor> asking the configured agent CLI; this can take a while</Text>
       </Box>
     );
   }
@@ -49,23 +64,27 @@ export const ClassifyCallout = ({ unclassified, classifying }: ClassifyCalloutPr
   // would actually do something rather than inviting an empty pass.
   if (unclassified <= 0) {
     return (
-      <Box>
-        <Text color={theme.ok}>✓ </Text>
-        <Text dimColor>every conversation has a topic · </Text>
-        <Key label="T" />
-        <Text dimColor> re-sorts all of them with the AI</Text>
+      <Box width={width}>
+        <Text wrap="truncate">
+          <Text color={theme.ok}>✓ </Text>
+          <Text dimColor>every conversation has a topic · </Text>
+          <Key label="T" />
+          <Text dimColor> re-sorts all of them with the AI</Text>
+        </Text>
       </Box>
     );
   }
 
   return (
-    <Box>
-      <Key label="t" />
-      <Text color={theme.accent} bold>
-        {" "}
-        sort {unclassified} {unclassified === 1 ? "conversation" : "conversations"} into topics
+    <Box width={width}>
+      <Text wrap="truncate">
+        <Key label="t" />
+        <Text color={theme.accent} bold>
+          {" "}
+          sort {unclassified} {unclassified === 1 ? "conversation" : "conversations"} into topics
+        </Text>
+        <Text dimColor> with the AI · T redoes every topic</Text>
       </Text>
-      <Text dimColor> with the AI · T redoes every topic</Text>
     </Box>
   );
 };

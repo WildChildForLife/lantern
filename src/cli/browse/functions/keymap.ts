@@ -7,6 +7,8 @@ export type KeyInput = {
   downArrow?: boolean | undefined;
   leftArrow?: boolean | undefined;
   rightArrow?: boolean | undefined;
+  pageUp?: boolean | undefined;
+  pageDown?: boolean | undefined;
   return?: boolean | undefined;
   escape?: boolean | undefined;
   ctrl?: boolean | undefined;
@@ -22,6 +24,11 @@ export type BrowseAction =
   | { type: "quit" }
   | { type: "move-column"; delta: number }
   | { type: "move-row"; delta: number }
+  /**
+   * A screenful at a time. Kept apart from `move-row` because how much a screen
+   * is depends on the terminal, which the keymap deliberately knows nothing about.
+   */
+  | { type: "move-row-page"; direction: -1 | 1 }
   | { type: "row-edge"; edge: "first" | "last" }
   | { type: "open-filter" }
   | { type: "close-overlay" }
@@ -45,6 +52,18 @@ const isQuit = (key: KeyInput): boolean =>
   (key.ctrl === true && key.input === "c") || key.input === "q" || key.input === "Q";
 
 const resolveBoardAction = (key: KeyInput): BrowseAction | null => {
+  // Checked before the letter keys, so the modifier is read before the letter
+  // under it.
+  if (key.pageUp === true || (key.ctrl === true && key.input === "u")) {
+    return { type: "move-row-page", direction: -1 };
+  }
+  if (key.pageDown === true || (key.ctrl === true && key.input === "d")) {
+    return { type: "move-row-page", direction: 1 };
+  }
+  // Every other Ctrl combination means nothing here, and must not fall through to
+  // the letter on the key: Ctrl-P is not `p`, and it should not print.
+  if (key.ctrl === true) return null;
+
   if (key.leftArrow === true || key.input === "h") return { type: "move-column", delta: -1 };
   if (key.rightArrow === true || key.input === "l") return { type: "move-column", delta: 1 };
   if (key.upArrow === true || key.input === "k") return { type: "move-row", delta: -1 };
@@ -52,6 +71,10 @@ const resolveBoardAction = (key: KeyInput): BrowseAction | null => {
   if (key.input === "g") return { type: "row-edge", edge: "first" };
   if (key.input === "G") return { type: "row-edge", edge: "last" };
   if (key.input === "/") return { type: "open-filter" };
+  // Nothing is open on the board, so escape is free to mean the search — the one
+  // piece of state it has anything to say about, now that a query outlives the
+  // bar it was typed into.
+  if (key.escape === true) return { type: "close-overlay" };
   if (key.input === "?") return { type: "toggle-help" };
   if (key.input === "r") return { type: "refresh" };
   if (key.input === "e") return { type: "cycle-enter-action" };

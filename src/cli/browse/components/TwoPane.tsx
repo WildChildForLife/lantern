@@ -7,9 +7,11 @@ import { ConversationRow } from "./ConversationRow.tsx";
 
 type TwoPaneProps = {
   columns: BoardColumn[];
-  layout: Layout;
+  layout: Extract<Layout, { mode: "two-pane" }>;
   columnIndex: number;
   rowIndex: number;
+  /** Where the conversation pane has been scrolled to. */
+  rowStart: number;
   now: Date;
 };
 
@@ -21,18 +23,28 @@ type TwoPaneProps = {
  * a list with extra steps. The keys are unchanged — left and right still move
  * between topics — so the two layouts are the same thing at different widths.
  */
-export const TwoPane = ({ columns, layout, columnIndex, rowIndex, now }: TwoPaneProps) => {
+export const TwoPane = ({
+  columns,
+  layout,
+  columnIndex,
+  rowIndex,
+  rowStart,
+  now,
+}: TwoPaneProps) => {
   const active = columns[columnIndex];
   const topicWindow = resolveWindow({
     index: columnIndex,
     total: columns.length,
     size: layout.visibleRows,
   });
-  const rowWindow = resolveWindow({
-    index: rowIndex,
-    total: active?.rows.length ?? 0,
-    size: layout.visibleRows,
-  });
+
+  // The pane is the list being moved through, so it scrolls from a remembered
+  // position like the board's focused column does. The rail beside it has a
+  // cursor but no anchor: it is re-centred on the chosen topic each time.
+  const total = active?.rows.length ?? 0;
+  const start = Math.min(Math.max(0, rowStart), Math.max(0, total - layout.visibleRows));
+  const end = Math.min(total, start + Math.max(0, layout.visibleRows));
+  const hiddenBelow = total - end;
 
   return (
     <Box flexDirection="row">
@@ -61,17 +73,23 @@ export const TwoPane = ({ columns, layout, columnIndex, rowIndex, now }: TwoPane
         {active === undefined ? (
           <Text color={theme.muted}>Nothing here.</Text>
         ) : (
-          active.rows
-            .slice(rowWindow.start, rowWindow.end)
-            .map((row, offset) => (
+          <>
+            {/*
+              The same markers the board's columns carry. Without them a pane
+              that scrolls looks like a pane that has run out of conversations.
+            */}
+            {start > 0 ? <Text dimColor> ↑ {start} more</Text> : null}
+            {active.rows.slice(start, end).map((row, offset) => (
               <ConversationRow
                 key={row.sessionId}
                 row={row}
                 width={layout.columnWidth}
-                selected={rowWindow.start + offset === rowIndex}
+                selected={start + offset === rowIndex}
                 now={now}
               />
-            ))
+            ))}
+            {hiddenBelow > 0 ? <Text dimColor> ↓ {hiddenBelow} more</Text> : null}
+          </>
         )}
       </Box>
     </Box>

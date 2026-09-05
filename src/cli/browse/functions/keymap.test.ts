@@ -29,6 +29,34 @@ describe("resolveKeyAction on the board", () => {
     expect(resolveKeyAction(press(input), "board")).toStrictEqual({ type: "move-row", delta });
   });
 
+  /** A column can be forty conversations long; `j` forty times is not a way down it. */
+  it("moves a screenful at a time with the page keys", () => {
+    expect(resolveKeyAction(press("", { pageUp: true }), "board")).toStrictEqual({
+      type: "move-row-page",
+      direction: -1,
+    });
+    expect(resolveKeyAction(press("", { pageDown: true }), "board")).toStrictEqual({
+      type: "move-row-page",
+      direction: 1,
+    });
+  });
+
+  it("moves a screenful with Ctrl-U and Ctrl-D, for the keyboards without page keys", () => {
+    expect(resolveKeyAction(press("u", { ctrl: true }), "board")).toStrictEqual({
+      type: "move-row-page",
+      direction: -1,
+    });
+    expect(resolveKeyAction(press("d", { ctrl: true }), "board")).toStrictEqual({
+      type: "move-row-page",
+      direction: 1,
+    });
+  });
+
+  /** `p` prints the resume command; Ctrl-P is a different key and means nothing. */
+  it("does not read a modified key as the letter on it", () => {
+    expect(resolveKeyAction(press("p", { ctrl: true }), "board")).toBeNull();
+  });
+
   it("jumps to the ends of a column", () => {
     expect(resolveKeyAction(press("g"), "board")).toStrictEqual({
       type: "row-edge",
@@ -37,8 +65,15 @@ describe("resolveKeyAction on the board", () => {
     expect(resolveKeyAction(press("G"), "board")).toStrictEqual({ type: "row-edge", edge: "last" });
   });
 
-  it("opens the filter", () => {
+  it("opens the search", () => {
     expect(resolveKeyAction(press("/"), "board")).toStrictEqual({ type: "open-filter" });
+  });
+
+  /** A query outlives the bar being open, so escape has something to clear. */
+  it("closes on escape even with nothing open", () => {
+    expect(resolveKeyAction(press("", { escape: true }), "board")).toStrictEqual({
+      type: "close-overlay",
+    });
   });
 
   /** The header says what Enter does; opening a menu of the same four would repeat it. */

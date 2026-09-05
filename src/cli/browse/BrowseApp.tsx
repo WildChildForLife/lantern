@@ -3,7 +3,6 @@ import { useCallback, useMemo, useState } from "react";
 import type { ConversationListEntry, TopicGroup } from "../../server/core/types.ts";
 import { type ActionPlan, planAction } from "../actions/planAction.ts";
 import { nextResumeAction, RESUME_ACTION_LABELS, type ResumeAction } from "../config/cliConfig.ts";
-import { TextInput } from "../ui/prompts/TextInput.tsx";
 import { theme } from "../ui/theme.ts";
 import { Board } from "./components/Board.tsx";
 import { CLASSIFY_CALLOUT_HEIGHT, ClassifyCallout } from "./components/ClassifyCallout.tsx";
@@ -14,11 +13,19 @@ import {
   PRINTED_COMMAND_HEIGHT,
   PrintedCommandPanel,
 } from "./components/PrintedCommand.tsx";
+import { SEARCH_BAR_HEIGHT, SearchBar } from "./components/SearchBar.tsx";
 import { StatusBar, type Status } from "./components/StatusBar.tsx";
 import { TwoPane } from "./components/TwoPane.tsx";
 import { buildColumns } from "./functions/buildColumns.ts";
 import { type BrowseMode, type ClassifyScopeKey, resolveKeyAction } from "./functions/keymap.ts";
-import { resolveLayout } from "./functions/layout.ts";
+import {
+  advanceWindow,
+  boardRowBudget,
+  FRAME_PADDING_X,
+  framePaddingY,
+  OUTER_SPARE_HEIGHT,
+  resolveLayout,
+} from "./functions/layout.ts";
 
 export type BrowseAppProps = {
   topics: TopicGroup[];
@@ -83,9 +90,6 @@ export type BrowseAppProps = {
 const clamp = (value: number, max: number): number =>
   Math.min(Math.max(0, value), Math.max(0, max));
 
-/** The filter line, plus the blank line under it. */
-const FILTER_HEIGHT = 2;
-
 /**
  * The board, in a terminal.
  *
@@ -117,6 +121,16 @@ export const BrowseApp = ({
   const { stdout, write } = useStdout();
   const [columnIndex, setColumnIndex] = useState(0);
   const [rowIndex, setRowIndex] = useState(0);
+  /**
+   * Where the focused column has been scrolled to.
+   *
+   * Held rather than derived from the cursor, because a window derived from the
+   * cursor has to guess — and the only guess available, centring, moves the whole
+   * list on every keypress. What is drawn is this anchor put through
+   * `advanceWindow`, so a re-read or a search that shortens the column corrects
+   * it without anything having to notice.
+   */
+  const [rowStart, setRowStart] = useState(0);
   const [filter, setFilter] = useState("");
   const [mode, setMode] = useState<BrowseMode>("board");
   const [status, setStatus] = useState<Status>(null);
@@ -131,28 +145,99 @@ export const BrowseApp = ({
   const width = terminal?.columns ?? stdout?.columns ?? 100;
   const height = terminal?.rows ?? stdout?.rows ?? 30;
 
-  // Always shown once the count is known, whatever the count is: a key that only
-  // appears on the day it becomes relevant is a key nobody knows exists.
-  const calloutVisible = classifying || unclassified !== undefined;
+  /**
+   * The width inside the gutter, which is what everything here is drawn against.
+   *
+   * Floored at twenty rather than at one: below that there is no laying anything
+   * out, only deciding what to let overflow, and a floor keeps the arithmetic
+   * above it honest.
+   */
+  const innerWidth = Math.max(20, width - FRAME_PADDING_X * 2);
+
+  /*
+    Everything drawn around the board has to be counted, or the status bar goes
+    off the bottom of a screen the board has already filled. The help overlay is
+    absent from this sum because it replaces the board rather than joining it.
+
+    The search bar is spent in every mode though it is not drawn in help, and
+    that constant reservation is the point: the board no longer changes height
+    under the user as the search opens and closes.
+
+    Two of these are askable-for and two are not. The question and the search bar
+    stay whatever it costs — a question with its answer off the screen is worse
+    than useless, and the bar is the board's own height contract. The callout and
+    the printed command are things the board is telling you, and on a screen with
+    no rows left, being told something is worth less than being able to see which
+    keys there are. So they give way in that order, and only when the row budget
+    has actually gone under.
+  */
+  const fixedRows = SEARCH_BAR_HEIGHT + (mode === "confirm-resort" ? CONFIRM_RESORT_HEIGHT : 0);
+  const fits = (rows: number): boolean => boardRowBudget({ height, reservedRows: rows }) > 0;
+
+  // Shown once the count is known, whatever the count is: a key that only appears
+  // on the day it becomes relevant is a key nobody knows exists.
+  const calloutWanted = classifying || unclassified !== undefined;
+  const printedWanted = printed !== null && printed !== undefined;
+
+  const printedVisible = printedWanted && fits(fixedRows + PRINTED_COMMAND_HEIGHT);
+  const calloutVisible =
+    calloutWanted &&
+    fits(fixedRows + (printedVisible ? PRINTED_COMMAND_HEIGHT : 0) + CLASSIFY_CALLOUT_HEIGHT);
 
   const layout = resolveLayout({
     width,
     height,
     topicCount: columns.length,
-    // Everything drawn around the board has to be counted, or the status bar goes
-    // off the bottom of a screen the board has already filled. The help overlay is
-    // absent from this sum because it replaces the board rather than joining it.
     reservedRows:
-      (printed === null || printed === undefined ? 0 : PRINTED_COMMAND_HEIGHT) +
-      (calloutVisible ? CLASSIFY_CALLOUT_HEIGHT : 0) +
-      (mode === "filter" ? FILTER_HEIGHT : 0) +
-      (mode === "confirm-resort" ? CONFIRM_RESORT_HEIGHT : 0),
+      fixedRows +
+      (printedVisible ? PRINTED_COMMAND_HEIGHT : 0) +
+      (calloutVisible ? CLASSIFY_CALLOUT_HEIGHT : 0),
   });
 
   const safeColumnIndex = clamp(columnIndex, columns.length - 1);
   const activeColumn = columns[safeColumnIndex];
   const safeRowIndex = clamp(rowIndex, (activeColumn?.rows.length ?? 1) - 1);
   const activeRow = activeColumn?.rows[safeRowIndex];
+  const safeRowStart = advanceWindow({
+    start: rowStart,
+    index: safeRowIndex,
+    total: activeColumn?.rows.length ?? 0,
+    size: layout.visibleRows,
+  });
+
+  const matchCount = columns.reduce((count, column) => count + column.rows.length, 0);
+
+  /** Moves the cursor and takes the window with it, only as far as it has to go. */
+  const moveRow = useCallback(
+    (target: number) => {
+      const next = clamp(target, (activeColumn?.rows.length ?? 1) - 1);
+      setRowIndex(next);
+      setRowStart(
+        advanceWindow({
+          start: safeRowStart,
+          index: next,
+          total: activeColumn?.rows.length ?? 0,
+          size: layout.visibleRows,
+        }),
+      );
+    },
+    [activeColumn, layout.visibleRows, safeRowStart],
+  );
+
+  /**
+   * A new query is a new list; keeping a place in the old one is not.
+   *
+   * The column goes back to the first as well as the row. A query that empties a
+   * column drops it (`buildColumns`), so every index after it shifts by one —
+   * which slid the cursor onto a different topic mid-keystroke, and left it
+   * there when the query was cleared again.
+   */
+  const applyFilter = useCallback((value: string) => {
+    setFilter(value);
+    setColumnIndex(0);
+    setRowIndex(0);
+    setRowStart(0);
+  }, []);
 
   const buildPlan = useCallback(
     (action: ResumeAction): ActionPlan | null =>
@@ -260,19 +345,34 @@ export const BrowseApp = ({
       case "move-column":
         setColumnIndex(clamp(safeColumnIndex + action.delta, columns.length - 1));
         setRowIndex(0);
+        // Each column keeps no scroll position of its own, so arriving in one
+        // starts at the top of it rather than part-way down where the last one was.
+        setRowStart(0);
         setStatus(null);
         return;
       case "move-row":
-        setRowIndex(clamp(safeRowIndex + action.delta, (activeColumn?.rows.length ?? 1) - 1));
+        moveRow(safeRowIndex + action.delta);
+        setStatus(null);
+        return;
+      case "move-row-page":
+        // A page short of a screenful, so the row that was at the edge is still
+        // there to read from after the jump.
+        moveRow(safeRowIndex + action.direction * Math.max(1, layout.visibleRows - 1));
         setStatus(null);
         return;
       case "row-edge":
-        setRowIndex(action.edge === "first" ? 0 : (activeColumn?.rows.length ?? 1) - 1);
+        moveRow(action.edge === "first" ? 0 : (activeColumn?.rows.length ?? 1) - 1);
         return;
       case "open-filter":
         setMode("filter");
         return;
       case "close-overlay":
+        // Escape on the board itself has nothing to close, so it drops the query
+        // instead. Escape inside the bar clears it too, by way of the field's own
+        // cancel; this is the way back once the bar has been left.
+        if (mode === "board" && filter !== "") {
+          applyFilter("");
+        }
         setMode("board");
         return;
       case "toggle-help":
@@ -312,22 +412,45 @@ export const BrowseApp = ({
   return (
     // The whole terminal, from the top row: the caller has already switched to
     // the alternate screen, and a fixed height is what pins the status bar to
-    // the bottom of it instead of letting it float under the last column.
-    <Box flexDirection="column" paddingX={1} height={Math.max(1, height - 1)}>
-      <Box marginBottom={1}>
-        <Text color={theme.accent} bold>
-          Lantern
-        </Text>
-        {/*
-          One truncating line rather than a row of separate Texts. Separate ones
-          wrap independently on a narrow terminal, which split "Lantern" down the
-          middle and broke the unsorted count in half — the counts are worth
-          losing the tail of the line for, not worth two mangled rows of header.
-        */}
+    // the bottom of it instead of letting it float under the last column. The
+    // padding is a gutter between the board and the edge of the window, and it is
+    // paid for in `layout.ts` rather than taken out of the rows the board thinks
+    // it has.
+    <Box
+      flexDirection="column"
+      paddingX={FRAME_PADDING_X}
+      paddingY={framePaddingY(height)}
+      height={Math.max(1, height - OUTER_SPARE_HEIGHT)}
+    >
+      {/*
+        The two ends of the frame, sharing whatever the board did not use.
+
+        The board used to take the slack itself, which glued the header to the top
+        row and the keys to the bottom one with a hole between them on any screen
+        with room to spare. Split in two, a short board sits in the middle of the
+        window instead — and a full one squeezes them both to nothing, which puts
+        everything back exactly where a full screen wants it, the keys on the last
+        row inside the padding.
+      */}
+      <Box flexGrow={1} />
+
+      {/*
+        One truncating line rather than a row of separate Texts, the name
+        included. Separate ones are measured and shrunk independently on a narrow
+        terminal, which split "Lantern" down the middle and broke the unsorted
+        count in half; inside the truncating line the clipping happens at the end,
+        where the least important thing is. The width is what gives Ink something
+        to truncate against — without it the line simply runs off the frame.
+      */}
+      <Box width={innerWidth} marginBottom={1} flexShrink={0}>
         <Text wrap="truncate">
+          <Text color={theme.accent} bold>
+            Lantern
+          </Text>
           <Text dimColor>
             {"  "}
-            {columns.length} topics · {conversations.length} conversations
+            {columns.length} {columns.length === 1 ? "topic" : "topics"} · {conversations.length}{" "}
+            {conversations.length === 1 ? "conversation" : "conversations"}
             {truncated ? ` of ${total}` : ""}
             {refreshing ? " · refreshing" : ""}
           </Text>
@@ -336,43 +459,64 @@ export const BrowseApp = ({
         </Text>
       </Box>
 
-      {mode === "filter" ? (
-        <Box marginBottom={1}>
-          <Text color={theme.accent}>filter </Text>
-          <TextInput
-            initialValue={filter}
-            onChange={setFilter}
+      {/*
+        Stood down while the key list is up, along with the sort row below: the
+        list is thirteen rows and wants the middle of the screen, and neither of
+        these is any use behind it.
+      */}
+      {mode === "help" ? null : (
+        <Box flexShrink={0}>
+          <SearchBar
+            active={mode === "filter"}
+            filter={filter}
+            matchCount={matchCount}
+            width={innerWidth}
+            onChange={applyFilter}
             onSubmit={() => {
               setMode("board");
             }}
             onCancel={() => {
-              setFilter("");
+              applyFilter("");
               setMode("board");
             }}
           />
         </Box>
-      ) : null}
+      )}
 
-      {/* Takes the slack, so everything below it sits at the bottom of the screen. */}
-      <Box flexDirection="column" flexGrow={1}>
+      {/*
+        The one thing on screen allowed to give.
+
+        The budget in `layout.ts` is meant to make this moot, and mostly does —
+        but it counts rows for panels whose real height depends on how the
+        terminal wrapped them, and being wrong by a row there used to mean the
+        status bar went off the bottom. Shrinking here instead costs a
+        conversation off the end of a column, which is a thing the column already
+        says it is doing.
+      */}
+      <Box flexDirection="column" flexShrink={1} overflowY="hidden">
         {/*
           The key list takes the board's place rather than stacking under it. It is
-          twenty-odd rows on its own: shown as well as the board, it pushed
-          everything below it off a twenty-four-row terminal, which is the size the
-          list is most wanted on.
+          thirteen rows on its own: shown as well as the board, it pushed everything
+          below it off a twenty-four-row terminal, which is the size the list is
+          most wanted on.
         */}
         {mode === "help" ? (
-          <HelpOverlay />
+          <HelpOverlay width={innerWidth} />
         ) : columns.length === 0 ? (
-          <Text color={theme.muted}>
-            {filter === "" ? "No conversations found." : `Nothing matches "${filter}".`}
-          </Text>
+          // Bounded and clipped like every other line here: the query is echoed
+          // back into it, and a long one wrapped this to three rows.
+          <Box width={innerWidth}>
+            <Text color={theme.muted} wrap="truncate">
+              {filter === "" ? "No conversations found." : `Nothing matches "${filter}".`}
+            </Text>
+          </Box>
         ) : layout.mode === "board" ? (
           <Board
             columns={columns}
             layout={layout}
             columnIndex={safeColumnIndex}
             rowIndex={safeRowIndex}
+            rowStart={safeRowStart}
             now={now}
           />
         ) : (
@@ -381,33 +525,43 @@ export const BrowseApp = ({
             layout={layout}
             columnIndex={safeColumnIndex}
             rowIndex={safeRowIndex}
+            rowStart={safeRowStart}
             now={now}
           />
         )}
       </Box>
 
       {mode === "confirm-resort" ? (
-        <Box marginTop={1}>
-          <ConfirmResort count={conversations.length} />
+        <Box marginTop={1} flexShrink={0}>
+          <ConfirmResort count={conversations.length} width={innerWidth} />
         </Box>
       ) : null}
 
       {/* Its own row, above the key line it used to be lost in. */}
-      {calloutVisible ? (
-        <Box marginTop={1}>
-          <ClassifyCallout unclassified={unclassified ?? 0} classifying={classifying} />
+      {calloutVisible && mode !== "help" ? (
+        <Box marginTop={1} flexShrink={0}>
+          <ClassifyCallout
+            unclassified={unclassified ?? 0}
+            classifying={classifying}
+            width={innerWidth}
+          />
         </Box>
       ) : null}
 
-      {printed === null || printed === undefined ? null : (
+      {!printedVisible || printed === null || printed === undefined ? null : (
         // A clear line between the board and the command, so the command does
         // not read as another row of the table.
-        <Box marginTop={1}>
-          <PrintedCommandPanel printed={printed} width={Math.max(20, width - 2)} />
+        <Box marginTop={1} flexShrink={0}>
+          <PrintedCommandPanel printed={printed} width={innerWidth} />
         </Box>
       )}
 
-      <Box marginTop={1}>
+      {/*
+        Never shrinks, whatever is above it. The board is windowed to the rows it
+        was given, but the key list and the printed command are not — and a status
+        bar that gave way to them would be a status bar the user cannot find.
+      */}
+      <Box marginTop={1} flexShrink={0}>
         <StatusBar
           row={activeRow}
           status={
@@ -415,9 +569,11 @@ export const BrowseApp = ({
               ? status
               : { text: refreshError, tone: "error" }
           }
-          width={width}
+          width={innerWidth}
         />
       </Box>
+
+      <Box flexGrow={1} />
     </Box>
   );
 };

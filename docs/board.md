@@ -9,44 +9,83 @@ word gets you both and quitting the board stops both. `lantern --cli-only` — o
 which is the same thing — draws the board on its own, opening no port at all.
 
 ```text
- Lantern  6 topics · 69 conversations · enter: resume here
+   Lantern  6 topics · 69 conversations · enter: resume here
 
- ⌁ Orders API 12                ≋ Home Network 6              ▣ Deploy Pipeline 5
- ─────────────────────────────  ────────────────────────────  ───────────────────
- ❯ Add refunds to checkout  2h     Router DHCP leases    1d      Cache the build 3h
-   Fix the webhook retry    5h     Split the VLANs       2d      Pin the runner  1d
-   Rename the price field   1d     Static leases for NAS 4d
+    ⌕ SEARCH  press / to search titles, projects and topics
 
-  t  sort 4 conversations into topics with the AI · T redoes every topic
+   ⌁ Orders API 1/12              ≋ Home Network 6              ▣ Deploy Pipeline 5
+   ─────────────────────────────  ────────────────────────────  ───────────────────
+   ❯ Add refunds to checkout  2h     Router DHCP leases    1d      Cache the build 3h
+     Fix the webhook retry    5h     Split the VLANs       2d      Pin the runner  1d
+     Rename the price field   1d     Static leases for NAS 4d
+    ↓ 9 more                        ↓ 3 more                      ↓ 2 more
 
- /home/you/work/orders-api · claude-code · sonnet · ~$0.42 · 24 messages · 4f2ab8c1
- ←→ topics · ↑↓ rows · / filter · e change · r reload · ? keys · q quit
+    t  sort 4 conversations into topics with the AI · T redoes every topic
+
+   /home/you/work/orders-api · claude-code · sonnet · ~$0.42 · 24 messages · 4f2ab8c1
+   ←→ topics · ↑↓ rows · / search · PgUp/PgDn page · e change · r reload · ? keys · q quit
 ```
 
-One column per topic, conversations as rows, newest topic first.
+One column per topic, conversations as rows, newest topic first. The board sits in the middle of the
+window: with little to show it gathers in the centre rather than splitting itself between the top and
+the bottom edge, and as a column fills up the key line walks down to the gutter and stops there.
+
+A column longer than the screen scrolls rather than being cut off. The list stays still while the
+cursor moves through it and only gives once the cursor reaches the end of what is drawn, `↑ N more`
+and `↓ N more` say how much is off either end, and the count beside the topic name reads `1/12` — how
+far down the column you are, not just how long it is. The key line never moves out of the way for it.
 
 ## Keys
 
-| Key     | Does                                                       |
-| ------- | ---------------------------------------------------------- |
-| `← →`   | move between topics (`h` `l` also work)                    |
-| `↑ ↓`   | move between conversations (`j` `k`), `g`/`G` for the ends |
-| `/`     | filter by topic, title or project                          |
-| `enter` | what to do with this conversation                          |
-| `R`     | resume here, and come back to the board after              |
-| `p`     | show the resume command, without leaving                   |
-| `c`     | copy the conversation id                                   |
-| `t`     | sort the conversations with no topic yet                   |
-| `T`     | throw every topic away and sort again (asks first)         |
-| `r`     | re-read the logs · `?` the key list · `q` quit             |
+| Key           | Does                                                       |
+| ------------- | ---------------------------------------------------------- |
+| `← →`         | move between topics (`h` `l` also work)                    |
+| `↑ ↓`         | move between conversations (`j` `k`), `g`/`G` for the ends |
+| `PgUp` `PgDn` | a screenful at a time (`Ctrl-U` / `Ctrl-D` also work)      |
+| `/`           | search titles, projects and topics                         |
+| `esc`         | clear the search                                           |
+| `enter`       | what to do with this conversation                          |
+| `e`           | change what `enter` does                                   |
+| `R`           | resume here, and come back to the board after              |
+| `p`           | show the resume command, without leaving                   |
+| `c`           | copy the conversation id                                   |
+| `t`           | sort the conversations with no topic yet                   |
+| `T`           | throw every topic away and sort again (asks first)         |
+| `r`           | re-read the logs · `?` the key list · `q` quit             |
 
-Below about ninety columns the board becomes a topic list on the left and its conversations on the
-right; the keys are unchanged.
+Below about ninety-four columns — ninety inside the gutter — the board becomes a topic list on the
+left and its conversations on the right; the keys are unchanged.
+
+## Searching
+
+The search bar sits under the header whenever the board is up — only the key list takes the screen
+from it. `/` puts the cursor in it, `enter` goes back to the board with the query still showing and
+still in force, and `esc` clears it.
+
+Naming a topic keeps that whole column — `/network` reads as "show me that one". It does not hide the
+rest of the board: every other column is narrowed to the conversations matching what you typed, so a
+named column arrives whole and the stragglers elsewhere come with it. The matched characters are
+picked out in the row.
+
+A topic name has to be typed in one piece to count. `/netw` names the Home Network column; `/netwk`
+does not, and searches the conversations instead.
+
+Matching does more than look for the query inside the title:
+
+- **Several words**, and all of them have to match — though not all in the same place, so
+  `refund lantern` finds a refund conversation in the `lantern` project.
+- **Characters in order**, not only whole words: `rdhcp` finds "Router DHCP leases".
+- **Case is ignored** until the query mixes it. `api` and `API` both find either spelling; `Api` asks
+  for that spelling exactly.
+- **The closest match goes first.** Within one field, the query found in one piece beats the same
+  letters scattered about, and the start of a word beats the middle of one. Across fields the title
+  counts for more than the project path every conversation there shares — enough that a loose match
+  in a title can outrank a tidy one in a path. Recency settles ties.
 
 ## Resuming
 
 `R` lends the terminal to the session rather than giving it away: when you leave `claude`, the same
-board comes back — same topic, same conversation, same filter — with the logs re-read, so you can
+board comes back — same topic, same conversation, same search — with the logs re-read, so you can
 resume something else without starting the board again.
 
 A conversation is always resumed **in the directory it ran in** — `claude --resume` looks a session

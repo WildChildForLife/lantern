@@ -1,4 +1,8 @@
-/** Width below which columns stop being worth drawing side by side. */
+/**
+ * Width inside the frame below which columns stop being worth drawing side by
+ * side. Measured against the padded width, so the switch happens a gutter's
+ * worth earlier than the terminal's own column count suggests.
+ */
 const BOARD_MIN_WIDTH = 90;
 
 /** Narrowest a column can get and still show a recognisable title. */
@@ -31,7 +35,31 @@ const COLUMN_HEADING_HEIGHT = 2;
 /** `↑ N more` and `↓ N more`, both drawn once a column is long enough to scroll. */
 const SCROLL_INDICATOR_HEIGHT = 2;
 /** The root box is kept a row short of the terminal, so nothing scrolls it. */
-const OUTER_SPARE_HEIGHT = 1;
+export const OUTER_SPARE_HEIGHT = 1;
+
+/**
+ * The gutter the frame keeps between itself and the terminal.
+ *
+ * Named here rather than written as a number into the root box, because the
+ * padding is not only decoration: every padded column is width the topics do not
+ * get, and the sum that takes it off is made below. A literal in the component
+ * and a literal here is how the two drift apart.
+ */
+export const FRAME_PADDING_X = 2;
+
+/** Shortest terminal with rows to spare for a gutter above and below. */
+const PADDED_MIN_HEIGHT = 24;
+
+/**
+ * The gutter's height, which a short terminal does not get.
+ *
+ * The cut is at twenty-four rows, the traditional default: below it a terminal
+ * is a split pane or a phone, and there the two rows are the difference between
+ * the board showing the question it just asked and the board pushing its own
+ * status bar off the screen. Breathing room is worth having where there is room
+ * to breathe.
+ */
+export const framePaddingY = (height: number): number => (height >= PADDED_MIN_HEIGHT ? 1 : 0);
 
 const CHROME_HEIGHT =
   HEADER_HEIGHT +
@@ -40,16 +68,50 @@ const CHROME_HEIGHT =
   SCROLL_INDICATOR_HEIGHT +
   OUTER_SPARE_HEIGHT;
 
-export type Layout = {
-  mode: "board" | "two-pane";
+/**
+ * Rows left for conversations once everything else has taken its share.
+ *
+ * Returns the true figure, which can be nought or less — `resolveLayout` draws a
+ * row regardless, because a board of no rows is not a board, but a caller
+ * deciding whether it can afford to show something needs to know it is already
+ * over budget rather than being told the floor.
+ */
+export const boardRowBudget = ({
+  height,
+  reservedRows = 0,
+}: {
+  height: number;
+  reservedRows?: number | undefined;
+}): number => height - CHROME_HEIGHT - framePaddingY(height) * 2 - Math.max(0, reservedRows);
+
+type SharedLayout = {
   /** Width of one topic column, or of the conversation pane in two-pane mode. */
   columnWidth: number;
-  railWidth: number;
-  /** How many topic columns fit at once. Zero when there are no topics. */
-  visibleColumns: number;
   /** How many conversations fit in a column before it has to scroll. */
   visibleRows: number;
 };
+
+/**
+ * How the board fits the terminal, in one of the two shapes it comes in.
+ *
+ * A union rather than one record with every field, because the record had two
+ * fields that were only ever read in one of the modes and invented in the other:
+ * `railWidth` was set to a constant nothing on the wide board ever asked for, and
+ * `visibleColumns` was set to 1 in two-pane mode, where the rail draws as many
+ * topics as it has rows for and nothing reads the field at all. A value invented
+ * to satisfy a shape is a value the next reader will believe.
+ */
+export type Layout =
+  | (SharedLayout & {
+      mode: "board";
+      /** How many topic columns fit side by side. Zero when there are no topics. */
+      visibleColumns: number;
+    })
+  | (SharedLayout & {
+      mode: "two-pane";
+      /** Width of the topic rail down the left-hand side. */
+      railWidth: number;
+    });
 
 /**
  * Decides how the board fits into the terminal it was given.
@@ -74,45 +136,57 @@ export const resolveLayout = ({
    */
   reservedRows?: number | undefined;
 }): Layout => {
-  const visibleRows = Math.max(1, height - CHROME_HEIGHT - Math.max(0, reservedRows));
+  const visibleRows = Math.max(1, boardRowBudget({ height, reservedRows }));
 
-  if (width < BOARD_MIN_WIDTH) {
+  // Everything below measures the space inside the frame, not the terminal. The
+  // two were the same until the frame gained padding, and a column sized to the
+  // terminal is a column the padding clips.
+  const inner = Math.max(1, width - FRAME_PADDING_X * 2);
+
+  if (inner < BOARD_MIN_WIDTH) {
     // The rail gives way on a very narrow terminal rather than holding its width
     // and pushing the conversations off the right-hand edge. A floor of 26 columns
-    // for the pane plus a fixed 24-column rail needs 52 columns to draw, so below
-    // that the old sums overflowed a split pane or a phone SSH client silently.
-    const railWidth = Math.min(RAIL_WIDTH, Math.max(TOPIC_RAIL_MIN_WIDTH, Math.floor(width / 3)));
+    // for the pane plus a fixed 24-column rail needs 50 inside the frame, and the
+    // gutter puts that at 54 of the terminal's own — below which the old sums
+    // overflowed a split pane or a phone SSH client silently.
+    const railWidth = Math.min(RAIL_WIDTH, Math.max(TOPIC_RAIL_MIN_WIDTH, Math.floor(inner / 3)));
 
     return {
       mode: "two-pane",
-      columnWidth: Math.max(1, width - railWidth - TWO_PANE_GAP),
+      columnWidth: Math.max(1, inner - railWidth - TWO_PANE_GAP),
       railWidth,
-      visibleColumns: Math.min(topicCount, 1),
       visibleRows,
     };
   }
 
-  const fitting = Math.max(1, Math.floor(width / (MIN_COLUMN_WIDTH + 1)));
+  const fitting = Math.max(1, Math.floor(inner / (MIN_COLUMN_WIDTH + 1)));
   const visibleColumns = Math.min(topicCount, fitting);
   const columnWidth =
     visibleColumns === 0
       ? MIN_COLUMN_WIDTH
-      : Math.min(MAX_COLUMN_WIDTH, Math.floor(width / visibleColumns) - 1);
+      : Math.min(MAX_COLUMN_WIDTH, Math.floor(inner / visibleColumns) - 1);
 
   return {
     mode: "board",
     columnWidth: Math.max(MIN_COLUMN_WIDTH, columnWidth),
-    railWidth: RAIL_WIDTH,
     visibleColumns,
     visibleRows,
   };
 };
 
 /**
- * The slice of a list to draw so that the cursor stays on screen.
+ * The slice of a list to draw around a cursor, with no memory of where the
+ * window was last time.
  *
- * Scrolls only when the cursor would leave the window, which keeps the board
- * still while the user moves around inside what they can already see.
+ * Centres the cursor whenever the list overflows, so it is right for a list
+ * being drawn cold — an unfocused column, or the topic rail. For a list the user
+ * moves through one step at a time, use `advanceWindow`: centring there slides
+ * the whole list under a stationary cursor on every keypress.
+ *
+ * The strip of topic columns is the deliberate exception. It is moved through,
+ * but a step of it is a whole column rather than a row, and it holds one cursor
+ * for the lot — so there is no anchor to remember and centring is what keeps the
+ * chosen column in view.
  */
 export const resolveWindow = ({
   index,
@@ -135,4 +209,50 @@ export const resolveWindow = ({
   const start = Math.min(Math.max(0, index - half), total - size);
 
   return { start, end: start + size };
+};
+
+/** Rows kept between the cursor and the edge of the window, where there is room. */
+const SCROLLOFF = 1;
+
+/**
+ * Where the window sits after the cursor has moved, given where it sat before.
+ *
+ * The list stays still and the cursor moves through it; the list only gives once
+ * the cursor reaches the margin at either end. That is the difference between
+ * scrolling a list and having a list scroll past you, and it is why this takes a
+ * previous `start` rather than deriving one from the cursor alone.
+ *
+ * Also the place a stale anchor is corrected: the columns are rebuilt on every
+ * re-read and every keystroke of the search, so the list under the window is
+ * routinely a different length than it was when the window last moved.
+ */
+export const advanceWindow = ({
+  start,
+  index,
+  total,
+  size,
+}: {
+  start: number;
+  index: number;
+  total: number;
+  size: number;
+}): number => {
+  if (size <= 0 || total <= size) {
+    return 0;
+  }
+
+  const last = total - size;
+  // A window of one or two rows has no room for a margin: keeping one would put
+  // the cursor outside the window it is supposed to be inside.
+  const scrolloff = size < SCROLLOFF * 2 + 1 ? 0 : SCROLLOFF;
+  const anchored = Math.min(Math.max(0, start), last);
+
+  const moved =
+    index < anchored + scrolloff
+      ? index - scrolloff
+      : index > anchored + size - 1 - scrolloff
+        ? index - size + 1 + scrolloff
+        : anchored;
+
+  return Math.min(Math.max(0, moved), last);
 };

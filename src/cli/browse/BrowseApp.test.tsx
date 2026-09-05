@@ -289,6 +289,141 @@ describe("BrowseApp", () => {
     expect(lastFrame()).toContain("Nothing matches");
   });
 
+  describe("the search bar", () => {
+    it("is on screen before anyone asks for it", async () => {
+      const { lastFrame } = setup();
+      await nextFrame();
+
+      expect(plain(lastFrame())).toContain("⌕ SEARCH");
+      expect(plain(lastFrame())).toContain("press / to search");
+    });
+
+    /**
+     * The query used to vanish the moment it was submitted, leaving a board
+     * filtered by something with nothing on screen to say what.
+     */
+    it("keeps the query on screen after enter", async () => {
+      const { stdin, lastFrame } = setup();
+      await nextFrame();
+      await press(stdin, "/");
+      await press(stdin, "router");
+      await press(stdin, ENTER);
+
+      expect(plain(lastFrame())).toContain("router");
+      expect(plain(lastFrame())).toContain("1 match");
+      expect(lastFrame()).not.toContain("Add refunds");
+    });
+
+    it("drops the query on escape from the board", async () => {
+      const { stdin, lastFrame } = setup();
+      await nextFrame();
+      await press(stdin, "/");
+      await press(stdin, "router");
+      await press(stdin, ENTER);
+      await press(stdin, ESC);
+
+      expect(lastFrame()).toContain("Add refunds");
+      expect(plain(lastFrame())).toContain("press / to search");
+    });
+
+    it("counts what the query left on the board", async () => {
+      const { stdin, lastFrame } = setup();
+      await nextFrame();
+      await press(stdin, "/");
+      await press(stdin, "lantern");
+
+      expect(plain(lastFrame())).toContain("3 matches");
+    });
+
+    it("picks the row out of a topic it does not name", async () => {
+      const { stdin, lastFrame } = setup();
+      await nextFrame();
+      await press(stdin, "/");
+      await press(stdin, "chkout");
+
+      expect(lastFrame()).toContain("Fix checkout");
+      expect(lastFrame()).not.toContain("Router DHCP");
+    });
+  });
+
+  describe("scrolling a long column", () => {
+    /** Enough that the column has to scroll on any terminal the tests use. */
+    const many = Array.from({ length: 60 }, (_unused, index) =>
+      conversation(`s-${index}`, "api", `Conversation ${index}`),
+    );
+
+    const long = () =>
+      setup({ conversations: many, total: many.length, topics: topics.slice(0, 1) });
+
+    it("says how far down the column the cursor is", async () => {
+      const { stdin, lastFrame } = long();
+      await nextFrame();
+
+      expect(plain(lastFrame())).toContain("1/60");
+
+      await press(stdin, ARROW_DOWN);
+      expect(plain(lastFrame())).toContain("2/60");
+    });
+
+    /**
+     * The window used to be centred on the cursor, so every keypress slid the
+     * whole column under a cursor that never moved.
+     */
+    it("leaves the list where it is while the cursor moves inside it", async () => {
+      const { stdin, lastFrame } = long();
+      await nextFrame();
+      const before = plain(lastFrame()).includes("Conversation 0");
+
+      await press(stdin, ARROW_DOWN);
+      await press(stdin, ARROW_DOWN);
+
+      expect(before).toBe(true);
+      expect(plain(lastFrame())).toContain("Conversation 0");
+      expect(plain(lastFrame())).not.toContain("↑ ");
+    });
+
+    it("gives way once the cursor reaches the bottom of the window", async () => {
+      const { stdin, lastFrame } = long();
+      await nextFrame();
+      for (let step = 0; step < 40; step++) {
+        await press(stdin, ARROW_DOWN);
+      }
+
+      expect(plain(lastFrame())).toContain("41/60");
+      expect(plain(lastFrame())).toContain("↑ ");
+      expect(plain(lastFrame())).not.toContain("Conversation 0 ");
+    });
+
+    it("moves a screenful on page down, and back on page up", async () => {
+      const { stdin, lastFrame } = long();
+      await nextFrame();
+
+      await press(stdin, `${ESC}[6~`);
+      const afterPage = plain(lastFrame());
+
+      await press(stdin, `${ESC}[5~`);
+
+      expect(afterPage).not.toContain("1/60");
+      expect(afterPage).toContain("↓ ");
+      expect(plain(lastFrame())).toContain("1/60");
+    });
+
+    /** The keys have to stay reachable however long the column is. */
+    it("keeps the keys on the last drawn row", async () => {
+      const { stdin, lastFrame } = long();
+      await nextFrame();
+      for (let step = 0; step < 30; step++) {
+        await press(stdin, ARROW_DOWN);
+      }
+
+      const drawn = plain(lastFrame())
+        .split("\n")
+        .filter((line) => line.trim() !== "");
+
+      expect(drawn.at(-1)).toContain("←→ topics");
+    });
+  });
+
   it("lists the keys on ?", async () => {
     const { stdin, lastFrame } = setup();
     await nextFrame();
@@ -456,7 +591,12 @@ describe("BrowseApp", () => {
     const { lastFrame } = setup({ unclassified: 69, total: 900 });
     await nextFrame();
 
-    const header = plain(lastFrame()).split("\n")[0] ?? "";
+    // Found rather than taken from the top: the frame opens with the gutter and
+    // whatever slack the board left above itself.
+    const header =
+      plain(lastFrame())
+        .split("\n")
+        .find((line) => line.includes("Lantern")) ?? "";
 
     expect(header).toContain("Lantern");
     expect(header).toContain("3 conversations of 900");

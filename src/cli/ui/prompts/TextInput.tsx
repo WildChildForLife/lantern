@@ -11,6 +11,19 @@ type TextInputProps = {
    * answer asynchronously, for checks that have to touch the filesystem.
    */
   validate?: ((value: string) => string | null | Promise<string | null>) | undefined;
+  /**
+   * Columns the value gets, if it has to fit somewhere.
+   *
+   * The field shows the end of what was typed rather than the start, so the
+   * caret stays visible — the same thing a browser's input does, and the only
+   * choice that keeps a field usable once the value outgrows the space.
+   *
+   * Columns rather than characters, and clipped by Ink rather than by us: a
+   * query of CJK or emoji is twice as wide as it is long, so slicing it to a
+   * character count let it overflow the box and wrap onto a second line — in
+   * the search bar, whose whole height is budgeted at one drawn row.
+   */
+  visibleWidth?: number | undefined;
   onSubmit: (value: string) => void;
   onChange?: ((value: string) => void) | undefined;
   onCancel?: (() => void) | undefined;
@@ -27,6 +40,7 @@ export const TextInput = ({
   placeholder,
   initialValue,
   validate,
+  visibleWidth,
   onSubmit,
   onChange,
   onCancel,
@@ -82,7 +96,19 @@ export const TextInput = ({
     <Box flexDirection="column">
       <Box>
         <Text color={theme.accent}>❯ </Text>
-        {value === "" ? <Text dimColor>{placeholder ?? ""}</Text> : <Text>{value}</Text>}
+        {value === "" ? (
+          <Text dimColor>{placeholder ?? ""}</Text>
+        ) : visibleWidth === undefined ? (
+          <Text>{value}</Text>
+        ) : (
+          // `truncate-start` drops the head of the value rather than its tail,
+          // which is the only end that can go: the tail is where the caret is.
+          // Ink measures the clip in display columns, so a wide character costs
+          // the two it actually takes.
+          <Box width={Math.max(1, visibleWidth)}>
+            <Text wrap="truncate-start">{value}</Text>
+          </Box>
+        )}
         <Text color={theme.accent}>▏</Text>
       </Box>
       {error === null ? null : <Text color={theme.danger}>{error}</Text>}

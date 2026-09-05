@@ -73,8 +73,15 @@ export const StatusBar = ({ row, status, width }: StatusBarProps) => (
         spends a CLI call, and among the movement keys it read as another way to
         move around — it has its own row above, in its own colour.
       */}
-      <Text dimColor wrap="truncate">
-        ←→ topics · ↑↓ rows · / filter · e change · r reload · ? keys · q quit
+      {/*
+        `/` is the one key here left its colour. Dimmed in with the rest it was
+        one word among eight; the search is the thing on this board most worth
+        knowing about, and the bar above it says so too.
+      */}
+      <Text wrap="truncate">
+        <Text dimColor>←→ topics · ↑↓ rows · </Text>
+        <Text color={theme.accent}>/ search</Text>
+        <Text dimColor> · PgUp/PgDn page · e change · r reload · ? keys · q quit</Text>
       </Text>
     </Box>
   </Box>
