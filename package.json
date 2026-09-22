@@ -107,7 +107,7 @@
     "es-toolkit": "1.50.0",
     "esbuild": "0.28.1",
     "gatecheck": "0.0.1-beta.5",
-    "hono": "4.12.34",
+    "hono": "4.13.8",
     "ink": "^7.1.1",
     "ink-testing-library": "^4.0.0",
     "inquirer": "14.2.0",
