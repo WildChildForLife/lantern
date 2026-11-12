@@ -54,7 +54,7 @@
     "@effect/sql": "0.52.1",
     "@effect/vitest": "^0.30.0",
     "@effect/workflow": "0.19.1",
-    "@hono/node-server": "2.0.12",
+    "@hono/node-server": "2.1.6",
     "@hono/zod-validator": "0.7.6",
     "@hookform/resolvers": "5.5.7",
     "@lingui/cli": "6.6.0",
